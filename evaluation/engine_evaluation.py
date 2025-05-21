@@ -3,6 +3,7 @@ import json
 import os
 import random
 from collections import deque
+from contextlib import redirect_stdout
 from datetime import datetime
 
 import numpy as np
@@ -25,7 +26,8 @@ class EngineEvaluator:
                  config: dict = {},
                  save: bool = False,
                  run_id: str = None,
-                 resume : bool = True
+                 resume : bool = True,
+                 use_previous_predictions: bool = True
                  ):
 
         self.dataset = dataset
@@ -78,7 +80,8 @@ class EngineEvaluator:
         for image in sequence.images:
             pil_image = image.load()
             # Run prediction on a single image
-            confidence = self.engine.predict(pil_image)
+            with open(os.devnull, 'w') as f, redirect_stdout(f):
+                confidence = self.engine.predict(pil_image)
             sequence_results.loc[len(sequence_results)] = [
                 sequence.sequence_id, # sequence_id 
                 image.image_path, # image

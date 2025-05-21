@@ -1,5 +1,6 @@
 import logging
 import os
+from contextlib import redirect_stdout
 
 import numpy as np
 import onnxruntime
@@ -118,13 +119,14 @@ class Model:
                 prediction = np.nan
         else:
             try:
-                results = self.model.predict(
-                    source=pil_image,
-                    conf=self.inference_params["conf"],
-                    iou=self.inference_params["iou"],
-                    imgsz=self.inference_params["imgsz"],
-                    device=self.device
-                )[0]
+                with open(os.devnull, 'w') as f, redirect_stdout(f):
+                    results = self.model.predict(
+                        source=pil_image,
+                        conf=self.inference_params["conf"],
+                        iou=self.inference_params["iou"],
+                        imgsz=self.inference_params["imgsz"],
+                        device=self.device
+                    )[0]
 
                 prediction = results.boxes.xyxyn.cpu().numpy()
             except Exception as e:
