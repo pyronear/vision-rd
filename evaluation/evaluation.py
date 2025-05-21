@@ -18,22 +18,26 @@ class EvaluationPipeline:
                  config: dict = {},
                  run_id: str = "",
                  resume: bool = False,
-                 device : str = None):
+                 device: str = None,
+                 use_previous_predictions: bool = True):
 
         self.dataset = dataset
         self.config = self.get_config(config)
         self.run_id = run_id or self.generate_run_id()
-        self.resume = resume
         self.metrics = {}
 
         # Evaluate the model performance on single images
-        self.model_evaluator = ModelEvaluator(dataset, self.config, device)
-        
+        self.model_evaluator = ModelEvaluator(dataset=dataset,
+                                              config=self.config,
+                                              device=device,
+                                              use_previous_predictions=use_previous_predictions)
+
         # Evaluate the engine performance on series of images
-        self.engine_evaluator = EngineEvaluator(dataset,
+        self.engine_evaluator = EngineEvaluator(dataset=dataset,
                                                 config=self.config,
                                                 run_id=self.run_id,
-                                                resume=self.resume)
+                                                resume=resume,
+                                                use_previous_predictions=use_previous_predictions)
 
     def get_config(self, config):
         """
