@@ -242,7 +242,7 @@ class EvaluationDataset:
         self.duplicates = {h: paths for h, paths in hash_to_paths.items() if len(paths) > 1}
 
         if self.duplicates:
-            logging.warning(f"{len(self.duplicates.keys())} duplicate image hashes detected")
+            logging.warning(f"🔴 {len(self.duplicates.keys())} duplicate image hashes detected")
             for h, paths in self.duplicates.items():
                 logging.warning(f"Hash {h} found in {len(paths)} files:")
                 for path in paths:
