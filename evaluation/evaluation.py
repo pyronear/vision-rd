@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import List
 
 from pyroengine.engine import Engine
+from pyroengine.vision import Classifier
 
 from dataset import EvaluationDataset
 from engine_evaluation import EngineEvaluator
@@ -46,10 +47,11 @@ class EvaluationPipeline:
         Assign default parameters to config dict, get the default parameters from an Engine instance
         """
         dummy_engine = Engine()
+        dummy_classifier = Classifier()
         config.setdefault("nb_consecutive_frames", dummy_engine.nb_consecutive_frames)
         config.setdefault("conf_thresh", dummy_engine.conf_thresh)
-        config.setdefault("max_bbox_size", dummy_engine.max_bbox_size)
-        config.setdefault("iou", 0.1)
+        config.setdefault("max_bbox_size", dummy_classifier.max_bbox_size)
+        config.setdefault("iou", dummy_classifier.iou)
         config.setdefault("eval", ["model", "engine"])
         return config
 
