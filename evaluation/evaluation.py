@@ -5,6 +5,8 @@ import random
 from datetime import datetime
 from typing import List
 
+from pyroengine.engine import Engine
+
 from dataset import EvaluationDataset
 from engine_evaluation import EngineEvaluator
 from model_evaluation import ModelEvaluator
@@ -41,11 +43,12 @@ class EvaluationPipeline:
 
     def get_config(self, config):
         """
-        Assign default parameters to config dict
+        Assign default parameters to config dict, get the default parameters from an Engine instance
         """
-        config.setdefault("nb_consecutive_frames", 4)
-        config.setdefault("conf_thresh", 0.15)
-        config.setdefault("max_bbox_size", 0.4)
+        dummy_engine = Engine()
+        config.setdefault("nb_consecutive_frames", dummy_engine.nb_consecutive_frames)
+        config.setdefault("conf_thresh", dummy_engine.conf_thresh)
+        config.setdefault("max_bbox_size", dummy_engine.max_bbox_size)
         config.setdefault("iou", 0.1)
         config.setdefault("eval", ["model", "engine"])
         return config
