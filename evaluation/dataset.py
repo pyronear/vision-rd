@@ -195,7 +195,7 @@ class EvaluationDataset:
         self.dataframe["sequence_label"] = [""] * len(self.dataframe)
         for sequence in self.sequences:
             for image in sequence.images:
-                self.dataframe.loc[self.dataframe["image"] == image.image_path, "sequence_label"] = sequence.label
+                self.dataframe.loc[self.dataframe["image"] == image.path, "sequence_label"] = sequence.label
         return self.dataframe
 
     def get_images_from_sequence(self, sequence_id):
@@ -236,7 +236,7 @@ class EvaluationDataset:
 
         # defaultdict(list) initialize the entry with {key : []} if key doesn't exist
         for img in self.get_all_images():
-            hash_to_paths[img.hash].append(img.image_path)
+            hash_to_paths[img.hash].append(img.path)
 
         # Check for hash that have several path corresponding
         self.duplicates = {h: paths for h, paths in hash_to_paths.items() if len(paths) > 1}

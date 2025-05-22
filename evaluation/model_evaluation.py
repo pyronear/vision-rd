@@ -98,18 +98,18 @@ class ModelEvaluator:
             if len(missing_predictions):
                 self.run_predictions(image_list=missing_predictions)
 
-    def track_predictions(self, fp, tp, fn, image_path):
+    def track_predictions(self, fp, tp, fn, image_name):
         """
         Track and stroe predictions for each image
         """
         if fp > 0:
-            self.predictions["fp"].append(image_path)
+            self.predictions["fp"].append(image_name)
         elif tp > 0:
-            self.predictions["tp"].append(image_path)
+            self.predictions["tp"].append(image_name)
         if fn > 0:
-            self.predictions["fn"].append(image_path)
+            self.predictions["fn"].append(image_name)
         else:
-            self.predictions["tn"].append(image_path)
+            self.predictions["tn"].append(image_name)
 
     def evaluate(self):
         """
@@ -128,7 +128,7 @@ class ModelEvaluator:
             # Predictions
             pred_boxes = image.prediction
             fp, tp, fn = find_matches(gt_boxes, pred_boxes, self.iou_threshold)
-            self.track_predictions(fp, tp, fn, image.image_path)
+            self.track_predictions(fp, tp, fn, image.name)
 
             nb_fp += fp
             nb_tp += tp

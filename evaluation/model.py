@@ -115,7 +115,7 @@ class Model:
                 prediction = self.model.run(["output0"], {"images": pil_image})[0][0]
                 # TODO : check format of prediction and reformat to xyxy if necessary
             except Exception as e:
-                logging.error(f"Onnx inference failed on {image.image_path} : {e}")
+                logging.error(f"Onnx inference failed on {image.path} : {e}")
                 prediction = np.nan
         else:
             try:
@@ -130,7 +130,7 @@ class Model:
 
                 prediction = results.boxes.xyxyn.cpu().numpy()
             except Exception as e:
-                logging.error(f"Inference failed on {image.image_path} : {e}")
+                logging.error(f"Inference failed on {image} : {e}")
                 prediction = np.nan
 
         return prediction

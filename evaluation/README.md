@@ -35,6 +35,7 @@ When instanciating from a local folder, the following rules must be follow to en
 - `images` folder must contain the images files, named with the following convention : `*_Y-m-dTH-M-S.jpg`, for example `seq_44_sdis-07_brison-200_2024-02-16T16-38-22.jpg``
 - `labels` folder must contain a label .txt file for each image with the coordinates of the groundtruth bounding box
 
+```text
 dataset
 ├── images
 │   ├── image1.jpg
@@ -44,6 +45,7 @@ dataset
 │   ├── image1.txt
 │   └── image2.txt
 │   └── image2.txt
+```
 
 ```python
 datapath = "path/to/dataset"
@@ -133,7 +135,7 @@ The file contains:
 
 ### CustomImage()
 `CustomImage`: object describing an image
-- `image.image_path`: file path
+- `image.path`: file path
 - `image.sequence_id`: name of the sequence the image belongs to
 - `image.timedelta`: time elapsed between the start of the sequence and this image
 - `image.boxes`: ground truth coordinates
