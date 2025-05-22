@@ -1,6 +1,7 @@
 import json
 from typing import List
 from pathlib import Path
+from pprint import pprint
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -28,6 +29,7 @@ class App:
             "engine" : _self.df[_self.engine_cols].copy(),
         }
 
+
     @st.cache_data
     def load_predictions(_self):
         """
@@ -50,11 +52,17 @@ class App:
     def load_dataframe(_self):
         return build_dataframe(_self.run_dirs)
 
-    def compare_predictions(_self, runs):
-        st.subheader("Prediction Differences")
-        pred1 = _self.predictions[runs[0]]
-        pred2 = _self.predictions[runs[1]]
-
+    def compare_predictions(_self, runs, pred_key):
+        st.subheader(f"Prediction Differences - {pred_key}")
+        key = "model_preds" if pred_key == "Model" else "engine_preds"
+        pred1 = _self.predictions[runs[0]][key]
+        pred2 = _self.predictions[runs[1]][key]
+        
+        # TODO : in the future : manage potential multiple paths
+        image_folders = [
+            _self.predictions[runs[i]].get("dataset", {}).get("datapath")
+            for i in [0, 1]
+        ]
         if pred1 and pred2:
             images_status = {}
             for status, imgs in pred1.items():
@@ -69,7 +77,15 @@ class App:
                 {"image": img, runs[0]: images_status[img].get("run1", "-"), runs[1]: images_status[img].get("run2", "-")}
                 for img in changed
             ]
-            st.dataframe(pd.DataFrame(diff_table), use_container_width=True)
+            # st.dataframe(pd.DataFrame(diff_table), use_container_width=True)
+            for row in diff_table:
+                image_path = Path(image_folders[0] / row["image"])
+                with st.expander(f"{image_path.name}"):
+                    st.markdown(f"**{runs[0]}**: {row[runs[0]]} — **{runs[1]}**: {row[runs[1]]}")
+                    if image_path.exists():
+                        st.image(str(image_path), use_column_width=True)
+                    else:
+                        st.error(f"Image not found : {image_path}")
         else:
             st.warning("Missing prediction data for one or both runs.")
 
@@ -88,12 +104,31 @@ class App:
         for metric in metrics:
             val1 = df.loc[df['run_id'] == runs[0], metric]
             val2 = df.loc[df['run_id'] == runs[1], metric]
-            
-            # TODO : deal differently for metrics for which lower is better (FP, FN)
+
+            # FIXME : try to highlight "best run" for each metric
+            # if len(val1) and len(val2):
+            #     val1 = val1.item()
+            #     val2 = val2.item()
+            #     # TODO : deal differently for metrics for which lower is better (FP, FN)
+            #     # Bold characters for the greater value
+            #     print("val1")
+            #     print(type(val1), val1)
+            #     print("val2")
+            #     print(type(val2), val2)
+            #     if metric.lower() in ["fp, fn"]:
+            #         val1 = f"**{val1:.2f}**" if val1 < val2 else f"{val1:.2f}"
+            #         val2 = f"**{val2:.2f}**" if val2 < val1 else f"{val2:.2f}"
+            #     else:
+            #         val1 = f"**{val1:.2f}**" if val1 > val2 else f"{val1:.2f}"
+            #         val2 = f"**{val2:.2f}**" if val2 > val1 else f"{val2:.2f}"
+            # else:
+            #     val1 = val1[0] if len(val1) else "N/A"
+            #     val2 = val2[0] if len(val2) else "N/A"
+
             row = {
                 "Metric": metric,
-                runs[0]: f"**{val1}**" if val1 > val2 else val1,
-                runs[1]: f"**{val2}**" if val2 > val1 else val2
+                runs[0]: val1.item(),
+                runs[1]: val2.item(),
             }
             data.append(row)
         st.subheader(subset_key)
@@ -114,42 +149,43 @@ class App:
     def run(_self):
 
         st.title("Metrics")
-        # Filters
-        st.header("Filters")
-        selected_runs = st.multiselect("Run IDs", df["run_id"].unique(), default=df["run_id"].unique())
-        f1_min = st.slider("Filter by minimum F1", 0.0, 1.0, 0.0, 0.01)
+        # # Filters
+        # st.header("Filters")
+        # selected_runs = st.multiselect("Run IDs", _self.df["run_id"].unique(), default=_self.df["run_id"].unique())
+        # f1_min = st.slider("Filter by minimum F1", 0.0, 1.0, 0.0, 0.01)
 
-        # Filter application
-        filtered_df = df[df["run_id"].isin(selected_runs) & (df["seq_f1"] >= f1_min)]
+        # # Filter application
+        # filtered_df = _self.df[_self.df["run_id"].isin(selected_runs) & (_self.df["seq_f1"] >= f1_min)]
 
         # Display Table
         st.subheader("Model Evaluation")
-        st.dataframe(_self.df_model, use_container_width=True)
+        st.dataframe(_self.split_df["model"], use_container_width=True)
 
         st.subheader("Engine Evaluation")
-        st.dataframe(_self.df_engine, use_container_width=True)
+        st.dataframe(_self.split_df["engine"], use_container_width=True)
 
         # Graph
         _self.score_graph(metric="model_f1")
 
         # Compare 2 runs
-        df = df.set_index("run_id")
-        st.header("\ud83d\udd04 Compare Runs")
+        _self.df = _self.df.set_index("run_id")
+        st.header("Compare Runs")
 
         compare_runs = st.checkbox("Enable run comparison")
-
+    
         if compare_runs:
-            run_choices = df.index.tolist()
+            run_choices = _self.df.index.tolist()
             run1 = st.selectbox("Select first run", run_choices, key="run1")
             run2 = st.selectbox("Select second run", run_choices, key="run2")
 
             if run1 and run2 and run1 != run2:
                 # Extract and compare metrics
-                _self.comparison_table([run1, run2], "Model")
-                _self.comparison_table([run1, run2], "Engine")
+                _self.comparison_table([run1, run2], "model")
+                _self.comparison_table([run1, run2], "engine")
 
                 # Compare predictions
-                _self.compare_predictions([run1, run2])
+                _self.compare_predictions([run1, run2], "Model")
+                _self.compare_predictions([run1, run2], "Engine")
 
 if __name__ == "__main__":
     run_dirs = [
@@ -162,4 +198,4 @@ if __name__ == "__main__":
     ]
 
     app = App(run_dirs=run_dirs)
-    app.run
+    app.run()
