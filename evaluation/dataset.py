@@ -123,7 +123,7 @@ class EvaluationDataset:
         for sequence_id, sequence_df in self.dataframe.groupby("sequence_id"):
             custom_images = [
                 CustomImage(
-                    image_path=row['image'],
+                    path=row['image'],
                     sequence_id=sequence_id,
                     timedelta=row['delta'],
                     boxes=row['boxes']
