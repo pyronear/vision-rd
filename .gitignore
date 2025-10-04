@@ -1,0 +1,41 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+.eggs/
+*.manifest
+*.spec
+
+# --- Virtual environments ---
+venv/
+.env/
+.venv/
+env/
+ENV/
+pip-wheel-metadata/
+*.dist-info/
+
+# --- IDE / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Logs & caches ---
+*.log
+*.tmp
+.cache/
+.pytest_cache/
+.mypy_cache/
+
+# --- Data & exports ---
+alertapi_export_by_type/
+sdis77_pred/
+*.zip
+
+# --- Notebooks checkpoints ---
+.ipynb_checkpoints/
