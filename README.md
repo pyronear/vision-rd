@@ -43,11 +43,10 @@ make push           Push PDF data to S3 via DVC
 ## Structure
 
 ```
-papers/
-├── README.md          # This file
-├── SUMMARY.md         # Narrative summary of all papers, grouped by theme
-├── papers.csv         # Structured metadata (title, authors, year, architecture, etc.)
-└── pdfs/              # PDF files (named as Year-Short-Title-Author.pdf)
+README.md          # This file
+SUMMARY.md         # Narrative summary of all papers, grouped by theme
+papers.csv         # Structured metadata (title, authors, year, architecture, etc.)
+pdfs/              # PDF files (named as Year-Short-Title-Author.pdf)
 ```
 
 ## Papers (28)
