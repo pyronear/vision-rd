@@ -6,3 +6,4 @@ __pycache__/
 # DVC local cache
 /pdfs/
 /pdfs
+/notes
