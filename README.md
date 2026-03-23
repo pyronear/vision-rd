@@ -47,7 +47,6 @@ make push           Push PDF data and notes to S3 via DVC
 vision-rd/
 ├── README.md        # This file
 ├── SUMMARY.md       # Narrative summary grouped by theme
-├── CLAUDE.md        # Project context for AI assistants
 ├── papers.csv       # Structured metadata for all papers
 ├── pdfs/            # PDF files (DVC-tracked)
 ├── notes/           # Per-paper reading notes (DVC-tracked)
