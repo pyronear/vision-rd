@@ -15,6 +15,7 @@ vision-rd/
 │   ├── template/        # Starter project — copy to begin a new experiment
 │   ├── README.md        # How to create and manage experiments
 │   └── GUIDELINES.md    # Standards: uv, ruff, DVC, reproducibility
+├── CONTRIBUTING.md      # How to contribute
 ├── README.md            # This file
 └── LICENSE              # Apache 2.0
 ```
@@ -24,3 +25,7 @@ vision-rd/
 - 📚 [Literature Survey](literature_survey/README.md) — 28 papers on temporal models, video foundations, smoke detection, and related topics
 - 🧪 [Experiments README](experiments/README.md) — How to start a new experiment
 - 📏 [R&D Guidelines](experiments/GUIDELINES.md) — Standards for reproducibility, tooling, and benchmarking
+
+## 🤝 Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get involved — adding papers, running experiments, and code style conventions.
