@@ -28,7 +28,7 @@ make pull           # downloads PDFs and notes from S3
 ```bash
 make add
 make push
-git add pdfs.dvc notes.dvc papers.csv SUMMARY.md README.md
+git add pdfs.dvc notes/ papers.csv SUMMARY.md README.md
 git commit -m "Add paper: <title>"
 ```
 
