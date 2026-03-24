@@ -34,6 +34,9 @@ def is_wf_sequence(sequence_dir: Path) -> bool:
 
     WF labels have 5 columns: class_id cx cy w h (human annotations).
     FP labels have 6 columns: class_id cx cy w h confidence (YOLO predictions).
+
+    Limitation: this heuristic relies on the pyro-dataset label convention.
+    Sequences with only empty label files default to FP (negative).
     """
     labels_dir = sequence_dir / "labels"
     if not labels_dir.is_dir():
