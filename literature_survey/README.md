@@ -4,6 +4,33 @@ Research papers on temporal ML models for wildfire smoke detection and related t
 
 See the [root README](../README.md) for overall project context.
 
+## Promising Approaches
+
+Based on the 28 papers reviewed, these are the most promising approaches to experiment with for Pyronear's system (YOLOv10 on edge, temporal verifier on server GPU, fixed cameras with 30s frame intervals).
+
+### Temporal Models (server-side second-stage verifier)
+
+| # | Approach | Key Paper(s) | Architecture | Why Promising | Effort |
+|---|----------|-------------|--------------|---------------|--------|
+| 1 | Tracking FSM + BG Subtraction | [FLAME](notes/2024-flame.md) (Gragnaniello 2024) | YOLOv8 + GMM background subtraction + finite state machine (New→Confirmed→Rejected) | +18% precision, no ML training needed. GMM exploits fixed cameras. FSM requires persistence across 2-3 frames before alarm — simplest FP reduction | Low |
+| 2 | MTB Change Detection | [SlowFastMTB](notes/2022-slowfastmtb.md) (Choi 2022) | Frame subtraction → change mask → adaptive bbox scaling | Static cameras make pixel subtraction effective. Accuracy *improves* at longer intervals (5s→15s). Zero FP rate achieved. Validates YOLO proposals: detection + change = confident | Low |
+| 3 | CNN + Temporal Transformer | [SmokeyNet](notes/2022-smokeynet.md) (Dewangan 2022), [Student LSTM](notes/2020-student-lstm.md) (Jeong 2020) | Per-frame CNN features from YOLO crops → Transformer/LSTM temporal fusion | Proven on smoke (FIgLib). Temporal + spatial context synergistic (+4%). Teacher-student distillation gives 8.4x compression. Smoke-tube concept maps to 30s cadence | Medium |
+| 4 | Streaming Transformer (LSTR / TeSTra) | [LSTR](notes/2021-lstr.md) (Xu 2021), [TeSTra](notes/2022-testra.md) (Zhao 2022) | Dual-memory (long-term compressed + short-term recent) with O(1) per-frame updates via exponential smoothing | O(1) cost per frame regardless of history. λ controls memory timescale. Relative positional encoding handles irregular intervals. LSTR simpler to implement; TeSTra for unbounded history | Medium-High |
+| 5 | Memory-Augmented Transformer | [MATR](notes/2024-matr.md) (Song 2024) | Segment encoder + selective memory queue (FLAG gating) + dual decoders | Online paradigm matches Pyronear exactly. FLAG token stores only interesting frames. Decouples classification ("is this smoke?") from localization ("when did it start?") | Medium-High |
+| 6 | VideoMAE Pre-training + Temporal Head | [VideoMAE](notes/2022-videomae.md) (Tong 2022) | Self-supervised masked autoencoder → ViT encoder as backbone + lightweight temporal head | Pre-train on abundant unlabeled Pyronear footage. Data-efficient (works with 3.5k videos). Domain-specific features outperform ImageNet. Encoder-only for deployment | High |
+| 7 | 3D CNN / SlowFast | [SlowFastMTB](notes/2022-slowfastmtb.md) (Choi 2022) | SlowFast dual-pathway 3D CNN on video crops | Captures spatiotemporal motion directly. Slow pathway for semantics, fast for motion dynamics. Designed for dense video (25fps) — needs significant adaptation for 30s sparse frames | High |
+
+### Single-Frame Detectors (server-side spatial improvement)
+
+Pyronear already uses YOLOv10 in production as the edge detector. These approaches target the server-side spatial backbone or complement the existing edge model.
+
+| # | Approach | Key Paper(s) | Architecture | Why Promising | Effort |
+|---|----------|-------------|--------------|---------------|--------|
+| 1 | RT-DETR for smoke | [RT-DETR-Smoke](notes/2025-rt-detr-smoke.md) (Wang 2025) | RT-DETR + CoordAtt + WShapeIoU loss | 87.75% mAP@0.5 at 445 FPS. Coordinate attention helps smoke-edge localization (H/V directional). WShapeIoU improves bbox regression for irregular smoke shapes | Medium |
+| 2 | Cross-Contrast Patch Embedding | [CCPE Swin](notes/2025-ccpe-swin.md) (Wang 2025) | Swin Transformer + CCPE module + separable negative sampling | Captures low-level smoke texture (color, transparency) that vanilla ViTs miss. Hard-negative mining against fog/clouds — directly addresses Pyronear's main FP sources. +13.5% image AUC | Medium |
+| 3 | Smoke-DETR | [Smoke-DETR](notes/2024-smoke-detr.md) (Sun 2024) | RT-DETR + ECPConv + EMA + MFFPN | Multi-scale foreground-focus fusion suppresses background confusion. +3.6pp precision over baseline with fewer params (16.4M). Foreground-focus module separates smoke from background | Medium |
+| 4 | Nemo / DETR | [Nemo](notes/2022-nemo-detr.md) (Yazdi 2022) | DETR + ResNet50, open-source benchmark | Open-source models and datasets. 97.9% incipient fire detection rate, 3.5 min mean detection time. Adding hard negatives dropped FP from 21 to 3. Directly usable for transfer learning | Low-Medium |
+
 ## 🏁 Getting Started
 
 ```bash
