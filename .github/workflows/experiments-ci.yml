@@ -1,0 +1,46 @@
+name: Experiments CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/**"
+  pull_request:
+    paths:
+      - "experiments/**"
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      experiments: ${{ steps.find.outputs.experiments }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: find
+        run: |
+          experiments=$(find experiments -mindepth 1 -maxdepth 1 -type d \
+            -exec test -f {}/pyproject.toml \; -print \
+            | jq -R -s -c 'split("\n") | map(select(. != ""))')
+          echo "experiments=$experiments" >> "$GITHUB_OUTPUT"
+
+  lint:
+    needs: discover
+    if: needs.discover.outputs.experiments != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        experiment: ${{ fromJson(needs.discover.outputs.experiments) }}
+    name: lint (${{ matrix.experiment }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install
+        working-directory: ${{ matrix.experiment }}
+        run: uv sync
+      - name: Ruff check
+        working-directory: ${{ matrix.experiment }}
+        run: uv run ruff check .
+      - name: Ruff format check
+        working-directory: ${{ matrix.experiment }}
+        run: uv run ruff format --check .
