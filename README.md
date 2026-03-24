@@ -4,7 +4,7 @@ Research and development for ML-based wildfire smoke detection at [Pyronear](htt
 
 ## 🏗️ System Overview
 
-Pyronear deploys fixed 360° cameras on antenna towers that capture images every 30 seconds. On each Raspberry Pi, a YOLOv8 (small) model detects smoke candidates. Full frames and bounding box info are sent to a server where a second-stage temporal model verifies detections — reducing false positives while maintaining high recall.
+Pyronear deploys fixed 360° cameras on antenna towers that capture images every 30 seconds. On each Raspberry Pi, a YOLO model detects smoke candidates. Full frames and bounding box info are sent to a server where a second-stage temporal model verifies detections — reducing false positives while maintaining high recall.
 
 ## 📂 Repository Structure
 
