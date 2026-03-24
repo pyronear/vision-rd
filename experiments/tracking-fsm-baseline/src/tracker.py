@@ -1,8 +1,26 @@
+"""IoU-based detection tracking with FSM confirmation logic.
+
+Matches detections across consecutive frames using Intersection-over-Union,
+then applies a finite-state-machine rule: a track is *confirmed* (alarm raised)
+only after it persists for ``min_consecutive`` frames in a row.
+"""
+
 from src.types import Detection, FrameResult, Track
 
 
 def compute_iou(det_a: Detection, det_b: Detection) -> float:
-    """Compute IoU between two detections in normalized (cx, cy, w, h) format."""
+    """Compute Intersection-over-Union between two detections.
+
+    Both detections must use normalized center-based coordinates
+    (cx, cy, w, h) in [0, 1].
+
+    Args:
+        det_a: First detection.
+        det_b: Second detection.
+
+    Returns:
+        IoU value in [0, 1]. Returns 0.0 when the union area is zero.
+    """
     # Convert to x1, y1, x2, y2
     a_x1 = det_a.cx - det_a.w / 2
     a_y1 = det_a.cy - det_a.h / 2
@@ -41,7 +59,16 @@ def match_detections(
 ) -> list[tuple[int, int]]:
     """Greedy matching of detections between consecutive frames.
 
-    Returns list of (prev_idx, curr_idx) matched pairs.
+    Computes all pairwise IoUs, sorts by descending IoU, and greedily
+    assigns one-to-one matches (each detection used at most once).
+
+    Args:
+        prev_dets: Detections from the previous frame.
+        curr_dets: Detections from the current frame.
+        iou_threshold: Minimum IoU required to consider a pair as a match.
+
+    Returns:
+        List of ``(prev_idx, curr_idx)`` index pairs for matched detections.
     """
     if not prev_dets or not curr_dets:
         return []
@@ -80,6 +107,17 @@ class SimpleTracker:
     def __init__(
         self, iou_threshold: float, min_consecutive: int, max_misses: int = 0
     ) -> None:
+        """Initialise the tracker.
+
+        Args:
+            iou_threshold: Minimum IoU to match a detection to an existing
+                track.
+            min_consecutive: Number of consecutive frames a track must be
+                matched before it is confirmed (alarm raised).
+            max_misses: Number of consecutive frames a track can go unmatched
+                before it is dropped.  ``0`` means a single miss kills the
+                track.
+        """
         self.iou_threshold = iou_threshold
         self.min_consecutive = min_consecutive
         self.max_misses = max_misses
@@ -87,12 +125,18 @@ class SimpleTracker:
     def process_sequence(
         self, frames: list[FrameResult]
     ) -> tuple[bool, list[Track], int | None]:
-        """Process a sequence of frames.
+        """Process a full sequence of frames through the tracker.
+
+        Args:
+            frames: Temporally ordered list of per-frame detection results.
 
         Returns:
-            is_alarm: True if any track was confirmed.
-            tracks: All tracks created during processing.
-            confirmed_frame_idx: Frame index where first confirmation occurred.
+            A tuple of ``(is_alarm, tracks, confirmed_frame_idx)`` where:
+
+            - **is_alarm** -- ``True`` if any track was confirmed.
+            - **tracks** -- All tracks created during processing.
+            - **confirmed_frame_idx** -- Index (into *frames*) where the first
+              confirmation occurred, or ``None``.
         """
         active_tracks: list[Track] = []
         all_tracks: list[Track] = []

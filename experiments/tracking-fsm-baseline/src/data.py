@@ -1,3 +1,10 @@
+"""File I/O and data utilities for sequence datasets.
+
+Provides helpers to discover sequences on disk, parse timestamps from
+filenames, and determine ground-truth labels from the pyro-dataset label
+convention.
+"""
+
 import re
 from datetime import datetime
 from pathlib import Path
@@ -21,7 +28,16 @@ def parse_timestamp(filename: str) -> datetime:
 
 
 def get_sorted_frames(sequence_dir: Path) -> list[Path]:
-    """Return image paths sorted by timestamp."""
+    """Return image paths from ``sequence_dir/images/`` sorted by timestamp.
+
+    Args:
+        sequence_dir: Path to a sequence directory containing an ``images/``
+            subdirectory with ``.jpg`` files.
+
+    Returns:
+        Sorted list of image paths, or an empty list if ``images/`` does not
+        exist.
+    """
     images_dir = sequence_dir / "images"
     if not images_dir.is_dir():
         return []

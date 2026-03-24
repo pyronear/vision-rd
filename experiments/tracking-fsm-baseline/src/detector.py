@@ -1,3 +1,9 @@
+"""YOLO inference wrapper.
+
+Provides functions to load a YOLO model, run it on a sequence of frames,
+and serialize / deserialize the per-frame detection results as JSON.
+"""
+
 import json
 from datetime import datetime
 from pathlib import Path
@@ -20,7 +26,19 @@ def run_inference_on_sequence(
     iou_nms: float,
     img_size: int,
 ) -> list[FrameResult]:
-    """Run YOLO on all frames in a sequence, return per-frame detections."""
+    """Run YOLO on all frames in a sequence, return per-frame detections.
+
+    Args:
+        model: Loaded YOLO model instance.
+        sequence_dir: Path to a sequence directory (must contain ``images/``).
+        conf: Minimum confidence threshold for YOLO predictions.
+        iou_nms: IoU threshold used by Non-Maximum Suppression.
+        img_size: Input image size (pixels) passed to YOLO.
+
+    Returns:
+        One :class:`FrameResult` per image, in temporal order. Detections use
+        normalized center-based coordinates (xywhn).
+    """
     image_paths = get_sorted_frames(sequence_dir)
     results = []
 
@@ -64,7 +82,13 @@ def run_inference_on_sequence(
 
 
 def save_inference_results(results: list[FrameResult], output_path: Path) -> None:
-    """Save per-frame detection results as JSON."""
+    """Save per-frame detection results as JSON.
+
+    Args:
+        results: List of frame results to serialize.
+        output_path: Destination ``.json`` file path (parent dirs are created
+            automatically).
+    """
     output_path.parent.mkdir(parents=True, exist_ok=True)
     data = []
     for frame in results:
@@ -89,7 +113,15 @@ def save_inference_results(results: list[FrameResult], output_path: Path) -> Non
 
 
 def load_inference_results(input_path: Path) -> list[FrameResult]:
-    """Load cached inference results from JSON."""
+    """Load cached inference results from JSON.
+
+    Args:
+        input_path: Path to a ``.json`` file written by
+            :func:`save_inference_results`.
+
+    Returns:
+        List of :class:`FrameResult` objects reconstructed from the JSON.
+    """
     data = json.loads(input_path.read_text())
     results = []
     for frame_data in data:

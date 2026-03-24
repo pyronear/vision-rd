@@ -1,3 +1,10 @@
+"""Sequence-level metrics computation and visualization.
+
+Computes classification metrics (precision, recall, F1, FPR) and
+time-to-detection from tracking results, and generates comparison plots
+against a YOLO-only baseline.
+"""
+
 import json
 import statistics
 from datetime import datetime
@@ -9,12 +16,29 @@ import seaborn as sns
 
 
 def load_tracking_results(results_path: Path) -> list[dict]:
-    """Load tracking results JSON."""
+    """Load tracking results from a JSON file.
+
+    Args:
+        results_path: Path to ``tracking_results.json``.
+
+    Returns:
+        List of per-sequence result dicts.
+    """
     return json.loads(results_path.read_text())
 
 
 def _extract_ttd_seconds(results: list[dict]) -> list[float]:
-    """Extract time-to-detection in seconds for true positive sequences."""
+    """Extract time-to-detection in seconds for true-positive sequences.
+
+    Only considers sequences that are both ground-truth positive and
+    predicted positive (TP), and where both timestamps are available.
+
+    Args:
+        results: List of per-sequence result dicts.
+
+    Returns:
+        List of TTD values in seconds (one per qualifying TP sequence).
+    """
     ttd_seconds = []
     for r in results:
         if (
@@ -30,7 +54,20 @@ def _extract_ttd_seconds(results: list[dict]) -> list[float]:
 
 
 def compute_metrics(results: list[dict]) -> dict:
-    """Compute sequence-level classification metrics."""
+    """Compute sequence-level classification metrics.
+
+    Args:
+        results: List of per-sequence result dicts, each containing at least
+            ``is_positive_gt``, ``is_positive_pred``, ``confirmed_timestamp``,
+            and ``first_timestamp``.
+
+    Returns:
+        Dict with keys: ``num_sequences``, ``num_positive_gt``,
+        ``num_negative_gt``, ``tp``, ``fp``, ``fn``, ``tn``, ``precision``,
+        ``recall``, ``f1``, ``fpr``, ``mean_ttd_seconds``,
+        ``median_ttd_seconds``.  TTD values are ``None`` when there are no
+        true positives.
+    """
     tp = sum(1 for r in results if r["is_positive_gt"] and r["is_positive_pred"])
     fp = sum(1 for r in results if not r["is_positive_gt"] and r["is_positive_pred"])
     fn = sum(1 for r in results if r["is_positive_gt"] and not r["is_positive_pred"])
@@ -74,7 +111,18 @@ def compute_metrics(results: list[dict]) -> dict:
 
 
 def compute_yolo_only_baseline(results: list[dict]) -> dict:
-    """Compute baseline metrics: any YOLO detection in any frame = positive."""
+    """Compute baseline metrics where any YOLO detection triggers an alarm.
+
+    Simulates a naive strategy with no temporal filtering: a sequence is
+    predicted positive if it contains at least one detection in any frame.
+
+    Args:
+        results: List of per-sequence result dicts (same format as
+            :func:`compute_metrics`).
+
+    Returns:
+        Metrics dict (same keys as :func:`compute_metrics`).
+    """
     baseline_results = []
     for r in results:
         baseline_results.append(
@@ -89,7 +137,12 @@ def compute_yolo_only_baseline(results: list[dict]) -> dict:
 
 
 def plot_confusion_matrix(metrics: dict, output_path: Path) -> None:
-    """Plot a confusion matrix heatmap."""
+    """Plot a confusion matrix heatmap and save it as PNG.
+
+    Args:
+        metrics: Metrics dict containing ``tp``, ``fp``, ``fn``, ``tn``.
+        output_path: Destination file path for the PNG image.
+    """
     sns.set_theme(style="whitegrid")
     cm = [[metrics["tp"], metrics["fn"]], [metrics["fp"], metrics["tn"]]]
     fig, ax = plt.subplots(figsize=(6, 5))
@@ -111,7 +164,13 @@ def plot_confusion_matrix(metrics: dict, output_path: Path) -> None:
 def plot_comparison(
     yolo_metrics: dict, tracking_metrics: dict, output_path: Path
 ) -> None:
-    """Bar chart comparing YOLO-only vs tracking baselines."""
+    """Bar chart comparing YOLO-only vs tracking on precision, recall, and F1.
+
+    Args:
+        yolo_metrics: Metrics dict for the YOLO-only baseline.
+        tracking_metrics: Metrics dict for the FSM tracker.
+        output_path: Destination file path for the PNG image.
+    """
     sns.set_theme(style="whitegrid")
     data = pd.DataFrame(
         {
@@ -141,7 +200,14 @@ def plot_comparison(
 
 
 def plot_ttd_histogram(results: list[dict], output_path: Path) -> None:
-    """Histogram of time-to-detection for correctly detected WF sequences."""
+    """Histogram of time-to-detection for true-positive wildfire sequences.
+
+    Skips plotting entirely if there are no true positives.
+
+    Args:
+        results: List of per-sequence result dicts.
+        output_path: Destination file path for the PNG image.
+    """
     sns.set_theme(style="whitegrid")
     ttd_seconds = _extract_ttd_seconds(results)
 
