@@ -1,7 +1,7 @@
 [project]
 name = "project-name"
 version = "0.1.0"
-description = ""
+description = "Experiment template"
 requires-python = ">=3.11"
 dependencies = [
     "dvc[s3]>=3.56",
