@@ -1,7 +1,18 @@
-"""Apply tracking to YOLO inference results.
+"""Apply FSM-based temporal tracking to YOLO inference results.
 
-Loads per-sequence inference JSON, applies the tracker,
-and saves results with ground-truth labels.
+Loads per-sequence inference JSONs, filters detections by confidence,
+and runs the SimpleTracker (IoU matching + min-consecutive-frames FSM)
+to decide whether each sequence triggers an alarm. Results are joined
+with ground-truth labels and written to a single tracking_results.json.
+
+Usage:
+    uv run python scripts/track.py \
+        --infer-dir data/02_intermediate/val \
+        --data-dir data/01_raw/datasets/val \
+        --output-dir data/07_model_output/val \
+        --confidence-threshold 0.25 \
+        --iou-threshold 0.3 \
+        --min-consecutive 3
 """
 
 import argparse

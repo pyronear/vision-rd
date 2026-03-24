@@ -1,12 +1,16 @@
-"""Sweep tracking parameters on cached inference results.
+"""Grid-search tracking parameters on cached inference results.
 
-Loads inference JSONs once, then loops over parameter combinations
-for tracking + evaluation. Much faster than running dvc exp per combo.
+Loads all inference JSONs once into memory, then sweeps over a grid of
+(confidence_threshold, iou_threshold, min_consecutive) combinations.
+For each combo the SimpleTracker is run and sequence-level metrics are
+computed. Results are written to a CSV sorted by F1 descending, and the
+top-10 configurations are logged. Much faster than running dvc exp per
+combo since YOLO inference is not repeated.
 
 Usage:
     uv run python scripts/sweep.py \
         --infer-dir data/02_intermediate/train \
-        --data-dir data/01_raw/train \
+        --data-dir data/01_raw/datasets/train \
         --output-dir data/08_reporting/sweep
 """
 

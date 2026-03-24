@@ -1,6 +1,14 @@
-"""Download the YOLO model from HuggingFace.
+"""Download YOLO model weights from HuggingFace Hub.
 
-Data is expected to already be in data/01_raw/ (DVC-tracked).
+Fetches a single model file from a HuggingFace repository and saves it
+to the local data directory. Skips the download if the file already exists.
+Dataset images are expected to already be in data/01_raw/ (DVC-tracked).
+
+Usage:
+    uv run python scripts/prepare.py \
+        --model-repo pyronear/yolov10 \
+        --model-filename best.pt \
+        --output-model-dir data/01_raw/models
 """
 
 import argparse

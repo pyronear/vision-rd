@@ -1,4 +1,15 @@
-"""Evaluate tracking results and generate metrics + plots."""
+"""Evaluate tracking results against ground truth.
+
+Loads tracking_results.json, computes sequence-level metrics (precision,
+recall, F1, FPR, time-to-detection) for both the FSM tracker and a
+YOLO-only baseline (any detection = alarm). Generates plots: confusion
+matrix, metric comparison bar chart, and TTD histogram.
+
+Usage:
+    uv run python scripts/evaluate.py \
+        --track-dir data/07_model_output/val \
+        --output-dir data/08_reporting/val
+"""
 
 import argparse
 import json

@@ -1,6 +1,18 @@
-"""Run YOLO inference on all sequences in a split.
+"""Run YOLO inference on all sequences in a data split.
 
-Saves per-sequence JSON files with frame-level detections.
+Iterates over sequence directories, runs the YOLO model on each frame,
+and writes one JSON file per sequence containing frame-level detections
+(bounding boxes and confidence scores). Already-processed sequences are
+skipped automatically.
+
+Usage:
+    uv run python scripts/infer.py \
+        --data-dir data/01_raw/datasets/val \
+        --model-path data/01_raw/models/best.pt \
+        --output-dir data/02_intermediate/val \
+        --confidence-threshold 0.1 \
+        --iou-nms 0.5 \
+        --image-size 1024
 """
 
 import argparse
