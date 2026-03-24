@@ -6,7 +6,7 @@ for tracking + evaluation. Much faster than running dvc exp per combo.
 Usage:
     uv run python scripts/sweep.py \
         --infer-dir data/02_intermediate/train \
-        --wf-registry data/01_raw/wf_registry.json \
+        --data-dir data/01_raw/train \
         --output-dir data/08_reporting/sweep
 """
 
@@ -18,10 +18,11 @@ import itertools
 import logging
 from pathlib import Path
 
-from src.data import is_wf_sequence, load_wf_folders
+from src.data import is_wf_sequence
 from src.detector import load_inference_results
 from src.evaluator import compute_metrics
 from src.tracker import SimpleTracker
+from src.types import FrameResult
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -32,9 +33,7 @@ MIN_CONSECUTIVES = [1, 2, 3, 4, 5]
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Sweep tracking parameters."
-    )
+    parser = argparse.ArgumentParser(description="Sweep tracking parameters.")
     parser.add_argument(
         "--infer-dir",
         type=Path,
@@ -42,10 +41,10 @@ def main() -> None:
         help="Path to inference results directory.",
     )
     parser.add_argument(
-        "--wf-registry",
+        "--data-dir",
         type=Path,
         required=True,
-        help="Path to WF registry JSON.",
+        help="Path to sequence data directory (for GT labels).",
     )
     parser.add_argument(
         "--output-dir",
@@ -57,23 +56,20 @@ def main() -> None:
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     # Load all inference results once
-    wf_folders = load_wf_folders(args.wf_registry)
     infer_files = sorted(args.infer_dir.glob("*.json"))
     logger.info("Loading %d inference files...", len(infer_files))
 
-    all_data: list[tuple[str, bool, list]] = []
+    all_data: list[tuple[bool, list]] = []
     for infer_path in infer_files:
         seq_id = infer_path.stem
         frames = load_inference_results(infer_path)
-        gt = is_wf_sequence(seq_id, wf_folders)
-        all_data.append((seq_id, gt, frames))
+        gt = is_wf_sequence(args.data_dir / seq_id)
+        all_data.append((gt, frames))
     logger.info("Loaded %d sequences.", len(all_data))
 
     # Sweep
     combos = list(
-        itertools.product(
-            CONFIDENCE_THRESHOLDS, IOU_THRESHOLDS, MIN_CONSECUTIVES
-        )
+        itertools.product(CONFIDENCE_THRESHOLDS, IOU_THRESHOLDS, MIN_CONSECUTIVES)
     )
     logger.info("Running %d parameter combinations...", len(combos))
 
@@ -85,32 +81,22 @@ def main() -> None:
         )
 
         results = []
-        for _seq_id, gt, frames in all_data:
+        for gt, frames in all_data:
             # Filter by confidence
-            filtered_frames = []
-            for frame in frames:
-                from src.types import FrameResult
-
-                filtered = FrameResult(
+            filtered_frames = [
+                FrameResult(
                     frame_id=frame.frame_id,
                     timestamp=frame.timestamp,
                     detections=[
-                        d
-                        for d in frame.detections
-                        if d.confidence >= conf_thresh
+                        d for d in frame.detections if d.confidence >= conf_thresh
                     ],
                 )
-                filtered_frames.append(filtered)
+                for frame in frames
+            ]
 
-            is_alarm, _tracks, confirmed_idx = tracker.process_sequence(
-                filtered_frames
-            )
-            total_dets = sum(
-                len(f.detections) for f in filtered_frames
-            )
-            first_ts = (
-                filtered_frames[0].timestamp if filtered_frames else None
-            )
+            is_alarm, _tracks, confirmed_idx = tracker.process_sequence(filtered_frames)
+            total_dets = sum(len(f.detections) for f in filtered_frames)
+            first_ts = filtered_frames[0].timestamp if filtered_frames else None
             confirmed_ts = (
                 filtered_frames[confirmed_idx].timestamp
                 if confirmed_idx is not None
@@ -125,9 +111,7 @@ def main() -> None:
                     "confirmed_timestamp": (
                         confirmed_ts.isoformat() if confirmed_ts else None
                     ),
-                    "first_timestamp": (
-                        first_ts.isoformat() if first_ts else None
-                    ),
+                    "first_timestamp": (first_ts.isoformat() if first_ts else None),
                 }
             )
 

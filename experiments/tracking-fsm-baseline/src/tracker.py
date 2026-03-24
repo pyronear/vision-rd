@@ -105,9 +105,7 @@ class SimpleTracker:
             if active_tracks and curr_dets:
                 # Get the latest detection from each active track
                 track_dets = [t.hits[-1][1] for t in active_tracks]
-                matches = match_detections(
-                    track_dets, curr_dets, self.iou_threshold
-                )
+                matches = match_detections(track_dets, curr_dets, self.iou_threshold)
                 matched_track_idxs = {m[0] for m in matches}
                 matched_det_idxs = {m[1] for m in matches}
 

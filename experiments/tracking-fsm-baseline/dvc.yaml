@@ -1,22 +1,9 @@
 stages:
-  prepare:
-    cmd: >-
-      uv run python scripts/prepare.py
-      --model-repo ${prepare.model_repo}
-      --model-filename ${prepare.model_filename}
-      --output-model-dir data/06_models
-    deps:
-      - scripts/prepare.py
-    params:
-      - prepare
-    outs:
-      - data/06_models
-
   infer_train:
     cmd: >-
       uv run python scripts/infer.py
       --data-dir data/01_raw/train
-      --model-path data/06_models/${prepare.model_filename}
+      --model-path data/01_raw/${prepare.model_filename}
       --output-dir data/02_intermediate/train
       --confidence-threshold ${infer.confidence_threshold}
       --iou-nms ${infer.iou_nms}
@@ -24,9 +11,9 @@ stages:
     deps:
       - scripts/infer.py
       - src
-      - data/06_models
       - data/01_raw/train
     params:
+      - prepare.model_filename
       - infer
     outs:
       - data/02_intermediate/train
@@ -35,7 +22,7 @@ stages:
     cmd: >-
       uv run python scripts/infer.py
       --data-dir data/01_raw/val
-      --model-path data/06_models/${prepare.model_filename}
+      --model-path data/01_raw/${prepare.model_filename}
       --output-dir data/02_intermediate/val
       --confidence-threshold ${infer.confidence_threshold}
       --iou-nms ${infer.iou_nms}
@@ -43,9 +30,9 @@ stages:
     deps:
       - scripts/infer.py
       - src
-      - data/06_models
       - data/01_raw/val
     params:
+      - prepare.model_filename
       - infer
     outs:
       - data/02_intermediate/val
@@ -54,7 +41,7 @@ stages:
     cmd: >-
       uv run python scripts/track.py
       --infer-dir data/02_intermediate/train
-      --wf-registry data/01_raw/wf_registry.json
+      --data-dir data/01_raw/train
       --output-dir data/07_model_output/train
       --confidence-threshold ${track.confidence_threshold}
       --iou-threshold ${track.iou_threshold}
@@ -63,7 +50,7 @@ stages:
       - scripts/track.py
       - src
       - data/02_intermediate/train
-      - data/01_raw/wf_registry.json
+      - data/01_raw/train
     params:
       - track
     outs:
@@ -73,7 +60,7 @@ stages:
     cmd: >-
       uv run python scripts/track.py
       --infer-dir data/02_intermediate/val
-      --wf-registry data/01_raw/wf_registry.json
+      --data-dir data/01_raw/val
       --output-dir data/07_model_output/val
       --confidence-threshold ${track.confidence_threshold}
       --iou-threshold ${track.iou_threshold}
@@ -82,7 +69,7 @@ stages:
       - scripts/track.py
       - src
       - data/02_intermediate/val
-      - data/01_raw/wf_registry.json
+      - data/01_raw/val
     params:
       - track
     outs:

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import re
 from datetime import datetime
 from pathlib import Path
@@ -32,13 +31,26 @@ def get_sorted_frames(sequence_dir: Path) -> list[Path]:
     return images
 
 
-def load_wf_folders(registry_path: Path) -> set[str]:
-    """Load the set of wildfire folder names from registry.json."""
-    with registry_path.open() as f:
-        data = json.load(f)
-    return {seq["folder"] for seq in data["sequences"]}
+def is_wf_sequence(sequence_dir: Path) -> bool:
+    """Determine if a sequence is wildfire (positive) based on label format.
 
-
-def is_wf_sequence(folder_name: str, wf_folders: set[str]) -> bool:
-    """Return True if the sequence folder is a wildfire (positive) sequence."""
-    return folder_name in wf_folders
+    WF labels have 5 columns: class_id cx cy w h (human annotations).
+    FP labels have 6 columns: class_id cx cy w h confidence (YOLO predictions).
+    """
+    labels_dir = sequence_dir / "labels"
+    if not labels_dir.is_dir():
+        return False
+    for label_file in labels_dir.iterdir():
+        if label_file.suffix != ".txt":
+            continue
+        content = label_file.read_text().strip()
+        if not content:
+            continue
+        first_line = content.split("\n")[0].strip()
+        n_cols = len(first_line.split())
+        if n_cols == 5:
+            return True
+        if n_cols == 6:
+            return False
+    # No non-empty label files — treat as FP
+    return False

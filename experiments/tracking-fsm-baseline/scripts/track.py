@@ -13,7 +13,7 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from src.data import is_wf_sequence, load_wf_folders
+from src.data import is_wf_sequence
 from src.detector import load_inference_results
 from src.tracker import SimpleTracker
 from src.types import SequenceResult
@@ -31,10 +31,10 @@ def main() -> None:
         help="Path to inference results directory.",
     )
     parser.add_argument(
-        "--wf-registry",
+        "--data-dir",
         type=Path,
         required=True,
-        help="Path to WF registry JSON.",
+        help="Path to sequence data directory (for GT labels).",
     )
     parser.add_argument(
         "--output-dir",
@@ -64,9 +64,6 @@ def main() -> None:
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    wf_folders = load_wf_folders(args.wf_registry)
-    logger.info("Loaded %d WF folder names from registry.", len(wf_folders))
-
     tracker = SimpleTracker(
         iou_threshold=args.iou_threshold,
         min_consecutive=args.min_consecutive,
@@ -83,20 +80,16 @@ def main() -> None:
         # Filter detections by confidence threshold
         for frame in frames:
             frame.detections = [
-                d
-                for d in frame.detections
-                if d.confidence >= args.confidence_threshold
+                d for d in frame.detections if d.confidence >= args.confidence_threshold
             ]
 
         is_alarm, tracks, confirmed_idx = tracker.process_sequence(frames)
-        gt = is_wf_sequence(seq_id, wf_folders)
+        gt = is_wf_sequence(args.data_dir / seq_id)
 
         total_dets = sum(len(f.detections) for f in frames)
         first_ts = frames[0].timestamp if frames else None
         confirmed_ts = (
-            frames[confirmed_idx].timestamp
-            if confirmed_idx is not None
-            else None
+            frames[confirmed_idx].timestamp if confirmed_idx is not None else None
         )
 
         seq_result = SequenceResult(

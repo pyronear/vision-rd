@@ -33,7 +33,7 @@ def main() -> None:
         "--output-model-dir",
         type=Path,
         required=True,
-        help="Output directory for model weights (data/06_models).",
+        help="Output directory for model weights (data/01_raw).",
     )
     args = parser.parse_args()
 
@@ -42,9 +42,7 @@ def main() -> None:
     if dst_model.exists():
         logger.info("Model already exists at %s, skipping.", dst_model)
     else:
-        logger.info(
-            "Downloading %s from %s...", args.model_filename, args.model_repo
-        )
+        logger.info("Downloading %s from %s...", args.model_filename, args.model_repo)
         hf_hub_download(
             repo_id=args.model_repo,
             filename=args.model_filename,
