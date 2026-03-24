@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["src*"]
+
+[project]
+name = "tracking-fsm-baseline"
+version = "0.1.0"
+description = "Temporal tracking baseline for smoke FP reduction (FLAME-inspired)"
+requires-python = ">=3.11"
+dependencies = [
+    "dvc[s3]>=3.56",
+    "huggingface-hub>=0.24",
+    "matplotlib>=3.8",
+    "numpy>=1.26,<2",
+    "pandas>=2.1",
+    "tqdm>=4.66",
+    "ultralytics>=8.3",
+]
+
+[dependency-groups]
+dev = [
+    "nbqa>=1.9",
+    "nbstripout>=0.8",
+    "ruff>=0.9",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B", "SIM"]
+
+[tool.ruff.format]
+quote-style = "double"

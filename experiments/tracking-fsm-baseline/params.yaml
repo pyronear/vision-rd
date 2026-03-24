@@ -1,0 +1,16 @@
+prepare:
+  model_repo: "pyronear/yolo11s_mighty-mongoose_v5.1.0"
+  model_filename: "yolo11s_mighty-mongoose_v5.1.0.pt"
+
+infer:
+  confidence_threshold: 0.01
+  iou_nms: 0.2
+  image_size: 1024
+
+track:
+  confidence_threshold: 0.25
+  iou_threshold: 0.3
+  min_consecutive: 2
+
+evaluate:
+  seed: 42
