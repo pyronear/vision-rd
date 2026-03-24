@@ -124,13 +124,15 @@ stages:
       - data/08_reporting/val/plots
 
   visualize_mispredictions_train:
-    desc: Generate annotated frame strips for mispredicted sequences (FP/FN) on training set
+    desc: Generate annotated frame strips for all FP/FN and sampled TP/TN on training set
     cmd: >-
       uv run python scripts/visualize_mispredictions.py
       --track-dir data/07_model_output/train
       --infer-dir data/02_intermediate/train
       --data-dir data/01_raw/datasets/train
       --output-dir data/08_reporting/train/mispredictions
+      --max-samples ${visualize.max_samples}
+      --seed ${visualize.seed}
     deps:
       - scripts/visualize_mispredictions.py
       - src/visualization.py
@@ -141,17 +143,21 @@ stages:
       - data/07_model_output/train
       - data/02_intermediate/train
       - data/01_raw/datasets/train
+    params:
+      - visualize
     outs:
       - data/08_reporting/train/mispredictions
 
   visualize_mispredictions_val:
-    desc: Generate annotated frame strips for mispredicted sequences (FP/FN) on validation set
+    desc: Generate annotated frame strips for all FP/FN and sampled TP/TN on validation set
     cmd: >-
       uv run python scripts/visualize_mispredictions.py
       --track-dir data/07_model_output/val
       --infer-dir data/02_intermediate/val
       --data-dir data/01_raw/datasets/val
       --output-dir data/08_reporting/val/mispredictions
+      --max-samples ${visualize.max_samples}
+      --seed ${visualize.seed}
     deps:
       - scripts/visualize_mispredictions.py
       - src/visualization.py
@@ -162,5 +168,7 @@ stages:
       - data/07_model_output/val
       - data/02_intermediate/val
       - data/01_raw/datasets/val
+    params:
+      - visualize
     outs:
       - data/08_reporting/val/mispredictions

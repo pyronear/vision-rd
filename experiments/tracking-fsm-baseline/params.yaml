@@ -11,3 +11,7 @@ track:
   confidence_threshold: 0.25
   iou_threshold: 0.3
   min_consecutive: 2
+
+visualize:
+  max_samples: 20
+  seed: 42

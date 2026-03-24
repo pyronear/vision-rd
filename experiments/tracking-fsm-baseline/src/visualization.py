@@ -1,7 +1,8 @@
-"""Visualization utilities for misprediction analysis.
+"""Visualization utilities for prediction analysis.
 
-Renders annotated frame strips showing YOLO detections and ground truth
-bounding boxes for false positive and false negative sequences.
+Renders annotated frame strips showing ground truth boxes, prior YOLO
+predictions (from label files), and current model predictions for
+tracking result sequences.
 """
 
 from math import ceil
@@ -12,18 +13,20 @@ from PIL import Image, ImageDraw, ImageFont
 from src.types import Detection
 
 
-def load_gt_boxes(label_path: Path) -> list[Detection]:
-    """Load ground truth bounding boxes from a YOLO-format label file.
+def load_label_boxes(label_path: Path) -> tuple[list[Detection], bool]:
+    """Load bounding boxes from a YOLO-format label file.
 
-    WF labels have 5 columns (class_id cx cy w h), FP labels have 6
-    columns (class_id cx cy w h confidence).
+    Returns a tuple of (detections, is_human_annotation).
+    WF labels have 5 columns (human annotations), FP labels have 6
+    columns (prior YOLO predictions with confidence).
     """
     if not label_path.is_file():
-        return []
+        return [], True
     content = label_path.read_text().strip()
     if not content:
-        return []
+        return [], True
     boxes = []
+    is_human = True
     for line in content.split("\n"):
         parts = line.strip().split()
         if len(parts) == 5:
@@ -38,6 +41,7 @@ def load_gt_boxes(label_path: Path) -> list[Detection]:
                 )
             )
         elif len(parts) == 6:
+            is_human = False
             boxes.append(
                 Detection(
                     class_id=int(parts[0]),
@@ -48,7 +52,7 @@ def load_gt_boxes(label_path: Path) -> list[Detection]:
                     confidence=float(parts[5]),
                 )
             )
-    return boxes
+    return boxes, is_human
 
 
 def draw_boxes_on_frame(
@@ -85,6 +89,12 @@ def draw_boxes_on_frame(
     return img
 
 
+# Box colors
+GT_COLOR = (0, 180, 0)  # Green — human annotations
+PRIOR_COLOR = (140, 0, 200)  # Purple — prior YOLO predictions from labels
+PRED_COLOR = (220, 0, 0)  # Red — current model predictions
+
+
 def render_sequence_strip(
     frames_data: list[dict],
     metadata: dict,
@@ -97,8 +107,10 @@ def render_sequence_strip(
     Parameters
     ----------
     frames_data
-        List of dicts with keys: image_path, gt_boxes, pred_detections,
-        frame_index, timestamp_str, num_preds.
+        List of dicts with keys: image_path, gt_boxes, prior_boxes,
+        pred_detections, frame_index, timestamp_str, num_preds.
+        gt_boxes: human-annotated GT (5-col labels, WF sequences).
+        prior_boxes: prior YOLO predictions (6-col labels, FP sequences).
     metadata
         Dict with keys: sequence_id, error_type, is_positive_gt,
         is_positive_pred, num_frames, num_detections_total, num_tracks,
@@ -123,7 +135,7 @@ def render_sequence_strip(
     n_cols = min(n_frames, max_cols)
     n_rows = ceil(n_frames / max_cols)
 
-    header_height = 100
+    header_height = 144
     label_height = 40
     canvas_w = n_cols * thumb_width
     canvas_h = header_height + n_rows * (thumb_height + label_height)
@@ -154,17 +166,42 @@ def render_sequence_strip(
         f"Frames: {metadata['num_frames']}  |  Dets: {n_dets}  |  Tracks: {n_tracks}",
         f"Confirmed at frame: {conf_frame}  ({conf_ts})",
     ]
-    if metadata["error_type"] == "false_positive":
-        header_color = (180, 0, 0)
-    else:
-        header_color = (0, 0, 180)
+    header_colors = {
+        "false_positive": (180, 0, 0),
+        "false_negative": (0, 0, 180),
+        "true_positive": (0, 130, 0),
+        "true_negative": (80, 80, 80),
+    }
+    header_color = header_colors.get(metadata["error_type"], (0, 0, 0))
     for i, line in enumerate(lines):
         draw.text((10, 8 + i * 22), line, fill=header_color, font=font)
 
-    # Draw frames
-    gt_color = (0, 180, 0)
-    pred_color = (220, 0, 0)
+    # Draw legend
+    legend_y = 8 + len(lines) * 22
+    x = 10
 
+    draw.rectangle([x, legend_y, x + 12, legend_y + 12], outline=GT_COLOR, width=2)
+    draw.text((x + 16, legend_y - 1), "Ground Truth", fill=(60, 60, 60), font=font)
+    x += 150
+
+    draw.rectangle([x, legend_y, x + 12, legend_y + 12], outline=PRIOR_COLOR, width=2)
+    draw.text(
+        (x + 16, legend_y - 1),
+        "Prior YOLO Prediction",
+        fill=(60, 60, 60),
+        font=font,
+    )
+    x += 200
+
+    draw.rectangle([x, legend_y, x + 12, legend_y + 12], outline=PRED_COLOR, width=2)
+    draw.text(
+        (x + 16, legend_y - 1),
+        "Current Prediction (confidence)",
+        fill=(60, 60, 60),
+        font=font,
+    )
+
+    # Draw frames
     for idx, frame in enumerate(frames_data):
         row = idx // max_cols
         col = idx % max_cols
@@ -175,18 +212,28 @@ def render_sequence_strip(
             (thumb_width, thumb_height), Image.LANCZOS
         )
 
-        # Draw GT boxes (green, thick)
+        # Draw GT boxes (green, thick) — human annotations
         if frame["gt_boxes"]:
             img = draw_boxes_on_frame(
-                img, frame["gt_boxes"], color=gt_color, line_width=3
+                img, frame["gt_boxes"], color=GT_COLOR, line_width=3
             )
 
-        # Draw prediction boxes (red, thinner, with confidence)
+        # Draw prior YOLO boxes (purple) — from label files
+        if frame["prior_boxes"]:
+            img = draw_boxes_on_frame(
+                img,
+                frame["prior_boxes"],
+                color=PRIOR_COLOR,
+                line_width=2,
+                show_confidence=True,
+            )
+
+        # Draw current prediction boxes (red, with confidence)
         if frame["pred_detections"]:
             img = draw_boxes_on_frame(
                 img,
                 frame["pred_detections"],
-                color=pred_color,
+                color=PRED_COLOR,
                 line_width=2,
                 show_confidence=True,
             )
@@ -197,7 +244,7 @@ def render_sequence_strip(
         fi = frame["frame_index"]
         ts = frame["timestamp_str"]
         nd = frame["num_preds"]
-        label = f"Frame {fi}  |  {ts}  |  {nd} dets"
+        label = f"Frame {fi}  |  {ts}  |  {nd} detections"
         draw.text(
             (x_off + 4, y_off + thumb_height + 4),
             label,
