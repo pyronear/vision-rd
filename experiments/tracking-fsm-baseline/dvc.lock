@@ -1,0 +1,224 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: uv run python scripts/prepare.py --model-repo 
+      pyronear/yolo11s_mighty-mongoose_v5.1.0 --model-filename 
+      yolo11s_mighty-mongoose_v5.1.0.pt --output-model-dir data/06_models
+    deps:
+    - path: scripts/prepare.py
+      hash: md5
+      md5: ffb4163d95636770d3a8f3c2cd11c434
+      size: 1549
+    params:
+      params.yaml:
+        prepare:
+          model_repo: pyronear/yolo11s_mighty-mongoose_v5.1.0
+          model_filename: yolo11s_mighty-mongoose_v5.1.0.pt
+    outs:
+    - path: data/06_models
+      hash: md5
+      md5: 3ff68b6fe6e8ab0bec7a9f59080d46fd.dir
+      size: 19260049
+      nfiles: 3
+  infer_train:
+    cmd: uv run python scripts/infer.py --data-dir data/01_raw/train 
+      --model-path data/06_models/yolo11s_mighty-mongoose_v5.1.0.pt --output-dir
+      data/02_intermediate/train --confidence-threshold 0.01 --iou-nms 0.2 
+      --image-size 1024
+    deps:
+    - path: data/01_raw/train
+      hash: md5
+      md5: c38b9cbd0a872ee86402973d6cd8a466.dir
+      size: 4366197067
+      nfiles: 82878
+    - path: data/06_models
+      hash: md5
+      md5: 3ff68b6fe6e8ab0bec7a9f59080d46fd.dir
+      size: 19260049
+      nfiles: 3
+    - path: scripts/infer.py
+      hash: md5
+      md5: c32f6e8f91ac543630ab09d6a95379af
+      size: 2333
+    - path: src
+      hash: md5
+      md5: 0a3ae186d7aca8cf280436c439364b9e.dir
+      size: 47572
+      nfiles: 13
+    params:
+      params.yaml:
+        infer:
+          confidence_threshold: 0.01
+          iou_nms: 0.2
+          image_size: 1024
+    outs:
+    - path: data/02_intermediate/train
+      hash: md5
+      md5: f255c75675f2585ee07bbbe79e3bb3a9.dir
+      size: 14994411
+      nfiles: 2865
+  infer_val:
+    cmd: uv run python scripts/infer.py --data-dir data/01_raw/val --model-path 
+      data/06_models/yolo11s_mighty-mongoose_v5.1.0.pt --output-dir 
+      data/02_intermediate/val --confidence-threshold 0.01 --iou-nms 0.2 
+      --image-size 1024
+    deps:
+    - path: data/01_raw/val
+      hash: md5
+      md5: 37bcb2b81249abab56cbec906e77fcdf.dir
+      size: 407799782
+      nfiles: 8044
+    - path: data/06_models
+      hash: md5
+      md5: 3ff68b6fe6e8ab0bec7a9f59080d46fd.dir
+      size: 19260049
+      nfiles: 3
+    - path: scripts/infer.py
+      hash: md5
+      md5: c32f6e8f91ac543630ab09d6a95379af
+      size: 2333
+    - path: src
+      hash: md5
+      md5: 0a3ae186d7aca8cf280436c439364b9e.dir
+      size: 47572
+      nfiles: 13
+    params:
+      params.yaml:
+        infer:
+          confidence_threshold: 0.01
+          iou_nms: 0.2
+          image_size: 1024
+    outs:
+    - path: data/02_intermediate/val
+      hash: md5
+      md5: 8da24711a3bcaf55d6d81f83613a19a0.dir
+      size: 1400152
+      nfiles: 294
+  track_train:
+    cmd: uv run python scripts/track.py --infer-dir data/02_intermediate/train 
+      --wf-registry data/01_raw/wf_registry.json --output-dir 
+      data/07_model_output/train --confidence-threshold 0.25 --iou-threshold 0.3
+      --min-consecutive 2
+    deps:
+    - path: data/01_raw/wf_registry.json
+      hash: md5
+      md5: e8351f5f63bc681a39e1961187a5182f
+      size: 311100
+    - path: data/02_intermediate/train
+      hash: md5
+      md5: f255c75675f2585ee07bbbe79e3bb3a9.dir
+      size: 14994411
+      nfiles: 2865
+    - path: scripts/track.py
+      hash: md5
+      md5: e2370807825845c69497ed5758f5a5de
+      size: 4861
+    - path: src
+      hash: md5
+      md5: 0a3ae186d7aca8cf280436c439364b9e.dir
+      size: 47572
+      nfiles: 13
+    params:
+      params.yaml:
+        track:
+          confidence_threshold: 0.25
+          iou_threshold: 0.3
+          min_consecutive: 2
+    outs:
+    - path: data/07_model_output/train
+      hash: md5
+      md5: 1ad74428348e12579c8f9bb2f5b15dbb.dir
+      size: 961265
+      nfiles: 1
+  track_val:
+    cmd: uv run python scripts/track.py --infer-dir data/02_intermediate/val 
+      --wf-registry data/01_raw/wf_registry.json --output-dir 
+      data/07_model_output/val --confidence-threshold 0.25 --iou-threshold 0.3 
+      --min-consecutive 2
+    deps:
+    - path: data/01_raw/wf_registry.json
+      hash: md5
+      md5: e8351f5f63bc681a39e1961187a5182f
+      size: 311100
+    - path: data/02_intermediate/val
+      hash: md5
+      md5: 8da24711a3bcaf55d6d81f83613a19a0.dir
+      size: 1400152
+      nfiles: 294
+    - path: scripts/track.py
+      hash: md5
+      md5: e2370807825845c69497ed5758f5a5de
+      size: 4861
+    - path: src
+      hash: md5
+      md5: 0a3ae186d7aca8cf280436c439364b9e.dir
+      size: 47572
+      nfiles: 13
+    params:
+      params.yaml:
+        track:
+          confidence_threshold: 0.25
+          iou_threshold: 0.3
+          min_consecutive: 2
+    outs:
+    - path: data/07_model_output/val
+      hash: md5
+      md5: bfb31283979c3b5b7541f564dc49a38b.dir
+      size: 98472
+      nfiles: 1
+  evaluate_train:
+    cmd: uv run python scripts/evaluate.py --track-dir 
+      data/07_model_output/train --output-dir data/08_reporting/train
+    deps:
+    - path: data/07_model_output/train
+      hash: md5
+      md5: 1ad74428348e12579c8f9bb2f5b15dbb.dir
+      size: 961265
+      nfiles: 1
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: bc31ac5fc4e0ff2473cc2d9ada232d6d
+      size: 2700
+    - path: src
+      hash: md5
+      md5: 0a3ae186d7aca8cf280436c439364b9e.dir
+      size: 47572
+      nfiles: 13
+    outs:
+    - path: data/08_reporting/train/metrics.json
+      hash: md5
+      md5: 1ff552497b330c068ca38ac07518faaa
+      size: 623
+    - path: data/08_reporting/train/plots
+      hash: md5
+      md5: 466ce07295cdd7db26a61a186a7360b4.dir
+      size: 69260
+      nfiles: 3
+  evaluate_val:
+    cmd: uv run python scripts/evaluate.py --track-dir data/07_model_output/val 
+      --output-dir data/08_reporting/val
+    deps:
+    - path: data/07_model_output/val
+      hash: md5
+      md5: bfb31283979c3b5b7541f564dc49a38b.dir
+      size: 98472
+      nfiles: 1
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: bc31ac5fc4e0ff2473cc2d9ada232d6d
+      size: 2700
+    - path: src
+      hash: md5
+      md5: 0a3ae186d7aca8cf280436c439364b9e.dir
+      size: 47572
+      nfiles: 13
+    outs:
+    - path: data/08_reporting/val/metrics.json
+      hash: md5
+      md5: 7ed1aa4fba0a541cdf278ab7042e2c7b
+      size: 612
+    - path: data/08_reporting/val/plots
+      hash: md5
+      md5: 3b181ed4de4ffae7b982e822ac3efbab.dir
+      size: 62245
+      nfiles: 3
