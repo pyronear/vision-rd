@@ -44,6 +44,41 @@ Notebooks are for **exploration and visualization only**. Move any reusable logi
 - Track data with `dvc add data/` and commit the `.dvc` files to git
 - Configure a DVC remote in `.dvc/config` using the convention: `s3://pyro-vision-rd/dvc/experiments/<experiment-name>/`
 
+## DVC Pipelines
+
+Define your ML pipeline as stages in `dvc.yaml`. The template provides a commented-out scaffold — uncomment and adapt the stages you need.
+
+### Structure
+
+A typical pipeline has four stages: **prepare → split → train → evaluate**. Each stage declares its command, dependencies, parameters, and outputs so DVC can track lineage and skip unchanged steps.
+
+### Conventions
+
+- **Commands**: Always use `uv run python scripts/<stage>.py` to run within the project environment
+- **CLI arguments**: Thread all inputs, outputs, and parameters directly to scripts via flags (e.g., `--input-dir`, `--seed ${train.seed}`). Scripts should not read paths or config files themselves — receive everything from the command line.
+- **Parameters**: Store hyperparameters in `params.yaml` at the project root. Reference them in `dvc.yaml` with `${group.key}` interpolation and list them under the `params:` field so DVC tracks them.
+- **Data paths**: Follow the Kedro-style layers in `data/` (raw → intermediate → model_input → models → reporting)
+- **Metrics**: Declare metrics files with `cache: false` so they are always readable in the working tree (e.g., `data/08_reporting/metrics.json`)
+- **Plots**: Use the `plots:` field for visualization outputs (e.g., `data/08_reporting/plots/`)
+
+### Running the pipeline
+
+```bash
+uv run dvc repro          # run the full pipeline (skips up-to-date stages)
+uv run dvc repro train    # run up to and including the train stage
+uv run dvc params diff    # compare parameter changes
+uv run dvc metrics show   # display current metrics
+uv run dvc plots show     # render plots
+```
+
+### Experimenting with parameters
+
+```bash
+uv run dvc exp run -S train.learning_rate=0.001   # run with modified param
+uv run dvc exp show                                # compare experiment results
+uv run dvc exp apply <exp-name>                    # apply best experiment
+```
+
 ## Reproducibility
 
 Every experiment must be reproducible from a clean checkout. Requirements:

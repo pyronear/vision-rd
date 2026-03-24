@@ -1,0 +1,71 @@
+# stages:
+#   prepare:
+#     cmd: >-
+#       uv run python scripts/prepare.py
+#       --input-dir data/01_raw
+#       --output-dir data/02_intermediate
+#     deps:
+#       - scripts/prepare.py
+#       - data/01_raw
+#     outs:
+#       - data/02_intermediate
+#
+#   split:
+#     cmd: >-
+#       uv run python scripts/split.py
+#       --input-dir data/02_intermediate
+#       --output-dir data/05_model_input
+#       --seed ${split.seed}
+#       --test-size ${split.test_size}
+#       --val-size ${split.val_size}
+#     deps:
+#       - scripts/split.py
+#       - data/02_intermediate
+#     params:
+#       - split.seed
+#       - split.test_size
+#       - split.val_size
+#     outs:
+#       - data/05_model_input/train
+#       - data/05_model_input/val
+#       - data/05_model_input/test
+#
+#   train:
+#     cmd: >-
+#       uv run python scripts/train.py
+#       --train-dir data/05_model_input/train
+#       --val-dir data/05_model_input/val
+#       --output-dir data/06_models
+#       --seed ${train.seed}
+#       --epochs ${train.epochs}
+#       --batch-size ${train.batch_size}
+#       --learning-rate ${train.learning_rate}
+#     deps:
+#       - scripts/train.py
+#       - src
+#       - data/05_model_input/train
+#       - data/05_model_input/val
+#     params:
+#       - train.seed
+#       - train.epochs
+#       - train.batch_size
+#       - train.learning_rate
+#     outs:
+#       - data/06_models/model.pt
+#
+#   evaluate:
+#     cmd: >-
+#       uv run python scripts/evaluate.py
+#       --model-path data/06_models/model.pt
+#       --test-dir data/05_model_input/test
+#       --output-dir data/08_reporting
+#     deps:
+#       - scripts/evaluate.py
+#       - src
+#       - data/06_models/model.pt
+#       - data/05_model_input/test
+#     metrics:
+#       - data/08_reporting/metrics.json:
+#           cache: false
+#     plots:
+#       - data/08_reporting/plots
