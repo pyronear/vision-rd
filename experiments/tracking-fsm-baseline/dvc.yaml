@@ -13,6 +13,7 @@ stages:
       - scripts/infer.py
       - src
       - data/01_raw/datasets/train
+      - data/01_raw/models/${prepare.model_filename}
     params:
       - prepare.model_filename
       - infer
@@ -33,6 +34,7 @@ stages:
       - scripts/infer.py
       - src
       - data/01_raw/datasets/val
+      - data/01_raw/models/${prepare.model_filename}
     params:
       - prepare.model_filename
       - infer
