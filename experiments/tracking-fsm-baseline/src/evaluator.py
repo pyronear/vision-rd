@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 
 
@@ -112,8 +113,6 @@ def plot_comparison(
 ) -> None:
     """Bar chart comparing YOLO-only vs tracking baselines."""
     sns.set_theme(style="whitegrid")
-    import pandas as pd
-
     data = pd.DataFrame(
         {
             "Metric": ["Precision", "Recall", "F1"] * 2,
