@@ -122,3 +122,45 @@ stages:
           cache: false
     plots:
       - data/08_reporting/val/plots
+
+  visualize_mispredictions_train:
+    desc: Generate annotated frame strips for mispredicted sequences (FP/FN) on training set
+    cmd: >-
+      uv run python scripts/visualize_mispredictions.py
+      --track-dir data/07_model_output/train
+      --infer-dir data/02_intermediate/train
+      --data-dir data/01_raw/datasets/train
+      --output-dir data/08_reporting/train/mispredictions
+    deps:
+      - scripts/visualize_mispredictions.py
+      - src/visualization.py
+      - src/evaluator.py
+      - src/detector.py
+      - src/data.py
+      - src/types.py
+      - data/07_model_output/train
+      - data/02_intermediate/train
+      - data/01_raw/datasets/train
+    outs:
+      - data/08_reporting/train/mispredictions
+
+  visualize_mispredictions_val:
+    desc: Generate annotated frame strips for mispredicted sequences (FP/FN) on validation set
+    cmd: >-
+      uv run python scripts/visualize_mispredictions.py
+      --track-dir data/07_model_output/val
+      --infer-dir data/02_intermediate/val
+      --data-dir data/01_raw/datasets/val
+      --output-dir data/08_reporting/val/mispredictions
+    deps:
+      - scripts/visualize_mispredictions.py
+      - src/visualization.py
+      - src/evaluator.py
+      - src/detector.py
+      - src/data.py
+      - src/types.py
+      - data/07_model_output/val
+      - data/02_intermediate/val
+      - data/01_raw/datasets/val
+    outs:
+      - data/08_reporting/val/mispredictions
