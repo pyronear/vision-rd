@@ -1,4 +1,4 @@
-.PHONY: install pull push help
+.PHONY: install lint format help
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -6,8 +6,8 @@ help: ## Show this help
 install: ## Install dependencies from uv.lock
 	uv sync
 
-pull: ## Pull PDF data from S3 via DVC
-	uv run dvc pull
+lint: ## Run ruff linter
+	uv run ruff check .
 
-push: ## Push PDF data to S3 via DVC
-	uv run dvc push
+format: ## Format code with ruff
+	uv run ruff format .

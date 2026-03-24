@@ -1,0 +1,8 @@
+[project]
+name = "pyronear-literature-survey"
+version = "0.1.0"
+description = "Literature survey on temporal ML models for wildfire smoke detection"
+requires-python = ">=3.11"
+dependencies = [
+    "dvc[s3]>=3.56",
+]
