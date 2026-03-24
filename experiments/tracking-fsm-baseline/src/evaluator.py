@@ -1,4 +1,5 @@
 import json
+import statistics
 from datetime import datetime
 from pathlib import Path
 
@@ -46,7 +47,7 @@ def compute_metrics(results: list[dict]) -> dict:
             ttd_seconds.append((t_confirmed - t_first).total_seconds())
 
     mean_ttd = sum(ttd_seconds) / len(ttd_seconds) if ttd_seconds else None
-    median_ttd = sorted(ttd_seconds)[len(ttd_seconds) // 2] if ttd_seconds else None
+    median_ttd = statistics.median(ttd_seconds) if ttd_seconds else None
 
     return {
         "num_sequences": len(results),
