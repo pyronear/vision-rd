@@ -1,5 +1,6 @@
 stages:
   infer_train:
+    desc: Run YOLO inference on training set images to produce raw smoke detections
     cmd: >-
       uv run python scripts/infer.py
       --data-dir data/01_raw/train
@@ -19,6 +20,7 @@ stages:
       - data/02_intermediate/train
 
   infer_val:
+    desc: Run YOLO inference on validation set images to produce raw smoke detections
     cmd: >-
       uv run python scripts/infer.py
       --data-dir data/01_raw/val
@@ -38,6 +40,7 @@ stages:
       - data/02_intermediate/val
 
   track_train:
+    desc: Apply FSM-based temporal tracking on training set detections to filter false positives
     cmd: >-
       uv run python scripts/track.py
       --infer-dir data/02_intermediate/train
@@ -57,6 +60,7 @@ stages:
       - data/07_model_output/train
 
   track_val:
+    desc: Apply FSM-based temporal tracking on validation set detections to filter false positives
     cmd: >-
       uv run python scripts/track.py
       --infer-dir data/02_intermediate/val
@@ -76,6 +80,7 @@ stages:
       - data/07_model_output/val
 
   evaluate_train:
+    desc: Compute sequence-level metrics (precision, recall, F1, latency) on training set
     cmd: >-
       uv run python scripts/evaluate.py
       --track-dir data/07_model_output/train
@@ -91,6 +96,7 @@ stages:
       - data/08_reporting/train/plots
 
   evaluate_val:
+    desc: Compute sequence-level metrics (precision, recall, F1, latency) on validation set
     cmd: >-
       uv run python scripts/evaluate.py
       --track-dir data/07_model_output/val
