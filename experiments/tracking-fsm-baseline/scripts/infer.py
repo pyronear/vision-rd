@@ -3,8 +3,6 @@
 Saves per-sequence JSON files with frame-level detections.
 """
 
-from __future__ import annotations
-
 import argparse
 import logging
 from pathlib import Path

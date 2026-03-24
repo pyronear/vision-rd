@@ -10,8 +10,6 @@ Usage:
         --output-dir data/08_reporting/sweep
 """
 
-from __future__ import annotations
-
 import argparse
 import csv
 import itertools

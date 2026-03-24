@@ -3,8 +3,6 @@
 Data is expected to already be in data/01_raw/ (DVC-tracked).
 """
 
-from __future__ import annotations
-
 import argparse
 import logging
 from pathlib import Path

@@ -1,7 +1,5 @@
 """Evaluate tracking results and generate metrics + plots."""
 
-from __future__ import annotations
-
 import argparse
 import json
 import logging

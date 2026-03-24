@@ -4,8 +4,6 @@ Loads per-sequence inference JSON, applies the tracker,
 and saves results with ground-truth labels.
 """
 
-from __future__ import annotations
-
 import argparse
 import json
 import logging
