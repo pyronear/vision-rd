@@ -77,9 +77,12 @@ class SimpleTracker:
     consecutive frames.
     """
 
-    def __init__(self, iou_threshold: float, min_consecutive: int) -> None:
+    def __init__(
+        self, iou_threshold: float, min_consecutive: int, max_misses: int = 0
+    ) -> None:
         self.iou_threshold = iou_threshold
         self.min_consecutive = min_consecutive
+        self.max_misses = max_misses
 
     def process_sequence(
         self, frames: list[FrameResult]
@@ -160,8 +163,10 @@ class SimpleTracker:
                     if confirmed_frame_idx is None:
                         confirmed_frame_idx = frame_idx
 
-            # Remove tracks that have been missing too long (no re-acquisition in L0)
-            active_tracks = [t for t in active_tracks if t.consecutive_misses == 0]
+            # Remove tracks that have been missing too long
+            active_tracks = [
+                t for t in active_tracks if t.consecutive_misses <= self.max_misses
+            ]
 
         is_alarm = any(t.confirmed for t in all_tracks)
         return is_alarm, all_tracks, confirmed_frame_idx
