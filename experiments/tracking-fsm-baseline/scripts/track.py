@@ -71,13 +71,57 @@ def main() -> None:
         required=True,
         help="Min consecutive frames for confirmation.",
     )
+    parser.add_argument(
+        "--max-detection-area",
+        type=float,
+        default=None,
+        help="Max normalized detection area (w*h). Larger detections are discarded.",
+    )
+    parser.add_argument(
+        "--max-misses",
+        type=int,
+        default=0,
+        help="Max consecutive missed frames before dropping a track.",
+    )
+    parser.add_argument(
+        "--use-confidence-filter",
+        type=str,
+        default="false",
+        help="Enable confidence post-filter ('true'/'false').",
+    )
+    parser.add_argument(
+        "--min-mean-confidence",
+        type=float,
+        default=0.3,
+        help="Min mean confidence for confirmed tracks.",
+    )
+    parser.add_argument(
+        "--use-area-change-filter",
+        type=str,
+        default="false",
+        help="Enable area-change post-filter ('true'/'false').",
+    )
+    parser.add_argument(
+        "--min-area-change",
+        type=float,
+        default=1.1,
+        help="Min area change ratio (last/first) for confirmed tracks.",
+    )
     args = parser.parse_args()
+
+    use_confidence_filter = args.use_confidence_filter.lower() == "true"
+    use_area_change_filter = args.use_area_change_filter.lower() == "true"
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     tracker = SimpleTracker(
         iou_threshold=args.iou_threshold,
         min_consecutive=args.min_consecutive,
+        max_misses=args.max_misses,
+        use_confidence_filter=use_confidence_filter,
+        min_mean_confidence=args.min_mean_confidence,
+        use_area_change_filter=use_area_change_filter,
+        min_area_change=args.min_area_change,
     )
 
     infer_files = sorted(args.infer_dir.glob("*.json"))
@@ -88,10 +132,14 @@ def main() -> None:
         seq_id = infer_path.stem
         frames = load_inference_results(infer_path)
 
-        # Filter detections by confidence threshold
+        # Filter detections by confidence threshold and max area
+        max_area = args.max_detection_area
         for frame in frames:
             frame.detections = [
-                d for d in frame.detections if d.confidence >= args.confidence_threshold
+                d
+                for d in frame.detections
+                if d.confidence >= args.confidence_threshold
+                and (max_area is None or d.w * d.h <= max_area)
             ]
 
         is_alarm, tracks, confirmed_idx = tracker.process_sequence(frames)

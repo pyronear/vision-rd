@@ -7,10 +7,31 @@ infer:
   iou_nms: 0.2
   image_size: 1024
 
+pad:
+  min_sequence_length: 10
+
+# Best params from sweep on train/pyronear (with padding)
 track:
-  confidence_threshold: 0.25
-  iou_threshold: 0.3
-  min_consecutive: 2
+  confidence_threshold: 0.3
+  iou_threshold: 0.1
+  min_consecutive: 5
+  max_detection_area: 0.05
+  max_misses: 0
+  use_confidence_filter: false
+  min_mean_confidence: 0.3
+  use_area_change_filter: false
+  min_area_change: 1.1
+
+# Ablation base params match track; rule "on" values control what
+# gets tested when each rule is toggled on in the ablation study
+ablation:
+  confidence_threshold: 0.3
+  iou_threshold: 0.1
+  min_consecutive: 5
+  max_detection_area: 0.05
+  max_misses: 2
+  min_mean_confidence: 0.4
+  min_area_change: 1.01
 
 visualize:
   max_samples: 20

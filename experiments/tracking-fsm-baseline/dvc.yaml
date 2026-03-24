@@ -45,23 +45,67 @@ stages:
     outs:
       - data/02_intermediate/val
 
+  # --- Pad short sequences ---
+  pad_train:
+    desc: Pad short training sequences by repeating the last frame
+    cmd: >-
+      uv run python scripts/pad_sequences.py
+      --infer-dir data/02_intermediate/train
+      --output-dir data/03_primary/train
+      --min-sequence-length ${pad.min_sequence_length}
+    deps:
+      - scripts/pad_sequences.py
+      - src/detector.py
+      - src/tracker.py
+      - src/types.py
+      - data/02_intermediate/train
+    params:
+      - pad
+    outs:
+      - data/03_primary/train
+
+  pad_val:
+    desc: Pad short validation sequences by repeating the last frame
+    cmd: >-
+      uv run python scripts/pad_sequences.py
+      --infer-dir data/02_intermediate/val
+      --output-dir data/03_primary/val
+      --min-sequence-length ${pad.min_sequence_length}
+    deps:
+      - scripts/pad_sequences.py
+      - src/detector.py
+      - src/tracker.py
+      - src/types.py
+      - data/02_intermediate/val
+    params:
+      - pad
+    outs:
+      - data/03_primary/val
+
+  # --- Track ---
   track_train:
     desc: Apply FSM-based temporal tracking on training set detections to filter false positives
     cmd: >-
       uv run python scripts/track.py
-      --infer-dir data/02_intermediate/train
+      --infer-dir data/03_primary/train
       --data-dir data/01_raw/datasets/train
       --output-dir data/07_model_output/train
       --confidence-threshold ${track.confidence_threshold}
       --iou-threshold ${track.iou_threshold}
       --min-consecutive ${track.min_consecutive}
+      --max-detection-area ${track.max_detection_area}
+      --max-misses ${track.max_misses}
+      --use-confidence-filter ${track.use_confidence_filter}
+      --min-mean-confidence ${track.min_mean_confidence}
+      --use-area-change-filter ${track.use_area_change_filter}
+      --min-area-change ${track.min_area_change}
     deps:
       - scripts/track.py
       - src/data.py
       - src/detector.py
       - src/tracker.py
       - src/types.py
-      - data/02_intermediate/train
+      - data/03_primary/train
       - data/01_raw/datasets/train
     params:
       - track
@@ -72,63 +116,290 @@ stages:
     desc: Apply FSM-based temporal tracking on validation set detections to filter false positives
     cmd: >-
       uv run python scripts/track.py
-      --infer-dir data/02_intermediate/val
+      --infer-dir data/03_primary/val
       --data-dir data/01_raw/datasets/val
       --output-dir data/07_model_output/val
       --confidence-threshold ${track.confidence_threshold}
       --iou-threshold ${track.iou_threshold}
       --min-consecutive ${track.min_consecutive}
+      --max-detection-area ${track.max_detection_area}
+      --max-misses ${track.max_misses}
+      --use-confidence-filter ${track.use_confidence_filter}
+      --min-mean-confidence ${track.min_mean_confidence}
+      --use-area-change-filter ${track.use_area_change_filter}
+      --min-area-change ${track.min_area_change}
     deps:
       - scripts/track.py
       - src/data.py
       - src/detector.py
       - src/tracker.py
       - src/types.py
-      - data/02_intermediate/val
+      - data/03_primary/val
       - data/01_raw/datasets/val
     params:
       - track
     outs:
       - data/07_model_output/val
 
+  # --- Evaluate (all sequences) ---
   evaluate_train:
-    desc: Compute sequence-level metrics (precision, recall, F1, latency) on training set
+    desc: Compute sequence-level metrics on training set (all sequences)
     cmd: >-
       uv run python scripts/evaluate.py
       --track-dir data/07_model_output/train
-      --output-dir data/08_reporting/train
+      --output-dir data/08_reporting/train/all
     deps:
       - scripts/evaluate.py
       - src/evaluator.py
       - data/07_model_output/train
     metrics:
-      - data/08_reporting/train/metrics.json:
+      - data/08_reporting/train/all/metrics.json:
           cache: false
     plots:
-      - data/08_reporting/train/plots
+      - data/08_reporting/train/all/plots
 
   evaluate_val:
-    desc: Compute sequence-level metrics (precision, recall, F1, latency) on validation set
+    desc: Compute sequence-level metrics on validation set (all sequences)
     cmd: >-
       uv run python scripts/evaluate.py
       --track-dir data/07_model_output/val
-      --output-dir data/08_reporting/val
+      --output-dir data/08_reporting/val/all
     deps:
       - scripts/evaluate.py
       - src/evaluator.py
       - data/07_model_output/val
     metrics:
-      - data/08_reporting/val/metrics.json:
+      - data/08_reporting/val/all/metrics.json:
           cache: false
     plots:
-      - data/08_reporting/val/plots
+      - data/08_reporting/val/all/plots
 
+  # --- Evaluate (Pyronear only) ---
+  evaluate_train_pyronear:
+    desc: Compute sequence-level metrics on training set (Pyronear sequences only)
+    cmd: >-
+      uv run python scripts/evaluate.py
+      --track-dir data/07_model_output/train
+      --output-dir data/08_reporting/train/pyronear
+      --filter-prefix pyronear
+    deps:
+      - scripts/evaluate.py
+      - src/evaluator.py
+      - data/07_model_output/train
+    metrics:
+      - data/08_reporting/train/pyronear/metrics.json:
+          cache: false
+    plots:
+      - data/08_reporting/train/pyronear/plots
+
+  evaluate_val_pyronear:
+    desc: Compute sequence-level metrics on validation set (Pyronear sequences only)
+    cmd: >-
+      uv run python scripts/evaluate.py
+      --track-dir data/07_model_output/val
+      --output-dir data/08_reporting/val/pyronear
+      --filter-prefix pyronear
+    deps:
+      - scripts/evaluate.py
+      - src/evaluator.py
+      - data/07_model_output/val
+    metrics:
+      - data/08_reporting/val/pyronear/metrics.json:
+          cache: false
+    plots:
+      - data/08_reporting/val/pyronear/plots
+
+  # --- Sweep (all sequences) ---
+  sweep_train:
+    desc: Grid-search tracking parameters on training set (all sequences)
+    cmd: >-
+      uv run python scripts/sweep.py
+      --infer-dir data/03_primary/train
+      --data-dir data/01_raw/datasets/train
+      --output-dir data/08_reporting/sweep/train/all
+      --sweep-rules
+    deps:
+      - scripts/sweep.py
+      - src/evaluator.py
+      - src/tracker.py
+      - src/types.py
+      - data/03_primary/train
+      - data/01_raw/datasets/train
+    outs:
+      - data/08_reporting/sweep/train/all
+
+  sweep_val:
+    desc: Grid-search tracking parameters on validation set (all sequences)
+    cmd: >-
+      uv run python scripts/sweep.py
+      --infer-dir data/03_primary/val
+      --data-dir data/01_raw/datasets/val
+      --output-dir data/08_reporting/sweep/val/all
+      --sweep-rules
+    deps:
+      - scripts/sweep.py
+      - src/evaluator.py
+      - src/tracker.py
+      - src/types.py
+      - data/03_primary/val
+      - data/01_raw/datasets/val
+    outs:
+      - data/08_reporting/sweep/val/all
+
+  # --- Sweep (Pyronear only) ---
+  sweep_train_pyronear:
+    desc: Grid-search tracking parameters on training set (Pyronear sequences only)
+    cmd: >-
+      uv run python scripts/sweep.py
+      --infer-dir data/03_primary/train
+      --data-dir data/01_raw/datasets/train
+      --output-dir data/08_reporting/sweep/train/pyronear
+      --sweep-rules
+      --filter-prefix pyronear
+    deps:
+      - scripts/sweep.py
+      - src/evaluator.py
+      - src/tracker.py
+      - src/types.py
+      - data/03_primary/train
+      - data/01_raw/datasets/train
+    outs:
+      - data/08_reporting/sweep/train/pyronear
+
+  sweep_val_pyronear:
+    desc: Grid-search tracking parameters on validation set (Pyronear sequences only)
+    cmd: >-
+      uv run python scripts/sweep.py
+      --infer-dir data/03_primary/val
+      --data-dir data/01_raw/datasets/val
+      --output-dir data/08_reporting/sweep/val/pyronear
+      --sweep-rules
+      --filter-prefix pyronear
+    deps:
+      - scripts/sweep.py
+      - src/evaluator.py
+      - src/tracker.py
+      - src/types.py
+      - data/03_primary/val
+      - data/01_raw/datasets/val
+    outs:
+      - data/08_reporting/sweep/val/pyronear
+
+  # --- Ablation (all sequences) ---
+  ablation_train:
+    desc: Ablation study of tracking rules on training set (all sequences)
+    cmd: >-
+      uv run python scripts/ablation.py
+      --infer-dir data/03_primary/train
+      --data-dir data/01_raw/datasets/train
+      --output-dir data/08_reporting/ablation/train/all
+      --confidence-threshold ${ablation.confidence_threshold}
+      --iou-threshold ${ablation.iou_threshold}
+      --min-consecutive ${ablation.min_consecutive}
+      --max-detection-area ${ablation.max_detection_area}
+      --max-misses ${ablation.max_misses}
+      --min-mean-confidence ${ablation.min_mean_confidence}
+      --min-area-change ${ablation.min_area_change}
+    deps:
+      - scripts/ablation.py
+      - src/evaluator.py
+      - src/tracker.py
+      - src/types.py
+      - data/03_primary/train
+      - data/01_raw/datasets/train
+    params:
+      - ablation
+    outs:
+      - data/08_reporting/ablation/train/all
+
+  ablation_val:
+    desc: Ablation study of tracking rules on validation set (all sequences)
+    cmd: >-
+      uv run python scripts/ablation.py
+      --infer-dir data/03_primary/val
+      --data-dir data/01_raw/datasets/val
+      --output-dir data/08_reporting/ablation/val/all
+      --confidence-threshold ${ablation.confidence_threshold}
+      --iou-threshold ${ablation.iou_threshold}
+      --min-consecutive ${ablation.min_consecutive}
+      --max-detection-area ${ablation.max_detection_area}
+      --max-misses ${ablation.max_misses}
+      --min-mean-confidence ${ablation.min_mean_confidence}
+      --min-area-change ${ablation.min_area_change}
+    deps:
+      - scripts/ablation.py
+      - src/evaluator.py
+      - src/tracker.py
+      - src/types.py
+      - data/03_primary/val
+      - data/01_raw/datasets/val
+    params:
+      - ablation
+    outs:
+      - data/08_reporting/ablation/val/all
+
+  # --- Ablation (Pyronear only) ---
+  ablation_train_pyronear:
+    desc: Ablation study of tracking rules on training set (Pyronear sequences only)
+    cmd: >-
+      uv run python scripts/ablation.py
+      --infer-dir data/03_primary/train
+      --data-dir data/01_raw/datasets/train
+      --output-dir data/08_reporting/ablation/train/pyronear
+      --filter-prefix pyronear
+      --confidence-threshold ${ablation.confidence_threshold}
+      --iou-threshold ${ablation.iou_threshold}
+      --min-consecutive ${ablation.min_consecutive}
+      --max-detection-area ${ablation.max_detection_area}
+      --max-misses ${ablation.max_misses}
+      --min-mean-confidence ${ablation.min_mean_confidence}
+      --min-area-change ${ablation.min_area_change}
+    deps:
+      - scripts/ablation.py
+      - src/evaluator.py
+      - src/tracker.py
+      - src/types.py
+      - data/03_primary/train
+      - data/01_raw/datasets/train
+    params:
+      - ablation
+    outs:
+      - data/08_reporting/ablation/train/pyronear
+
+  ablation_val_pyronear:
+    desc: Ablation study of tracking rules on validation set (Pyronear sequences only)
+    cmd: >-
+      uv run python scripts/ablation.py
+      --infer-dir data/03_primary/val
+      --data-dir data/01_raw/datasets/val
+      --output-dir data/08_reporting/ablation/val/pyronear
+      --filter-prefix pyronear
+      --confidence-threshold ${ablation.confidence_threshold}
+      --iou-threshold ${ablation.iou_threshold}
+      --min-consecutive ${ablation.min_consecutive}
+      --max-detection-area ${ablation.max_detection_area}
+      --max-misses ${ablation.max_misses}
+      --min-mean-confidence ${ablation.min_mean_confidence}
+      --min-area-change ${ablation.min_area_change}
+    deps:
+      - scripts/ablation.py
+      - src/evaluator.py
+      - src/tracker.py
+      - src/types.py
+      - data/03_primary/val
+      - data/01_raw/datasets/val
+    params:
+      - ablation
+    outs:
+      - data/08_reporting/ablation/val/pyronear
+
+  # --- Visualize mispredictions ---
   visualize_mispredictions_train:
     desc: Generate annotated frame strips for all FP/FN and sampled TP/TN on training set
     cmd: >-
       uv run python scripts/visualize_mispredictions.py
       --track-dir data/07_model_output/train
-      --infer-dir data/02_intermediate/train
+      --infer-dir data/03_primary/train
       --data-dir data/01_raw/datasets/train
       --output-dir data/08_reporting/train/mispredictions
       --max-samples ${visualize.max_samples}
@@ -141,7 +412,7 @@ stages:
       - src/data.py
       - src/types.py
       - data/07_model_output/train
-      - data/02_intermediate/train
+      - data/03_primary/train
       - data/01_raw/datasets/train
     params:
       - visualize
@@ -153,7 +424,7 @@ stages:
     cmd: >-
       uv run python scripts/visualize_mispredictions.py
       --track-dir data/07_model_output/val
-      --infer-dir data/02_intermediate/val
+      --infer-dir data/03_primary/val
       --data-dir data/01_raw/datasets/val
       --output-dir data/08_reporting/val/mispredictions
       --max-samples ${visualize.max_samples}
@@ -166,7 +437,7 @@ stages:
       - src/data.py
       - src/types.py
       - data/07_model_output/val
-      - data/02_intermediate/val
+      - data/03_primary/val
       - data/01_raw/datasets/val
     params:
       - visualize

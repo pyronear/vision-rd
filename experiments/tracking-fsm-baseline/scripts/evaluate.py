@@ -43,6 +43,12 @@ def main() -> None:
         required=True,
         help="Output directory for metrics and plots.",
     )
+    parser.add_argument(
+        "--filter-prefix",
+        type=str,
+        default=None,
+        help="Only include sequences whose ID starts with this prefix.",
+    )
     args = parser.parse_args()
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -50,6 +56,10 @@ def main() -> None:
     plots_dir.mkdir(parents=True, exist_ok=True)
 
     results = load_tracking_results(args.track_dir / "tracking_results.json")
+    if args.filter_prefix:
+        results = [
+            r for r in results if r["sequence_id"].startswith(args.filter_prefix)
+        ]
     logger.info("Loaded %d sequence results.", len(results))
 
     # Compute metrics

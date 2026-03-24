@@ -1,0 +1,32 @@
+{
+  "yolo_only": {
+    "num_sequences": 2467,
+    "num_positive_gt": 1034,
+    "num_negative_gt": 1433,
+    "tp": 1020,
+    "fp": 445,
+    "fn": 14,
+    "tn": 988,
+    "precision": 0.6962,
+    "recall": 0.9865,
+    "f1": 0.8163,
+    "fpr": 0.3105,
+    "mean_ttd_seconds": 0.0,
+    "median_ttd_seconds": 0.0
+  },
+  "tracking": {
+    "num_sequences": 2467,
+    "num_positive_gt": 1034,
+    "num_negative_gt": 1433,
+    "tp": 995,
+    "fp": 145,
+    "fn": 39,
+    "tn": 1288,
+    "precision": 0.8728,
+    "recall": 0.9623,
+    "f1": 0.9154,
+    "fpr": 0.1012,
+    "mean_ttd_seconds": 125.7,
+    "median_ttd_seconds": 40.0
+  }
+}

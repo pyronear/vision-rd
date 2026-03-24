@@ -23,7 +23,7 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from src.data import get_sorted_frames, parse_timestamp
+from src.data import get_sorted_frames
 from src.detector import load_inference_results
 from src.evaluator import load_tracking_results
 from src.visualization import load_label_boxes, render_sequence_strip
@@ -61,32 +61,34 @@ def render_sequences(
             logger.warning("No images found for %s, skipping.", seq_id)
             continue
 
-        infer_by_frame_id = {f.frame_id: f for f in infer_frames}
-        frames_data = []
+        # Map frame_id -> image path (for padded frames, reuse last image)
+        image_by_frame_id = {p.stem: p for p in image_paths}
 
-        for idx, img_path in enumerate(image_paths):
-            frame_id = img_path.stem
-            timestamp = parse_timestamp(img_path.name)
-            timestamp_str = timestamp.strftime("%H:%M:%S")
+        frames_data = []
+        last_img_path = image_paths[-1] if image_paths else None
+
+        for idx, infer_frame in enumerate(infer_frames):
+            frame_id = infer_frame.frame_id
+            img_path = image_by_frame_id.get(frame_id, last_img_path)
+            if img_path is None:
+                continue
+
+            timestamp_str = infer_frame.timestamp.strftime("%H:%M:%S")
 
             label_path = img_path.parent.parent / "labels" / (frame_id + ".txt")
             boxes, is_human = load_label_boxes(label_path)
             gt_boxes = boxes if is_human else []
             prior_boxes = boxes if not is_human else []
 
-            pred_detections = []
-            if frame_id in infer_by_frame_id:
-                pred_detections = infer_by_frame_id[frame_id].detections
-
             frames_data.append(
                 {
                     "image_path": img_path,
                     "gt_boxes": gt_boxes,
                     "prior_boxes": prior_boxes,
-                    "pred_detections": pred_detections,
+                    "pred_detections": infer_frame.detections,
                     "frame_index": idx,
                     "timestamp_str": timestamp_str,
-                    "num_preds": len(pred_detections),
+                    "num_preds": len(infer_frame.detections),
                 }
             )
 

@@ -73,6 +73,8 @@ class Track:
     consecutive_misses: int = 0
     confirmed: bool = False
     confirmed_at_frame: int | None = None
+    mean_confidence: float | None = None
+    area_change_ratio: float | None = None
 
 
 @dataclass

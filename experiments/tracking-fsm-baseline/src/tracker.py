@@ -3,9 +3,45 @@
 Matches detections across consecutive frames using Intersection-over-Union,
 then applies a finite-state-machine rule: a track is *confirmed* (alarm raised)
 only after it persists for ``min_consecutive`` frames in a row.
+
+Optional post-confirmation filters can reject confirmed tracks based on:
+- Mean detection confidence across hits.
+- Area change ratio (last / first detection area) to require growth.
 """
 
+import statistics
+
 from src.types import Detection, FrameResult, Track
+
+
+def pad_sequence(frames: list[FrameResult], min_length: int) -> list[FrameResult]:
+    """Pad a short sequence symmetrically by repeating boundary frames.
+
+    If *frames* already has at least *min_length* entries (or is empty),
+    it is returned unchanged.  Otherwise the first frame is prepended and
+    the last frame is appended in alternation until the list reaches
+    *min_length*.
+    """
+    if not frames or len(frames) >= min_length:
+        return frames
+    first = FrameResult(
+        frame_id=frames[0].frame_id,
+        timestamp=frames[0].timestamp,
+        detections=frames[0].detections,
+    )
+    last = FrameResult(
+        frame_id=frames[-1].frame_id,
+        timestamp=frames[-1].timestamp,
+        detections=frames[-1].detections,
+    )
+    prepend = True
+    while len(frames) < min_length:
+        if prepend:
+            frames.insert(0, first)
+        else:
+            frames.append(last)
+        prepend = not prepend
+    return frames
 
 
 def compute_iou(det_a: Detection, det_b: Detection) -> float:
@@ -105,7 +141,14 @@ class SimpleTracker:
     """
 
     def __init__(
-        self, iou_threshold: float, min_consecutive: int, max_misses: int = 0
+        self,
+        iou_threshold: float,
+        min_consecutive: int,
+        max_misses: int = 0,
+        use_confidence_filter: bool = False,
+        min_mean_confidence: float = 0.3,
+        use_area_change_filter: bool = False,
+        min_area_change: float = 1.1,
     ) -> None:
         """Initialise the tracker.
 
@@ -117,10 +160,25 @@ class SimpleTracker:
             max_misses: Number of consecutive frames a track can go unmatched
                 before it is dropped.  ``0`` means a single miss kills the
                 track.
+            use_confidence_filter: When ``True``, confirmed tracks whose mean
+                detection confidence is below *min_mean_confidence* are
+                un-confirmed.
+            min_mean_confidence: Minimum mean confidence required to keep a
+                confirmed track.  Only used when *use_confidence_filter* is
+                ``True``.
+            use_area_change_filter: When ``True``, confirmed tracks whose area
+                change ratio is below *min_area_change* are un-confirmed.
+            min_area_change: Minimum ratio of last-detection area to
+                first-detection area.  Only used when *use_area_change_filter*
+                is ``True``.
         """
         self.iou_threshold = iou_threshold
         self.min_consecutive = min_consecutive
         self.max_misses = max_misses
+        self.use_confidence_filter = use_confidence_filter
+        self.min_mean_confidence = min_mean_confidence
+        self.use_area_change_filter = use_area_change_filter
+        self.min_area_change = min_area_change
 
     def process_sequence(
         self, frames: list[FrameResult]
@@ -212,5 +270,45 @@ class SimpleTracker:
                 t for t in active_tracks if t.consecutive_misses <= self.max_misses
             ]
 
+        # -- Compute features on all tracks (for analysis) --
+        for track in all_tracks:
+            if track.hits:
+                track.mean_confidence = statistics.mean(
+                    det.confidence for _, det in track.hits
+                )
+                first_area = track.hits[0][1].w * track.hits[0][1].h
+                last_area = track.hits[-1][1].w * track.hits[-1][1].h
+                track.area_change_ratio = (
+                    last_area / first_area if first_area > 0 else 0.0
+                )
+
+        # -- Post-confirmation filters --
+        for track in all_tracks:
+            if not track.confirmed:
+                continue
+            if (
+                self.use_confidence_filter
+                and track.mean_confidence is not None
+                and track.mean_confidence < self.min_mean_confidence
+            ):
+                track.confirmed = False
+                track.confirmed_at_frame = None
+                continue
+            if (
+                self.use_area_change_filter
+                and track.area_change_ratio is not None
+                and track.area_change_ratio < self.min_area_change
+            ):
+                track.confirmed = False
+                track.confirmed_at_frame = None
+
+        # Recompute alarm after post-filters
         is_alarm = any(t.confirmed for t in all_tracks)
+        confirmed_frame_idx = None
+        if is_alarm:
+            confirmed_frame_idx = min(
+                t.confirmed_at_frame
+                for t in all_tracks
+                if t.confirmed and t.confirmed_at_frame is not None
+            )
         return is_alarm, all_tracks, confirmed_frame_idx
