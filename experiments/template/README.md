@@ -1,22 +1,22 @@
-# Project Name
+# 🧪 Project Name
 
-## Objective
+## 🎯 Objective
 
 _What problem does this project address?_
 
-## Approach
+## 🔬 Approach
 
 _Method and architecture choices._
 
-## Data
+## 📊 Data
 
 _What data is used and how to obtain it._
 
-## Results
+## 📈 Results
 
 _Key metrics and comparison to baselines._
 
-## How to Reproduce
+## 🔄 How to Reproduce
 
 ```bash
 make install

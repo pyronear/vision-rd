@@ -1,10 +1,10 @@
-# Literature Survey
+# 📚 Literature Survey
 
 Research papers on temporal ML models for wildfire smoke detection and related topics.
 
 See the [root README](../README.md) for overall project context.
 
-## Getting Started
+## 🏁 Getting Started
 
 ```bash
 cd literature_survey
@@ -12,12 +12,12 @@ make install        # installs DVC and dependencies from uv.lock
 make pull           # downloads PDFs and notes from S3
 ```
 
-### Prerequisites
+### ⚙️ Prerequisites
 
 - [uv](https://docs.astral.sh/uv/) for Python dependency management
 - AWS credentials configured for access to the S3 bucket (`s3://pyro-vision-rd/dvc/literature_survey/`)
 
-### Adding a new paper
+### ➕ Adding a new paper
 
 1. Drop the PDF into `pdfs/` using the naming convention `Year-Short-Title-Author.pdf`
 2. Add a row to `papers.csv`
@@ -32,7 +32,7 @@ git add pdfs.dvc notes/ papers.csv SUMMARY.md README.md
 git commit -m "Add paper: <title>"
 ```
 
-### Available commands
+### 🛠️ Available commands
 
 ```
 make install        Install dependencies from uv.lock
@@ -41,7 +41,7 @@ make push           Push PDF data and notes to S3 via DVC
 make add            Track changes to pdfs/ and notes/ with DVC
 ```
 
-## Structure
+## 📂 Structure
 
 ```
 literature_survey/
@@ -55,7 +55,7 @@ literature_survey/
 └── uv.lock          # Lockfile
 ```
 
-## Papers (28)
+## 📄 Papers (28)
 
 | Year | Paper | Category | Architecture / Focus | PDF | Notes |
 |------|-------|----------|---------------------|-----|-------|
@@ -88,6 +88,6 @@ literature_survey/
 | 2025 | ViT on the Edge Survey | Survey | Pruning, quantization, knowledge distillation | [pdf](pdfs/2025-Vision-Transformers-Edge-Compression-Acceleration-Survey.pdf) | [notes](notes/2025-vit-edge-survey.md) |
 | 2026 | ViT + 3D-CNN (Lilhore et al.) | Temporal | ViT + 3D-CNN + Transformer encoder | [pdf](pdfs/2026-Real-Time-Fire-Smoke-ViT-Spatiotemporal-Learning.pdf) | [notes](notes/2026-vit-3dcnn-spatiotemporal.md) |
 
-## Related Repos
+## 🔗 Related Repos
 
 - [time-wildfire](https://github.com/rensortino/time-wildfire) -- Temporal smoke detection with EfficientNet, 3D ResNet, VideoMAE, ViViT, CNN+Transformer backbones + SAM3 tracking
