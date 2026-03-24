@@ -12,5 +12,5 @@ pull: ## Pull PDF data from S3 via DVC
 push: ## Push PDF data to S3 via DVC
 	uv run dvc push
 
-add: ## Track changes to pdfs/ and notes/ with DVC
-	uv run dvc add pdfs/ notes/
+add: ## Track changes to pdfs/ with DVC
+	uv run dvc add pdfs/
