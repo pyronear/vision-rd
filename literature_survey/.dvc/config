@@ -2,4 +2,4 @@
     remote = s3remote
     analytics = false
 ['remote "s3remote"']
-    url = s3://pyro-survey-research/dvc/
+    url = s3://pyro-vision-rd/dvc/literature_survey/

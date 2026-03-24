@@ -1746,7 +1746,7 @@ wheels = [
 ]
 
 [[package]]
-name = "pyronear-papers"
+name = "pyronear-literature-survey"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
