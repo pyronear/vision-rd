@@ -9,8 +9,8 @@ install: ## Install dependencies and set up notebook output stripping
 
 lint: ## Run ruff linter on code and notebooks
 	uv run ruff check .
-	uv run nbqa ruff check notebooks/
+	@find notebooks/ -name '*.ipynb' 2>/dev/null | grep -q . && uv run nbqa ruff check notebooks/ || true
 
 format: ## Format code and notebooks with ruff
 	uv run ruff format .
-	uv run nbqa ruff format notebooks/
+	@find notebooks/ -name '*.ipynb' 2>/dev/null | grep -q . && uv run nbqa ruff format notebooks/ || true
