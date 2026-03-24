@@ -12,6 +12,22 @@ def load_tracking_results(results_path: Path) -> list[dict]:
     return json.loads(results_path.read_text())
 
 
+def _extract_ttd_seconds(results: list[dict]) -> list[float]:
+    """Extract time-to-detection in seconds for true positive sequences."""
+    ttd_seconds = []
+    for r in results:
+        if (
+            r["is_positive_gt"]
+            and r["is_positive_pred"]
+            and r["confirmed_timestamp"]
+            and r["first_timestamp"]
+        ):
+            t_first = datetime.fromisoformat(r["first_timestamp"])
+            t_confirmed = datetime.fromisoformat(r["confirmed_timestamp"])
+            ttd_seconds.append((t_confirmed - t_first).total_seconds())
+    return ttd_seconds
+
+
 def compute_metrics(results: list[dict]) -> dict:
     """Compute sequence-level classification metrics."""
     tp = sum(1 for r in results if r["is_positive_gt"] and r["is_positive_pred"])
@@ -33,19 +49,7 @@ def compute_metrics(results: list[dict]) -> dict:
     n_negative_gt = fp + tn
     fpr = fp / n_negative_gt if n_negative_gt > 0 else 0.0
 
-    # Time to detection (seconds from first frame to confirmation)
-    ttd_seconds = []
-    for r in results:
-        if (
-            r["is_positive_gt"]
-            and r["is_positive_pred"]
-            and r["confirmed_timestamp"]
-            and r["first_timestamp"]
-        ):
-            t_first = datetime.fromisoformat(r["first_timestamp"])
-            t_confirmed = datetime.fromisoformat(r["confirmed_timestamp"])
-            ttd_seconds.append((t_confirmed - t_first).total_seconds())
-
+    ttd_seconds = _extract_ttd_seconds(results)
     mean_ttd = sum(ttd_seconds) / len(ttd_seconds) if ttd_seconds else None
     median_ttd = statistics.median(ttd_seconds) if ttd_seconds else None
 
@@ -140,17 +144,7 @@ def plot_comparison(
 def plot_ttd_histogram(results: list[dict], output_path: Path) -> None:
     """Histogram of time-to-detection for correctly detected WF sequences."""
     sns.set_theme(style="whitegrid")
-    ttd_seconds = []
-    for r in results:
-        if (
-            r["is_positive_gt"]
-            and r["is_positive_pred"]
-            and r["confirmed_timestamp"]
-            and r["first_timestamp"]
-        ):
-            t_first = datetime.fromisoformat(r["first_timestamp"])
-            t_confirmed = datetime.fromisoformat(r["confirmed_timestamp"])
-            ttd_seconds.append((t_confirmed - t_first).total_seconds())
+    ttd_seconds = _extract_ttd_seconds(results)
 
     if not ttd_seconds:
         return
