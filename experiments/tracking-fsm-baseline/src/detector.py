@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from pathlib import Path
 
 from ultralytics import YOLO
@@ -106,7 +107,7 @@ def load_inference_results(input_path: Path) -> list[FrameResult]:
         results.append(
             FrameResult(
                 frame_id=frame_data["frame_id"],
-                timestamp=parse_timestamp(frame_data["frame_id"]),
+                timestamp=datetime.fromisoformat(frame_data["timestamp"]),
                 detections=detections,
             )
         )
