@@ -11,7 +11,9 @@ stages:
       --image-size ${infer.image_size}
     deps:
       - scripts/infer.py
-      - src
+      - src/data.py
+      - src/detector.py
+      - src/types.py
       - data/01_raw/datasets/train
       - data/01_raw/models/${prepare.model_filename}
     params:
@@ -32,7 +34,9 @@ stages:
       --image-size ${infer.image_size}
     deps:
       - scripts/infer.py
-      - src
+      - src/data.py
+      - src/detector.py
+      - src/types.py
       - data/01_raw/datasets/val
       - data/01_raw/models/${prepare.model_filename}
     params:
@@ -53,7 +57,10 @@ stages:
       --min-consecutive ${track.min_consecutive}
     deps:
       - scripts/track.py
-      - src
+      - src/data.py
+      - src/detector.py
+      - src/tracker.py
+      - src/types.py
       - data/02_intermediate/train
       - data/01_raw/datasets/train
     params:
@@ -73,7 +80,10 @@ stages:
       --min-consecutive ${track.min_consecutive}
     deps:
       - scripts/track.py
-      - src
+      - src/data.py
+      - src/detector.py
+      - src/tracker.py
+      - src/types.py
       - data/02_intermediate/val
       - data/01_raw/datasets/val
     params:
@@ -89,7 +99,7 @@ stages:
       --output-dir data/08_reporting/train
     deps:
       - scripts/evaluate.py
-      - src
+      - src/evaluator.py
       - data/07_model_output/train
     metrics:
       - data/08_reporting/train/metrics.json:
@@ -105,7 +115,7 @@ stages:
       --output-dir data/08_reporting/val
     deps:
       - scripts/evaluate.py
-      - src
+      - src/evaluator.py
       - data/07_model_output/val
     metrics:
       - data/08_reporting/val/metrics.json:
