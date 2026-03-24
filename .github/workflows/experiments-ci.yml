@@ -44,3 +44,9 @@ jobs:
       - name: Ruff format check
         working-directory: ${{ matrix.experiment }}
         run: uv run ruff format --check .
+      - name: Notebook lint
+        working-directory: ${{ matrix.experiment }}
+        run: test -d notebooks && uv run nbqa ruff check notebooks/ || true
+      - name: Notebook format check
+        working-directory: ${{ matrix.experiment }}
+        run: test -d notebooks && uv run nbqa ruff format --check notebooks/ || true

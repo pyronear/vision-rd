@@ -3,11 +3,14 @@
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
-install: ## Install dependencies from uv.lock
+install: ## Install dependencies and set up notebook output stripping
 	uv sync
+	uv run nbstripout --install
 
-lint: ## Run ruff linter
+lint: ## Run ruff linter on code and notebooks
 	uv run ruff check .
+	uv run nbqa ruff check notebooks/
 
-format: ## Format code with ruff
+format: ## Format code and notebooks with ruff
 	uv run ruff format .
+	uv run nbqa ruff format notebooks/
