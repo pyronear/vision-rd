@@ -71,13 +71,13 @@ uv run dvc metrics show
 # Sweep on train set (fast — reuses cached inference)
 uv run python scripts/sweep.py \
     --infer-dir data/02_intermediate/train \
-    --data-dir data/01_raw/train \
+    --data-dir data/01_raw/datasets/train \
     --output-dir data/08_reporting/sweep
 
 # Sweep on val set
 uv run python scripts/sweep.py \
     --infer-dir data/02_intermediate/val \
-    --data-dir data/01_raw/val \
+    --data-dir data/01_raw/datasets/val \
     --output-dir data/08_reporting/sweep_val
 ```
 

@@ -3,8 +3,8 @@ stages:
     desc: Run YOLO inference on training set images to produce raw smoke detections
     cmd: >-
       uv run python scripts/infer.py
-      --data-dir data/01_raw/train
-      --model-path data/01_raw/${prepare.model_filename}
+      --data-dir data/01_raw/datasets/train
+      --model-path data/01_raw/models/${prepare.model_filename}
       --output-dir data/02_intermediate/train
       --confidence-threshold ${infer.confidence_threshold}
       --iou-nms ${infer.iou_nms}
@@ -12,7 +12,7 @@ stages:
     deps:
       - scripts/infer.py
       - src
-      - data/01_raw/train
+      - data/01_raw/datasets/train
     params:
       - prepare.model_filename
       - infer
@@ -23,8 +23,8 @@ stages:
     desc: Run YOLO inference on validation set images to produce raw smoke detections
     cmd: >-
       uv run python scripts/infer.py
-      --data-dir data/01_raw/val
-      --model-path data/01_raw/${prepare.model_filename}
+      --data-dir data/01_raw/datasets/val
+      --model-path data/01_raw/models/${prepare.model_filename}
       --output-dir data/02_intermediate/val
       --confidence-threshold ${infer.confidence_threshold}
       --iou-nms ${infer.iou_nms}
@@ -32,7 +32,7 @@ stages:
     deps:
       - scripts/infer.py
       - src
-      - data/01_raw/val
+      - data/01_raw/datasets/val
     params:
       - prepare.model_filename
       - infer
@@ -44,7 +44,7 @@ stages:
     cmd: >-
       uv run python scripts/track.py
       --infer-dir data/02_intermediate/train
-      --data-dir data/01_raw/train
+      --data-dir data/01_raw/datasets/train
       --output-dir data/07_model_output/train
       --confidence-threshold ${track.confidence_threshold}
       --iou-threshold ${track.iou_threshold}
@@ -53,7 +53,7 @@ stages:
       - scripts/track.py
       - src
       - data/02_intermediate/train
-      - data/01_raw/train
+      - data/01_raw/datasets/train
     params:
       - track
     outs:
@@ -64,7 +64,7 @@ stages:
     cmd: >-
       uv run python scripts/track.py
       --infer-dir data/02_intermediate/val
-      --data-dir data/01_raw/val
+      --data-dir data/01_raw/datasets/val
       --output-dir data/07_model_output/val
       --confidence-threshold ${track.confidence_threshold}
       --iou-threshold ${track.iou_threshold}
@@ -73,7 +73,7 @@ stages:
       - scripts/track.py
       - src
       - data/02_intermediate/val
-      - data/01_raw/val
+      - data/01_raw/datasets/val
     params:
       - track
     outs:
