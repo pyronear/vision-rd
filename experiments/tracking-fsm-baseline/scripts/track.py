@@ -16,8 +16,10 @@ Usage:
 """
 
 import argparse
+import dataclasses
 import json
 import logging
+from datetime import datetime
 from pathlib import Path
 
 from tqdm import tqdm
@@ -113,27 +115,11 @@ def main() -> None:
             first_timestamp=first_ts,
         )
 
-        results.append(
-            {
-                "sequence_id": seq_result.sequence_id,
-                "is_positive_gt": seq_result.is_positive_gt,
-                "is_positive_pred": seq_result.is_positive_pred,
-                "num_frames": seq_result.num_frames,
-                "num_detections_total": seq_result.num_detections_total,
-                "num_tracks": seq_result.num_tracks,
-                "confirmed_frame_index": seq_result.confirmed_frame_index,
-                "confirmed_timestamp": (
-                    seq_result.confirmed_timestamp.isoformat()
-                    if seq_result.confirmed_timestamp
-                    else None
-                ),
-                "first_timestamp": (
-                    seq_result.first_timestamp.isoformat()
-                    if seq_result.first_timestamp
-                    else None
-                ),
-            }
-        )
+        row = dataclasses.asdict(seq_result)
+        for key in ("confirmed_timestamp", "first_timestamp"):
+            val = row[key]
+            row[key] = val.isoformat() if isinstance(val, datetime) else val
+        results.append(row)
 
     output_path = args.output_dir / "tracking_results.json"
     output_path.write_text(json.dumps(results, indent=2))
