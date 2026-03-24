@@ -24,4 +24,3 @@ vision-rd/
 - [Literature Survey](literature_survey/README.md) — 28 papers on temporal models, video foundations, smoke detection, and related topics
 - [Experiments README](experiments/README.md) — How to start a new experiment
 - [R&D Guidelines](experiments/GUIDELINES.md) — Standards for reproducibility, tooling, and benchmarking
-- [time-wildfire](https://github.com/rensortino/time-wildfire) — Temporal smoke detection implementations (EfficientNet, 3D ResNet, VideoMAE, ViViT, CNN+Transformer)
