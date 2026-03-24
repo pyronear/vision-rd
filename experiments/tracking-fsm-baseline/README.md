@@ -67,6 +67,8 @@ uv run dvc metrics show
 
 ### Parameter sweep
 
+Sweeps are run manually (not part of `dvc repro`). Result CSVs are checked into the repo as-is.
+
 ```bash
 # Sweep on train set (fast — reuses cached inference)
 uv run python scripts/sweep.py \
