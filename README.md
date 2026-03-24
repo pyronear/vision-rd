@@ -1,12 +1,12 @@
-# Pyronear Vision R&D
+# 🔥 Pyronear Vision R&D
 
 Research and development for ML-based wildfire smoke detection at [Pyronear](https://pyronear.org/).
 
-## System Overview
+## 🏗️ System Overview
 
 Pyronear deploys fixed 360° cameras on antenna towers that capture images every 30 seconds. On each Raspberry Pi, a YOLOv8 (small) model detects smoke candidates. Full frames and bounding box info are sent to a server where a second-stage temporal model verifies detections — reducing false positives while maintaining high recall.
 
-## Repository Structure
+## 📂 Repository Structure
 
 ```
 vision-rd/
@@ -19,8 +19,8 @@ vision-rd/
 └── LICENSE              # Apache 2.0
 ```
 
-## Quick Links
+## 🔗 Quick Links
 
-- [Literature Survey](literature_survey/README.md) — 28 papers on temporal models, video foundations, smoke detection, and related topics
-- [Experiments README](experiments/README.md) — How to start a new experiment
-- [R&D Guidelines](experiments/GUIDELINES.md) — Standards for reproducibility, tooling, and benchmarking
+- 📚 [Literature Survey](literature_survey/README.md) — 28 papers on temporal models, video foundations, smoke detection, and related topics
+- 🧪 [Experiments README](experiments/README.md) — How to start a new experiment
+- 📏 [R&D Guidelines](experiments/GUIDELINES.md) — Standards for reproducibility, tooling, and benchmarking

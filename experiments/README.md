@@ -1,8 +1,8 @@
-# Experiments
+# 🧪 Experiments
 
 This directory contains R&D experiments for Pyronear wildfire smoke detection. Each experiment is a self-contained Python project with its own dependencies, data, and results.
 
-## Starting a New Experiment
+## 🚀 Starting a New Experiment
 
 ```bash
 cp -r template/ my-experiment-name/
@@ -16,7 +16,7 @@ Then update `pyproject.toml` with the experiment name, description, and dependen
 make install
 ```
 
-## Experiment Template Structure
+## 📁 Experiment Template Structure
 
 ```
 experiments/<experiment-name>/
@@ -42,7 +42,7 @@ experiments/<experiment-name>/
     └── 08_reporting/      # Plots, metrics, reports
 ```
 
-## Kedro Data Layers
+## 🗂️ Kedro Data Layers
 
 The `data/` directory follows [Kedro's data engineering convention](https://docs.kedro.org/en/stable/faq/faq.html#what-is-data-engineering-convention) with numbered layers that reflect the data processing pipeline:
 
@@ -59,6 +59,6 @@ The `data/` directory follows [Kedro's data engineering convention](https://docs
 
 Data flows from lower to higher numbers. Raw data is never modified — all transformations produce new files in subsequent layers.
 
-## Guidelines
+## 📏 Guidelines
 
 See [GUIDELINES.md](GUIDELINES.md) for standards on tooling, reproducibility, and benchmarking.
