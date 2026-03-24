@@ -27,6 +27,15 @@ Do not share dependencies between experiments. This ensures each is reproducible
 - Run `make lint` and `make format` before committing
 - Recommended ruff rules: `["E", "F", "I", "W", "UP", "B", "SIM"]`
 
+## Notebooks
+
+Notebooks are for **exploration and visualization only**. Move any reusable logic into `src/` modules and import it from the notebook.
+
+- **No committed outputs**: Always clear cell outputs before committing. The `nbstripout` git filter enforces this automatically — `make install` sets it up.
+- **Linting**: `make lint` and `make format` cover both `.py` files and notebooks (via `nbqa ruff`).
+- **Keep notebooks focused**: One analysis per notebook. Split large explorations into separate files.
+- **Naming**: Use descriptive lowercase-kebab-case with an optional numeric prefix (e.g., `01-eda-smoke-crops.ipynb`, `02-model-comparison.ipynb`).
+
 ## Data Versioning
 
 - Use **DVC** for all data and model artifacts

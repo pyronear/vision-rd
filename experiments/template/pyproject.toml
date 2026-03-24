@@ -9,6 +9,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "nbqa>=1.9",
+    "nbstripout>=0.8",
     "ruff>=0.9",
 ]
 
