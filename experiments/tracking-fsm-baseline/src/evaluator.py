@@ -91,6 +91,11 @@ def compute_metrics(results: list[dict]) -> dict:
     mean_ttd = sum(ttd_seconds) / len(ttd_seconds) if ttd_seconds else None
     median_ttd = statistics.median(ttd_seconds) if ttd_seconds else None
 
+    total = tp + fp + fn + tn
+
+    def pct(v: int) -> float:
+        return round(v / total * 100, 2) if total > 0 else 0.0
+
     return {
         "num_sequences": len(results),
         "num_positive_gt": n_positive_gt,
@@ -99,6 +104,10 @@ def compute_metrics(results: list[dict]) -> dict:
         "fp": fp,
         "fn": fn,
         "tn": tn,
+        "tp_pct": pct(tp),
+        "fp_pct": pct(fp),
+        "fn_pct": pct(fn),
+        "tn_pct": pct(tn),
         "precision": round(precision, 4),
         "recall": round(recall, 4),
         "f1": round(f1, 4),
@@ -156,6 +165,36 @@ def plot_confusion_matrix(metrics: dict, output_path: Path) -> None:
         ax=ax,
     )
     ax.set_title("Confusion Matrix")
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=100)
+    plt.close(fig)
+
+
+def plot_confusion_matrix_percentages(metrics: dict, output_path: Path) -> None:
+    """Plot a confusion matrix heatmap with percentages and save it as PNG.
+
+    Args:
+        metrics: Metrics dict containing ``tp``, ``fp``, ``fn``, ``tn``.
+        output_path: Destination file path for the PNG image.
+    """
+    sns.set_theme(style="whitegrid")
+    cm = [[metrics["tp"], metrics["fn"]], [metrics["fp"], metrics["tn"]]]
+    total = metrics["tp"] + metrics["fp"] + metrics["fn"] + metrics["tn"]
+    cm_pct = [[v / total * 100 if total > 0 else 0 for v in row] for row in cm]
+    labels = [
+        [f"{v / total * 100:.1f}%" if total > 0 else "0.0%" for v in row] for row in cm
+    ]
+    fig, ax = plt.subplots(figsize=(6, 5))
+    sns.heatmap(
+        cm_pct,
+        annot=labels,
+        fmt="",
+        cmap="Blues",
+        xticklabels=["Predicted +", "Predicted -"],
+        yticklabels=["Actual +", "Actual -"],
+        ax=ax,
+    )
+    ax.set_title("Confusion Matrix (%)")
     fig.tight_layout()
     fig.savefig(output_path, dpi=100)
     plt.close(fig)

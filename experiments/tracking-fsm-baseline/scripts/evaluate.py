@@ -22,6 +22,7 @@ from src.evaluator import (
     load_tracking_results,
     plot_comparison,
     plot_confusion_matrix,
+    plot_confusion_matrix_percentages,
     plot_ttd_histogram,
 )
 
@@ -101,6 +102,9 @@ def main() -> None:
 
     # Generate plots
     plot_confusion_matrix(tracking_metrics, plots_dir / "confusion_matrix.png")
+    plot_confusion_matrix_percentages(
+        tracking_metrics, plots_dir / "confusion_matrix_percentages.png"
+    )
     plot_comparison(yolo_metrics, tracking_metrics, plots_dir / "comparison.png")
     plot_ttd_histogram(results, plots_dir / "ttd_histogram.png")
     logger.info("Saved plots to %s", plots_dir)
