@@ -65,8 +65,10 @@ def match_detections(
 ) -> list[tuple[int, int]]:
     """Greedy matching of detections between consecutive frames.
 
-    Computes all pairwise IoUs, sorts by descending IoU, and greedily
-    assigns one-to-one matches (each detection used at most once).
+    Computes all pairwise IoUs (O(n*m)), sorts by descending IoU, and greedily
+    assigns one-to-one matches (each detection used at most once).  This is
+    sufficient for the expected low number of detections per frame; Hungarian
+    matching would give optimal assignments for denser scenes.
 
     Args:
         prev_dets: Detections from the previous frame.
