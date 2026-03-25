@@ -19,6 +19,8 @@ _Key metrics and comparison to baselines._
 ## 🔄 How to Reproduce
 
 ```bash
-make install
-# ...
+make install    # Install dependencies
+make lint       # Run linter
+make format     # Format code
+make test       # Run tests
 ```
