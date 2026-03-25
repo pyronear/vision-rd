@@ -6,6 +6,9 @@ Usage:
     uv run --group explore python scripts/launch_fiftyone.py
 """
 
+import signal
+import sys
+
 import fiftyone as fo
 
 
@@ -27,6 +30,15 @@ def main() -> None:
     print("Switch datasets in the FiftyOne UI via the dataset selector dropdown.")
 
     session = fo.launch_app(dataset, port=5151)
+
+    def _shutdown(signum, _frame):
+        print("\nShutting down FiftyOne...")
+        session.close()
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, _shutdown)
+    signal.signal(signal.SIGTERM, _shutdown)
+
     session.wait()
 
 
