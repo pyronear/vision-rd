@@ -19,8 +19,8 @@ from pathlib import Path
 
 from tqdm import tqdm
 
+from src.data import pad_sequence
 from src.detector import load_inference_results, save_inference_results
-from src.tracker import pad_sequence
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)

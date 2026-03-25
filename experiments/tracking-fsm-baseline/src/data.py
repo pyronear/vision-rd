@@ -9,6 +9,36 @@ import re
 from datetime import datetime
 from pathlib import Path
 
+from src.types import FrameResult
+
+
+def pad_sequence(frames: list[FrameResult], min_length: int) -> list[FrameResult]:
+    """Pad a short sequence symmetrically by repeating boundary frames.
+
+    If *frames* already has at least *min_length* entries (or is empty),
+    it is returned unchanged.  Otherwise the first frame is prepended and
+    the last frame is appended in alternation until the list reaches
+    *min_length*.
+
+    Returns a new list; the input list is not modified.
+    """
+    if not frames or len(frames) >= min_length:
+        return list(frames)
+    result = list(frames)
+    prepend = True
+    while len(result) < min_length:
+        src = frames[0] if prepend else frames[-1]
+        result.insert(
+            0 if prepend else len(result),
+            FrameResult(
+                frame_id=src.frame_id,
+                timestamp=src.timestamp,
+                detections=list(src.detections),
+            ),
+        )
+        prepend = not prepend
+    return result
+
 
 def list_sequences(split_dir: Path) -> list[Path]:
     """List all sequence directories in a split, sorted by name."""

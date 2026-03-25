@@ -2,7 +2,8 @@ from datetime import datetime
 
 import pytest
 
-from src.tracker import SimpleTracker, compute_iou, match_detections, pad_sequence
+from src.data import pad_sequence
+from src.tracker import SimpleTracker, compute_iou, match_detections
 from src.types import Detection, FrameResult
 
 

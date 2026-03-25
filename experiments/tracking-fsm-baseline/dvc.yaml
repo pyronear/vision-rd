@@ -55,8 +55,8 @@ stages:
       --min-sequence-length ${pad.min_sequence_length}
     deps:
       - scripts/pad_sequences.py
+      - src/data.py
       - src/detector.py
-      - src/tracker.py
       - src/types.py
       - data/02_intermediate/train
     params:
@@ -73,8 +73,8 @@ stages:
       --min-sequence-length ${pad.min_sequence_length}
     deps:
       - scripts/pad_sequences.py
+      - src/data.py
       - src/detector.py
-      - src/tracker.py
       - src/types.py
       - data/02_intermediate/val
     params:
