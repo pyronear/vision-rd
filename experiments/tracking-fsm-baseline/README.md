@@ -1,10 +1,10 @@
-# Tracking FSM Baseline
+# 🔥 Tracking FSM Baseline
 
-## Objective
+## 🎯 Objective
 
 Reduce false positives from the production YOLO smoke detector by requiring temporal persistence: a detection must appear in multiple consecutive frames before raising an alarm. Inspired by the [FLAME paper](../../literature_survey/notes/2024-flame.md) (Gragnaniello 2024), which achieves +18% precision using a tracking-based motion filter.
 
-## Approach
+## 🧠 Approach
 
 1. Run production YOLO11s on every frame of each sequence
 2. Pad short sequences by symmetrically repeating boundary frames (min 10 frames)
@@ -24,7 +24,7 @@ Each rule has a boolean flag and a threshold. Disabled by default.
 - **Confidence filter** (`use_confidence_filter` + `min_mean_confidence`): Reject confirmed tracks with low average detection confidence. Targets FP reduction.
 - **Area change filter** (`use_area_change_filter` + `min_area_change`): Reject confirmed tracks where the detection area didn't grow (smoke expands, static FP doesn't). Targets FP reduction.
 
-## Data
+## 📊 Data
 
 Sequential dataset from `pyro-dataset`, truncated to max 20 frames per sequence:
 - Train: ~1,034 WF + ~1,433 FP sequences (Pyronear only; 2,865 total incl. external)
@@ -33,7 +33,7 @@ Sequential dataset from `pyro-dataset`, truncated to max 20 frames per sequence:
   - WF (positive): 5-column labels (`class cx cy w h`) — human annotations
   - FP (negative): 6-column labels (`class cx cy w h confidence`) — prior YOLO predictions on non-smoke scenes
 
-## Evaluation
+## 📏 Evaluation
 
 All metrics are computed **at the sequence level**, not per-frame, on both all sequences and Pyronear-only subsets.
 
@@ -55,7 +55,7 @@ The tracker processes all frames in a sequence and produces a single binary pred
 
 **YOLO-only baseline:** any YOLO detection in any frame counts as a positive prediction for that sequence. This gives an upper bound on recall and a lower bound on precision.
 
-## Results
+## 📈 Results
 
 Best parameters from sweep on train/pyronear (`conf=0.3, iou=0.1, min_consecutive=5, max_detection_area=0.05`):
 
@@ -75,25 +75,25 @@ Best parameters from sweep on train/pyronear (`conf=0.3, iou=0.1, min_consecutiv
 | YOLO-only | 0.696 | 0.987 | 0.816 | 0.311 | — |
 | Tracking | 0.873 | 0.962 | 0.915 | 0.101 | 126s |
 
-### Key improvements over YOLO-only (val/pyronear)
+### ✅ Key improvements over YOLO-only (val/pyronear)
 
 - **+11.8pp precision** (0.775 → 0.893)
 - **-13.0pp FPR** (0.218 → 0.088) — 60% reduction in false alarms
 - **-1.8pp recall** (0.982 → 0.964) — minimal cost
 - **Mean TTD: 56s** (median: 30s)
 
-## Pipeline
+## ⚙️ Pipeline
 
 ```
 infer (01_raw → 02_intermediate)
   → pad (02_intermediate → 03_primary)
     → track (03_primary → 07_model_output)
-      → evaluate / sweep / ablation / visualize (→ 08_reporting)
+      → evaluate / sweep / ablation (→ 08_reporting)
 ```
 
 Each evaluate, sweep, and ablation stage runs on both all sequences and Pyronear-only subsets.
 
-## How to Reproduce
+## 🚀 How to Reproduce
 
 ```bash
 cd experiments/tracking-fsm-baseline
@@ -119,7 +119,7 @@ Tests all 8 on/off combinations of the 3 rules with fixed base params from `para
 uv run dvc repro ablation_val_pyronear
 ```
 
-### Visualize results with FiftyOne
+### 🔍 Visualize results with FiftyOne
 
 Browse all predictions interactively — filter by TP/FP/FN/TN, inspect YOLO detections frame-by-frame, and group by sequence.
 
@@ -135,7 +135,7 @@ This builds FiftyOne datasets for both train and val splits, then launches the w
 
 Use the **tags sidebar** to filter by category (e.g. click `false_positive` to see only FP sequences), and the **confidence slider** on `yolo_detections` to interactively threshold. Switch between `tracking-fsm-val` and `tracking-fsm-train` datasets via the dropdown.
 
-### Tunable parameters
+### 🎛️ Tunable parameters
 
 | Parameter | Description | Default | Sweep range |
 |---|---|---|---|
