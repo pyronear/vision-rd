@@ -1,9 +1,10 @@
-"""Pad short inference sequences by repeating the last frame.
+"""Pad short inference sequences by symmetrically repeating boundary frames.
 
 Reads per-sequence inference JSONs, pads any sequence shorter than
-``--min-sequence-length`` by duplicating the last frame, and writes
-the (possibly padded) results to an output directory. Sequences that
-already meet the minimum length are copied unchanged.
+``--min-sequence-length`` by alternately prepending the first frame and
+appending the last frame, and writes the (possibly padded) results to an
+output directory. Sequences that already meet the minimum length are
+copied unchanged.
 
 Usage:
     uv run python scripts/pad_sequences.py \
