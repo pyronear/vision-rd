@@ -56,3 +56,22 @@ jobs:
           if find notebooks/ -name '*.ipynb' 2>/dev/null | grep -q .; then
             uv run nbqa ruff format --check notebooks/
           fi
+
+  test:
+    needs: discover
+    if: needs.discover.outputs.experiments != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        experiment: ${{ fromJson(needs.discover.outputs.experiments) }}
+    name: test (${{ matrix.experiment }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install
+        working-directory: ${{ matrix.experiment }}
+        run: uv sync
+      - name: Run tests
+        working-directory: ${{ matrix.experiment }}
+        run: uv run pytest tests/ -v
