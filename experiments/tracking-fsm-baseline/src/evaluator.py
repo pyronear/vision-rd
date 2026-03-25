@@ -14,6 +14,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
+from src.tracker import SimpleTracker
+from src.types import FrameResult
+
 
 def load_tracking_results(results_path: Path) -> list[dict]:
     """Load tracking results from a JSON file.
@@ -143,6 +146,63 @@ def compute_yolo_only_baseline(results: list[dict]) -> dict:
             }
         )
     return compute_metrics(baseline_results)
+
+
+def evaluate_tracker(
+    tracker: SimpleTracker,
+    all_data: list[tuple[bool, list[FrameResult]]],
+    conf_thresh: float,
+    max_det_area: float | None,
+) -> tuple[list[dict], dict]:
+    """Filter detections, run the tracker, and compute metrics.
+
+    Args:
+        tracker: Configured tracker instance.
+        all_data: List of ``(ground_truth, frames)`` pairs.
+        conf_thresh: Minimum detection confidence to keep.
+        max_det_area: Maximum normalized detection area, or ``None``.
+
+    Returns:
+        A tuple of ``(results, metrics)`` where *results* is the list of
+        per-sequence result dicts and *metrics* is the aggregated metrics dict.
+    """
+    results = []
+    for gt, frames in all_data:
+        filtered_frames = [
+            FrameResult(
+                frame_id=frame.frame_id,
+                timestamp=frame.timestamp,
+                detections=[
+                    d
+                    for d in frame.detections
+                    if d.confidence >= conf_thresh
+                    and (max_det_area is None or d.w * d.h <= max_det_area)
+                ],
+            )
+            for frame in frames
+        ]
+
+        is_alarm, _tracks, confirmed_idx = tracker.process_sequence(filtered_frames)
+        first_ts = filtered_frames[0].timestamp if filtered_frames else None
+        confirmed_ts = (
+            filtered_frames[confirmed_idx].timestamp
+            if confirmed_idx is not None
+            else None
+        )
+
+        results.append(
+            {
+                "is_positive_gt": gt,
+                "is_positive_pred": is_alarm,
+                "num_detections_total": sum(len(f.detections) for f in filtered_frames),
+                "confirmed_timestamp": (
+                    confirmed_ts.isoformat() if confirmed_ts else None
+                ),
+                "first_timestamp": first_ts.isoformat() if first_ts else None,
+            }
+        )
+
+    return results, compute_metrics(results)
 
 
 def plot_confusion_matrix(metrics: dict, output_path: Path) -> None:

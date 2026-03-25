@@ -22,7 +22,7 @@ from pathlib import Path
 
 from src.data import is_wf_sequence
 from src.detector import load_inference_results
-from src.evaluator import compute_metrics
+from src.evaluator import evaluate_tracker
 from src.tracker import SimpleTracker
 from src.types import FrameResult
 
@@ -55,43 +55,10 @@ def _run_combo(
         min_area_change=min_area_change,
     )
 
-    results = []
-    for gt, frames in all_data:
-        filtered_frames = [
-            FrameResult(
-                frame_id=frame.frame_id,
-                timestamp=frame.timestamp,
-                detections=[
-                    d
-                    for d in frame.detections
-                    if d.confidence >= conf_thresh
-                    and (max_detection_area is None or d.w * d.h <= max_detection_area)
-                ],
-            )
-            for frame in frames
-        ]
-
-        is_alarm, _tracks, confirmed_idx = tracker.process_sequence(filtered_frames)
-        first_ts = filtered_frames[0].timestamp if filtered_frames else None
-        confirmed_ts = (
-            filtered_frames[confirmed_idx].timestamp
-            if confirmed_idx is not None
-            else None
-        )
-
-        results.append(
-            {
-                "is_positive_gt": gt,
-                "is_positive_pred": is_alarm,
-                "num_detections_total": sum(len(f.detections) for f in filtered_frames),
-                "confirmed_timestamp": (
-                    confirmed_ts.isoformat() if confirmed_ts else None
-                ),
-                "first_timestamp": first_ts.isoformat() if first_ts else None,
-            }
-        )
-
-    return compute_metrics(results)
+    _results, metrics = evaluate_tracker(
+        tracker, all_data, conf_thresh, max_detection_area
+    )
+    return metrics
 
 
 def main() -> None:
