@@ -18,11 +18,10 @@ from pathlib import Path
 import fiftyone as fo
 from tqdm import tqdm
 
-from src.data import get_sorted_frames
+from src.data import get_sorted_frames, load_label_boxes
 from src.detector import load_inference_results
 from src.evaluator import load_tracking_results
 from src.types import Detection
-from src.visualization import load_label_boxes
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
