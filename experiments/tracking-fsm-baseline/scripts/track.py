@@ -27,7 +27,7 @@ from tqdm import tqdm
 from src.data import is_wf_sequence
 from src.detector import load_inference_results
 from src.tracker import SimpleTracker
-from src.types import SequenceResult
+from src.types import FrameResult, SequenceResult
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -134,13 +134,19 @@ def main() -> None:
 
         # Filter detections by confidence threshold and max area
         max_area = args.max_detection_area
-        for frame in frames:
-            frame.detections = [
-                d
-                for d in frame.detections
-                if d.confidence >= args.confidence_threshold
-                and (max_area is None or d.w * d.h <= max_area)
-            ]
+        frames = [
+            FrameResult(
+                frame_id=frame.frame_id,
+                timestamp=frame.timestamp,
+                detections=[
+                    d
+                    for d in frame.detections
+                    if d.confidence >= args.confidence_threshold
+                    and (max_area is None or d.w * d.h <= max_area)
+                ],
+            )
+            for frame in frames
+        ]
 
         is_alarm, tracks, confirmed_idx = tracker.process_sequence(frames)
         gt = is_wf_sequence(args.data_dir / seq_id)
