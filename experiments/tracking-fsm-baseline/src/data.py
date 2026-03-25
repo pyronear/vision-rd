@@ -9,7 +9,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-from src.types import FrameResult
+from src.types import Detection, FrameResult
 
 
 def pad_sequence(frames: list[FrameResult], min_length: int) -> list[FrameResult]:
@@ -101,3 +101,45 @@ def is_wf_sequence(sequence_dir: Path) -> bool:
             return False
     # No non-empty label files — treat as FP
     return False
+
+
+def load_label_boxes(label_path: Path) -> tuple[list[Detection], bool]:
+    """Load bounding boxes from a YOLO-format label file.
+
+    Returns a tuple of (detections, is_human_annotation).
+    WF labels have 5 columns (human annotations), FP labels have 6
+    columns (prior YOLO predictions with confidence).
+    """
+    if not label_path.is_file():
+        return [], True
+    content = label_path.read_text().strip()
+    if not content:
+        return [], True
+    boxes = []
+    is_human = True
+    for line in content.split("\n"):
+        parts = line.strip().split()
+        if len(parts) == 5:
+            boxes.append(
+                Detection(
+                    class_id=int(parts[0]),
+                    cx=float(parts[1]),
+                    cy=float(parts[2]),
+                    w=float(parts[3]),
+                    h=float(parts[4]),
+                    confidence=1.0,
+                )
+            )
+        elif len(parts) == 6:
+            is_human = False
+            boxes.append(
+                Detection(
+                    class_id=int(parts[0]),
+                    cx=float(parts[1]),
+                    cy=float(parts[2]),
+                    w=float(parts[3]),
+                    h=float(parts[4]),
+                    confidence=float(parts[5]),
+                )
+            )
+    return boxes, is_human

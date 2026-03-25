@@ -88,7 +88,7 @@ Best parameters from sweep on train/pyronear (`conf=0.3, iou=0.1, min_consecutiv
 infer (01_raw → 02_intermediate)
   → pad (02_intermediate → 03_primary)
     → track (03_primary → 07_model_output)
-      → evaluate / sweep / ablation / visualize (→ 08_reporting)
+      → evaluate / sweep / ablation (→ 08_reporting)
 ```
 
 Each evaluate, sweep, and ablation stage runs on both all sequences and Pyronear-only subsets.
