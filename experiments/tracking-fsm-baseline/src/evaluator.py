@@ -94,10 +94,8 @@ def compute_metrics(results: list[dict]) -> dict:
     mean_ttd = sum(ttd_seconds) / len(ttd_seconds) if ttd_seconds else None
     median_ttd = statistics.median(ttd_seconds) if ttd_seconds else None
 
-    total = tp + fp + fn + tn
-
-    def pct(v: int) -> float:
-        return round(v / total * 100, 2) if total > 0 else 0.0
+    def row_pct(v: int, row_total: int) -> float:
+        return round(v / row_total * 100, 2) if row_total > 0 else 0.0
 
     return {
         "num_sequences": len(results),
@@ -107,10 +105,10 @@ def compute_metrics(results: list[dict]) -> dict:
         "fp": fp,
         "fn": fn,
         "tn": tn,
-        "tp_pct": pct(tp),
-        "fp_pct": pct(fp),
-        "fn_pct": pct(fn),
-        "tn_pct": pct(tn),
+        "tp_pct": row_pct(tp, n_positive_gt),
+        "fp_pct": row_pct(fp, n_negative_gt),
+        "fn_pct": row_pct(fn, n_positive_gt),
+        "tn_pct": row_pct(tn, n_negative_gt),
         "precision": round(precision, 4),
         "recall": round(recall, 4),
         "f1": round(f1, 4),
@@ -239,10 +237,14 @@ def plot_confusion_matrix_percentages(metrics: dict, output_path: Path) -> None:
     """
     sns.set_theme(style="whitegrid")
     cm = [[metrics["tp"], metrics["fn"]], [metrics["fp"], metrics["tn"]]]
-    total = metrics["tp"] + metrics["fp"] + metrics["fn"] + metrics["tn"]
-    cm_pct = [[v / total * 100 if total > 0 else 0 for v in row] for row in cm]
+    row_totals = [sum(row) for row in cm]
+    cm_pct = [
+        [v / rt * 100 if rt > 0 else 0 for v in row]
+        for row, rt in zip(cm, row_totals, strict=True)
+    ]
     labels = [
-        [f"{v / total * 100:.1f}%" if total > 0 else "0.0%" for v in row] for row in cm
+        [f"{v / rt * 100:.1f}%" if rt > 0 else "0.0%" for v in row]
+        for row, rt in zip(cm, row_totals, strict=True)
     ]
     fig, ax = plt.subplots(figsize=(6, 5))
     sns.heatmap(
