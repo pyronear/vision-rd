@@ -1,4 +1,4 @@
-from src.evaluator import compute_metrics
+from src.evaluator import compute_metrics, compute_yolo_only_baseline
 
 
 def _result(gt: bool, pred: bool) -> dict:
@@ -102,3 +102,43 @@ class TestComputeMetrics:
         m = compute_metrics(results)
         # Median of [60, 120, 180, 240] = (120 + 180) / 2 = 150
         assert m["median_ttd_seconds"] == 150.0
+
+
+class TestComputeYoloOnlyBaseline:
+    def test_any_detection_triggers_alarm(self):
+        results = [
+            {
+                "is_positive_gt": True,
+                "is_positive_pred": False,
+                "num_detections_total": 5,
+                "confirmed_timestamp": None,
+                "first_timestamp": "2024-01-01T00:00:00",
+            },
+            {
+                "is_positive_gt": False,
+                "is_positive_pred": False,
+                "num_detections_total": 0,
+                "confirmed_timestamp": None,
+                "first_timestamp": "2024-01-01T00:00:00",
+            },
+        ]
+        m = compute_yolo_only_baseline(results)
+        # Sequence with detections → positive, sequence without → negative
+        assert m["tp"] == 1
+        assert m["tn"] == 1
+        assert m["fp"] == 0
+        assert m["fn"] == 0
+
+    def test_no_detections_all_negative(self):
+        results = [
+            {
+                "is_positive_gt": True,
+                "is_positive_pred": False,
+                "num_detections_total": 0,
+                "confirmed_timestamp": None,
+                "first_timestamp": "2024-01-01T00:00:00",
+            },
+        ]
+        m = compute_yolo_only_baseline(results)
+        assert m["fn"] == 1
+        assert m["tp"] == 0
