@@ -119,6 +119,22 @@ Tests all 8 on/off combinations of the 3 rules with fixed base params from `para
 uv run dvc repro ablation_val_pyronear
 ```
 
+### Visualize results with FiftyOne
+
+Browse all predictions interactively — filter by TP/FP/FN/TN, inspect YOLO detections frame-by-frame, and group by sequence.
+
+```bash
+make fiftyone
+```
+
+This builds FiftyOne datasets for both train and val splits, then launches the web UI at `http://localhost:5151`. Each frame is a sample with three detection overlay fields, color-coded:
+
+- **Green** — ground truth boxes (human annotations)
+- **Purple** — prior YOLO predictions (from label files)
+- **Red** — current model YOLO detections
+
+Use the **tags sidebar** to filter by category (e.g. click `false_positive` to see only FP sequences), and the **confidence slider** on `yolo_detections` to interactively threshold. Switch between `tracking-fsm-val` and `tracking-fsm-train` datasets via the dropdown.
+
 ### Tunable parameters
 
 | Parameter | Description | Default | Sweep range |
