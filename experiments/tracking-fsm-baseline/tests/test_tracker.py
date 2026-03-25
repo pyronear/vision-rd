@@ -47,6 +47,20 @@ class TestPadSequence:
         result = pad_sequence([], 5)
         assert result == []
 
+    def test_does_not_mutate_input(self):
+        d = _det(0.5, 0.5, 0.2, 0.2)
+        frames = [_frame("f1", [d])]
+        pad_sequence(frames, 3)
+        assert len(frames) == 1
+
+    def test_padded_frames_are_distinct_objects(self):
+        d = _det(0.5, 0.5, 0.2, 0.2)
+        frames = [_frame("f1", [d]), _frame("f2", [d])]
+        result = pad_sequence(frames, 5)
+        # All FrameResult objects should be distinct
+        ids = [id(f) for f in result]
+        assert len(set(ids)) == len(ids)
+
     def test_padded_sequence_confirms_with_tracker(self):
         tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=3)
         d = _det(0.5, 0.5, 0.2, 0.2)

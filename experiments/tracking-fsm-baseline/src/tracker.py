@@ -21,27 +21,25 @@ def pad_sequence(frames: list[FrameResult], min_length: int) -> list[FrameResult
     it is returned unchanged.  Otherwise the first frame is prepended and
     the last frame is appended in alternation until the list reaches
     *min_length*.
+
+    Returns a new list; the input list is not modified.
     """
     if not frames or len(frames) >= min_length:
-        return frames
-    first = FrameResult(
-        frame_id=frames[0].frame_id,
-        timestamp=frames[0].timestamp,
-        detections=frames[0].detections,
-    )
-    last = FrameResult(
-        frame_id=frames[-1].frame_id,
-        timestamp=frames[-1].timestamp,
-        detections=frames[-1].detections,
-    )
+        return list(frames)
+    result = list(frames)
     prepend = True
-    while len(frames) < min_length:
-        if prepend:
-            frames.insert(0, first)
-        else:
-            frames.append(last)
+    while len(result) < min_length:
+        src = frames[0] if prepend else frames[-1]
+        result.insert(
+            0 if prepend else len(result),
+            FrameResult(
+                frame_id=src.frame_id,
+                timestamp=src.timestamp,
+                detections=list(src.detections),
+            ),
+        )
         prepend = not prepend
-    return frames
+    return result
 
 
 def compute_iou(det_a: Detection, det_b: Detection) -> float:
