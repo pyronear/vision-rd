@@ -109,6 +109,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    # DVC YAML interpolation passes booleans as strings, so we parse manually.
     use_confidence_filter = args.use_confidence_filter.lower() == "true"
     use_area_change_filter = args.use_area_change_filter.lower() == "true"
 
