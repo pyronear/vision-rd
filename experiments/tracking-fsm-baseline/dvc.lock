@@ -21,8 +21,8 @@ stages:
       size: 2757
     - path: src/data.py
       hash: md5
-      md5: 9a43e26c3ead11bd9ee1c0d53c79959e
-      size: 3427
+      md5: 80a53bf3c1f04062523fa5e72819cbd4
+      size: 4785
     - path: src/detector.py
       hash: md5
       md5: f10f677e4af17d38ebea461bc83f8283
@@ -65,8 +65,8 @@ stages:
       size: 2757
     - path: src/data.py
       hash: md5
-      md5: 9a43e26c3ead11bd9ee1c0d53c79959e
-      size: 3427
+      md5: 80a53bf3c1f04062523fa5e72819cbd4
+      size: 4785
     - path: src/detector.py
       hash: md5
       md5: f10f677e4af17d38ebea461bc83f8283
@@ -104,8 +104,8 @@ stages:
       size: 2271
     - path: src/data.py
       hash: md5
-      md5: 9a43e26c3ead11bd9ee1c0d53c79959e
-      size: 3427
+      md5: 80a53bf3c1f04062523fa5e72819cbd4
+      size: 4785
     - path: src/detector.py
       hash: md5
       md5: f10f677e4af17d38ebea461bc83f8283
@@ -140,8 +140,8 @@ stages:
       size: 2271
     - path: src/data.py
       hash: md5
-      md5: 9a43e26c3ead11bd9ee1c0d53c79959e
-      size: 3427
+      md5: 80a53bf3c1f04062523fa5e72819cbd4
+      size: 4785
     - path: src/detector.py
       hash: md5
       md5: f10f677e4af17d38ebea461bc83f8283
@@ -184,8 +184,8 @@ stages:
       size: 6369
     - path: src/data.py
       hash: md5
-      md5: 9a43e26c3ead11bd9ee1c0d53c79959e
-      size: 3427
+      md5: 80a53bf3c1f04062523fa5e72819cbd4
+      size: 4785
     - path: src/detector.py
       hash: md5
       md5: f10f677e4af17d38ebea461bc83f8283
@@ -240,8 +240,8 @@ stages:
       size: 6369
     - path: src/data.py
       hash: md5
-      md5: 9a43e26c3ead11bd9ee1c0d53c79959e
-      size: 3427
+      md5: 80a53bf3c1f04062523fa5e72819cbd4
+      size: 4785
     - path: src/detector.py
       hash: md5
       md5: f10f677e4af17d38ebea461bc83f8283
@@ -727,115 +727,3 @@ stages:
       md5: c2c84386af6dd7e77348f73e3827735d.dir
       size: 955
       nfiles: 1
-  visualize_mispredictions@train:
-    cmd: uv run python scripts/visualize_mispredictions.py --track-dir 
-      data/07_model_output/train --infer-dir data/03_primary/train --data-dir 
-      data/01_raw/datasets/train --output-dir 
-      data/08_reporting/train/mispredictions --max-samples 20 --seed 42
-    deps:
-    - path: data/01_raw/datasets/train
-      hash: md5
-      md5: c38b9cbd0a872ee86402973d6cd8a466.dir
-      size: 4366197067
-      nfiles: 82878
-    - path: data/03_primary/train
-      hash: md5
-      md5: 4286f42a6719937a2283859d1d651646.dir
-      size: 16322405
-      nfiles: 2865
-    - path: data/07_model_output/train
-      hash: md5
-      md5: 22ee23beff0e96143fc2a56c92c4c6e7.dir
-      size: 959209
-      nfiles: 1
-    - path: scripts/visualize_mispredictions.py
-      hash: md5
-      md5: 7f47c7ed7842263841ec621f7db61792
-      size: 6752
-    - path: src/data.py
-      hash: md5
-      md5: 9a43e26c3ead11bd9ee1c0d53c79959e
-      size: 3427
-    - path: src/detector.py
-      hash: md5
-      md5: f10f677e4af17d38ebea461bc83f8283
-      size: 4337
-    - path: src/evaluator.py
-      hash: md5
-      md5: 2b4f05be4ad37e545e5dfb6cfb020521
-      size: 11003
-    - path: src/types.py
-      hash: md5
-      md5: 0137d75da12d6a90254153b07b4ea367
-      size: 3971
-    - path: src/visualization.py
-      hash: md5
-      md5: 69bff005c9038758d1b8fe362828d7ad
-      size: 8132
-    params:
-      params.yaml:
-        visualize:
-          max_samples: 20
-          seed: 42
-    outs:
-    - path: data/08_reporting/train/mispredictions
-      hash: md5
-      md5: 1a48877a0c6954b91655c9cb138013a7.dir
-      size: 299066735
-      nfiles: 287
-  visualize_mispredictions@val:
-    cmd: uv run python scripts/visualize_mispredictions.py --track-dir 
-      data/07_model_output/val --infer-dir data/03_primary/val --data-dir 
-      data/01_raw/datasets/val --output-dir data/08_reporting/val/mispredictions
-      --max-samples 20 --seed 42
-    deps:
-    - path: data/01_raw/datasets/val
-      hash: md5
-      md5: 37bcb2b81249abab56cbec906e77fcdf.dir
-      size: 407799782
-      nfiles: 8044
-    - path: data/03_primary/val
-      hash: md5
-      md5: d4d95d41701a8a5babbb894e7fcbacf4.dir
-      size: 1574908
-      nfiles: 294
-    - path: data/07_model_output/val
-      hash: md5
-      md5: 225d89caa75a94c2e56554137dd8138b.dir
-      size: 98447
-      nfiles: 1
-    - path: scripts/visualize_mispredictions.py
-      hash: md5
-      md5: 7f47c7ed7842263841ec621f7db61792
-      size: 6752
-    - path: src/data.py
-      hash: md5
-      md5: 9a43e26c3ead11bd9ee1c0d53c79959e
-      size: 3427
-    - path: src/detector.py
-      hash: md5
-      md5: f10f677e4af17d38ebea461bc83f8283
-      size: 4337
-    - path: src/evaluator.py
-      hash: md5
-      md5: 2b4f05be4ad37e545e5dfb6cfb020521
-      size: 11003
-    - path: src/types.py
-      hash: md5
-      md5: 0137d75da12d6a90254153b07b4ea367
-      size: 3971
-    - path: src/visualization.py
-      hash: md5
-      md5: 69bff005c9038758d1b8fe362828d7ad
-      size: 8132
-    params:
-      params.yaml:
-        visualize:
-          max_samples: 20
-          seed: 42
-    outs:
-    - path: data/08_reporting/val/mispredictions
-      hash: md5
-      md5: 4db0ff43230b2c27dffc7ac5c5728d25.dir
-      size: 65739097
-      nfiles: 64

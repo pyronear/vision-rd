@@ -32,7 +32,3 @@ ablation:
   max_misses: 2
   min_mean_confidence: 0.4
   min_area_change: 1.01
-
-visualize:
-  max_samples: 20
-  seed: 42
