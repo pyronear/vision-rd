@@ -1631,6 +1631,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "dvc", extra = ["s3"] },
+    { name = "pyrocore" },
 ]
 
 [package.dev-dependencies]
@@ -1642,7 +1643,10 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "dvc", extras = ["s3"], specifier = ">=3.56" }]
+requires-dist = [
+    { name = "dvc", extras = ["s3"], specifier = ">=3.56" },
+    { name = "pyrocore", directory = "../../lib/pyrocore" },
+]
 
 [package.metadata.requires-dev]
 dev = [
@@ -2057,6 +2061,18 @@ sdist = { url = "https://files.pythonhosted.org/packages/f3/91/9c6ee907786a473bf
 wheels = [
     { url = "https://files.pythonhosted.org/packages/10/bd/c038d7cc38edc1aa5bf91ab8068b63d4308c66c4c8bb3cbba7dfbc049f9c/pyparsing-3.3.2-py3-none-any.whl", hash = "sha256:850ba148bd908d7e2411587e247a1e4f0327839c40e2e5e6d05a007ecc69911d", size = 122781 },
 ]
+
+[[package]]
+name = "pyrocore"
+version = "0.1.0"
+source = { directory = "../../lib/pyrocore" }
+
+[package.metadata]
+requires-dist = [
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9" },
+]
+provides-extras = ["dev"]
 
 [[package]]
 name = "pytest"
