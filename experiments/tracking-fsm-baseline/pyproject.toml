@@ -11,6 +11,7 @@ version = "0.1.0"
 description = "Temporal tracking baseline for smoke FP reduction (FLAME-inspired)"
 requires-python = ">=3.11"
 dependencies = [
+    "pyrocore @ file:///${PROJECT_ROOT}/../../lib/pyrocore",
     "dvc[s3]>=3.56",
     "huggingface-hub>=0.24",
     "Pillow>=10.0",

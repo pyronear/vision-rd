@@ -10,6 +10,8 @@ Pyronear deploys fixed 360° cameras on antenna towers that capture images every
 
 ```
 vision-rd/
+├── lib/                  # Shared packages used across experiments
+│   └── pyrocore/        # Types, protocols, and base model (TemporalModel ABC)
 ├── literature_survey/   # Paper collection, notes, and thematic summary
 ├── experiments/          # R&D experiments (each a self-contained uv project)
 │   ├── template/        # Starter project — copy to begin a new experiment

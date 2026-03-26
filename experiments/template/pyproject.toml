@@ -5,6 +5,7 @@ description = "Experiment template"
 requires-python = ">=3.11"
 dependencies = [
     "dvc[s3]>=3.56",
+    "pyrocore @ file:///${PROJECT_ROOT}/../../lib/pyrocore",
 ]
 
 [dependency-groups]

@@ -4084,6 +4084,18 @@ wheels = [
 ]
 
 [[package]]
+name = "pyrocore"
+version = "0.1.0"
+source = { directory = "../../lib/pyrocore" }
+
+[package.metadata]
+requires-dist = [
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9" },
+]
+provides-extras = ["dev"]
+
+[[package]]
 name = "pytest"
 version = "9.0.2"
 source = { registry = "https://pypi.org/simple" }
@@ -5161,6 +5173,7 @@ dependencies = [
     { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
     { name = "pandas", version = "3.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
     { name = "pillow" },
+    { name = "pyrocore" },
     { name = "seaborn" },
     { name = "tqdm" },
     { name = "ultralytics" },
@@ -5184,6 +5197,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=1.26,<2" },
     { name = "pandas", specifier = ">=2.1" },
     { name = "pillow", specifier = ">=10.0" },
+    { name = "pyrocore", directory = "../../lib/pyrocore" },
     { name = "seaborn", specifier = ">=0.13" },
     { name = "tqdm", specifier = ">=4.66" },
     { name = "ultralytics", specifier = ">=8.3" },
