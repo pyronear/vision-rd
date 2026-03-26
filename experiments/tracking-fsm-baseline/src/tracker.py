@@ -11,7 +11,14 @@ Optional post-confirmation filters can reject confirmed tracks based on:
 
 import statistics
 
-from src.types import Detection, FrameResult, Track
+from src.types import (
+    Detection,
+    FrameResult,
+    FrameTrace,
+    MatchEvent,
+    PostFilterResult,
+    Track,
+)
 
 
 def compute_iou(det_a: Detection, det_b: Detection) -> float:
@@ -62,7 +69,7 @@ def match_detections(
     prev_dets: list[Detection],
     curr_dets: list[Detection],
     iou_threshold: float,
-) -> list[tuple[int, int]]:
+) -> list[tuple[int, int, float]]:
     """Greedy matching of detections between consecutive frames.
 
     Computes all pairwise IoUs (O(n*m)), sorts by descending IoU, and greedily
@@ -76,7 +83,7 @@ def match_detections(
         iou_threshold: Minimum IoU required to consider a pair as a match.
 
     Returns:
-        List of ``(prev_idx, curr_idx)`` index pairs for matched detections.
+        List of ``(prev_idx, curr_idx, iou)`` tuples for matched detections.
     """
     if not prev_dets or not curr_dets:
         return []
@@ -95,9 +102,9 @@ def match_detections(
     matched_curr: set[int] = set()
     matches = []
 
-    for _iou, i, j in pairs:
+    for iou_val, i, j in pairs:
         if i not in matched_prev and j not in matched_curr:
-            matches.append((i, j))
+            matches.append((i, j, iou_val))
             matched_prev.add(i)
             matched_curr.add(j)
 
@@ -154,27 +161,35 @@ class SimpleTracker:
 
     def process_sequence(
         self, frames: list[FrameResult]
-    ) -> tuple[bool, list[Track], int | None]:
+    ) -> tuple[bool, list[Track], int | None, list[FrameTrace]]:
         """Process a full sequence of frames through the tracker.
 
         Args:
             frames: Temporally ordered list of per-frame detection results.
 
         Returns:
-            A tuple of ``(is_alarm, tracks, confirmed_frame_idx)`` where:
+            A tuple of ``(is_alarm, tracks, confirmed_frame_idx, frame_traces)``
+            where:
 
             - **is_alarm** -- ``True`` if any track was confirmed.
             - **tracks** -- All tracks created during processing.
             - **confirmed_frame_idx** -- Index (into *frames*) where the first
               confirmation occurred, or ``None``.
+            - **frame_traces** -- Per-frame trace of tracker activity.
         """
         active_tracks: list[Track] = []
         all_tracks: list[Track] = []
         next_track_id = 0
         confirmed_frame_idx: int | None = None
+        frame_traces: list[FrameTrace] = []
 
         for frame_idx, frame in enumerate(frames):
             curr_dets = frame.detections
+            trace = FrameTrace(
+                frame_idx=frame_idx,
+                frame_id=frame.frame_id,
+                num_detections=len(curr_dets),
+            )
 
             # Match current detections to active tracks
             if active_tracks and curr_dets:
@@ -185,17 +200,25 @@ class SimpleTracker:
                 matched_det_idxs = {m[1] for m in matches}
 
                 # Update matched tracks
-                for track_idx, det_idx in matches:
+                for track_idx, det_idx, iou_val in matches:
                     track = active_tracks[track_idx]
                     track.hits.append((frame.frame_id, curr_dets[det_idx]))
                     track.consecutive_hits += 1
                     track.consecutive_misses = 0
+                    trace.matches.append(
+                        MatchEvent(
+                            track_id=track.track_id,
+                            detection_idx=det_idx,
+                            iou=iou_val,
+                        )
+                    )
 
                 # Mark unmatched tracks as missed
                 for i, track in enumerate(active_tracks):
                     if i not in matched_track_idxs:
                         track.consecutive_misses += 1
                         track.consecutive_hits = 0
+                        trace.missed_track_ids.append(track.track_id)
 
                 # Create new tracks for unmatched detections
                 for j, det in enumerate(curr_dets):
@@ -205,6 +228,7 @@ class SimpleTracker:
                             hits=[(frame.frame_id, det)],
                             consecutive_hits=1,
                         )
+                        trace.new_track_ids.append(next_track_id)
                         next_track_id += 1
                         active_tracks.append(new_track)
                         all_tracks.append(new_track)
@@ -214,6 +238,7 @@ class SimpleTracker:
                 for track in active_tracks:
                     track.consecutive_misses += 1
                     track.consecutive_hits = 0
+                    trace.missed_track_ids.append(track.track_id)
 
                 # Create new tracks for all detections
                 for det in curr_dets:
@@ -222,6 +247,7 @@ class SimpleTracker:
                         hits=[(frame.frame_id, det)],
                         consecutive_hits=1,
                     )
+                    trace.new_track_ids.append(next_track_id)
                     next_track_id += 1
                     active_tracks.append(new_track)
                     all_tracks.append(new_track)
@@ -234,13 +260,19 @@ class SimpleTracker:
                 ):
                     track.confirmed = True
                     track.confirmed_at_frame = frame_idx
+                    trace.confirmed_track_ids.append(track.track_id)
                     if confirmed_frame_idx is None:
                         confirmed_frame_idx = frame_idx
 
             # Remove tracks that have been missing too long
+            prev_active_ids = {t.track_id for t in active_tracks}
             active_tracks = [
                 t for t in active_tracks if t.consecutive_misses <= self.max_misses
             ]
+            new_active_ids = {t.track_id for t in active_tracks}
+            trace.pruned_track_ids = sorted(prev_active_ids - new_active_ids)
+
+            frame_traces.append(trace)
 
         # -- Compute features on all tracks (for analysis) --
         for track in all_tracks:
@@ -258,21 +290,33 @@ class SimpleTracker:
         for track in all_tracks:
             if not track.confirmed:
                 continue
-            if (
-                self.use_confidence_filter
-                and track.mean_confidence is not None
-                and track.mean_confidence < self.min_mean_confidence
-            ):
-                track.confirmed = False
-                track.confirmed_at_frame = None
-                continue
-            if (
-                self.use_area_change_filter
-                and track.area_change_ratio is not None
-                and track.area_change_ratio < self.min_area_change
-            ):
-                track.confirmed = False
-                track.confirmed_at_frame = None
+            if self.use_confidence_filter and track.mean_confidence is not None:
+                passed = track.mean_confidence >= self.min_mean_confidence
+                track.post_filter_results.append(
+                    PostFilterResult(
+                        filter_name="confidence",
+                        passed=passed,
+                        actual_value=track.mean_confidence,
+                        threshold=self.min_mean_confidence,
+                    )
+                )
+                if not passed:
+                    track.confirmed = False
+                    track.confirmed_at_frame = None
+                    continue
+            if self.use_area_change_filter and track.area_change_ratio is not None:
+                passed = track.area_change_ratio >= self.min_area_change
+                track.post_filter_results.append(
+                    PostFilterResult(
+                        filter_name="area_change",
+                        passed=passed,
+                        actual_value=track.area_change_ratio,
+                        threshold=self.min_area_change,
+                    )
+                )
+                if not passed:
+                    track.confirmed = False
+                    track.confirmed_at_frame = None
 
         # Recompute alarm after post-filters
         is_alarm = any(t.confirmed for t in all_tracks)
@@ -283,4 +327,4 @@ class SimpleTracker:
                 for t in all_tracks
                 if t.confirmed and t.confirmed_at_frame is not None
             )
-        return is_alarm, all_tracks, confirmed_frame_idx
+        return is_alarm, all_tracks, confirmed_frame_idx, frame_traces

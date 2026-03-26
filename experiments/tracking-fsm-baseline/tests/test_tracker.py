@@ -66,7 +66,9 @@ class TestPadSequence:
         tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=3)
         d = _det(0.5, 0.5, 0.2, 0.2)
         frames = pad_sequence([_frame("f1", [d])], 3)
-        is_alarm, _tracks, confirmed_idx = tracker.process_sequence(frames)
+        is_alarm, _tracks, confirmed_idx, _frame_traces = tracker.process_sequence(
+            frames
+        )
         assert is_alarm is True
         assert confirmed_idx == 2
 
@@ -102,7 +104,10 @@ class TestMatchDetections:
     def test_single_match(self):
         d = _det(0.5, 0.5, 0.2, 0.2)
         matches = match_detections([d], [d], 0.3)
-        assert matches == [(0, 0)]
+        assert len(matches) == 1
+        assert matches[0][0] == 0
+        assert matches[0][1] == 0
+        assert matches[0][2] == pytest.approx(1.0)
 
     def test_below_threshold(self):
         a = _det(0.1, 0.1, 0.1, 0.1)
@@ -118,13 +123,15 @@ class TestMatchDetections:
         curr_idxs = {m[1] for m in matches}
         assert prev_idxs == {0, 1}
         assert curr_idxs == {0, 1}
+        # Each match should include an IoU value
+        assert all(m[2] > 0.3 for m in matches)
 
 
 class TestSimpleTracker:
     def test_no_detections(self):
         tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=2)
         frames = [_frame("f1", []), _frame("f2", []), _frame("f3", [])]
-        is_alarm, tracks, confirmed_idx = tracker.process_sequence(frames)
+        is_alarm, tracks, confirmed_idx, _ft = tracker.process_sequence(frames)
         assert is_alarm is False
         assert tracks == []
         assert confirmed_idx is None
@@ -133,14 +140,14 @@ class TestSimpleTracker:
         tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=2)
         d = _det(0.5, 0.5, 0.2, 0.2)
         frames = [_frame("f1", [d]), _frame("f2", []), _frame("f3", [])]
-        is_alarm, tracks, confirmed_idx = tracker.process_sequence(frames)
+        is_alarm, tracks, confirmed_idx, _ft = tracker.process_sequence(frames)
         assert is_alarm is False
 
     def test_consecutive_detections_confirmed(self):
         tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=2)
         d = _det(0.5, 0.5, 0.2, 0.2)
         frames = [_frame("f1", [d]), _frame("f2", [d]), _frame("f3", [])]
-        is_alarm, tracks, confirmed_idx = tracker.process_sequence(frames)
+        is_alarm, tracks, confirmed_idx, _ft = tracker.process_sequence(frames)
         assert is_alarm is True
         assert confirmed_idx == 1
 
@@ -148,7 +155,7 @@ class TestSimpleTracker:
         tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=3)
         d = _det(0.5, 0.5, 0.2, 0.2)
         frames = [_frame("f1", [d]), _frame("f2", [d]), _frame("f3", [d])]
-        is_alarm, tracks, confirmed_idx = tracker.process_sequence(frames)
+        is_alarm, tracks, confirmed_idx, _ft = tracker.process_sequence(frames)
         assert is_alarm is True
         assert confirmed_idx == 2
 
@@ -162,7 +169,7 @@ class TestSimpleTracker:
             _frame("f4", [d]),
             _frame("f5", [d]),
         ]
-        is_alarm, tracks, confirmed_idx = tracker.process_sequence(frames)
+        is_alarm, tracks, confirmed_idx, _ft = tracker.process_sequence(frames)
         assert is_alarm is False
 
     def test_max_misses_tolerates_gap(self):
@@ -174,7 +181,7 @@ class TestSimpleTracker:
             _frame("f3", []),  # gap — tolerated
             _frame("f4", [d]),
         ]
-        is_alarm, tracks, confirmed_idx = tracker.process_sequence(frames)
+        is_alarm, tracks, confirmed_idx, _ft = tracker.process_sequence(frames)
         # Track survives the gap but consecutive_hits was reset at f3
         # f1: hits=1, f2: hits=2, f3: miss (hits=0), f4: hits=1
         # So with min_consecutive=3, not confirmed
@@ -184,7 +191,7 @@ class TestSimpleTracker:
         tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=1)
         d = _det(0.5, 0.5, 0.2, 0.2)
         frames = [_frame("f1", [d])]
-        is_alarm, tracks, confirmed_idx = tracker.process_sequence(frames)
+        is_alarm, tracks, confirmed_idx, _ft = tracker.process_sequence(frames)
         assert is_alarm is True
         assert confirmed_idx == 0
 
@@ -192,7 +199,7 @@ class TestSimpleTracker:
         tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=2)
         d = _det(0.5, 0.5, 0.2, 0.2, conf=0.8)
         frames = [_frame("f1", [d]), _frame("f2", [d])]
-        _is_alarm, tracks, _idx = tracker.process_sequence(frames)
+        _is_alarm, tracks, _idx, _ft = tracker.process_sequence(frames)
         assert len(tracks) == 1
         assert tracks[0].mean_confidence == pytest.approx(0.8)
         assert tracks[0].area_change_ratio == pytest.approx(1.0)
@@ -208,7 +215,7 @@ class TestConfidenceFilter:
         )
         d = _det(0.5, 0.5, 0.2, 0.2, conf=0.3)
         frames = [_frame("f1", [d]), _frame("f2", [d])]
-        is_alarm, tracks, confirmed_idx = tracker.process_sequence(frames)
+        is_alarm, tracks, confirmed_idx, _ft = tracker.process_sequence(frames)
         assert is_alarm is False
         assert confirmed_idx is None
         assert tracks[0].confirmed is False
@@ -222,7 +229,7 @@ class TestConfidenceFilter:
         )
         d = _det(0.5, 0.5, 0.2, 0.2, conf=0.8)
         frames = [_frame("f1", [d]), _frame("f2", [d])]
-        is_alarm, tracks, confirmed_idx = tracker.process_sequence(frames)
+        is_alarm, tracks, confirmed_idx, _ft = tracker.process_sequence(frames)
         assert is_alarm is True
         assert confirmed_idx == 1
 
@@ -235,7 +242,7 @@ class TestConfidenceFilter:
         )
         d = _det(0.5, 0.5, 0.2, 0.2, conf=0.3)
         frames = [_frame("f1", [d]), _frame("f2", [d])]
-        is_alarm, _tracks, _idx = tracker.process_sequence(frames)
+        is_alarm, _tracks, _idx, _ft = tracker.process_sequence(frames)
         assert is_alarm is True
 
 
@@ -249,7 +256,7 @@ class TestAreaChangeFilter:
         )
         d = _det(0.5, 0.5, 0.2, 0.2)
         frames = [_frame("f1", [d]), _frame("f2", [d])]
-        is_alarm, tracks, confirmed_idx = tracker.process_sequence(frames)
+        is_alarm, tracks, confirmed_idx, _ft = tracker.process_sequence(frames)
         # area_change_ratio = 1.0 < 1.1 → rejected
         assert is_alarm is False
         assert confirmed_idx is None
@@ -264,7 +271,7 @@ class TestAreaChangeFilter:
         d1 = _det(0.5, 0.5, 0.10, 0.10)
         d2 = _det(0.5, 0.5, 0.15, 0.15)  # area grows 2.25x
         frames = [_frame("f1", [d1]), _frame("f2", [d2])]
-        is_alarm, tracks, confirmed_idx = tracker.process_sequence(frames)
+        is_alarm, tracks, confirmed_idx, _ft = tracker.process_sequence(frames)
         assert is_alarm is True
         assert tracks[0].area_change_ratio == pytest.approx(2.25)
 
@@ -277,7 +284,7 @@ class TestAreaChangeFilter:
         )
         d = _det(0.5, 0.5, 0.2, 0.2)
         frames = [_frame("f1", [d]), _frame("f2", [d])]
-        is_alarm, _tracks, _idx = tracker.process_sequence(frames)
+        is_alarm, _tracks, _idx, _ft = tracker.process_sequence(frames)
         assert is_alarm is True
 
 
@@ -297,7 +304,7 @@ class TestCombinedRules:
             _frame("f3", [d]),
             _frame("f4", [d]),
         ]
-        is_alarm, tracks, confirmed_idx = tracker.process_sequence(frames)
+        is_alarm, tracks, confirmed_idx, _ft = tracker.process_sequence(frames)
         # Track survives gap, rebuilds consecutive hits at f3+f4, passes confidence
         assert is_alarm is True
 
@@ -312,6 +319,192 @@ class TestCombinedRules:
         )
         d = _det(0.5, 0.5, 0.2, 0.2, conf=0.3)
         frames = [_frame("f1", [d]), _frame("f2", [d])]
-        is_alarm, _tracks, _idx = tracker.process_sequence(frames)
+        is_alarm, _tracks, _idx, _ft = tracker.process_sequence(frames)
         # Low confidence → rejected by confidence filter
         assert is_alarm is False
+
+
+# ---------------------------------------------------------------------------
+# Frame trace tests
+# ---------------------------------------------------------------------------
+
+
+class TestFrameTrace:
+    def test_trace_has_one_entry_per_frame(self):
+        tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=2)
+        frames = [_frame("f1", []), _frame("f2", []), _frame("f3", [])]
+        _alarm, _tracks, _idx, ft = tracker.process_sequence(frames)
+        assert len(ft) == 3
+        assert [t.frame_idx for t in ft] == [0, 1, 2]
+        assert [t.frame_id for t in ft] == ["f1", "f2", "f3"]
+
+    def test_trace_records_new_tracks(self):
+        tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=2)
+        d = _det(0.5, 0.5, 0.2, 0.2)
+        frames = [_frame("f1", [d])]
+        _alarm, _tracks, _idx, ft = tracker.process_sequence(frames)
+        assert ft[0].new_track_ids == [0]
+        assert ft[0].matches == []
+
+    def test_trace_records_matches_with_iou(self):
+        tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=2)
+        d = _det(0.5, 0.5, 0.2, 0.2)
+        frames = [_frame("f1", [d]), _frame("f2", [d])]
+        _alarm, _tracks, _idx, ft = tracker.process_sequence(frames)
+        assert len(ft[1].matches) == 1
+        m = ft[1].matches[0]
+        assert m.track_id == 0
+        assert m.detection_idx == 0
+        assert m.iou == pytest.approx(1.0)
+
+    def test_trace_records_misses(self):
+        tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=2)
+        d = _det(0.5, 0.5, 0.2, 0.2)
+        frames = [_frame("f1", [d]), _frame("f2", [])]
+        _alarm, _tracks, _idx, ft = tracker.process_sequence(frames)
+        assert ft[1].missed_track_ids == [0]
+
+    def test_trace_records_confirmation(self):
+        tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=2)
+        d = _det(0.5, 0.5, 0.2, 0.2)
+        frames = [_frame("f1", [d]), _frame("f2", [d])]
+        _alarm, _tracks, _idx, ft = tracker.process_sequence(frames)
+        assert ft[0].confirmed_track_ids == []
+        assert ft[1].confirmed_track_ids == [0]
+
+    def test_trace_records_pruning(self):
+        tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=2, max_misses=0)
+        d = _det(0.5, 0.5, 0.2, 0.2)
+        frames = [_frame("f1", [d]), _frame("f2", [])]
+        _alarm, _tracks, _idx, ft = tracker.process_sequence(frames)
+        assert ft[1].pruned_track_ids == [0]
+
+    def test_trace_num_detections(self):
+        tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=2)
+        d1 = _det(0.3, 0.5, 0.1, 0.1)
+        d2 = _det(0.7, 0.5, 0.1, 0.1)
+        frames = [_frame("f1", [d1, d2]), _frame("f2", [])]
+        _alarm, _tracks, _idx, ft = tracker.process_sequence(frames)
+        assert ft[0].num_detections == 2
+        assert ft[1].num_detections == 0
+
+    def test_trace_multiple_tracks(self):
+        tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=2)
+        d1 = _det(0.2, 0.5, 0.1, 0.1)
+        d2 = _det(0.8, 0.5, 0.1, 0.1)
+        frames = [_frame("f1", [d1, d2]), _frame("f2", [d1, d2])]
+        _alarm, _tracks, _idx, ft = tracker.process_sequence(frames)
+        assert len(ft[0].new_track_ids) == 2
+        assert len(ft[1].matches) == 2
+
+
+# ---------------------------------------------------------------------------
+# Post-filter trace tests
+# ---------------------------------------------------------------------------
+
+
+class TestPostFilterTrace:
+    def test_confidence_filter_rejection_traced(self):
+        tracker = SimpleTracker(
+            iou_threshold=0.3,
+            min_consecutive=2,
+            use_confidence_filter=True,
+            min_mean_confidence=0.5,
+        )
+        d = _det(0.5, 0.5, 0.2, 0.2, conf=0.3)
+        frames = [_frame("f1", [d]), _frame("f2", [d])]
+        _alarm, tracks, _idx, _ft = tracker.process_sequence(frames)
+        assert len(tracks[0].post_filter_results) == 1
+        pf = tracks[0].post_filter_results[0]
+        assert pf.filter_name == "confidence"
+        assert pf.passed is False
+        assert pf.actual_value == pytest.approx(0.3)
+        assert pf.threshold == 0.5
+
+    def test_confidence_filter_pass_traced(self):
+        tracker = SimpleTracker(
+            iou_threshold=0.3,
+            min_consecutive=2,
+            use_confidence_filter=True,
+            min_mean_confidence=0.5,
+        )
+        d = _det(0.5, 0.5, 0.2, 0.2, conf=0.8)
+        frames = [_frame("f1", [d]), _frame("f2", [d])]
+        _alarm, tracks, _idx, _ft = tracker.process_sequence(frames)
+        assert len(tracks[0].post_filter_results) == 1
+        pf = tracks[0].post_filter_results[0]
+        assert pf.filter_name == "confidence"
+        assert pf.passed is True
+
+    def test_area_change_filter_traced(self):
+        tracker = SimpleTracker(
+            iou_threshold=0.3,
+            min_consecutive=2,
+            use_area_change_filter=True,
+            min_area_change=1.1,
+        )
+        d = _det(0.5, 0.5, 0.2, 0.2)
+        frames = [_frame("f1", [d]), _frame("f2", [d])]
+        _alarm, tracks, _idx, _ft = tracker.process_sequence(frames)
+        assert len(tracks[0].post_filter_results) == 1
+        pf = tracks[0].post_filter_results[0]
+        assert pf.filter_name == "area_change"
+        assert pf.passed is False
+        assert pf.actual_value == pytest.approx(1.0)
+        assert pf.threshold == 1.1
+
+    def test_no_filters_yields_empty_results(self):
+        tracker = SimpleTracker(iou_threshold=0.3, min_consecutive=2)
+        d = _det(0.5, 0.5, 0.2, 0.2)
+        frames = [_frame("f1", [d]), _frame("f2", [d])]
+        _alarm, tracks, _idx, _ft = tracker.process_sequence(frames)
+        assert tracks[0].post_filter_results == []
+
+    def test_confidence_rejection_skips_area_filter(self):
+        tracker = SimpleTracker(
+            iou_threshold=0.3,
+            min_consecutive=2,
+            use_confidence_filter=True,
+            min_mean_confidence=0.5,
+            use_area_change_filter=True,
+            min_area_change=1.1,
+        )
+        d = _det(0.5, 0.5, 0.2, 0.2, conf=0.3)
+        frames = [_frame("f1", [d]), _frame("f2", [d])]
+        _alarm, tracks, _idx, _ft = tracker.process_sequence(frames)
+        # Only confidence filter was evaluated (short-circuit)
+        assert len(tracks[0].post_filter_results) == 1
+        assert tracks[0].post_filter_results[0].filter_name == "confidence"
+
+    def test_both_filters_pass(self):
+        tracker = SimpleTracker(
+            iou_threshold=0.1,
+            min_consecutive=2,
+            use_confidence_filter=True,
+            min_mean_confidence=0.5,
+            use_area_change_filter=True,
+            min_area_change=1.1,
+        )
+        d1 = _det(0.5, 0.5, 0.10, 0.10, conf=0.8)
+        d2 = _det(0.5, 0.5, 0.15, 0.15, conf=0.8)
+        frames = [_frame("f1", [d1]), _frame("f2", [d2])]
+        _alarm, tracks, _idx, _ft = tracker.process_sequence(frames)
+        assert len(tracks[0].post_filter_results) == 2
+        assert tracks[0].post_filter_results[0].filter_name == "confidence"
+        assert tracks[0].post_filter_results[0].passed is True
+        assert tracks[0].post_filter_results[1].filter_name == "area_change"
+        assert tracks[0].post_filter_results[1].passed is True
+
+    def test_unconfirmed_track_has_no_filter_results(self):
+        tracker = SimpleTracker(
+            iou_threshold=0.3,
+            min_consecutive=3,
+            use_confidence_filter=True,
+            min_mean_confidence=0.5,
+        )
+        d = _det(0.5, 0.5, 0.2, 0.2, conf=0.8)
+        # Only 2 frames, needs 3 to confirm
+        frames = [_frame("f1", [d]), _frame("f2", [d])]
+        _alarm, tracks, _idx, _ft = tracker.process_sequence(frames)
+        assert tracks[0].confirmed is False
+        assert tracks[0].post_filter_results == []

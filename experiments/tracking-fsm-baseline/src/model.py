@@ -1,5 +1,6 @@
 """TemporalModel implementation backed by YOLO + FSM tracker."""
 
+import dataclasses
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Self
@@ -71,7 +72,9 @@ class FsmTrackingModel(TemporalModel):
         filtered = self._filter_detections(padded)
 
         tracker = SimpleTracker(**self._tracker_params)
-        is_alarm, tracks, confirmed_frame_idx = tracker.process_sequence(filtered)
+        is_alarm, tracks, confirmed_frame_idx, frame_traces = tracker.process_sequence(
+            filtered
+        )
 
         return TemporalModelOutput(
             is_positive=is_alarm,
@@ -80,6 +83,14 @@ class FsmTrackingModel(TemporalModel):
                 "num_tracks": len(tracks),
                 "num_confirmed_tracks": sum(1 for t in tracks if t.confirmed),
                 "num_detections_total": sum(len(f.detections) for f in filtered),
+                "original_sequence_length": len(frame_results),
+                "padded_sequence_length": len(padded),
+                "pre_filter_detections_per_frame": [len(f.detections) for f in padded],
+                "post_filter_detections_per_frame": [
+                    len(f.detections) for f in filtered
+                ],
+                "frame_traces": [dataclasses.asdict(ft) for ft in frame_traces],
+                "tracks": [dataclasses.asdict(t) for t in tracks],
             },
         )
 
