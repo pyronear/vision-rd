@@ -1630,12 +1630,12 @@ name = "project-name"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "dvc", extra = ["s3"] },
     { name = "pyrocore" },
 ]
 
 [package.dev-dependencies]
 dev = [
+    { name = "dvc", extra = ["s3"] },
     { name = "nbqa" },
     { name = "nbstripout" },
     { name = "pytest" },
@@ -1643,13 +1643,11 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "dvc", extras = ["s3"], specifier = ">=3.56" },
-    { name = "pyrocore", directory = "../../lib/pyrocore" },
-]
+requires-dist = [{ name = "pyrocore", directory = "../../lib/pyrocore" }]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "dvc", extras = ["s3"], specifier = ">=3.56" },
     { name = "nbqa", specifier = ">=1.9" },
     { name = "nbstripout", specifier = ">=0.8" },
     { name = "pytest", specifier = ">=8.0" },
