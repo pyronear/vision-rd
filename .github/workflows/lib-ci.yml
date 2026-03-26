@@ -1,0 +1,65 @@
+name: Lib CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/**"
+  pull_request:
+    paths:
+      - "lib/**"
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.find.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: find
+        run: |
+          packages=$(find lib -mindepth 1 -maxdepth 1 -type d \
+            -exec test -f {}/pyproject.toml \; -print \
+            | jq -R -s -c 'split("\n") | map(select(. != ""))')
+          echo "packages=$packages" >> "$GITHUB_OUTPUT"
+
+  lint:
+    needs: discover
+    if: needs.discover.outputs.packages != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.discover.outputs.packages) }}
+    name: lint (${{ matrix.package }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install
+        working-directory: ${{ matrix.package }}
+        run: uv sync --extra dev
+      - name: Ruff check
+        working-directory: ${{ matrix.package }}
+        run: uv run ruff check src/ tests/
+      - name: Ruff format check
+        working-directory: ${{ matrix.package }}
+        run: uv run ruff format --check src/ tests/
+
+  test:
+    needs: discover
+    if: needs.discover.outputs.packages != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.discover.outputs.packages) }}
+    name: test (${{ matrix.package }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install
+        working-directory: ${{ matrix.package }}
+        run: uv sync --extra dev
+      - name: Run tests
+        working-directory: ${{ matrix.package }}
+        run: uv run pytest tests/ -v
