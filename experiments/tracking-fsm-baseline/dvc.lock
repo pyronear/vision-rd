@@ -21,8 +21,8 @@ stages:
       size: 2757
     - path: src/data.py
       hash: md5
-      md5: 9a43e26c3ead11bd9ee1c0d53c79959e
-      size: 3427
+      md5: 80a53bf3c1f04062523fa5e72819cbd4
+      size: 4785
     - path: src/detector.py
       hash: md5
       md5: f10f677e4af17d38ebea461bc83f8283
@@ -65,8 +65,8 @@ stages:
       size: 2757
     - path: src/data.py
       hash: md5
-      md5: 9a43e26c3ead11bd9ee1c0d53c79959e
-      size: 3427
+      md5: 80a53bf3c1f04062523fa5e72819cbd4
+      size: 4785
     - path: src/detector.py
       hash: md5
       md5: f10f677e4af17d38ebea461bc83f8283
@@ -104,8 +104,8 @@ stages:
       size: 2271
     - path: src/data.py
       hash: md5
-      md5: 9a43e26c3ead11bd9ee1c0d53c79959e
-      size: 3427
+      md5: 80a53bf3c1f04062523fa5e72819cbd4
+      size: 4785
     - path: src/detector.py
       hash: md5
       md5: f10f677e4af17d38ebea461bc83f8283
@@ -140,8 +140,8 @@ stages:
       size: 2271
     - path: src/data.py
       hash: md5
-      md5: 9a43e26c3ead11bd9ee1c0d53c79959e
-      size: 3427
+      md5: 80a53bf3c1f04062523fa5e72819cbd4
+      size: 4785
     - path: src/detector.py
       hash: md5
       md5: f10f677e4af17d38ebea461bc83f8283
@@ -184,8 +184,8 @@ stages:
       size: 6369
     - path: src/data.py
       hash: md5
-      md5: 9a43e26c3ead11bd9ee1c0d53c79959e
-      size: 3427
+      md5: 80a53bf3c1f04062523fa5e72819cbd4
+      size: 4785
     - path: src/detector.py
       hash: md5
       md5: f10f677e4af17d38ebea461bc83f8283
@@ -240,8 +240,8 @@ stages:
       size: 6369
     - path: src/data.py
       hash: md5
-      md5: 9a43e26c3ead11bd9ee1c0d53c79959e
-      size: 3427
+      md5: 80a53bf3c1f04062523fa5e72819cbd4
+      size: 4785
     - path: src/detector.py
       hash: md5
       md5: f10f677e4af17d38ebea461bc83f8283
@@ -727,3 +727,42 @@ stages:
       md5: c2c84386af6dd7e77348f73e3827735d.dir
       size: 955
       nfiles: 1
+  package:
+    cmd: uv run python scripts/package.py --weights-path 
+      data/01_raw/models/yolo11s_mighty-mongoose_v5.1.0.pt --params-path 
+      params.yaml --output-path data/06_models/model.zip
+    deps:
+    - path: data/01_raw/models/yolo11s_mighty-mongoose_v5.1.0.pt
+      hash: md5
+      md5: 4657163d63ae9873728cf5bbf2c918f7
+      size: 19259923
+    - path: scripts/package.py
+      hash: md5
+      md5: 397ac76d0aeb061b59a43ab0237d43a0
+      size: 1635
+    - path: src/package.py
+      hash: md5
+      md5: a9f7fbe0a6142f8c8f2c6272220f15b5
+      size: 6217
+    params:
+      params.yaml:
+        infer:
+          confidence_threshold: 0.01
+          iou_nms: 0.2
+          image_size: 1024
+        prepare.model_filename: yolo11s_mighty-mongoose_v5.1.0.pt
+        track:
+          confidence_threshold: 0.3
+          iou_threshold: 0.1
+          min_consecutive: 5
+          max_detection_area: 0.05
+          max_misses: 0
+          use_confidence_filter: false
+          min_mean_confidence: 0.3
+          use_area_change_filter: false
+          min_area_change: 1.1
+    outs:
+    - path: data/06_models/model.zip
+      hash: md5
+      md5: a85c5f7ec5148d4db30c5a07f91b582c
+      size: 19260615
