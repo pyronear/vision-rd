@@ -149,7 +149,9 @@ def main() -> None:
             for frame in frames
         ]
 
-        is_alarm, tracks, confirmed_idx = tracker.process_sequence(frames)
+        is_alarm, tracks, confirmed_idx, _frame_traces = tracker.process_sequence(
+            frames
+        )
         gt = is_wf_sequence(args.data_dir / seq_id)
 
         total_dets = sum(len(f.detections) for f in frames)

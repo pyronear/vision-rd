@@ -1,5 +1,6 @@
 """Tests for FsmTrackingModel (TemporalModel implementation)."""
 
+import json
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -325,3 +326,96 @@ class TestTimestampNone:
 
         output = model.predict(frames)
         assert output.is_positive is False
+
+
+# ---------------------------------------------------------------------------
+# Trace in details
+# ---------------------------------------------------------------------------
+
+
+class TestTraceInDetails:
+    def test_trace_keys_present(self, tmp_path: Path) -> None:
+        yolo = MagicMock()
+        yolo.predict.return_value = _make_yolo_prediction([])
+
+        model = FsmTrackingModel(
+            yolo_model=yolo,
+            infer_params=INFER_PARAMS,
+            prefilter_params=PREFILTER_PARAMS,
+            tracker_params=TRACKER_PARAMS,
+        )
+        output = model.predict(_make_frames(5, tmp_path))
+
+        assert "frame_traces" in output.details
+        assert "tracks" in output.details
+        assert "original_sequence_length" in output.details
+        assert "padded_sequence_length" in output.details
+        assert "pre_filter_detections_per_frame" in output.details
+        assert "post_filter_detections_per_frame" in output.details
+
+    def test_existing_detail_keys_preserved(self, tmp_path: Path) -> None:
+        yolo = MagicMock()
+        yolo.predict.return_value = _make_yolo_prediction([])
+
+        model = FsmTrackingModel(
+            yolo_model=yolo,
+            infer_params=INFER_PARAMS,
+            prefilter_params=PREFILTER_PARAMS,
+            tracker_params=TRACKER_PARAMS,
+        )
+        output = model.predict(_make_frames(5, tmp_path))
+
+        assert "num_tracks" in output.details
+        assert "num_confirmed_tracks" in output.details
+        assert "num_detections_total" in output.details
+
+    def test_padding_info(self, tmp_path: Path) -> None:
+        det = (0, 0.5, 0.5, 0.1, 0.1, 0.8)
+        yolo = MagicMock()
+        yolo.predict.return_value = _make_yolo_prediction([det])
+
+        model = FsmTrackingModel(
+            yolo_model=yolo,
+            infer_params=INFER_PARAMS,
+            prefilter_params=PREFILTER_PARAMS,
+            tracker_params=TRACKER_PARAMS,
+            min_sequence_length=5,
+        )
+        # 2 frames, padded to 5
+        output = model.predict(_make_frames(2, tmp_path))
+
+        assert output.details["original_sequence_length"] == 2
+        assert output.details["padded_sequence_length"] == 5
+
+    def test_frame_traces_match_padded_length(self, tmp_path: Path) -> None:
+        det = (0, 0.5, 0.5, 0.1, 0.1, 0.8)
+        yolo = MagicMock()
+        yolo.predict.return_value = _make_yolo_prediction([det])
+
+        model = FsmTrackingModel(
+            yolo_model=yolo,
+            infer_params=INFER_PARAMS,
+            prefilter_params=PREFILTER_PARAMS,
+            tracker_params=TRACKER_PARAMS,
+            min_sequence_length=5,
+        )
+        output = model.predict(_make_frames(2, tmp_path))
+
+        assert len(output.details["frame_traces"]) == 5
+
+    def test_details_json_serializable(self, tmp_path: Path) -> None:
+        det = (0, 0.5, 0.5, 0.1, 0.1, 0.8)
+        yolo = MagicMock()
+        yolo.predict.return_value = _make_yolo_prediction([det])
+
+        model = FsmTrackingModel(
+            yolo_model=yolo,
+            infer_params=INFER_PARAMS,
+            prefilter_params=PREFILTER_PARAMS,
+            tracker_params=TRACKER_PARAMS,
+            min_sequence_length=5,
+        )
+        output = model.predict(_make_frames(5, tmp_path))
+
+        serialized = json.dumps(output.details)
+        assert isinstance(serialized, str)

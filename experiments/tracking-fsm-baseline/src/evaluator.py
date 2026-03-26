@@ -180,7 +180,9 @@ def evaluate_tracker(
             for frame in frames
         ]
 
-        is_alarm, _tracks, confirmed_idx = tracker.process_sequence(filtered_frames)
+        is_alarm, _tracks, confirmed_idx, _frame_traces = tracker.process_sequence(
+            filtered_frames
+        )
         first_ts = filtered_frames[0].timestamp if filtered_frames else None
         confirmed_ts = (
             filtered_frames[confirmed_idx].timestamp
