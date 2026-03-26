@@ -5167,14 +5167,13 @@ name = "tracking-fsm-baseline"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "dvc", extra = ["s3"] },
     { name = "huggingface-hub" },
+    { name = "matplotlib" },
     { name = "numpy" },
-    { name = "opencv-python-headless" },
     { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
     { name = "pandas", version = "3.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
-    { name = "pillow" },
     { name = "pyrocore" },
+    { name = "pyyaml" },
     { name = "seaborn" },
     { name = "tqdm" },
     { name = "ultralytics" },
@@ -5182,6 +5181,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "dvc", extra = ["s3"] },
     { name = "nbqa" },
     { name = "nbstripout" },
     { name = "pytest" },
@@ -5193,13 +5193,12 @@ explore = [
 
 [package.metadata]
 requires-dist = [
-    { name = "dvc", extras = ["s3"], specifier = ">=3.56" },
     { name = "huggingface-hub", specifier = ">=0.24" },
+    { name = "matplotlib", specifier = ">=3.8" },
     { name = "numpy", specifier = ">=1.26,<2" },
-    { name = "opencv-python-headless", specifier = ">=4.8" },
     { name = "pandas", specifier = ">=2.1" },
-    { name = "pillow", specifier = ">=10.0" },
     { name = "pyrocore", directory = "../../lib/pyrocore" },
+    { name = "pyyaml", specifier = ">=6.0" },
     { name = "seaborn", specifier = ">=0.13" },
     { name = "tqdm", specifier = ">=4.66" },
     { name = "ultralytics", specifier = ">=8.3" },
@@ -5207,6 +5206,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "dvc", extras = ["s3"], specifier = ">=3.56" },
     { name = "nbqa", specifier = ">=1.9" },
     { name = "nbstripout", specifier = ">=0.8" },
     { name = "pytest", specifier = ">=8.0" },
