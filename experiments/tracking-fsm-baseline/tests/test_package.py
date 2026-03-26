@@ -27,6 +27,9 @@ SAMPLE_PARAMS: dict = {
         "iou_nms": 0.2,
         "image_size": 1024,
     },
+    "pad": {
+        "min_sequence_length": 10,
+    },
     "track": {
         "confidence_threshold": 0.3,
         "iou_threshold": 0.1,
@@ -117,6 +120,7 @@ class TestConfigSchema:
         with zipfile.ZipFile(built_archive, "r") as zf:
             config = yaml.safe_load(zf.read(CONFIG_FILENAME))
         assert "infer" in config
+        assert "pad" in config
         assert "prefilter" in config
         assert "tracker" in config
 

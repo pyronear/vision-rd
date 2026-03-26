@@ -30,11 +30,13 @@ class FsmTrackingModel(TemporalModel):
         infer_params: dict[str, Any],
         prefilter_params: dict[str, Any],
         tracker_params: dict[str, Any],
+        min_sequence_length: int = 10,
     ) -> None:
         self._yolo_model = yolo_model
         self._infer_params = infer_params
         self._prefilter_params = prefilter_params
         self._tracker_params = tracker_params
+        self._min_sequence_length = min_sequence_length
 
     @classmethod
     def from_package(cls, package_path: Path) -> Self:
@@ -50,6 +52,7 @@ class FsmTrackingModel(TemporalModel):
             infer_params=pkg.infer_params,
             prefilter_params=pkg.prefilter_params,
             tracker_params=pkg.tracker_params,
+            min_sequence_length=pkg.pad_params["min_sequence_length"],
         )
 
     def predict(self, frames: list[Frame]) -> TemporalModelOutput:
@@ -64,7 +67,7 @@ class FsmTrackingModel(TemporalModel):
             metadata in ``details``.
         """
         frame_results = self._run_inference(frames)
-        padded = pad_sequence(frame_results, self._tracker_params["min_consecutive"])
+        padded = pad_sequence(frame_results, self._min_sequence_length)
         filtered = self._filter_detections(padded)
 
         tracker = SimpleTracker(**self._tracker_params)

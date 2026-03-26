@@ -112,6 +112,7 @@ class TestConstruction:
         pkg.infer_params = INFER_PARAMS
         pkg.prefilter_params = PREFILTER_PARAMS
         pkg.tracker_params = TRACKER_PARAMS
+        pkg.pad_params = {"min_sequence_length": 10}
         mock_load.return_value = pkg
 
         archive_path = tmp_path / "model.zip"
@@ -194,7 +195,7 @@ class TestPredictConsecutiveHits:
 
 class TestPadding:
     def test_short_sequence_gets_padded(self, tmp_path: Path) -> None:
-        """A 2-frame sequence with min_consecutive=3 should still work."""
+        """A 2-frame sequence with min_sequence_length=3 should still work."""
         det = (0, 0.5, 0.5, 0.1, 0.1, 0.8)
         yolo = MagicMock()
         yolo.predict.return_value = _make_yolo_prediction([det])
@@ -204,8 +205,9 @@ class TestPadding:
             infer_params=INFER_PARAMS,
             prefilter_params=PREFILTER_PARAMS,
             tracker_params=TRACKER_PARAMS,  # min_consecutive=3
+            min_sequence_length=3,
         )
-        # Only 2 frames — less than min_consecutive
+        # Only 2 frames — less than min_sequence_length
         frames = _make_frames(2, tmp_path)
         output = model.predict(frames)
 
@@ -288,6 +290,7 @@ class TestOutputDetails:
             infer_params=INFER_PARAMS,
             prefilter_params=PREFILTER_PARAMS,
             tracker_params=TRACKER_PARAMS,
+            min_sequence_length=5,
         )
         output = model.predict(_make_frames(5, tmp_path))
 

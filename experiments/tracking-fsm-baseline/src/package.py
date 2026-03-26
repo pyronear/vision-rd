@@ -46,6 +46,11 @@ class ModelPackage:
         return self.config["infer"]
 
     @property
+    def pad_params(self) -> dict[str, Any]:
+        """Sequence padding parameters."""
+        return self.config["pad"]
+
+    @property
     def prefilter_params(self) -> dict[str, Any]:
         """Detection pre-filter parameters (applied before the tracker)."""
         return self.config["prefilter"]
@@ -161,16 +166,20 @@ def _build_config(params: dict[str, Any]) -> dict[str, Any]:
     """Build a package config from the full ``params.yaml`` dictionary.
 
     Extracts only the fields relevant at inference time and reshapes them
-    into the package config schema with ``infer``, ``prefilter``, and
-    ``tracker`` sections.
+    into the package config schema with ``infer``, ``prefilter``, ``pad``,
+    and ``tracker`` sections.
     """
     infer = params["infer"]
+    pad = params["pad"]
     track = params["track"]
     return {
         "infer": {
             "confidence_threshold": infer["confidence_threshold"],
             "iou_nms": infer["iou_nms"],
             "image_size": infer["image_size"],
+        },
+        "pad": {
+            "min_sequence_length": pad["min_sequence_length"],
         },
         "prefilter": {
             "confidence_threshold": track["confidence_threshold"],
