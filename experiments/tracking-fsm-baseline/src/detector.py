@@ -19,6 +19,62 @@ def load_model(model_path: Path) -> YOLO:
     return YOLO(str(model_path))
 
 
+def run_inference_on_frame(
+    model: YOLO,
+    image_path: Path,
+    frame_id: str,
+    timestamp: datetime,
+    conf: float,
+    iou_nms: float,
+    img_size: int,
+) -> FrameResult:
+    """Run YOLO on a single frame image.
+
+    Args:
+        model: Loaded YOLO model instance.
+        image_path: Path to the frame image file.
+        frame_id: Unique identifier for this frame (typically filename stem).
+        timestamp: Capture time for this frame.
+        conf: Minimum confidence threshold for YOLO predictions.
+        iou_nms: IoU threshold used by Non-Maximum Suppression.
+        img_size: Input image size (pixels) passed to YOLO.
+
+    Returns:
+        A :class:`FrameResult` with normalized center-based detections (xywhn).
+    """
+    preds = model.predict(
+        str(image_path),
+        conf=conf,
+        iou=iou_nms,
+        imgsz=img_size,
+        verbose=False,
+    )
+
+    detections = []
+    for pred in preds:
+        boxes = pred.boxes
+        if boxes is None or len(boxes) == 0:
+            continue
+        for i in range(len(boxes)):
+            xywhn = boxes.xywhn[i].tolist()
+            detections.append(
+                Detection(
+                    class_id=int(boxes.cls[i].item()),
+                    cx=xywhn[0],
+                    cy=xywhn[1],
+                    w=xywhn[2],
+                    h=xywhn[3],
+                    confidence=float(boxes.conf[i].item()),
+                )
+            )
+
+    return FrameResult(
+        frame_id=frame_id,
+        timestamp=timestamp,
+        detections=detections,
+    )
+
+
 def run_inference_on_sequence(
     model: YOLO,
     sequence_dir: Path,
@@ -40,45 +96,18 @@ def run_inference_on_sequence(
         normalized center-based coordinates (xywhn).
     """
     image_paths = get_sorted_frames(sequence_dir)
-    results = []
-
-    for img_path in image_paths:
-        timestamp = parse_timestamp(img_path.name)
-        preds = model.predict(
-            str(img_path),
+    return [
+        run_inference_on_frame(
+            model=model,
+            image_path=img_path,
+            frame_id=img_path.stem,
+            timestamp=parse_timestamp(img_path.name),
             conf=conf,
-            iou=iou_nms,
-            imgsz=img_size,
-            verbose=False,
+            iou_nms=iou_nms,
+            img_size=img_size,
         )
-
-        detections = []
-        for pred in preds:
-            boxes = pred.boxes
-            if boxes is None or len(boxes) == 0:
-                continue
-            for i in range(len(boxes)):
-                xywhn = boxes.xywhn[i].tolist()
-                detections.append(
-                    Detection(
-                        class_id=int(boxes.cls[i].item()),
-                        cx=xywhn[0],
-                        cy=xywhn[1],
-                        w=xywhn[2],
-                        h=xywhn[3],
-                        confidence=float(boxes.conf[i].item()),
-                    )
-                )
-
-        results.append(
-            FrameResult(
-                frame_id=img_path.stem,
-                timestamp=timestamp,
-                detections=detections,
-            )
-        )
-
-    return results
+        for img_path in image_paths
+    ]
 
 
 def save_inference_results(results: list[FrameResult], output_path: Path) -> None:
