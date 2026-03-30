@@ -1,0 +1,27 @@
+[project]
+name = "image-capture"
+version = "0.1.0"
+description = "Hourly image capture from Pyronear cameras (8am–8pm)"
+requires-python = ">=3.11"
+dependencies = [
+    "Pillow>=10.0",
+    "requests>=2.31",
+]
+
+[dependency-groups]
+dev = [
+    "nbqa>=1.9",
+    "nbstripout>=0.8",
+    "pytest>=8.0",
+    "ruff>=0.9",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B", "SIM", "PLC0415"]
+
+[tool.ruff.format]
+quote-style = "double"

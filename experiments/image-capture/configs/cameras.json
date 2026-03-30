@@ -1,0 +1,17 @@
+{
+  "api_port": 8081,
+  "cameras": [
+    {"site": "pouncho-agast", "ip": "192.168.255.66"},
+    {"site": "sdis77_croix-augas", "ip": "192.168.255.14"},
+    {"site": "sdis77_moret-sur-loing", "ip": "192.168.255.18"},
+    {"site": "sdis77_nemours", "ip": "192.168.255.22"},
+    {"site": "sdis77_videlles", "ip": "192.168.255.26"},
+    {"site": "sis67_haguenau", "ip": "192.168.255.94"},
+    {"site": "sis67_betschdorf", "ip": "192.168.255.98"},
+    {"site": "sis67_bischwiller", "ip": "192.168.255.102"},
+    {"site": "germersheim_tour1", "ip": "192.168.255.106"},
+    {"site": "vendoeuvres", "ip": "192.168.255.130"},
+    {"site": "laluque", "ip": "192.168.255.134"},
+    {"site": "morcenx", "ip": "192.168.255.166"}
+  ]
+}
