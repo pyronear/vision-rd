@@ -1,6 +1,6 @@
 # Temporal Model Leaderboard
 
-Standardized evaluation and ranking of `TemporalModel` implementations on the [pyro-dataset](https://github.com/pyronear/pyro-dataset) v2.2.0 sequential test set.
+Standardized evaluation and ranking of `TemporalModel` implementations on the [pyro-dataset](https://github.com/pyronear/pyro-dataset) sequential test set.
 
 ## Leaderboard
 
@@ -37,7 +37,7 @@ See also: [time-wildfire](https://github.com/rensortino/time-wildfire) -- collea
 
 ## Data
 
-Test set imported via DVC from [pyro-dataset](https://github.com/pyronear/pyro-dataset) v2.2.0:
+Test set imported via DVC from [pyro-dataset](https://github.com/pyronear/pyro-dataset):
 - 149 wildfire (positive) + 149 false positive (negative) sequences
 - Ground truth determined by directory structure (`wildfire/` vs `fp/`)
 - Max 20 frames per sequence, 30s apart

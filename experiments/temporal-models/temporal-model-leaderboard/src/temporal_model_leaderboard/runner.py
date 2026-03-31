@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-from pyrocore import TemporalModel
+from pyrocore import Frame, TemporalModel
 
 from .dataset import get_sorted_frames, list_sequences
 from .types import SequenceResult
@@ -73,7 +73,7 @@ def _compute_ttd(
     ground_truth: bool,
     predicted: bool,
     trigger_frame_index: int | None,
-    frames: list,
+    frames: list[Frame],
 ) -> float | None:
     """Compute time-to-detection in seconds for a true positive.
 

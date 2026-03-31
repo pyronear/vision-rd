@@ -1,6 +1,6 @@
 """Pyro-dataset test set discovery and ground-truth labeling.
 
-Reads the v2.2.0 sequential test set structure where ground truth is
+Reads the sequential test set structure where ground truth is
 determined by directory location (``wildfire/`` vs ``fp/``).
 """
 
