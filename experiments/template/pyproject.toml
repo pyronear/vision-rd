@@ -8,7 +8,7 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-pyrocore = { path = "../../lib/pyrocore" }
+pyrocore = { path = "../../../lib/pyrocore" }
 
 [dependency-groups]
 dev = [
