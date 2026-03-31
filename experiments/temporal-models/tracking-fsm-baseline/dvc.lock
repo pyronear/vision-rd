@@ -471,24 +471,24 @@ stages:
       nfiles: 2865
     - path: scripts/sweep.py
       hash: md5
-      md5: d8dfd97964b485a6bd2ad3f4eb1fd244
-      size: 8134
-    - path: src/evaluator.py
+      md5: bb12d1376ee4b8ac885d25b8e725831c
+      size: 8224
+    - path: src/tracking_fsm_baseline/evaluator.py
       hash: md5
-      md5: 2b4f05be4ad37e545e5dfb6cfb020521
-      size: 11003
-    - path: src/tracker.py
+      md5: d6d71058fa05ff818a3da0e9e017cadc
+      size: 11034
+    - path: src/tracking_fsm_baseline/tracker.py
       hash: md5
-      md5: 0dff4b7deb6ff01154a2c5ab902432d2
-      size: 10707
-    - path: src/types.py
+      md5: 27d2515c26f5bc414e8bc1063a57069f
+      size: 12671
+    - path: src/tracking_fsm_baseline/types.py
       hash: md5
-      md5: 0137d75da12d6a90254153b07b4ea367
-      size: 3971
+      md5: a5ecd3bc770383fa41ca02dc49bb9852
+      size: 6110
     outs:
     - path: data/08_reporting/sweep/train/pyronear
       hash: md5
-      md5: 6e92b2e9b05ee32677e7cabf40f3fe5f.dir
+      md5: b361fadc9d28ba5b0bcdfca74ca18464.dir
       size: 3369553
       nfiles: 1
   sweep@val_pyronear:
@@ -509,24 +509,24 @@ stages:
       nfiles: 294
     - path: scripts/sweep.py
       hash: md5
-      md5: d8dfd97964b485a6bd2ad3f4eb1fd244
-      size: 8134
-    - path: src/evaluator.py
+      md5: bb12d1376ee4b8ac885d25b8e725831c
+      size: 8224
+    - path: src/tracking_fsm_baseline/evaluator.py
       hash: md5
-      md5: 2b4f05be4ad37e545e5dfb6cfb020521
-      size: 11003
-    - path: src/tracker.py
+      md5: d6d71058fa05ff818a3da0e9e017cadc
+      size: 11034
+    - path: src/tracking_fsm_baseline/tracker.py
       hash: md5
-      md5: 0dff4b7deb6ff01154a2c5ab902432d2
-      size: 10707
-    - path: src/types.py
+      md5: 27d2515c26f5bc414e8bc1063a57069f
+      size: 12671
+    - path: src/tracking_fsm_baseline/types.py
       hash: md5
-      md5: 0137d75da12d6a90254153b07b4ea367
-      size: 3971
+      md5: a5ecd3bc770383fa41ca02dc49bb9852
+      size: 6110
     outs:
     - path: data/08_reporting/sweep/val/pyronear
       hash: md5
-      md5: fb08fb1cd725aeb59ab9a8c45d464b53.dir
+      md5: 007a6ff3ddfe07227087f66f3687653e.dir
       size: 3130441
       nfiles: 1
   ablation@train_all:
@@ -548,20 +548,20 @@ stages:
       nfiles: 2865
     - path: scripts/ablation.py
       hash: md5
-      md5: 2d3d883c1731bf734198e87f6e246338
-      size: 5391
-    - path: src/evaluator.py
+      md5: 218e4577c22bf0901d5d9567502b2275
+      size: 5481
+    - path: src/tracking_fsm_baseline/evaluator.py
       hash: md5
-      md5: 2b4f05be4ad37e545e5dfb6cfb020521
-      size: 11003
-    - path: src/tracker.py
+      md5: d6d71058fa05ff818a3da0e9e017cadc
+      size: 11034
+    - path: src/tracking_fsm_baseline/tracker.py
       hash: md5
-      md5: 0dff4b7deb6ff01154a2c5ab902432d2
-      size: 10707
-    - path: src/types.py
+      md5: 27d2515c26f5bc414e8bc1063a57069f
+      size: 12671
+    - path: src/tracking_fsm_baseline/types.py
       hash: md5
-      md5: 0137d75da12d6a90254153b07b4ea367
-      size: 3971
+      md5: a5ecd3bc770383fa41ca02dc49bb9852
+      size: 6110
     params:
       params.yaml:
         ablation:
@@ -597,20 +597,20 @@ stages:
       nfiles: 294
     - path: scripts/ablation.py
       hash: md5
-      md5: 2d3d883c1731bf734198e87f6e246338
-      size: 5391
-    - path: src/evaluator.py
+      md5: 218e4577c22bf0901d5d9567502b2275
+      size: 5481
+    - path: src/tracking_fsm_baseline/evaluator.py
       hash: md5
-      md5: 2b4f05be4ad37e545e5dfb6cfb020521
-      size: 11003
-    - path: src/tracker.py
+      md5: d6d71058fa05ff818a3da0e9e017cadc
+      size: 11034
+    - path: src/tracking_fsm_baseline/tracker.py
       hash: md5
-      md5: 0dff4b7deb6ff01154a2c5ab902432d2
-      size: 10707
-    - path: src/types.py
+      md5: 27d2515c26f5bc414e8bc1063a57069f
+      size: 12671
+    - path: src/tracking_fsm_baseline/types.py
       hash: md5
-      md5: 0137d75da12d6a90254153b07b4ea367
-      size: 3971
+      md5: a5ecd3bc770383fa41ca02dc49bb9852
+      size: 6110
     params:
       params.yaml:
         ablation:
@@ -647,20 +647,20 @@ stages:
       nfiles: 2865
     - path: scripts/ablation.py
       hash: md5
-      md5: 2d3d883c1731bf734198e87f6e246338
-      size: 5391
-    - path: src/evaluator.py
+      md5: 218e4577c22bf0901d5d9567502b2275
+      size: 5481
+    - path: src/tracking_fsm_baseline/evaluator.py
       hash: md5
-      md5: 2b4f05be4ad37e545e5dfb6cfb020521
-      size: 11003
-    - path: src/tracker.py
+      md5: d6d71058fa05ff818a3da0e9e017cadc
+      size: 11034
+    - path: src/tracking_fsm_baseline/tracker.py
       hash: md5
-      md5: 0dff4b7deb6ff01154a2c5ab902432d2
-      size: 10707
-    - path: src/types.py
+      md5: 27d2515c26f5bc414e8bc1063a57069f
+      size: 12671
+    - path: src/tracking_fsm_baseline/types.py
       hash: md5
-      md5: 0137d75da12d6a90254153b07b4ea367
-      size: 3971
+      md5: a5ecd3bc770383fa41ca02dc49bb9852
+      size: 6110
     params:
       params.yaml:
         ablation:
@@ -697,20 +697,20 @@ stages:
       nfiles: 294
     - path: scripts/ablation.py
       hash: md5
-      md5: 2d3d883c1731bf734198e87f6e246338
-      size: 5391
-    - path: src/evaluator.py
+      md5: 218e4577c22bf0901d5d9567502b2275
+      size: 5481
+    - path: src/tracking_fsm_baseline/evaluator.py
       hash: md5
-      md5: 2b4f05be4ad37e545e5dfb6cfb020521
-      size: 11003
-    - path: src/tracker.py
+      md5: d6d71058fa05ff818a3da0e9e017cadc
+      size: 11034
+    - path: src/tracking_fsm_baseline/tracker.py
       hash: md5
-      md5: 0dff4b7deb6ff01154a2c5ab902432d2
-      size: 10707
-    - path: src/types.py
+      md5: 27d2515c26f5bc414e8bc1063a57069f
+      size: 12671
+    - path: src/tracking_fsm_baseline/types.py
       hash: md5
-      md5: 0137d75da12d6a90254153b07b4ea367
-      size: 3971
+      md5: a5ecd3bc770383fa41ca02dc49bb9852
+      size: 6110
     params:
       params.yaml:
         ablation:
