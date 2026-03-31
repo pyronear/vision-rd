@@ -13,10 +13,16 @@ Shared types and base model for Pyronear temporal smoke detection experiments.
 Experiments add pyrocore as a path dependency in their `pyproject.toml`:
 
 ```toml
+[project]
 dependencies = [
-    "pyrocore @ file:///${PROJECT_ROOT}/../../lib/pyrocore",
+    "pyrocore",
 ]
+
+[tool.uv.sources]
+pyrocore = { path = "../../../lib/pyrocore" }
 ```
+
+Adjust the relative path depth based on the experiment's nesting level.
 
 Then subclass `TemporalModel` and implement `predict`:
 
