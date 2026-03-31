@@ -1,20 +1,20 @@
 [project]
-name = "project-name"
+name = "temporal-model-leaderboard"
 version = "0.1.0"
-description = "Experiment template"
+description = "Evaluate and rank temporal smoke detection models on pyro-dataset test set"
 requires-python = ">=3.11"
 dependencies = [
     "pyrocore",
+    "tracking-fsm-baseline",
 ]
 
 [tool.uv.sources]
-pyrocore = { path = "../../lib/pyrocore" }
+pyrocore = { path = "../../../lib/pyrocore" }
+tracking-fsm-baseline = { path = "../tracking-fsm-baseline" }
 
 [dependency-groups]
 dev = [
     "dvc[s3]>=3.56",
-    "nbqa>=1.9",
-    "nbstripout>=0.8",
     "pytest>=8.0",
     "ruff>=0.9",
 ]
@@ -24,7 +24,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/project_name"]
+packages = ["src/temporal_model_leaderboard"]
 
 [tool.ruff]
 target-version = "py311"

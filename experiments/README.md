@@ -2,32 +2,41 @@
 
 This directory contains R&D experiments for Pyronear wildfire smoke detection. Each experiment is a self-contained Python project with its own dependencies, data, and results.
 
+Experiments are organized by category:
+
+```
+experiments/
+├── template/                          # Starter template (copy to create new experiments)
+└── temporal-models/                   # Temporal smoke detection models
+    ├── tracking-fsm-baseline/         # YOLO + IoU FSM tracker baseline
+    └── temporal-model-leaderboard/    # Evaluation & ranking of temporal models
+```
+
 ## 🚀 Starting a New Experiment
 
 ```bash
-cp -r template/ my-experiment-name/
-cd my-experiment-name/
+cp -r template/ <category>/<kebab-case-name>/
+cd <category>/<kebab-case-name>/
 ```
 
-Then update `pyproject.toml` with the experiment name, description, and dependencies:
+Then:
 
-```bash
-# Edit pyproject.toml (name, description, deps)
-make install
-```
+1. Rename `src/project_name/` to `src/<snake_case_name>/`
+2. Update `pyproject.toml`: name, description, dependencies, `packages = ["src/<snake_case_name>"]`, and `[tool.uv.sources]` paths (adjust `../` depth based on nesting)
+3. Run `make install`
 
 ## 📁 Experiment Template Structure
 
 ```
-experiments/<experiment-name>/
+experiments/<category>/<experiment-name>/
 ├── README.md              # Objective, approach, results, how to reproduce
-├── pyproject.toml         # Experiment deps (uv) + ruff config
+├── pyproject.toml         # Experiment deps (uv) + hatchling build + ruff config
 ├── uv.lock
 ├── .python-version        # Pinned Python version
 ├── .dvc/                  # Experiment-specific DVC config
 ├── .dvcignore
-├── Makefile               # install, lint, format
-├── src/                   # Source code
+├── Makefile               # install, lint, format, test
+├── src/<package_name>/    # Source code (unique importable package name)
 ├── notebooks/             # Exploration notebooks
 ├── configs/               # Experiment configs (YAML)
 ├── scripts/               # Training/eval scripts

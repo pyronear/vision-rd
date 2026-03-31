@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tracking_fsm_baseline"]
+
+[project]
+name = "tracking-fsm-baseline"
+version = "0.1.0"
+description = "Temporal tracking baseline for smoke FP reduction (FLAME-inspired)"
+requires-python = ">=3.11"
+dependencies = [
+    "pyrocore",
+    "huggingface-hub>=0.24",
+    "matplotlib>=3.8",
+    "numpy>=1.26,<2",
+    "pandas>=2.1",
+    "pyyaml>=6.0",
+    "seaborn>=0.13",
+    "tqdm>=4.66",
+    "ultralytics>=8.3",
+]
+
+[tool.uv.sources]
+pyrocore = { path = "../../../lib/pyrocore" }
+
+[dependency-groups]
+dev = [
+    "dvc[s3]>=3.56",
+    "nbqa>=1.9",
+    "nbstripout>=0.8",
+    "pytest>=8.0",
+    "ruff>=0.9",
+]
+explore = [
+    "fiftyone>=1.0",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B", "SIM", "PLC0415"]
+
+[tool.ruff.format]
+quote-style = "double"
