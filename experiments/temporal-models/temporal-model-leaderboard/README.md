@@ -55,5 +55,6 @@ uv run dvc repro           # run evaluation pipeline
 1. Implement `TemporalModel` in a new experiment under `experiments/temporal-models/`
 2. Package the model (see [tracking-fsm-baseline](../tracking-fsm-baseline/) for the zip format)
 3. Add a `dvc add` for the model package in `data/01_raw/models/`
-4. Add an `evaluate_<name>` stage in `dvc.yaml`
-5. Run `uv run dvc repro`
+4. Register the model in `MODEL_REGISTRY` in `scripts/evaluate.py`
+5. Add an `evaluate_<name>` stage in `dvc.yaml` (with `--model-type <registry-key>`)
+6. Run `uv run dvc repro`
