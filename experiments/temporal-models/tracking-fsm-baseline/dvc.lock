@@ -397,24 +397,24 @@ stages:
       nfiles: 2865
     - path: scripts/sweep.py
       hash: md5
-      md5: d8dfd97964b485a6bd2ad3f4eb1fd244
-      size: 8134
-    - path: src/evaluator.py
+      md5: bb12d1376ee4b8ac885d25b8e725831c
+      size: 8224
+    - path: src/tracking_fsm_baseline/evaluator.py
       hash: md5
-      md5: 2b4f05be4ad37e545e5dfb6cfb020521
-      size: 11003
-    - path: src/tracker.py
+      md5: d6d71058fa05ff818a3da0e9e017cadc
+      size: 11034
+    - path: src/tracking_fsm_baseline/tracker.py
       hash: md5
-      md5: 0dff4b7deb6ff01154a2c5ab902432d2
-      size: 10707
-    - path: src/types.py
+      md5: 27d2515c26f5bc414e8bc1063a57069f
+      size: 12671
+    - path: src/tracking_fsm_baseline/types.py
       hash: md5
-      md5: 0137d75da12d6a90254153b07b4ea367
-      size: 3971
+      md5: a5ecd3bc770383fa41ca02dc49bb9852
+      size: 6110
     outs:
     - path: data/08_reporting/sweep/train/all
       hash: md5
-      md5: 652530c3144b63525dd65c29bbf12439.dir
+      md5: 60eb24ee3f075de1b015d2f0b603683a.dir
       size: 3405864
       nfiles: 1
   sweep@val_all:
@@ -433,24 +433,24 @@ stages:
       nfiles: 294
     - path: scripts/sweep.py
       hash: md5
-      md5: d8dfd97964b485a6bd2ad3f4eb1fd244
-      size: 8134
-    - path: src/evaluator.py
+      md5: bb12d1376ee4b8ac885d25b8e725831c
+      size: 8224
+    - path: src/tracking_fsm_baseline/evaluator.py
       hash: md5
-      md5: 2b4f05be4ad37e545e5dfb6cfb020521
-      size: 11003
-    - path: src/tracker.py
+      md5: d6d71058fa05ff818a3da0e9e017cadc
+      size: 11034
+    - path: src/tracking_fsm_baseline/tracker.py
       hash: md5
-      md5: 0dff4b7deb6ff01154a2c5ab902432d2
-      size: 10707
-    - path: src/types.py
+      md5: 27d2515c26f5bc414e8bc1063a57069f
+      size: 12671
+    - path: src/tracking_fsm_baseline/types.py
       hash: md5
-      md5: 0137d75da12d6a90254153b07b4ea367
-      size: 3971
+      md5: a5ecd3bc770383fa41ca02dc49bb9852
+      size: 6110
     outs:
     - path: data/08_reporting/sweep/val/all
       hash: md5
-      md5: 297d5185c5b36721440416b7cd5c27e7.dir
+      md5: 542f8b1605391f67eee193e78edeabfa.dir
       size: 3174837
       nfiles: 1
   sweep@train_pyronear:

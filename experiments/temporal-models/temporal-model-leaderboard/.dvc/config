@@ -1,0 +1,6 @@
+[core]
+    no_scm = True
+    analytics = false
+    remote = s3remote
+['remote "s3remote"']
+    url = s3://pyro-vision-rd/dvc/experiments/temporal-model-leaderboard/
