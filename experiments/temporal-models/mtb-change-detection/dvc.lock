@@ -1,0 +1,343 @@
+schema: '2.0'
+stages:
+  infer@val:
+    cmd: uv run python scripts/infer.py --data-dir data/01_raw/datasets/val 
+      --model-path data/01_raw/models/yolo11s_mighty-mongoose_v5.1.0.pt 
+      --output-dir data/02_intermediate/val --confidence-threshold 0.01 
+      --iou-nms 0.2 --image-size 1024
+    deps:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: c178b34b1bd867a3f2e9c5dad9a838ae.dir
+      size: 415167241
+      nfiles: 8268
+    - path: data/01_raw/models/yolo11s_mighty-mongoose_v5.1.0.pt
+      hash: md5
+      md5: 4657163d63ae9873728cf5bbf2c918f7
+      size: 19259923
+    - path: scripts/infer.py
+      hash: md5
+      md5: 176a9f6c07b82744b76d78e12e60deda
+      size: 2808
+    - path: src/mtb_change_detection/data.py
+      hash: md5
+      md5: 8f8716562dc435637505c3cb513a7a47
+      size: 4556
+    - path: src/mtb_change_detection/detector.py
+      hash: md5
+      md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
+      size: 5120
+    - path: src/mtb_change_detection/types.py
+      hash: md5
+      md5: 31f29b242155840f2075fca43bffc2f4
+      size: 6303
+    params:
+      params.yaml:
+        infer:
+          confidence_threshold: 0.01
+          iou_nms: 0.2
+          image_size: 1024
+        prepare.model_filename: yolo11s_mighty-mongoose_v5.1.0.pt
+    outs:
+    - path: data/02_intermediate/val
+      hash: md5
+      md5: 30c7e155dbde23ca947f40c3b0a083a9.dir
+      size: 1426269
+      nfiles: 302
+  pad@val:
+    cmd: uv run python scripts/pad_sequences.py --infer-dir 
+      data/02_intermediate/val --output-dir data/03_primary/val 
+      --min-sequence-length 10
+    deps:
+    - path: data/02_intermediate/val
+      hash: md5
+      md5: 30c7e155dbde23ca947f40c3b0a083a9.dir
+      size: 1426269
+      nfiles: 302
+    - path: scripts/pad_sequences.py
+      hash: md5
+      md5: 2d94c253e65882dad2fd02514a3d7ad2
+      size: 2318
+    - path: src/mtb_change_detection/data.py
+      hash: md5
+      md5: 8f8716562dc435637505c3cb513a7a47
+      size: 4556
+    - path: src/mtb_change_detection/detector.py
+      hash: md5
+      md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
+      size: 5120
+    - path: src/mtb_change_detection/types.py
+      hash: md5
+      md5: 31f29b242155840f2075fca43bffc2f4
+      size: 6303
+    params:
+      params.yaml:
+        pad:
+          min_sequence_length: 10
+    outs:
+    - path: data/03_primary/val
+      hash: md5
+      md5: 3cace80e98ea019f818658e7a911fcc6.dir
+      size: 1604796
+      nfiles: 302
+  track@val:
+    cmd: uv run python scripts/track.py --infer-dir data/03_primary/val 
+      --data-dir data/01_raw/datasets/val --output-dir data/07_model_output/val 
+      --pixel-threshold 10 --min-change-ratio 0.01 --confidence-threshold 0.01 
+      --iou-threshold 0.1 --min-consecutive 2 --max-detection-area 1.0 
+      --max-misses 0 --use-confidence-filter false --min-mean-confidence 0.0 
+      --use-area-change-filter false --min-area-change 1.0
+    deps:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: c178b34b1bd867a3f2e9c5dad9a838ae.dir
+      size: 415167241
+      nfiles: 8268
+    - path: data/03_primary/val
+      hash: md5
+      md5: 3cace80e98ea019f818658e7a911fcc6.dir
+      size: 1604796
+      nfiles: 302
+    - path: scripts/track.py
+      hash: md5
+      md5: 47a0d111cc0bfefc8b3f54c8122a8041
+      size: 8477
+    - path: src/mtb_change_detection/change_detector.py
+      hash: md5
+      md5: 953ca1eadedf51fc057bf5d217daa8a0
+      size: 1858
+    - path: src/mtb_change_detection/data.py
+      hash: md5
+      md5: 8f8716562dc435637505c3cb513a7a47
+      size: 4556
+    - path: src/mtb_change_detection/detector.py
+      hash: md5
+      md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
+      size: 5120
+    - path: src/mtb_change_detection/tracker.py
+      hash: md5
+      md5: 27d2515c26f5bc414e8bc1063a57069f
+      size: 12671
+    - path: src/mtb_change_detection/types.py
+      hash: md5
+      md5: 31f29b242155840f2075fca43bffc2f4
+      size: 6303
+    params:
+      params.yaml:
+        change:
+          pixel_threshold: 10
+          min_change_ratio: 0.01
+        track:
+          confidence_threshold: 0.01
+          iou_threshold: 0.1
+          min_consecutive: 2
+          max_detection_area: 1.0
+          max_misses: 0
+          use_confidence_filter: false
+          min_mean_confidence: 0.0
+          use_area_change_filter: false
+          min_area_change: 1.0
+    outs:
+    - path: data/07_model_output/val
+      hash: md5
+      md5: afb791148045e966ae7dc2929a61c53c.dir
+      size: 101563
+      nfiles: 1
+  evaluate@val_all:
+    cmd: 'uv run python scripts/evaluate.py --track-dir data/07_model_output/val --output-dir
+      data/08_reporting/val/all '
+    deps:
+    - path: data/07_model_output/val
+      hash: md5
+      md5: afb791148045e966ae7dc2929a61c53c.dir
+      size: 101563
+      nfiles: 1
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 17a58161fbbbef80ad8112772d9d6f64
+      size: 3544
+    - path: src/mtb_change_detection/evaluator.py
+      hash: md5
+      md5: 1c8be4a0a9d403dae68bde6433b5fd33
+      size: 11040
+    outs:
+    - path: data/08_reporting/val/all/metrics.json
+      hash: md5
+      md5: 5f587b260986898e8151f8878151890a
+      size: 780
+    - path: data/08_reporting/val/all/plots
+      hash: md5
+      md5: 3c3b18124d8d3bef29768f978d32c87d.dir
+      size: 97473
+      nfiles: 4
+  infer@train:
+    cmd: uv run python scripts/infer.py --data-dir data/01_raw/datasets/train 
+      --model-path data/01_raw/models/yolo11s_mighty-mongoose_v5.1.0.pt 
+      --output-dir data/02_intermediate/train --confidence-threshold 0.01 
+      --iou-nms 0.2 --image-size 1024
+    deps:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: 93396ffb1654e2023eb75168251ef01b.dir
+      size: 4462554268
+      nfiles: 84784
+    - path: data/01_raw/models/yolo11s_mighty-mongoose_v5.1.0.pt
+      hash: md5
+      md5: 4657163d63ae9873728cf5bbf2c918f7
+      size: 19259923
+    - path: scripts/infer.py
+      hash: md5
+      md5: 176a9f6c07b82744b76d78e12e60deda
+      size: 2808
+    - path: src/mtb_change_detection/data.py
+      hash: md5
+      md5: 8f8716562dc435637505c3cb513a7a47
+      size: 4556
+    - path: src/mtb_change_detection/detector.py
+      hash: md5
+      md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
+      size: 5120
+    - path: src/mtb_change_detection/types.py
+      hash: md5
+      md5: 31f29b242155840f2075fca43bffc2f4
+      size: 6303
+    params:
+      params.yaml:
+        infer:
+          confidence_threshold: 0.01
+          iou_nms: 0.2
+          image_size: 1024
+        prepare.model_filename: yolo11s_mighty-mongoose_v5.1.0.pt
+    outs:
+    - path: data/02_intermediate/train
+      hash: md5
+      md5: 8f9cf745aedf312fa3f25bbbe3e87e24.dir
+      size: 15283311
+      nfiles: 2933
+  pad@train:
+    cmd: uv run python scripts/pad_sequences.py --infer-dir 
+      data/02_intermediate/train --output-dir data/03_primary/train 
+      --min-sequence-length 10
+    deps:
+    - path: data/02_intermediate/train
+      hash: md5
+      md5: 8f9cf745aedf312fa3f25bbbe3e87e24.dir
+      size: 15283311
+      nfiles: 2933
+    - path: scripts/pad_sequences.py
+      hash: md5
+      md5: 2d94c253e65882dad2fd02514a3d7ad2
+      size: 2318
+    - path: src/mtb_change_detection/data.py
+      hash: md5
+      md5: 8f8716562dc435637505c3cb513a7a47
+      size: 4556
+    - path: src/mtb_change_detection/detector.py
+      hash: md5
+      md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
+      size: 5120
+    - path: src/mtb_change_detection/types.py
+      hash: md5
+      md5: 31f29b242155840f2075fca43bffc2f4
+      size: 6303
+    params:
+      params.yaml:
+        pad:
+          min_sequence_length: 10
+    outs:
+    - path: data/03_primary/train
+      hash: md5
+      md5: d2c005a04c2aa55712f5739c179fafe1.dir
+      size: 16623827
+      nfiles: 2933
+  track@train:
+    cmd: uv run python scripts/track.py --infer-dir data/03_primary/train 
+      --data-dir data/01_raw/datasets/train --output-dir 
+      data/07_model_output/train --pixel-threshold 10 --min-change-ratio 0.01 
+      --confidence-threshold 0.01 --iou-threshold 0.1 --min-consecutive 2 
+      --max-detection-area 1.0 --max-misses 0 --use-confidence-filter false 
+      --min-mean-confidence 0.0 --use-area-change-filter false --min-area-change
+      1.0
+    deps:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: 93396ffb1654e2023eb75168251ef01b.dir
+      size: 4462554268
+      nfiles: 84784
+    - path: data/03_primary/train
+      hash: md5
+      md5: d2c005a04c2aa55712f5739c179fafe1.dir
+      size: 16623827
+      nfiles: 2933
+    - path: scripts/track.py
+      hash: md5
+      md5: 47a0d111cc0bfefc8b3f54c8122a8041
+      size: 8477
+    - path: src/mtb_change_detection/change_detector.py
+      hash: md5
+      md5: 953ca1eadedf51fc057bf5d217daa8a0
+      size: 1858
+    - path: src/mtb_change_detection/data.py
+      hash: md5
+      md5: 8f8716562dc435637505c3cb513a7a47
+      size: 4556
+    - path: src/mtb_change_detection/detector.py
+      hash: md5
+      md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
+      size: 5120
+    - path: src/mtb_change_detection/tracker.py
+      hash: md5
+      md5: 27d2515c26f5bc414e8bc1063a57069f
+      size: 12671
+    - path: src/mtb_change_detection/types.py
+      hash: md5
+      md5: 31f29b242155840f2075fca43bffc2f4
+      size: 6303
+    params:
+      params.yaml:
+        change:
+          pixel_threshold: 10
+          min_change_ratio: 0.01
+        track:
+          confidence_threshold: 0.01
+          iou_threshold: 0.1
+          min_consecutive: 2
+          max_detection_area: 1.0
+          max_misses: 0
+          use_confidence_filter: false
+          min_mean_confidence: 0.0
+          use_area_change_filter: false
+          min_area_change: 1.0
+    outs:
+    - path: data/07_model_output/train
+      hash: md5
+      md5: 8be1e12a76b60fd04d74112b4d977d74.dir
+      size: 988081
+      nfiles: 1
+  evaluate@train_all:
+    cmd: 'uv run python scripts/evaluate.py --track-dir data/07_model_output/train
+      --output-dir data/08_reporting/train/all '
+    deps:
+    - path: data/07_model_output/train
+      hash: md5
+      md5: 8be1e12a76b60fd04d74112b4d977d74.dir
+      size: 988081
+      nfiles: 1
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 17a58161fbbbef80ad8112772d9d6f64
+      size: 3544
+    - path: src/mtb_change_detection/evaluator.py
+      hash: md5
+      md5: 1c8be4a0a9d403dae68bde6433b5fd33
+      size: 11040
+    outs:
+    - path: data/08_reporting/train/all/metrics.json
+      hash: md5
+      md5: ce68485e8b6219a07f302a07809fae4f
+      size: 795
+    - path: data/08_reporting/train/all/plots
+      hash: md5
+      md5: 7b16ebe1b16c7e82a7598e6d7d9fc8fe.dir
+      size: 102053
+      nfiles: 4
