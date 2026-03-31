@@ -19,6 +19,7 @@ jobs:
       - id: find
         run: |
           experiments=$(find experiments -mindepth 1 -type d \
+            -not -path "experiments/template" \
             -exec test -f {}/pyproject.toml \; -print \
             | jq -R -s -c 'split("\n") | map(select(. != ""))')
           echo "experiments=$experiments" >> "$GITHUB_OUTPUT"
