@@ -21,8 +21,8 @@ stages:
       size: 2808
     - path: src/mtb_change_detection/data.py
       hash: md5
-      md5: 8f8716562dc435637505c3cb513a7a47
-      size: 4556
+      md5: 0227d77d6a1654f4b5df8102e9063fd1
+      size: 4570
     - path: src/mtb_change_detection/detector.py
       hash: md5
       md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
@@ -60,8 +60,8 @@ stages:
       size: 2318
     - path: src/mtb_change_detection/data.py
       hash: md5
-      md5: 8f8716562dc435637505c3cb513a7a47
-      size: 4556
+      md5: 0227d77d6a1654f4b5df8102e9063fd1
+      size: 4570
     - path: src/mtb_change_detection/detector.py
       hash: md5
       md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
@@ -100,16 +100,16 @@ stages:
       nfiles: 302
     - path: scripts/track.py
       hash: md5
-      md5: 47a0d111cc0bfefc8b3f54c8122a8041
-      size: 8477
+      md5: d5b1b170c09b97bb8f0ef29d119dc431
+      size: 9012
     - path: src/mtb_change_detection/change_detector.py
       hash: md5
       md5: 953ca1eadedf51fc057bf5d217daa8a0
       size: 1858
     - path: src/mtb_change_detection/data.py
       hash: md5
-      md5: 8f8716562dc435637505c3cb513a7a47
-      size: 4556
+      md5: 0227d77d6a1654f4b5df8102e9063fd1
+      size: 4570
     - path: src/mtb_change_detection/detector.py
       hash: md5
       md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
@@ -191,8 +191,8 @@ stages:
       size: 2808
     - path: src/mtb_change_detection/data.py
       hash: md5
-      md5: 8f8716562dc435637505c3cb513a7a47
-      size: 4556
+      md5: 0227d77d6a1654f4b5df8102e9063fd1
+      size: 4570
     - path: src/mtb_change_detection/detector.py
       hash: md5
       md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
@@ -230,8 +230,8 @@ stages:
       size: 2318
     - path: src/mtb_change_detection/data.py
       hash: md5
-      md5: 8f8716562dc435637505c3cb513a7a47
-      size: 4556
+      md5: 0227d77d6a1654f4b5df8102e9063fd1
+      size: 4570
     - path: src/mtb_change_detection/detector.py
       hash: md5
       md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
@@ -271,16 +271,16 @@ stages:
       nfiles: 2933
     - path: scripts/track.py
       hash: md5
-      md5: 47a0d111cc0bfefc8b3f54c8122a8041
-      size: 8477
+      md5: d5b1b170c09b97bb8f0ef29d119dc431
+      size: 9012
     - path: src/mtb_change_detection/change_detector.py
       hash: md5
       md5: 953ca1eadedf51fc057bf5d217daa8a0
       size: 1858
     - path: src/mtb_change_detection/data.py
       hash: md5
-      md5: 8f8716562dc435637505c3cb513a7a47
-      size: 4556
+      md5: 0227d77d6a1654f4b5df8102e9063fd1
+      size: 4570
     - path: src/mtb_change_detection/detector.py
       hash: md5
       md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
@@ -341,3 +341,220 @@ stages:
       md5: 7b16ebe1b16c7e82a7598e6d7d9fc8fe.dir
       size: 102053
       nfiles: 4
+  evaluate@val_pyronear:
+    cmd: uv run python scripts/evaluate.py --track-dir data/07_model_output/val 
+      --output-dir data/08_reporting/val/pyronear --filter-prefix pyronear
+    deps:
+    - path: data/07_model_output/val
+      hash: md5
+      md5: afb791148045e966ae7dc2929a61c53c.dir
+      size: 101563
+      nfiles: 1
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 17a58161fbbbef80ad8112772d9d6f64
+      size: 3544
+    - path: src/mtb_change_detection/evaluator.py
+      hash: md5
+      md5: 1c8be4a0a9d403dae68bde6433b5fd33
+      size: 11040
+    outs:
+    - path: data/08_reporting/val/pyronear/metrics.json
+      hash: md5
+      md5: 304ec23f6db95c88c20d66410977188e
+      size: 780
+    - path: data/08_reporting/val/pyronear/plots
+      hash: md5
+      md5: ec2a1f56b49037f1785d1a54506276d3.dir
+      size: 98327
+      nfiles: 4
+  evaluate@train_pyronear:
+    cmd: uv run python scripts/evaluate.py --track-dir 
+      data/07_model_output/train --output-dir data/08_reporting/train/pyronear 
+      --filter-prefix pyronear
+    deps:
+    - path: data/07_model_output/train
+      hash: md5
+      md5: 8be1e12a76b60fd04d74112b4d977d74.dir
+      size: 988081
+      nfiles: 1
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 17a58161fbbbef80ad8112772d9d6f64
+      size: 3544
+    - path: src/mtb_change_detection/evaluator.py
+      hash: md5
+      md5: 1c8be4a0a9d403dae68bde6433b5fd33
+      size: 11040
+    outs:
+    - path: data/08_reporting/train/pyronear/metrics.json
+      hash: md5
+      md5: eaf176726301d9679c5ca1d575cf73fe
+      size: 788
+    - path: data/08_reporting/train/pyronear/plots
+      hash: md5
+      md5: d9d3ca86ce106b1a4997199f6d6d4fff.dir
+      size: 97279
+      nfiles: 4
+  sweep@val_all:
+    cmd: 'uv run python scripts/sweep.py --infer-dir data/03_primary/val --data-dir
+      data/01_raw/datasets/val --output-dir data/08_reporting/sweep/val/all '
+    deps:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: c178b34b1bd867a3f2e9c5dad9a838ae.dir
+      size: 415167241
+      nfiles: 8268
+    - path: data/03_primary/val
+      hash: md5
+      md5: 3cace80e98ea019f818658e7a911fcc6.dir
+      size: 1604796
+      nfiles: 302
+    - path: scripts/sweep.py
+      hash: md5
+      md5: cd60211986883523b2f308f4302d42d7
+      size: 11005
+    - path: src/mtb_change_detection/change_detector.py
+      hash: md5
+      md5: 953ca1eadedf51fc057bf5d217daa8a0
+      size: 1858
+    - path: src/mtb_change_detection/evaluator.py
+      hash: md5
+      md5: 1c8be4a0a9d403dae68bde6433b5fd33
+      size: 11040
+    - path: src/mtb_change_detection/tracker.py
+      hash: md5
+      md5: 27d2515c26f5bc414e8bc1063a57069f
+      size: 12671
+    - path: src/mtb_change_detection/types.py
+      hash: md5
+      md5: 31f29b242155840f2075fca43bffc2f4
+      size: 6303
+    outs:
+    - path: data/08_reporting/sweep/val/all
+      hash: md5
+      md5: c632a640f809040fb8ab192491e5375e.dir
+      size: 29932
+      nfiles: 1
+  sweep@train_all:
+    cmd: 'uv run python scripts/sweep.py --infer-dir data/03_primary/train --data-dir
+      data/01_raw/datasets/train --output-dir data/08_reporting/sweep/train/all '
+    deps:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: 93396ffb1654e2023eb75168251ef01b.dir
+      size: 4462554268
+      nfiles: 84784
+    - path: data/03_primary/train
+      hash: md5
+      md5: d2c005a04c2aa55712f5739c179fafe1.dir
+      size: 16623827
+      nfiles: 2933
+    - path: scripts/sweep.py
+      hash: md5
+      md5: cd60211986883523b2f308f4302d42d7
+      size: 11005
+    - path: src/mtb_change_detection/change_detector.py
+      hash: md5
+      md5: 953ca1eadedf51fc057bf5d217daa8a0
+      size: 1858
+    - path: src/mtb_change_detection/evaluator.py
+      hash: md5
+      md5: 1c8be4a0a9d403dae68bde6433b5fd33
+      size: 11040
+    - path: src/mtb_change_detection/tracker.py
+      hash: md5
+      md5: 27d2515c26f5bc414e8bc1063a57069f
+      size: 12671
+    - path: src/mtb_change_detection/types.py
+      hash: md5
+      md5: 31f29b242155840f2075fca43bffc2f4
+      size: 6303
+    outs:
+    - path: data/08_reporting/sweep/train/all
+      hash: md5
+      md5: fc93d6cd495635a18c0030328c10217a.dir
+      size: 31839
+      nfiles: 1
+  sweep@val_pyronear:
+    cmd: uv run python scripts/sweep.py --infer-dir data/03_primary/val 
+      --data-dir data/01_raw/datasets/val --output-dir 
+      data/08_reporting/sweep/val/pyronear --filter-prefix pyronear
+    deps:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: c178b34b1bd867a3f2e9c5dad9a838ae.dir
+      size: 415167241
+      nfiles: 8268
+    - path: data/03_primary/val
+      hash: md5
+      md5: 3cace80e98ea019f818658e7a911fcc6.dir
+      size: 1604796
+      nfiles: 302
+    - path: scripts/sweep.py
+      hash: md5
+      md5: cd60211986883523b2f308f4302d42d7
+      size: 11005
+    - path: src/mtb_change_detection/change_detector.py
+      hash: md5
+      md5: 953ca1eadedf51fc057bf5d217daa8a0
+      size: 1858
+    - path: src/mtb_change_detection/evaluator.py
+      hash: md5
+      md5: 1c8be4a0a9d403dae68bde6433b5fd33
+      size: 11040
+    - path: src/mtb_change_detection/tracker.py
+      hash: md5
+      md5: 27d2515c26f5bc414e8bc1063a57069f
+      size: 12671
+    - path: src/mtb_change_detection/types.py
+      hash: md5
+      md5: 31f29b242155840f2075fca43bffc2f4
+      size: 6303
+    outs:
+    - path: data/08_reporting/sweep/val/pyronear
+      hash: md5
+      md5: 1579a2799ff9e49796bfce782b088370.dir
+      size: 29576
+      nfiles: 1
+  sweep@train_pyronear:
+    cmd: uv run python scripts/sweep.py --infer-dir data/03_primary/train 
+      --data-dir data/01_raw/datasets/train --output-dir 
+      data/08_reporting/sweep/train/pyronear --filter-prefix pyronear
+    deps:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: 93396ffb1654e2023eb75168251ef01b.dir
+      size: 4462554268
+      nfiles: 84784
+    - path: data/03_primary/train
+      hash: md5
+      md5: d2c005a04c2aa55712f5739c179fafe1.dir
+      size: 16623827
+      nfiles: 2933
+    - path: scripts/sweep.py
+      hash: md5
+      md5: cd60211986883523b2f308f4302d42d7
+      size: 11005
+    - path: src/mtb_change_detection/change_detector.py
+      hash: md5
+      md5: 953ca1eadedf51fc057bf5d217daa8a0
+      size: 1858
+    - path: src/mtb_change_detection/evaluator.py
+      hash: md5
+      md5: 1c8be4a0a9d403dae68bde6433b5fd33
+      size: 11040
+    - path: src/mtb_change_detection/tracker.py
+      hash: md5
+      md5: 27d2515c26f5bc414e8bc1063a57069f
+      size: 12671
+    - path: src/mtb_change_detection/types.py
+      hash: md5
+      md5: 31f29b242155840f2075fca43bffc2f4
+      size: 6303
+    outs:
+    - path: data/08_reporting/sweep/train/pyronear
+      hash: md5
+      md5: 0bae719a075918c7e7a1220a196e3c24.dir
+      size: 31577
+      nfiles: 1
