@@ -1,15 +1,15 @@
-# Temporal Models
+# ⏱️ Temporal Models
 
 Experiments exploring temporal/video-based approaches to reduce false positives from the production YOLO smoke detector. Pyronear cameras capture frames every 30 seconds from fixed positions -- temporal models exploit this sequential structure to distinguish real smoke (which persists and grows) from transient false positives.
 
-## Experiments
+## 🧪 Experiments
 
 | Experiment | Description | Paper |
 |------------|-------------|-------|
 | [tracking-fsm-baseline](tracking-fsm-baseline/) | YOLO11s detector + IoU-based FSM tracker. Requires temporal persistence (5 consecutive frames) before raising an alarm. Rule-based, no ML training. | [FLAME (Gragnaniello et al., 2024)](https://doi.org/10.1007/s00521-024-10963-z) |
 | [temporal-model-leaderboard](temporal-model-leaderboard/) | Standardized evaluation and ranking of `TemporalModel` implementations on the [pyro-dataset](https://github.com/pyronear/pyro-dataset) sequential test set. | -- |
 
-## Leaderboard
+## 🏆 Leaderboard
 
 Current rankings on the test set (298 sequences: 149 wildfire + 149 false positive):
 
@@ -19,7 +19,7 @@ Current rankings on the test set (298 sequences: 149 wildfire + 149 false positi
 
 See [temporal-model-leaderboard](temporal-model-leaderboard/) for full details and reproduction steps.
 
-## Related Papers
+## 📚 Related Papers
 
 Temporal/video models for smoke detection explored in the [literature survey](../../literature_survey/SUMMARY.md):
 
