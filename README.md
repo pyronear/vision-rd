@@ -14,6 +14,7 @@ vision-rd/
 │   └── pyrocore/        # Types, protocols, and base model (TemporalModel ABC)
 ├── literature_survey/   # Paper collection, notes, and thematic summary
 ├── experiments/          # R&D experiments (each a self-contained uv project)
+│   ├── temporal-models/ # Temporal smoke detection models
 │   ├── template/        # Starter project — copy to begin a new experiment
 │   ├── README.md        # How to create and manage experiments
 │   └── GUIDELINES.md    # Standards: uv, ruff, DVC, reproducibility
