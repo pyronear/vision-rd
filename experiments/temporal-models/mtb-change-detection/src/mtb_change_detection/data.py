@@ -114,7 +114,7 @@ def load_label_boxes(label_path: Path) -> tuple[list[Detection], bool]:
         if len(parts) == 5:
             boxes.append(
                 Detection(
-                    class_id=int(parts[0]),
+                    class_id=int(float(parts[0])),
                     cx=float(parts[1]),
                     cy=float(parts[2]),
                     w=float(parts[3]),
@@ -126,7 +126,7 @@ def load_label_boxes(label_path: Path) -> tuple[list[Detection], bool]:
             is_human = False
             boxes.append(
                 Detection(
-                    class_id=int(parts[0]),
+                    class_id=int(float(parts[0])),
                     cx=float(parts[1]),
                     cy=float(parts[2]),
                     w=float(parts[3]),
