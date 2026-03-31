@@ -1,6 +1,6 @@
 schema: '2.0'
 stages:
-  evaluate_fsm_baseline:
+  evaluate_fsm_tracking:
     cmd: uv run python scripts/evaluate.py --model-name fsm-tracking-baseline 
       --model-package data/01_raw/models/fsm-tracking-baseline.zip --test-dir 
       data/01_raw/sequential_test/test --output-dir 
@@ -36,9 +36,9 @@ stages:
     deps:
     - path: data/07_model_output
       hash: md5
-      md5: b603a4ea3bc48568dc9df88b04b7e553.dir
-      size: 46644
-      nfiles: 3
+      md5: 6af82611b2a69282012915498c595d56.dir
+      size: 46667
+      nfiles: 4
     - path: scripts/leaderboard.py
       hash: md5
       md5: 81dec9584c04f465c99ced1b8c733a08

@@ -1,5 +1,5 @@
 stages:
-  evaluate_fsm_baseline:
+  evaluate_fsm_tracking:
     cmd: >-
       uv run python scripts/evaluate.py
       --model-name fsm-tracking-baseline
