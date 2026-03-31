@@ -6,21 +6,30 @@ per-sequence results and aggregated metrics to the output directory.
 Usage:
     uv run python scripts/evaluate.py \
         --model-name fsm-tracking-baseline \
+        --model-type fsm-tracking-baseline \
         --model-package data/01_raw/models/fsm-tracking-baseline.zip \
         --test-dir data/01_raw/sequential_test/test \
         --output-dir data/07_model_output/fsm-tracking-baseline
 """
 
 import argparse
+import importlib
 import json
 import logging
 from pathlib import Path
 
-from tracking_fsm_baseline.model import FsmTrackingModel
+from pyrocore import TemporalModel
 
 from temporal_model_leaderboard.metrics import compute_metrics
 from temporal_model_leaderboard.runner import evaluate_model
 from temporal_model_leaderboard.types import SequenceResult
+
+MODEL_REGISTRY: dict[str, tuple[str, str]] = {
+    "fsm-tracking-baseline": (
+        "tracking_fsm_baseline.model",
+        "FsmTrackingModel",
+    ),
+}
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -38,6 +47,19 @@ def _serialize_results(results: list[SequenceResult]) -> list[dict]:
     ]
 
 
+def _load_model(model_type: str, package_path: Path) -> TemporalModel:
+    """Instantiate a TemporalModel by looking up *model_type* in the registry."""
+    if model_type not in MODEL_REGISTRY:
+        raise ValueError(
+            f"Unknown model type {model_type!r}. "
+            f"Available: {sorted(MODEL_REGISTRY)}"
+        )
+    module_path, class_name = MODEL_REGISTRY[model_type]
+    module = importlib.import_module(module_path)
+    cls = getattr(module, class_name)
+    return cls.from_package(package_path)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Evaluate a temporal model on the test set."
@@ -47,6 +69,13 @@ def main() -> None:
         type=str,
         required=True,
         help="Human-readable model name for the leaderboard.",
+    )
+    parser.add_argument(
+        "--model-type",
+        type=str,
+        required=True,
+        choices=sorted(MODEL_REGISTRY),
+        help="Model type key (selects the model class to load).",
     )
     parser.add_argument(
         "--model-package",
@@ -70,8 +99,8 @@ def main() -> None:
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    logger.info("Loading model from %s", args.model_package)
-    model = FsmTrackingModel.from_package(args.model_package)
+    logger.info("Loading model %s from %s", args.model_type, args.model_package)
+    model = _load_model(args.model_type, args.model_package)
 
     logger.info("Evaluating on %s", args.test_dir)
     results = evaluate_model(model, args.test_dir)
