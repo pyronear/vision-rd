@@ -13,6 +13,7 @@ Usage:
 """
 
 import argparse
+import dataclasses
 import importlib
 import json
 import logging
@@ -22,7 +23,6 @@ from pyrocore import TemporalModel
 
 from temporal_model_leaderboard.metrics import compute_metrics
 from temporal_model_leaderboard.runner import evaluate_model
-from temporal_model_leaderboard.types import SequenceResult
 
 MODEL_REGISTRY: dict[str, tuple[str, str]] = {
     "fsm-tracking-baseline": (
@@ -35,24 +35,11 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def _serialize_results(results: list[SequenceResult]) -> list[dict]:
-    return [
-        {
-            "sequence_id": r.sequence_id,
-            "ground_truth": r.ground_truth,
-            "predicted": r.predicted,
-            "ttd_seconds": r.ttd_seconds,
-        }
-        for r in results
-    ]
-
-
 def _load_model(model_type: str, package_path: Path) -> TemporalModel:
     """Instantiate a TemporalModel by looking up *model_type* in the registry."""
     if model_type not in MODEL_REGISTRY:
         raise ValueError(
-            f"Unknown model type {model_type!r}. "
-            f"Available: {sorted(MODEL_REGISTRY)}"
+            f"Unknown model type {model_type!r}. Available: {sorted(MODEL_REGISTRY)}"
         )
     module_path, class_name = MODEL_REGISTRY[model_type]
     module = importlib.import_module(module_path)
@@ -107,25 +94,12 @@ def main() -> None:
     metrics = compute_metrics(args.model_name, results)
 
     results_path = args.output_dir / "results.json"
-    results_path.write_text(json.dumps(_serialize_results(results), indent=2))
+    results_data = [dataclasses.asdict(r) for r in results]
+    results_path.write_text(json.dumps(results_data, indent=2))
     logger.info("Saved %d results to %s", len(results), results_path)
 
     metrics_path = args.output_dir / "metrics.json"
-    metrics_data = {
-        "model_name": metrics.model_name,
-        "num_sequences": metrics.num_sequences,
-        "tp": metrics.tp,
-        "fp": metrics.fp,
-        "fn": metrics.fn,
-        "tn": metrics.tn,
-        "precision": metrics.precision,
-        "recall": metrics.recall,
-        "f1": metrics.f1,
-        "fpr": metrics.fpr,
-        "mean_ttd_seconds": metrics.mean_ttd_seconds,
-        "median_ttd_seconds": metrics.median_ttd_seconds,
-    }
-    metrics_path.write_text(json.dumps(metrics_data, indent=2))
+    metrics_path.write_text(json.dumps(dataclasses.asdict(metrics), indent=2))
     logger.info("Saved metrics to %s", metrics_path)
 
     logger.info(
