@@ -1,4 +1,4 @@
-# 🔥 Pyronear Vision R&D
+# 🧪 Pyronear Vision R&D
 
 Research and development for ML-based wildfire smoke detection at [Pyronear](https://pyronear.org/).
 
