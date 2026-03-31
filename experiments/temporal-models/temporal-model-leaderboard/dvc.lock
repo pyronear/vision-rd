@@ -1,0 +1,60 @@
+schema: '2.0'
+stages:
+  evaluate_fsm_tracking:
+    cmd: uv run python scripts/evaluate.py --model-name fsm-tracking-baseline 
+      --model-type fsm-tracking-baseline --model-package 
+      data/01_raw/models/fsm-tracking-baseline.zip --test-dir 
+      data/01_raw/sequential_test/test --output-dir 
+      data/07_model_output/fsm-tracking-baseline
+    deps:
+    - path: data/01_raw/models/fsm-tracking-baseline.zip
+      hash: md5
+      md5: b42e37943c7441b5f52b8b7cbc67b095
+      size: 19260646
+    - path: data/01_raw/sequential_test
+      hash: md5
+      md5: 828edb7fb8f0909f0d6115d67ffbddc9.dir
+      size: 1594484536
+      nfiles: 32640
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 75f32f92f6ac1d1ba28eb9c7bf5343e1
+      size: 3761
+    - path: src/temporal_model_leaderboard
+      hash: md5
+      md5: cbdb9e92766ca170b1bc87485d74c633.dir
+      size: 32176
+      nfiles: 12
+    outs:
+    - path: data/07_model_output/fsm-tracking-baseline
+      hash: md5
+      md5: 6e574aa7996a8e23b502f6a22c4f7fff.dir
+      size: 46644
+      nfiles: 2
+  leaderboard:
+    cmd: uv run python scripts/leaderboard.py --results-dir data/07_model_output
+      --output-dir data/08_reporting
+    deps:
+    - path: data/07_model_output
+      hash: md5
+      md5: 6af82611b2a69282012915498c595d56.dir
+      size: 46667
+      nfiles: 4
+    - path: scripts/leaderboard.py
+      hash: md5
+      md5: 81dec9584c04f465c99ced1b8c733a08
+      size: 2507
+    - path: src/temporal_model_leaderboard
+      hash: md5
+      md5: cbdb9e92766ca170b1bc87485d74c633.dir
+      size: 32176
+      nfiles: 12
+    outs:
+    - path: data/08_reporting/leaderboard.json
+      hash: md5
+      md5: bdfd6120841f4649413c6426e8cd04aa
+      size: 283
+    - path: data/08_reporting/leaderboard.txt
+      hash: md5
+      md5: cc2e649cfd237e8d4d7108e3efee5707
+      size: 279

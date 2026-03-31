@@ -1,0 +1,31 @@
+stages:
+  evaluate_fsm_tracking:
+    cmd: >-
+      uv run python scripts/evaluate.py
+      --model-name fsm-tracking-baseline
+      --model-type fsm-tracking-baseline
+      --model-package data/01_raw/models/fsm-tracking-baseline.zip
+      --test-dir data/01_raw/sequential_test/test
+      --output-dir data/07_model_output/fsm-tracking-baseline
+    deps:
+      - scripts/evaluate.py
+      - src/temporal_model_leaderboard
+      - data/01_raw/sequential_test
+      - data/01_raw/models/fsm-tracking-baseline.zip
+    outs:
+      - data/07_model_output/fsm-tracking-baseline
+
+  leaderboard:
+    cmd: >-
+      uv run python scripts/leaderboard.py
+      --results-dir data/07_model_output
+      --output-dir data/08_reporting
+    deps:
+      - scripts/leaderboard.py
+      - src/temporal_model_leaderboard
+      - data/07_model_output
+    metrics:
+      - data/08_reporting/leaderboard.json:
+          cache: false
+    outs:
+      - data/08_reporting/leaderboard.txt

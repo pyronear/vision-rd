@@ -1,0 +1,16 @@
+[
+  {
+    "model_name": "fsm-tracking-baseline",
+    "num_sequences": 298,
+    "tp": 144,
+    "fp": 8,
+    "fn": 5,
+    "tn": 141,
+    "precision": 0.9474,
+    "recall": 0.9664,
+    "f1": 0.9568,
+    "fpr": 0.0537,
+    "mean_ttd_seconds": 142.0,
+    "median_ttd_seconds": 58.0
+  }
+]

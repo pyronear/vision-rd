@@ -42,7 +42,7 @@
 #       --learning-rate ${train.learning_rate}
 #     deps:
 #       - scripts/train.py
-#       - src
+#       - src/project_name
 #       - data/05_model_input/train
 #       - data/05_model_input/val
 #     params:
@@ -61,7 +61,7 @@
 #       --output-dir data/08_reporting
 #     deps:
 #       - scripts/evaluate.py
-#       - src
+#       - src/project_name
 #       - data/06_models/model.pt
 #       - data/05_model_input/test
 #     metrics:

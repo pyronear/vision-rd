@@ -1,0 +1,5 @@
+outs:
+- md5: b42e37943c7441b5f52b8b7cbc67b095
+  size: 19260646
+  hash: md5
+  path: fsm-tracking-baseline.zip
