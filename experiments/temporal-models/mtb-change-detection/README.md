@@ -22,6 +22,14 @@ make install
 make test
 ```
 
+## Notebooks
+
+```bash
+make notebook  # launches JupyterLab
+```
+
+- `01-visualize-change-masks.ipynb` — bird's-eye view of frame-to-frame change masks across sequences (raw frames + binary change masks side by side)
+
 ## Pipeline
 
 ```bash

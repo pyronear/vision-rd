@@ -36,6 +36,7 @@ dev = [
 ]
 explore = [
     "fiftyone>=1.0",
+    "jupyterlab>=4.0",
 ]
 
 [tool.ruff]
