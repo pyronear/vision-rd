@@ -1,0 +1,10 @@
+prepare:
+  model_repo: "pyronear/yolo11s_nimble-narwhal_v6.0.0"
+  model_filename: "onnx_cpu.tar.gz"
+
+# Production defaults from pyro-engine's Engine class
+predict:
+  conf_thresh: 0.2
+  model_conf_thresh: 0.05
+  nb_consecutive_frames: 4
+  max_bbox_size: 0.4

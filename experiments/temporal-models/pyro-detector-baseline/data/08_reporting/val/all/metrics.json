@@ -1,0 +1,40 @@
+{
+  "single_frame": {
+    "num_sequences": 302,
+    "num_positive_gt": 151,
+    "num_negative_gt": 151,
+    "tp": 145,
+    "fp": 25,
+    "fn": 6,
+    "tn": 126,
+    "tp_pct": 96.03,
+    "fp_pct": 16.56,
+    "fn_pct": 3.97,
+    "tn_pct": 83.44,
+    "precision": 0.8529,
+    "recall": 0.9603,
+    "f1": 0.9034,
+    "fpr": 0.1656,
+    "mean_ttd_seconds": 0.0,
+    "median_ttd_seconds": 0.0
+  },
+  "predictor": {
+    "num_sequences": 302,
+    "num_positive_gt": 151,
+    "num_negative_gt": 151,
+    "tp": 141,
+    "fp": 17,
+    "fn": 10,
+    "tn": 134,
+    "tp_pct": 93.38,
+    "fp_pct": 11.26,
+    "fn_pct": 6.62,
+    "tn_pct": 88.74,
+    "precision": 0.8924,
+    "recall": 0.9338,
+    "f1": 0.9126,
+    "fpr": 0.1126,
+    "mean_ttd_seconds": 90.4,
+    "median_ttd_seconds": 9.0
+  }
+}
