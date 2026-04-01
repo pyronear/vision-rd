@@ -2,8 +2,8 @@ truncate:
   max_frames: 20
 
 prepare:
-  model_repo: "pyronear/yolo11s_mighty-mongoose_v5.1.0"
-  model_filename: "yolo11s_mighty-mongoose_v5.1.0.pt"
+  model_repo: "pyronear/yolo11s_nimble-narwhal_v6.0.0"
+  model_filename: "best.pt"
 
 infer:
   confidence_threshold: 0.01
