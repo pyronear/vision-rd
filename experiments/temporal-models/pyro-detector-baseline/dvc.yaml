@@ -31,6 +31,7 @@ stages:
       deps:
         - scripts/predict.py
         - src/pyro_detector_baseline/data.py
+        - src/pyro_detector_baseline/predictor_wrapper.py
         - data/03_primary/${item}
         - data/01_raw/datasets/${item}
       params:
@@ -111,6 +112,7 @@ stages:
       deps:
         - scripts/sweep.py
         - src/pyro_detector_baseline/evaluator.py
+        - src/pyro_detector_baseline/predictor_wrapper.py
         - src/pyro_detector_baseline/data.py
         - data/03_primary/${item.split}
         - data/01_raw/datasets/${item.split}

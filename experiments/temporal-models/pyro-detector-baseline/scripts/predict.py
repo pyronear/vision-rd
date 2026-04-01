@@ -19,37 +19,17 @@ import json
 import logging
 from pathlib import Path
 
-import numpy as np
-from PIL import Image
-from pyro_predictor.predictor import Predictor
 from tqdm import tqdm
 
 from pyro_detector_baseline.data import is_wf_sequence, parse_timestamp
+from pyro_detector_baseline.predictor_wrapper import (
+    create_replay_predictor,
+    load_detections,
+    replay_sequence,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
-
-_DUMMY_FRAME = Image.new("RGB", (1, 1))
-
-
-def _create_replay(conf_thresh: float, nb_consecutive_frames: int) -> Predictor:
-    """Create a lightweight Predictor for temporal replay without loading YOLO."""
-    replay = object.__new__(Predictor)
-    replay.conf_thresh = conf_thresh
-    replay.nb_consecutive_frames = nb_consecutive_frames
-    replay._states = {}
-    return replay
-
-
-def _load_sequence_detections(
-    json_path: Path,
-) -> list[tuple[str, np.ndarray]]:
-    """Load cached per-frame detections from an infer JSON."""
-    data = json.loads(json_path.read_text())
-    return [
-        (d["filename"], np.array(d["detections"], dtype=np.float64).reshape(-1, 5))
-        for d in data
-    ]
 
 
 def main() -> None:
@@ -90,7 +70,7 @@ def main() -> None:
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    replay = _create_replay(args.conf_thresh, args.nb_consecutive_frames)
+    replay = create_replay_predictor(args.conf_thresh, args.nb_consecutive_frames)
 
     infer_files = sorted(args.infer_dir.glob("*.json"))
     logger.info("Found %d inference files.", len(infer_files))
@@ -98,7 +78,7 @@ def main() -> None:
     results: list[dict] = []
     for infer_path in tqdm(infer_files, desc="Predicting"):
         seq_id = infer_path.stem
-        frame_detections = _load_sequence_detections(infer_path)
+        frame_detections = load_detections(infer_path)
 
         if not frame_detections:
             logger.warning("No frames in %s, skipping.", seq_id)
@@ -116,19 +96,7 @@ def main() -> None:
         gt = is_wf_sequence(seq_dir)
         first_ts = parse_timestamp(frame_detections[0][0])
 
-        # Replay temporal logic
-        cam_key = seq_id
-        replay._states[cam_key] = replay._new_state()
-
-        confidences: list[float] = []
-        trigger_idx: int | None = None
-        for i, (_filename, preds) in enumerate(frame_detections):
-            conf = replay._update_states(_DUMMY_FRAME, preds, cam_key)
-            confidences.append(float(conf))
-            if conf > args.conf_thresh and trigger_idx is None:
-                trigger_idx = i
-
-        del replay._states[cam_key]
+        trigger_idx, confidences = replay_sequence(replay, frame_detections, seq_id)
 
         confirmed_ts = (
             parse_timestamp(frame_detections[trigger_idx][0])

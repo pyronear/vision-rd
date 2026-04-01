@@ -2,12 +2,22 @@
 
 Provides factory and helper functions to run the production Predictor on
 a sequence of frames and collect per-frame confidences.
+
+The ``create_predictor`` factory creates a full Predictor (with YOLO model)
+for live inference.  The ``create_replay_predictor``, ``load_detections``,
+and ``replay_sequence`` helpers support offline replay of cached YOLO
+detections through the Predictor's temporal logic without loading the model.
 """
 
+import json
 from pathlib import Path
 
+import numpy as np
 import pyro_predictor
 from PIL import Image
+from pyro_predictor.predictor import Predictor
+
+_DUMMY_FRAME = Image.new("RGB", (1, 1))
 
 
 def create_predictor(
@@ -41,6 +51,70 @@ def create_predictor(
         frame_size=frame_size,
         verbose=False,
     )
+
+
+def create_replay_predictor(
+    conf_thresh: float,
+    nb_consecutive_frames: int,
+) -> Predictor:
+    """Create a lightweight Predictor for temporal replay without loading YOLO.
+
+    Uses ``object.__new__`` to skip ``__init__`` (and ONNX model loading),
+    setting only the attributes that ``_update_states`` and ``_new_state``
+    require: ``conf_thresh``, ``nb_consecutive_frames``, and ``_states``.
+    """
+    replay = object.__new__(Predictor)
+    replay.conf_thresh = conf_thresh
+    replay.nb_consecutive_frames = nb_consecutive_frames
+    replay._states = {}
+    return replay
+
+
+def load_detections(json_path: Path) -> list[tuple[str, np.ndarray]]:
+    """Load cached per-frame detections from an infer JSON.
+
+    Args:
+        json_path: Path to a sequence JSON produced by the infer stage.
+
+    Returns:
+        List of ``(filename, detections)`` tuples where *detections* is
+        a ``(N, 5)`` numpy array of ``[x1, y1, x2, y2, conf]``.
+    """
+    data = json.loads(json_path.read_text())
+    return [
+        (d["filename"], np.array(d["detections"], dtype=np.float64).reshape(-1, 5))
+        for d in data
+    ]
+
+
+def replay_sequence(
+    predictor: Predictor,
+    frame_detections: list[tuple[str, np.ndarray]],
+    cam_key: str,
+) -> tuple[int | None, list[float]]:
+    """Replay cached detections through the Predictor's temporal logic.
+
+    Args:
+        predictor: A replay Predictor created via ``create_replay_predictor``.
+        frame_detections: Per-frame detections from ``load_detections``.
+        cam_key: Unique identifier for this sequence (used as camera ID).
+
+    Returns:
+        A tuple of ``(trigger_frame_index, per_frame_confidences)``.
+        ``trigger_frame_index`` is ``None`` if no alarm was triggered.
+    """
+    predictor._states[cam_key] = predictor._new_state()
+
+    confidences: list[float] = []
+    trigger_idx: int | None = None
+    for i, (_filename, preds) in enumerate(frame_detections):
+        conf = predictor._update_states(_DUMMY_FRAME, preds, cam_key)
+        confidences.append(float(conf))
+        if conf > predictor.conf_thresh and trigger_idx is None:
+            trigger_idx = i
+
+    del predictor._states[cam_key]
+    return trigger_idx, confidences
 
 
 def predict_sequence(

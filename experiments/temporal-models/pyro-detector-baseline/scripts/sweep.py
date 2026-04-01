@@ -23,27 +23,27 @@ Usage:
 import argparse
 import csv
 import itertools
-import json
 import logging
 import multiprocessing
 import os
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
-from pyro_predictor.predictor import Predictor
 from tqdm import tqdm
 
 from pyro_detector_baseline.data import is_wf_sequence, parse_timestamp
 from pyro_detector_baseline.evaluator import compute_metrics
+from pyro_detector_baseline.predictor_wrapper import (
+    create_replay_predictor,
+    load_detections,
+    replay_sequence,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 CONF_THRESHOLDS = [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5]
 NB_CONSECUTIVE_FRAMES = [2, 3, 4, 5, 6, 7, 8, 10]
-
-_DUMMY_FRAME = Image.new("RGB", (1, 1))
 
 # Module-level shared state set via _init_worker
 _all_sequences: list[tuple[str, bool, list[tuple[str, np.ndarray]], str]] = []
@@ -56,34 +56,13 @@ def _init_worker(
     _all_sequences = sequences
 
 
-def _create_replay(conf_thresh: float, nb_consecutive_frames: int) -> Predictor:
-    """Create a lightweight Predictor for temporal replay without loading YOLO.
-
-    Uses ``object.__new__`` to skip ``__init__`` (and ONNX model loading),
-    setting only the attributes that ``_update_states`` and ``_new_state``
-    require: ``conf_thresh``, ``nb_consecutive_frames``, and ``_states``.
-    """
-    replay = object.__new__(Predictor)
-    replay.conf_thresh = conf_thresh
-    replay.nb_consecutive_frames = nb_consecutive_frames
-    replay._states = {}
-    return replay
-
-
 def _evaluate_combo(combo: tuple[float, int]) -> dict:
     conf_thresh, nb_frames = combo
-    replay = _create_replay(conf_thresh, nb_frames)
+    replay = create_replay_predictor(conf_thresh, nb_frames)
 
     results: list[dict] = []
     for seq_id, is_positive_gt, frame_detections, first_ts in _all_sequences:
-        cam_key = seq_id
-        replay._states[cam_key] = replay._new_state()
-
-        trigger_idx: int | None = None
-        for i, (_filename, preds) in enumerate(frame_detections):
-            conf = replay._update_states(_DUMMY_FRAME, preds, cam_key)
-            if conf > conf_thresh and trigger_idx is None:
-                trigger_idx = i
+        trigger_idx, _confidences = replay_sequence(replay, frame_detections, seq_id)
 
         confirmed_ts = None
         if trigger_idx is not None:
@@ -99,25 +78,12 @@ def _evaluate_combo(combo: tuple[float, int]) -> dict:
             }
         )
 
-        del replay._states[cam_key]
-
     metrics = compute_metrics(results)
     return {
         "conf_thresh": conf_thresh,
         "nb_consecutive_frames": nb_frames,
         **metrics,
     }
-
-
-def _load_sequence_detections(
-    json_path: Path,
-) -> list[tuple[str, np.ndarray]]:
-    """Load cached per-frame detections from an infer JSON."""
-    data = json.loads(json_path.read_text())
-    return [
-        (d["filename"], np.array(d["detections"], dtype=np.float64).reshape(-1, 5))
-        for d in data
-    ]
 
 
 def main() -> None:
@@ -174,7 +140,7 @@ def main() -> None:
                 continue
             seq_dir = seq_dir_candidates[0]
 
-        frame_detections = _load_sequence_detections(infer_path)
+        frame_detections = load_detections(infer_path)
         if not frame_detections:
             continue
 
