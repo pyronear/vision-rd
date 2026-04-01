@@ -121,9 +121,7 @@ def _load_sequence_detections(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Sweep predictor temporal parameters."
-    )
+    parser = argparse.ArgumentParser(description="Sweep predictor temporal parameters.")
     parser.add_argument(
         "--infer-dir",
         type=Path,
