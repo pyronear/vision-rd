@@ -1,9 +1,8 @@
 """Run pyro-predictor on all sequences in a data split.
 
 Iterates over sequence directories, feeds each frame through the
-Predictor, and writes sequence-level results to tracking_results.json.
-The output format matches the FSM tracking baseline for evaluation
-compatibility.
+PyroDetectorModel (TemporalModel subclass), and writes sequence-level
+results to tracking_results.json.
 
 Usage:
     uv run python scripts/predict.py \
@@ -29,13 +28,16 @@ from pyro_detector_baseline.data import (
     list_sequences,
     parse_timestamp,
 )
-from pyro_detector_baseline.predictor_wrapper import (
-    create_predictor,
-    predict_sequence,
-)
+from pyro_detector_baseline.model import PyroDetectorModel
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
+
+
+def _find_onnx_model(model_dir: Path) -> str | None:
+    """Find the ONNX model file in a directory, skipping macOS resource forks."""
+    onnx_files = [f for f in model_dir.glob("**/*.onnx") if not f.name.startswith("._")]
+    return str(onnx_files[0]) if onnx_files else None
 
 
 def main() -> None:
@@ -86,14 +88,10 @@ def main() -> None:
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Find ONNX model in model directory (skip macOS resource forks)
-    onnx_files = [
-        f for f in args.model_dir.glob("**/*.onnx") if not f.name.startswith("._")
-    ]
-    model_path = str(onnx_files[0]) if onnx_files else None
+    model_path = _find_onnx_model(args.model_dir)
     logger.info("Using model: %s", model_path)
 
-    predictor = create_predictor(
+    model = PyroDetectorModel(
         model_path=model_path,
         conf_thresh=args.conf_thresh,
         model_conf_thresh=args.model_conf_thresh,
@@ -113,14 +111,11 @@ def main() -> None:
             logger.warning("No frames in %s, skipping.", seq_id)
             continue
 
-        is_alarm, trigger_idx, confidences = predict_sequence(
-            predictor=predictor,
-            frame_paths=frame_paths,
-            cam_id=seq_id,
-        )
+        output = model.predict_sequence(frame_paths)
 
         gt = is_wf_sequence(seq_dir)
         first_ts = parse_timestamp(frame_paths[0].name)
+        trigger_idx = output.trigger_frame_index
         confirmed_ts = (
             parse_timestamp(frame_paths[trigger_idx].name)
             if trigger_idx is not None
@@ -131,15 +126,15 @@ def main() -> None:
             {
                 "sequence_id": seq_id,
                 "is_positive_gt": gt,
-                "is_positive_pred": is_alarm,
-                "num_frames": len(frame_paths),
-                "num_detections_total": sum(1 for c in confidences if c > 0),
+                "is_positive_pred": output.is_positive,
+                "num_frames": output.details["num_frames"],
+                "num_detections_total": output.details["num_detections_total"],
                 "confirmed_frame_index": trigger_idx,
                 "confirmed_timestamp": (
                     confirmed_ts.isoformat() if confirmed_ts else None
                 ),
                 "first_timestamp": first_ts.isoformat(),
-                "per_frame_confidences": confidences,
+                "per_frame_confidences": output.details["per_frame_confidences"],
             }
         )
 

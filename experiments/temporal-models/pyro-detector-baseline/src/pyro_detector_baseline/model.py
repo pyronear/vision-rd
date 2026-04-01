@@ -1,10 +1,12 @@
 """TemporalModel implementation backed by pyro-predictor."""
 
 from pathlib import Path
+from typing import Self
 
 from PIL import Image
 from pyrocore import Frame, TemporalModel, TemporalModelOutput
 
+from .package import load_model_package
 from .predictor_wrapper import create_predictor
 
 
@@ -41,7 +43,21 @@ class PyroDetectorModel(TemporalModel):
         self._sequence_counter = 0
 
     @classmethod
-    def from_model_dir(cls, model_dir: Path, **kwargs) -> "PyroDetectorModel":
+    def from_package(cls, package_path: Path) -> Self:
+        """Load from a packaged model archive.
+
+        Args:
+            package_path: Path to a ``.zip`` archive created by
+                :func:`~pyro_detector_baseline.package.build_model_package`.
+        """
+        pkg = load_model_package(package_path)
+        return cls(
+            model_path=str(pkg.model_path),
+            **pkg.predict_params,
+        )
+
+    @classmethod
+    def from_model_dir(cls, model_dir: Path, **kwargs) -> Self:
         """Load from a directory containing the extracted ONNX model.
 
         Args:

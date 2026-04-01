@@ -1,6 +1,6 @@
 prepare:
-  model_repo: "pyronear/yolo11s_mighty-mongoose_v5.1.0"
-  model_filename: "onnx_cpu_yolo11s_mighty-mongoose_v5.1.0.tar.gz"
+  model_repo: "pyronear/yolo11s_nimble-narwhal_v6.0.0"
+  model_filename: "onnx_cpu.tar.gz"
 
 # Production defaults from pyro-engine's Engine class
 predict:
