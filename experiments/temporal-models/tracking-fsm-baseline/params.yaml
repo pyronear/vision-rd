@@ -1,3 +1,6 @@
+truncate:
+  max_frames: 20
+
 prepare:
   model_repo: "pyronear/yolo11s_mighty-mongoose_v5.1.0"
   model_filename: "yolo11s_mighty-mongoose_v5.1.0.pt"

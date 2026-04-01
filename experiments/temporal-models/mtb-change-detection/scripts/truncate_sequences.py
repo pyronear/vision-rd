@@ -1,9 +1,8 @@
-"""Copy and truncate the pyro-dataset for this experiment.
+"""Truncate sequences to a maximum number of frames.
 
-Copies sequences from the source pyro-dataset into data/01_raw/datasets/,
-preserving the {wildfire,fp}/<sequence>/ structure and truncating each
-sequence to a maximum number of frames (sorted by timestamp, keeping the
-earliest).
+Copies sequences from an input directory to an output directory,
+keeping only the first N frames (sorted by filename/timestamp).
+Preserves the {wildfire,fp}/<sequence>/{images,labels}/ structure.
 """
 
 import argparse
@@ -14,16 +13,16 @@ from pathlib import Path
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--source-dir",
+        "--input-dir",
         type=Path,
         required=True,
-        help="Path to sequential_train_val/ in pyro-dataset",
+        help="Input split directory (e.g. data/01_raw/datasets_full/train)",
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
         required=True,
-        help="Output path (e.g. data/01_raw/datasets)",
+        help="Output split directory (e.g. data/01_raw/datasets/train)",
     )
     parser.add_argument(
         "--max-frames",
@@ -61,26 +60,20 @@ def truncate_sequence(src_seq: Path, dst_seq: Path, max_frames: int) -> None:
 def main() -> None:
     args = parse_args()
 
-    for split in ("train", "val"):
-        src_split = args.source_dir / split
-        if not src_split.is_dir():
-            print(f"Skipping {split}: {src_split} not found")
+    for category in ("wildfire", "fp"):
+        src_cat = args.input_dir / category
+        if not src_cat.is_dir():
+            print(f"Skipping {category}: {src_cat} not found")
             continue
 
-        for category in ("wildfire", "fp"):
-            src_cat = src_split / category
-            if not src_cat.is_dir():
-                print(f"Skipping {split}/{category}: not found")
+        sequences = sorted(d for d in src_cat.iterdir() if d.is_dir())
+        print(f"{category}: {len(sequences)} sequences")
+
+        for seq_dir in sequences:
+            dst_seq = args.output_dir / category / seq_dir.name
+            if dst_seq.exists():
                 continue
-
-            sequences = sorted(d for d in src_cat.iterdir() if d.is_dir())
-            print(f"{split}/{category}: {len(sequences)} sequences")
-
-            for seq_dir in sequences:
-                dst_seq = args.output_dir / split / category / seq_dir.name
-                if dst_seq.exists():
-                    continue
-                truncate_sequence(seq_dir, dst_seq, args.max_frames)
+            truncate_sequence(seq_dir, dst_seq, args.max_frames)
 
     print("Done.")
 
