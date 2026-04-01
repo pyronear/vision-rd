@@ -37,12 +37,16 @@ stages:
       nfiles: 302
     - path: scripts/predict.py
       hash: md5
-      md5: 515763db4a1da4663e6c039cf4586d7e
-      size: 5552
+      md5: c468ccec035e1bfadf4ea6d06a338717
+      size: 4469
     - path: src/pyro_detector_baseline/data.py
       hash: md5
       md5: 2ff239d58eac9694ef8ae3d07e5410ee
       size: 3553
+    - path: src/pyro_detector_baseline/predictor_wrapper.py
+      hash: md5
+      md5: 1d8b78500bab5f515aaa058b3802f24d
+      size: 5259
     params:
       params.yaml:
         predict.conf_thresh: 0.2
@@ -185,8 +189,8 @@ stages:
       nfiles: 302
     - path: scripts/sweep.py
       hash: md5
-      md5: 00e475772d8850db7df8d593060aa1c5
-      size: 7917
+      md5: 7e150b4201e840171ec29fdea8551c0d
+      size: 7164
     - path: src/pyro_detector_baseline/data.py
       hash: md5
       md5: 2ff239d58eac9694ef8ae3d07e5410ee
@@ -195,10 +199,14 @@ stages:
       hash: md5
       md5: 873acf4e0538965efb5ac88164252c3a
       size: 8280
+    - path: src/pyro_detector_baseline/predictor_wrapper.py
+      hash: md5
+      md5: 1d8b78500bab5f515aaa058b3802f24d
+      size: 5259
     outs:
     - path: data/08_reporting/sweep/val/all
       hash: md5
-      md5: 32f7932ea3468fc607905b4407297265.dir
+      md5: ffce0faf22f724c67f77dc0ae5958ff6.dir
       size: 6161
       nfiles: 1
   infer@train:
@@ -250,8 +258,8 @@ stages:
       nfiles: 2933
     - path: scripts/sweep.py
       hash: md5
-      md5: 78b9a7b13e2cde22a62061d48356ca74
-      size: 7903
+      md5: 7e150b4201e840171ec29fdea8551c0d
+      size: 7164
     - path: src/pyro_detector_baseline/data.py
       hash: md5
       md5: 2ff239d58eac9694ef8ae3d07e5410ee
@@ -260,6 +268,10 @@ stages:
       hash: md5
       md5: 873acf4e0538965efb5ac88164252c3a
       size: 8280
+    - path: src/pyro_detector_baseline/predictor_wrapper.py
+      hash: md5
+      md5: 1d8b78500bab5f515aaa058b3802f24d
+      size: 5259
     outs:
     - path: data/08_reporting/sweep/train/all
       hash: md5
@@ -283,12 +295,16 @@ stages:
       nfiles: 2933
     - path: scripts/predict.py
       hash: md5
-      md5: 515763db4a1da4663e6c039cf4586d7e
-      size: 5552
+      md5: c468ccec035e1bfadf4ea6d06a338717
+      size: 4469
     - path: src/pyro_detector_baseline/data.py
       hash: md5
       md5: 2ff239d58eac9694ef8ae3d07e5410ee
       size: 3553
+    - path: src/pyro_detector_baseline/predictor_wrapper.py
+      hash: md5
+      md5: 1d8b78500bab5f515aaa058b3802f24d
+      size: 5259
     params:
       params.yaml:
         predict.conf_thresh: 0.2
@@ -316,8 +332,8 @@ stages:
       nfiles: 2933
     - path: scripts/sweep.py
       hash: md5
-      md5: 78b9a7b13e2cde22a62061d48356ca74
-      size: 7903
+      md5: 7e150b4201e840171ec29fdea8551c0d
+      size: 7164
     - path: src/pyro_detector_baseline/data.py
       hash: md5
       md5: 2ff239d58eac9694ef8ae3d07e5410ee
@@ -326,6 +342,10 @@ stages:
       hash: md5
       md5: 873acf4e0538965efb5ac88164252c3a
       size: 8280
+    - path: src/pyro_detector_baseline/predictor_wrapper.py
+      hash: md5
+      md5: 1d8b78500bab5f515aaa058b3802f24d
+      size: 5259
     outs:
     - path: data/08_reporting/sweep/train/pyronear
       hash: md5
@@ -349,8 +369,8 @@ stages:
       nfiles: 302
     - path: scripts/sweep.py
       hash: md5
-      md5: 78b9a7b13e2cde22a62061d48356ca74
-      size: 7903
+      md5: 7e150b4201e840171ec29fdea8551c0d
+      size: 7164
     - path: src/pyro_detector_baseline/data.py
       hash: md5
       md5: 2ff239d58eac9694ef8ae3d07e5410ee
@@ -359,10 +379,14 @@ stages:
       hash: md5
       md5: 873acf4e0538965efb5ac88164252c3a
       size: 8280
+    - path: src/pyro_detector_baseline/predictor_wrapper.py
+      hash: md5
+      md5: 1d8b78500bab5f515aaa058b3802f24d
+      size: 5259
     outs:
     - path: data/08_reporting/sweep/val/pyronear
       hash: md5
-      md5: fbbaa5c46b88c1ef646a4837bf7c0cb5.dir
+      md5: 4018fc6999fbc8cc9ae8f8a2b29af91b.dir
       size: 6052
       nfiles: 1
   evaluate@train_all:
