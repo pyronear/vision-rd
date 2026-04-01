@@ -1,0 +1,150 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: uv run python scripts/prepare.py --model-repo 
+      pyronear/yolo11s_nimble-narwhal_v6.0.0 --model-filename onnx_cpu.tar.gz 
+      --output-model-dir data/01_raw/models
+    deps:
+    - path: scripts/prepare.py
+      hash: md5
+      md5: a06968e134716e738d04f1fe5cffa356
+      size: 2463
+    params:
+      params.yaml:
+        prepare:
+          model_repo: pyronear/yolo11s_nimble-narwhal_v6.0.0
+          model_filename: onnx_cpu.tar.gz
+    outs:
+    - path: data/01_raw/models
+      hash: md5
+      md5: cb02d212f75c68f1c83fffdfa64d66f4.dir
+      size: 71127408
+      nfiles: 4
+  predict@val:
+    cmd: uv run python scripts/predict.py --data-dir data/01_raw/datasets/val 
+      --model-dir data/01_raw/models --output-dir data/07_model_output/val 
+      --conf-thresh 0.35 --model-conf-thresh 0.05 --nb-consecutive-frames 7 
+      --max-bbox-size 0.4
+    deps:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: 2ca47638a4b0cc9ca7d4011376c54e45.dir
+      size: 631259421
+      nfiles: 12448
+    - path: data/01_raw/models
+      hash: md5
+      md5: cb02d212f75c68f1c83fffdfa64d66f4.dir
+      size: 71127408
+      nfiles: 4
+    - path: scripts/predict.py
+      hash: md5
+      md5: ec1aee43fb3fecf22df056f1b298142f
+      size: 4905
+    - path: src/pyro_detector_baseline/data.py
+      hash: md5
+      md5: 2ff239d58eac9694ef8ae3d07e5410ee
+      size: 3553
+    - path: src/pyro_detector_baseline/model.py
+      hash: md5
+      md5: 73b31f02decf1342ad2c95f3db2a430d
+      size: 3867
+    - path: src/pyro_detector_baseline/predictor_wrapper.py
+      hash: md5
+      md5: 59bf8e370c2dcee5351f8c3666e5edb5
+      size: 2617
+    params:
+      params.yaml:
+        predict:
+          conf_thresh: 0.35
+          model_conf_thresh: 0.05
+          nb_consecutive_frames: 7
+          max_bbox_size: 0.4
+    outs:
+    - path: data/07_model_output/val
+      hash: md5
+      md5: 10938cef3b9c3cae53b731e839fd809c.dir
+      size: 215627
+      nfiles: 1
+  evaluate@val_all:
+    cmd: 'uv run python scripts/evaluate.py --track-dir data/07_model_output/val --output-dir
+      data/08_reporting/val/all '
+    deps:
+    - path: data/07_model_output/val
+      hash: md5
+      md5: 10938cef3b9c3cae53b731e839fd809c.dir
+      size: 215627
+      nfiles: 1
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: fb9c7ea2e105f28eb457932ed6c3cc76
+      size: 3608
+    - path: src/pyro_detector_baseline/evaluator.py
+      hash: md5
+      md5: 873acf4e0538965efb5ac88164252c3a
+      size: 8280
+    outs:
+    - path: data/08_reporting/val/all/metrics.json
+      hash: md5
+      md5: 471cc0965d192e67bc749a1eccb58897
+      size: 783
+    - path: data/08_reporting/val/all/plots
+      hash: md5
+      md5: b15cee2225a76d13ebdc9f7a9ec6e40f.dir
+      size: 99167
+      nfiles: 4
+  evaluate@val_pyronear:
+    cmd: uv run python scripts/evaluate.py --track-dir data/07_model_output/val 
+      --output-dir data/08_reporting/val/pyronear --filter-prefix pyronear
+    deps:
+    - path: data/07_model_output/val
+      hash: md5
+      md5: 10938cef3b9c3cae53b731e839fd809c.dir
+      size: 215627
+      nfiles: 1
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: fb9c7ea2e105f28eb457932ed6c3cc76
+      size: 3608
+    - path: src/pyro_detector_baseline/evaluator.py
+      hash: md5
+      md5: 873acf4e0538965efb5ac88164252c3a
+      size: 8280
+    outs:
+    - path: data/08_reporting/val/pyronear/metrics.json
+      hash: md5
+      md5: a6fc840464e38482939dbc6006c6659a
+      size: 781
+    - path: data/08_reporting/val/pyronear/plots
+      hash: md5
+      md5: c83961a84d63bd8f2ee1eff54949180a.dir
+      size: 98788
+      nfiles: 4
+  package:
+    cmd: uv run python scripts/package.py --model-dir data/01_raw/models 
+      --params-path params.yaml --output-path data/06_models/model.zip
+    deps:
+    - path: data/01_raw/models
+      hash: md5
+      md5: cb02d212f75c68f1c83fffdfa64d66f4.dir
+      size: 71127408
+      nfiles: 4
+    - path: scripts/package.py
+      hash: md5
+      md5: af6f6892ef8728a6b5a0ddb4d150ba76
+      size: 2053
+    - path: src/pyro_detector_baseline/package.py
+      hash: md5
+      md5: ac261bf1ba687d687967f8891783d1d8
+      size: 3569
+    params:
+      params.yaml:
+        predict:
+          conf_thresh: 0.35
+          model_conf_thresh: 0.05
+          nb_consecutive_frames: 7
+          max_bbox_size: 0.4
+    outs:
+    - path: data/06_models/model.zip
+      hash: md5
+      md5: 834ddb95125fa916bc4cef3192ca3fd4
+      size: 38513180
