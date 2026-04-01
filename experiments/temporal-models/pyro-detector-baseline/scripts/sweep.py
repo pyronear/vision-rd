@@ -42,8 +42,8 @@ from pyro_detector_baseline.predictor_wrapper import (
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
-CONF_THRESHOLDS = [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5]
-NB_CONSECUTIVE_FRAMES = [2, 3, 4, 5, 6, 7, 8, 10]
+DEFAULT_CONF_THRESHOLDS = [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5]
+DEFAULT_NB_CONSECUTIVE_FRAMES = [2, 3, 4, 5, 6, 7, 8, 10]
 
 # Module-level shared state set via _init_worker
 _all_sequences: list[tuple[str, bool, list[tuple[str, np.ndarray]], str]] = []
@@ -118,6 +118,20 @@ def main() -> None:
         default=None,
         help="Only include sequences whose ID starts with this prefix.",
     )
+    parser.add_argument(
+        "--conf-thresholds",
+        type=float,
+        nargs="+",
+        default=DEFAULT_CONF_THRESHOLDS,
+        help="Confidence thresholds to sweep (default: %(default)s).",
+    )
+    parser.add_argument(
+        "--nb-frames-values",
+        type=int,
+        nargs="+",
+        default=DEFAULT_NB_CONSECUTIVE_FRAMES,
+        help="Sliding window sizes to sweep (default: %(default)s).",
+    )
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -155,7 +169,7 @@ def main() -> None:
         return
 
     # Build parameter grid
-    combos = list(itertools.product(CONF_THRESHOLDS, NB_CONSECUTIVE_FRAMES))
+    combos = list(itertools.product(args.conf_thresholds, args.nb_frames_values))
     n_workers = args.workers or os.cpu_count() or 1
     logger.info(
         "Running %d parameter combinations with %d workers...",
