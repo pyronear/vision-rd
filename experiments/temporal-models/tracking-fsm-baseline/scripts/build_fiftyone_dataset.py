@@ -18,7 +18,11 @@ from pathlib import Path
 import fiftyone as fo
 from tqdm import tqdm
 
-from tracking_fsm_baseline.data import get_sorted_frames, load_label_boxes
+from tracking_fsm_baseline.data import (
+    find_sequence_dir,
+    get_sorted_frames,
+    load_label_boxes,
+)
 from tracking_fsm_baseline.detector import load_inference_results
 from tracking_fsm_baseline.evaluator import load_tracking_results
 from tracking_fsm_baseline.types import Detection
@@ -88,8 +92,8 @@ def build_dataset(
         infer_frames = load_inference_results(infer_path)
 
         # Get sorted image paths
-        seq_dir = data_dir / seq_id
-        if not seq_dir.is_dir():
+        seq_dir = find_sequence_dir(data_dir, seq_id)
+        if seq_dir is None:
             logger.warning("Missing sequence directory for %s, skipping.", seq_id)
             continue
 

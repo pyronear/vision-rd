@@ -2,7 +2,13 @@ from datetime import datetime
 
 import pytest
 
-from tracking_fsm_baseline.data import is_wf_sequence, pad_sequence, parse_timestamp
+from tracking_fsm_baseline.data import (
+    find_sequence_dir,
+    is_wf_sequence,
+    list_sequences,
+    pad_sequence,
+    parse_timestamp,
+)
 from tracking_fsm_baseline.types import Detection, FrameResult
 
 
@@ -21,46 +27,55 @@ class TestParseTimestamp:
 
 
 class TestIsWfSequence:
-    def test_five_columns_is_wf(self, tmp_path):
-        seq = tmp_path / "seq1"
-        labels = seq / "labels"
-        labels.mkdir(parents=True)
-        (labels / "frame1.txt").write_text("0 0.5 0.5 0.2 0.2\n")
+    def test_wildfire_parent_is_wf(self, tmp_path):
+        seq = tmp_path / "wildfire" / "seq1"
+        seq.mkdir(parents=True)
         assert is_wf_sequence(seq) is True
 
-    def test_six_columns_is_fp(self, tmp_path):
-        seq = tmp_path / "seq2"
-        labels = seq / "labels"
-        labels.mkdir(parents=True)
-        (labels / "frame1.txt").write_text("0 0.5 0.5 0.2 0.2 0.85\n")
+    def test_fp_parent_is_not_wf(self, tmp_path):
+        seq = tmp_path / "fp" / "seq2"
+        seq.mkdir(parents=True)
         assert is_wf_sequence(seq) is False
 
-    def test_empty_labels_default_to_fp(self, tmp_path):
-        seq = tmp_path / "seq3"
-        labels = seq / "labels"
-        labels.mkdir(parents=True)
-        (labels / "frame1.txt").write_text("")
+    def test_other_parent_is_not_wf(self, tmp_path):
+        seq = tmp_path / "other" / "seq3"
+        seq.mkdir(parents=True)
         assert is_wf_sequence(seq) is False
 
-    def test_no_labels_dir_returns_false(self, tmp_path):
-        seq = tmp_path / "seq4"
-        seq.mkdir()
-        assert is_wf_sequence(seq) is False
 
-    def test_non_txt_files_ignored(self, tmp_path):
-        seq = tmp_path / "seq5"
-        labels = seq / "labels"
-        labels.mkdir(parents=True)
-        (labels / "frame1.xml").write_text("0 0.5 0.5 0.2 0.2")
-        assert is_wf_sequence(seq) is False
+class TestFindSequenceDir:
+    def test_finds_in_wildfire(self, tmp_path):
+        (tmp_path / "wildfire" / "seq1").mkdir(parents=True)
+        result = find_sequence_dir(tmp_path, "seq1")
+        assert result == tmp_path / "wildfire" / "seq1"
 
-    def test_mixed_empty_and_wf(self, tmp_path):
-        seq = tmp_path / "seq6"
-        labels = seq / "labels"
-        labels.mkdir(parents=True)
-        (labels / "frame1.txt").write_text("")
-        (labels / "frame2.txt").write_text("0 0.5 0.5 0.2 0.2\n")
-        assert is_wf_sequence(seq) is True
+    def test_finds_in_fp(self, tmp_path):
+        (tmp_path / "fp" / "seq2").mkdir(parents=True)
+        result = find_sequence_dir(tmp_path, "seq2")
+        assert result == tmp_path / "fp" / "seq2"
+
+    def test_returns_none_if_missing(self, tmp_path):
+        (tmp_path / "wildfire").mkdir()
+        (tmp_path / "fp").mkdir()
+        assert find_sequence_dir(tmp_path, "missing") is None
+
+
+class TestListSequences:
+    def test_nested_layout(self, tmp_path):
+        (tmp_path / "wildfire" / "seq_a").mkdir(parents=True)
+        (tmp_path / "wildfire" / "seq_c").mkdir(parents=True)
+        (tmp_path / "fp" / "seq_b").mkdir(parents=True)
+        result = list_sequences(tmp_path)
+        assert [p.name for p in result] == ["seq_a", "seq_b", "seq_c"]
+
+    def test_flat_layout(self, tmp_path):
+        (tmp_path / "seq_x").mkdir()
+        (tmp_path / "seq_y").mkdir()
+        result = list_sequences(tmp_path)
+        assert [p.name for p in result] == ["seq_x", "seq_y"]
+
+    def test_empty_dir(self, tmp_path):
+        assert list_sequences(tmp_path) == []
 
 
 class TestPadSequence:

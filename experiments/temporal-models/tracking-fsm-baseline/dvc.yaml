@@ -1,4 +1,24 @@
 stages:
+  # --- Truncate imported dataset ---
+  truncate:
+    foreach:
+      - train
+      - val
+    do:
+      desc: "Truncate ${item} sequences to max_frames (imported full dataset)"
+      cmd: >-
+        uv run python scripts/truncate_sequences.py
+        --input-dir data/01_raw/datasets_full/${item}
+        --output-dir data/01_raw/datasets/${item}
+        --max-frames ${truncate.max_frames}
+      deps:
+        - scripts/truncate_sequences.py
+        - data/01_raw/datasets_full/${item}
+      params:
+        - truncate.max_frames
+      outs:
+        - data/01_raw/datasets/${item}
+
   # --- YOLO Inference ---
   infer:
     foreach:

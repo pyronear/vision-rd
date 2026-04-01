@@ -602,3 +602,49 @@ stages:
       hash: md5
       md5: af4db66fccf5be457dff99c0b66a30f5
       size: 19260701
+  truncate@train:
+    cmd: uv run python scripts/truncate_sequences.py --input-dir 
+      data/01_raw/datasets_full/train --output-dir data/01_raw/datasets/train 
+      --max-frames 20
+    deps:
+    - path: data/01_raw/datasets_full/train
+      hash: md5
+      md5: 22ee5d57943a0ff900121ca28b18f2a8.dir
+      size: 7149007108
+      nfiles: 135742
+    - path: scripts/truncate_sequences.py
+      hash: md5
+      md5: 50ac7865933889df116cf61d7f35bc63
+      size: 2495
+    params:
+      params.yaml:
+        truncate.max_frames: 20
+    outs:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: 93396ffb1654e2023eb75168251ef01b.dir
+      size: 4462554268
+      nfiles: 84784
+  truncate@val:
+    cmd: uv run python scripts/truncate_sequences.py --input-dir 
+      data/01_raw/datasets_full/val --output-dir data/01_raw/datasets/val 
+      --max-frames 20
+    deps:
+    - path: data/01_raw/datasets_full/val
+      hash: md5
+      md5: 2ca47638a4b0cc9ca7d4011376c54e45.dir
+      size: 631259421
+      nfiles: 12448
+    - path: scripts/truncate_sequences.py
+      hash: md5
+      md5: 50ac7865933889df116cf61d7f35bc63
+      size: 2495
+    params:
+      params.yaml:
+        truncate.max_frames: 20
+    outs:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: c178b34b1bd867a3f2e9c5dad9a838ae.dir
+      size: 415167241
+      nfiles: 8268
