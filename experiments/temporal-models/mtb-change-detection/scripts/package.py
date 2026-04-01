@@ -6,7 +6,7 @@ a ``.zip`` archive that can be deployed independently.
 
 Usage:
     uv run python scripts/package.py \
-        --weights-path data/01_raw/models/yolo11s_mighty-mongoose_v5.1.0.pt \
+        --weights-path data/01_raw/models/best.pt \
         --params-path params.yaml \
         --output-path data/06_models/model.zip
 """
