@@ -1,0 +1,40 @@
+{
+  "yolo_only": {
+    "num_sequences": 2933,
+    "num_positive_gt": 1467,
+    "num_negative_gt": 1466,
+    "tp": 1422,
+    "fp": 939,
+    "fn": 45,
+    "tn": 527,
+    "tp_pct": 96.93,
+    "fp_pct": 64.05,
+    "fn_pct": 3.07,
+    "tn_pct": 35.95,
+    "precision": 0.6023,
+    "recall": 0.9693,
+    "f1": 0.7429,
+    "fpr": 0.6405,
+    "mean_ttd_seconds": 0.0,
+    "median_ttd_seconds": 0.0
+  },
+  "mtb_tracking": {
+    "num_sequences": 2933,
+    "num_positive_gt": 1467,
+    "num_negative_gt": 1466,
+    "tp": 1358,
+    "fp": 617,
+    "fn": 109,
+    "tn": 849,
+    "tp_pct": 92.57,
+    "fp_pct": 42.09,
+    "fn_pct": 7.43,
+    "tn_pct": 57.91,
+    "precision": 0.6876,
+    "recall": 0.9257,
+    "f1": 0.7891,
+    "fpr": 0.4209,
+    "mean_ttd_seconds": 117.0,
+    "median_ttd_seconds": 38.0
+  }
+}

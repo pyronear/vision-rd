@@ -1,0 +1,28 @@
+prepare:
+  model_repo: "pyronear/yolo11s_mighty-mongoose_v5.1.0"
+  model_filename: "yolo11s_mighty-mongoose_v5.1.0.pt"
+
+infer:
+  confidence_threshold: 0.01
+  iou_nms: 0.2
+  image_size: 1024
+
+pad:
+  min_sequence_length: 10
+
+# MTB change detection params — the main knobs
+change:
+  pixel_threshold: 10       # Tuned from sweep (paper default 19 too aggressive at 30s)
+  min_change_ratio: 0.01    # Min fraction of changed pixels in bbox to validate
+
+# Tracker params — deliberately minimal to isolate change detection effect
+track:
+  confidence_threshold: 0.01   # Pass through all YOLO detections
+  iou_threshold: 0.1           # Reasonable IoU for matching across frames
+  min_consecutive: 2            # Just 2 consecutive change-validated frames
+  max_detection_area: 1.0       # No area filtering
+  max_misses: 0                 # Strict consecutive requirement
+  use_confidence_filter: false
+  min_mean_confidence: 0.0
+  use_area_change_filter: false
+  min_area_change: 1.0
