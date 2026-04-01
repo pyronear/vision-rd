@@ -29,12 +29,10 @@ Each rule has a boolean flag and a threshold. Disabled by default.
 Imported from [pyro-dataset](https://github.com/pyronear/pyro-dataset) v2.2.0
 via `dvc import`, then truncated to max 20 frames per sequence:
 
-- **Train**: ~1,034 WF + ~1,433 FP sequences (Pyronear only; 2,865 total incl. external)
-- **Val**: ~112 WF + ~147 FP sequences (Pyronear only; 294 total incl. external)
+- **Train**: ~1,070 WF + ~1,466 FP sequences (Pyronear only; 2,933 total incl. external)
+- **Val**: ~116 WF + ~151 FP sequences (Pyronear only; 302 total incl. external)
 - Layout: `data/01_raw/datasets/{train,val}/{wildfire,fp}/sequence_name/{images,labels}/`
-- Ground truth: sequence-level binary, inferred from label format
-  - WF (positive): 5-column labels (`class cx cy w h`) — human annotations
-  - FP (negative): 6-column labels (`class cx cy w h confidence`) — prior YOLO predictions on non-smoke scenes
+- Ground truth: inferred from parent directory name (`wildfire/` = positive, `fp/` = negative)
 
 ## 📏 Evaluation
 
