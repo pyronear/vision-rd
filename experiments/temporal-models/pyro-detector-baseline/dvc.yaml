@@ -1,0 +1,78 @@
+stages:
+  # --- Prepare: download ONNX model weights ---
+  prepare:
+    desc: "Download ONNX model weights from HuggingFace Hub"
+    cmd: >-
+      uv run python scripts/prepare.py
+      --model-repo ${prepare.model_repo}
+      --model-filename ${prepare.model_filename}
+      --output-model-dir data/01_raw/models
+    deps:
+      - scripts/prepare.py
+    params:
+      - prepare
+    outs:
+      - data/01_raw/models
+
+  # --- Predict ---
+  predict:
+    foreach:
+      - train
+      - val
+    do:
+      desc: "Run pyro-predictor on ${item} set sequences"
+      cmd: >-
+        uv run python scripts/predict.py
+        --data-dir data/01_raw/datasets/${item}
+        --model-dir data/01_raw/models
+        --output-dir data/07_model_output/${item}
+        --conf-thresh ${predict.conf_thresh}
+        --model-conf-thresh ${predict.model_conf_thresh}
+        --nb-consecutive-frames ${predict.nb_consecutive_frames}
+        --max-bbox-size ${predict.max_bbox_size}
+      deps:
+        - scripts/predict.py
+        - src/pyro_detector_baseline/data.py
+        - src/pyro_detector_baseline/predictor_wrapper.py
+        - data/01_raw/datasets/${item}
+        - data/01_raw/models
+      params:
+        - predict
+      outs:
+        - data/07_model_output/${item}
+
+  # --- Evaluate ---
+  evaluate:
+    foreach:
+      train_all:
+        split: train
+        subset: all
+        filter_flag: ""
+      val_all:
+        split: val
+        subset: all
+        filter_flag: ""
+      train_pyronear:
+        split: train
+        subset: pyronear
+        filter_flag: "--filter-prefix pyronear"
+      val_pyronear:
+        split: val
+        subset: pyronear
+        filter_flag: "--filter-prefix pyronear"
+    do:
+      desc: "Compute sequence-level metrics on ${item.split} set (${item.subset})"
+      cmd: >-
+        uv run python scripts/evaluate.py
+        --track-dir data/07_model_output/${item.split}
+        --output-dir data/08_reporting/${item.split}/${item.subset}
+        ${item.filter_flag}
+      deps:
+        - scripts/evaluate.py
+        - src/pyro_detector_baseline/evaluator.py
+        - data/07_model_output/${item.split}
+      metrics:
+        - data/08_reporting/${item.split}/${item.subset}/metrics.json:
+            cache: false
+      plots:
+        - data/08_reporting/${item.split}/${item.subset}/plots
