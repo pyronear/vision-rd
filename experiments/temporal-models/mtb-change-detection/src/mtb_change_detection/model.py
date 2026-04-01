@@ -2,6 +2,7 @@
 
 import dataclasses
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Self
 
 import cv2
@@ -11,6 +12,7 @@ from pyrocore import Frame, TemporalModel, TemporalModelOutput
 from .change_detector import compute_change_mask, compute_change_ratio_in_bbox
 from .data import pad_sequence
 from .detector import run_inference_on_frame
+from .package import ModelPackage, load_model_package
 from .tracker import SimpleTracker
 from .types import FrameResult
 
@@ -42,6 +44,24 @@ class MtbChangeDetectionModel(TemporalModel):
         self._change_params = change_params
         self._tracker_params = tracker_params
         self._min_sequence_length = min_sequence_length
+
+    @classmethod
+    def from_package(cls, package_path: Path) -> Self:
+        """Load a packaged model archive and return an :class:`MtbChangeDetectionModel`.
+
+        Args:
+            package_path: Path to a ``.zip`` archive created by
+                :func:`~mtb_change_detection.package.build_model_package`.
+        """
+        pkg: ModelPackage = load_model_package(package_path)
+        return cls(
+            yolo_model=pkg.model,
+            infer_params=pkg.infer_params,
+            prefilter_params=pkg.prefilter_params,
+            change_params=pkg.change_params,
+            tracker_params=pkg.tracker_params,
+            min_sequence_length=pkg.pad_params["min_sequence_length"],
+        )
 
     @classmethod
     def from_params(

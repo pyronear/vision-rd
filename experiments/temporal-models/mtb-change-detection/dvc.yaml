@@ -88,6 +88,27 @@ stages:
       outs:
         - data/07_model_output/${item}
 
+  # --- Package ---
+  package:
+    desc: "Bundle YOLO weights and MTB+tracking config into a single deployable archive"
+    cmd: >-
+      uv run python scripts/package.py
+      --weights-path data/01_raw/models/${prepare.model_filename}
+      --params-path params.yaml
+      --output-path data/06_models/model.zip
+    deps:
+      - scripts/package.py
+      - src/mtb_change_detection/package.py
+      - data/01_raw/models/${prepare.model_filename}
+    params:
+      - prepare.model_filename
+      - infer
+      - pad
+      - change
+      - track
+    outs:
+      - data/06_models/model.zip
+
   # --- Evaluate ---
   evaluate:
     foreach:

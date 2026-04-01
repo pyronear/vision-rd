@@ -558,3 +558,47 @@ stages:
       md5: 0bae719a075918c7e7a1220a196e3c24.dir
       size: 31577
       nfiles: 1
+  package:
+    cmd: uv run python scripts/package.py --weights-path 
+      data/01_raw/models/yolo11s_mighty-mongoose_v5.1.0.pt --params-path 
+      params.yaml --output-path data/06_models/model.zip
+    deps:
+    - path: data/01_raw/models/yolo11s_mighty-mongoose_v5.1.0.pt
+      hash: md5
+      md5: 4657163d63ae9873728cf5bbf2c918f7
+      size: 19259923
+    - path: scripts/package.py
+      hash: md5
+      md5: 592d221037f344e1cfc3ce3993e2405b
+      size: 1679
+    - path: src/mtb_change_detection/package.py
+      hash: md5
+      md5: fd3357dcee3bf7db5e1e7e40b1868368
+      size: 6886
+    params:
+      params.yaml:
+        change:
+          pixel_threshold: 10
+          min_change_ratio: 0.01
+        infer:
+          confidence_threshold: 0.01
+          iou_nms: 0.2
+          image_size: 1024
+        pad:
+          min_sequence_length: 10
+        prepare.model_filename: yolo11s_mighty-mongoose_v5.1.0.pt
+        track:
+          confidence_threshold: 0.01
+          iou_threshold: 0.1
+          min_consecutive: 2
+          max_detection_area: 1.0
+          max_misses: 0
+          use_confidence_filter: false
+          min_mean_confidence: 0.0
+          use_area_change_filter: false
+          min_area_change: 1.0
+    outs:
+    - path: data/06_models/model.zip
+      hash: md5
+      md5: af4db66fccf5be457dff99c0b66a30f5
+      size: 19260701
