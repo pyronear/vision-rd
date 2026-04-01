@@ -1,3 +1,6 @@
+truncate:
+  max_frames: 20
+
 prepare:
   model_repo: "pyronear/yolo11s_nimble-narwhal_v6.0.0"
   model_filename: "best.pt"

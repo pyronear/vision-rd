@@ -26,12 +26,13 @@ Each rule has a boolean flag and a threshold. Disabled by default.
 
 ## 📊 Data
 
-Sequential dataset from `pyro-dataset`, truncated to max 20 frames per sequence:
-- Train: ~1,034 WF + ~1,433 FP sequences (Pyronear only; 2,865 total incl. external)
-- Val: ~112 WF + ~147 FP sequences (Pyronear only; 294 total incl. external)
-- Ground truth: sequence-level binary, inferred from label format
-  - WF (positive): 5-column labels (`class cx cy w h`) — human annotations
-  - FP (negative): 6-column labels (`class cx cy w h confidence`) — prior YOLO predictions on non-smoke scenes
+Imported from [pyro-dataset](https://github.com/pyronear/pyro-dataset) v2.2.0
+via `dvc import`, then truncated to max 20 frames per sequence:
+
+- **Train**: ~1,070 WF + ~1,466 FP sequences (Pyronear only; 2,933 total incl. external)
+- **Val**: ~116 WF + ~151 FP sequences (Pyronear only; 302 total incl. external)
+- Layout: `data/01_raw/datasets/{train,val}/{wildfire,fp}/sequence_name/{images,labels}/`
+- Ground truth: inferred from parent directory name (`wildfire/` = positive, `fp/` = negative)
 
 ## 📏 Evaluation
 
@@ -85,10 +86,11 @@ Best parameters from sweep on train/pyronear (`conf=0.3, iou=0.1, min_consecutiv
 ## ⚙️ Pipeline
 
 ```
-infer (01_raw → 02_intermediate)
-  → pad (02_intermediate → 03_primary)
-    → track (03_primary → 07_model_output)
-      → evaluate / sweep / ablation (→ 08_reporting)
+truncate (01_raw/datasets_full → 01_raw/datasets)
+  → infer (01_raw → 02_intermediate)
+    → pad (02_intermediate → 03_primary)
+      → track (03_primary → 07_model_output)
+        → evaluate / sweep / ablation (→ 08_reporting)
 ```
 
 Each evaluate, sweep, and ablation stage runs on both all sequences and Pyronear-only subsets.
@@ -98,6 +100,17 @@ Each evaluate, sweep, and ablation stage runs on both all sequences and Pyronear
 ```bash
 cd experiments/temporal-models/tracking-fsm-baseline
 make install
+
+# Dataset is imported via DVC from pyro-dataset v2.2.0:
+#   uv run dvc import https://github.com/pyronear/pyro-dataset \
+#       data/processed/sequential_train_val/train \
+#       -o data/01_raw/datasets_full/train --rev v2.2.0
+#   uv run dvc import https://github.com/pyronear/pyro-dataset \
+#       data/processed/sequential_train_val/val \
+#       -o data/01_raw/datasets_full/val --rev v2.2.0
+# The .dvc files are committed — just pull:
+uv run dvc pull
+
 uv run dvc repro
 uv run dvc metrics show
 ```

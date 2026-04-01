@@ -30,7 +30,7 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from tracking_fsm_baseline.data import is_wf_sequence
+from tracking_fsm_baseline.data import find_sequence_dir, is_wf_sequence
 from tracking_fsm_baseline.detector import load_inference_results
 from tracking_fsm_baseline.evaluator import evaluate_tracker
 from tracking_fsm_baseline.tracker import SimpleTracker
@@ -142,7 +142,8 @@ def main() -> None:
         if args.filter_prefix and not seq_id.startswith(args.filter_prefix):
             continue
         frames = load_inference_results(infer_path)
-        gt = is_wf_sequence(args.data_dir / seq_id)
+        seq_dir = find_sequence_dir(args.data_dir, seq_id)
+        gt = is_wf_sequence(seq_dir) if seq_dir is not None else False
         all_data.append((gt, frames))
     logger.info("Loaded %d sequences.", len(all_data))
 

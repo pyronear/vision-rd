@@ -24,7 +24,7 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from tracking_fsm_baseline.data import is_wf_sequence
+from tracking_fsm_baseline.data import find_sequence_dir, is_wf_sequence
 from tracking_fsm_baseline.detector import load_inference_results
 from tracking_fsm_baseline.tracker import SimpleTracker
 from tracking_fsm_baseline.types import FrameResult, SequenceResult
@@ -152,7 +152,8 @@ def main() -> None:
         is_alarm, tracks, confirmed_idx, _frame_traces = tracker.process_sequence(
             frames
         )
-        gt = is_wf_sequence(args.data_dir / seq_id)
+        seq_dir = find_sequence_dir(args.data_dir, seq_id)
+        gt = is_wf_sequence(seq_dir) if seq_dir is not None else False
 
         total_dets = sum(len(f.detections) for f in frames)
         first_ts = frames[0].timestamp if frames else None

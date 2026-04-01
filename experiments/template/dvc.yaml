@@ -1,4 +1,26 @@
 # stages:
+#   # --- Truncate imported dataset (optional) ---
+#   # Use this stage if your experiment needs to preprocess the raw dataset
+#   # imported via `dvc import` (e.g. truncate sequences to N frames).
+#   # Import to data/01_raw/datasets_full/ and truncate to data/01_raw/datasets/.
+#   truncate:
+#     foreach:
+#       - train
+#       - val
+#     do:
+#       cmd: >-
+#         uv run python scripts/truncate_sequences.py
+#         --input-dir data/01_raw/datasets_full/${item}
+#         --output-dir data/01_raw/datasets/${item}
+#         --max-frames ${truncate.max_frames}
+#       deps:
+#         - scripts/truncate_sequences.py
+#         - data/01_raw/datasets_full/${item}
+#       params:
+#         - truncate.max_frames
+#       outs:
+#         - data/01_raw/datasets/${item}
+#
 #   prepare:
 #     cmd: >-
 #       uv run python scripts/prepare.py

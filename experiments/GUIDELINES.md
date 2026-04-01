@@ -44,6 +44,48 @@ Notebooks are for **exploration and visualization only**. Move any reusable logi
 - Track data with `dvc add data/` and commit the `.dvc` files to git
 - Configure a DVC remote in `.dvc/config` using the convention: `s3://pyro-vision-rd/dvc/experiments/<experiment-name>/`
 
+## Dataset Import
+
+All experiments that use the Pyronear sequential dataset must import it from [`pyro-dataset`](https://github.com/pyronear/pyro-dataset) via `dvc import` with a pinned version tag. This ensures every experiment tracks exactly which dataset version it uses and where it came from.
+
+### Standard import commands
+
+```bash
+# Train/val splits
+uv run dvc import https://github.com/pyronear/pyro-dataset \
+    data/processed/sequential_train_val/train \
+    -o data/01_raw/datasets/train --rev v2.2.0
+uv run dvc import https://github.com/pyronear/pyro-dataset \
+    data/processed/sequential_train_val/val \
+    -o data/01_raw/datasets/val --rev v2.2.0
+
+# Test split (for leaderboard/evaluation)
+uv run dvc import https://github.com/pyronear/pyro-dataset \
+    data/processed/sequential_test \
+    -o data/01_raw/datasets/test --rev v2.2.0
+```
+
+### Conventions
+
+- **Version tag**: Always use `--rev <tag>` (e.g. `v2.2.0`), never a branch name
+- **Output path**: `data/01_raw/datasets/{train,val,test}`
+- **Frozen imports**: DVC imports are frozen by default — they won't re-check the remote on `dvc repro`
+- **Collaborators**: After cloning, just run `uv run dvc pull` to fetch data from the experiment's S3 remote
+- **Commit `.dvc` files**: The resulting `.dvc` files (e.g. `data/01_raw/datasets/train.dvc`) must be committed to git
+
+### Preprocessing (truncation, filtering, etc.)
+
+If your experiment needs to preprocess the imported data (e.g. truncate sequences to N frames), import to `data/01_raw/datasets_full/` and add a pipeline stage that writes to `data/01_raw/datasets/`:
+
+```bash
+# Import full dataset
+uv run dvc import https://github.com/pyronear/pyro-dataset \
+    data/processed/sequential_train_val/train \
+    -o data/01_raw/datasets_full/train --rev v2.2.0
+```
+
+Then add a `truncate` stage in `dvc.yaml` (see template for example). This keeps downstream stages unchanged since they already depend on `data/01_raw/datasets/`.
+
 ## DVC Pipelines
 
 Define your ML pipeline as stages in `dvc.yaml`. The template provides a commented-out scaffold — uncomment and adapt the stages you need.
