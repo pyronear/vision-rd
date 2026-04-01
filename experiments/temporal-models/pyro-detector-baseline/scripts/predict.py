@@ -1,18 +1,17 @@
-"""Run pyro-predictor on all sequences in a data split.
+"""Replay temporal logic on cached YOLO detections for a data split.
 
-Iterates over sequence directories, feeds each frame through the
-PyroDetectorModel (TemporalModel subclass), and writes sequence-level
-results to tracking_results.json.
+Loads per-frame detections produced by the infer stage and replays them
+through the Predictor's sliding-window temporal logic.  Writes
+sequence-level results to tracking_results.json (same format consumed
+by the evaluate stage).
 
 Usage:
     uv run python scripts/predict.py \
+        --infer-dir data/03_primary/val \
         --data-dir data/01_raw/datasets/val \
-        --model-dir data/01_raw/models \
         --output-dir data/07_model_output/val \
         --conf-thresh 0.35 \
-        --model-conf-thresh 0.05 \
-        --nb-consecutive-frames 7 \
-        --max-bbox-size 0.4
+        --nb-consecutive-frames 7
 """
 
 import argparse
@@ -20,39 +19,54 @@ import json
 import logging
 from pathlib import Path
 
+import numpy as np
+from PIL import Image
+from pyro_predictor.predictor import Predictor
 from tqdm import tqdm
 
-from pyro_detector_baseline.data import (
-    get_sorted_frames,
-    is_wf_sequence,
-    list_sequences,
-    parse_timestamp,
-)
-from pyro_detector_baseline.model import PyroDetectorModel
+from pyro_detector_baseline.data import is_wf_sequence, parse_timestamp
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
+_DUMMY_FRAME = Image.new("RGB", (1, 1))
 
-def _find_onnx_model(model_dir: Path) -> str | None:
-    """Find the ONNX model file in a directory, skipping macOS resource forks."""
-    onnx_files = [f for f in model_dir.glob("**/*.onnx") if not f.name.startswith("._")]
-    return str(onnx_files[0]) if onnx_files else None
+
+def _create_replay(conf_thresh: float, nb_consecutive_frames: int) -> Predictor:
+    """Create a lightweight Predictor for temporal replay without loading YOLO."""
+    replay = object.__new__(Predictor)
+    replay.conf_thresh = conf_thresh
+    replay.nb_consecutive_frames = nb_consecutive_frames
+    replay._states = {}
+    return replay
+
+
+def _load_sequence_detections(
+    json_path: Path,
+) -> list[tuple[str, np.ndarray]]:
+    """Load cached per-frame detections from an infer JSON."""
+    data = json.loads(json_path.read_text())
+    return [
+        (d["filename"], np.array(d["detections"], dtype=np.float64).reshape(-1, 5))
+        for d in data
+    ]
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run pyro-predictor on sequence data.")
+    parser = argparse.ArgumentParser(
+        description="Replay temporal logic on cached detections."
+    )
+    parser.add_argument(
+        "--infer-dir",
+        type=Path,
+        required=True,
+        help="Path to cached inference results directory.",
+    )
     parser.add_argument(
         "--data-dir",
         type=Path,
         required=True,
-        help="Path to sequence data directory.",
-    )
-    parser.add_argument(
-        "--model-dir",
-        type=Path,
-        required=True,
-        help="Path to directory containing the ONNX model.",
+        help="Path to sequence data directory (for GT labels).",
     )
     parser.add_argument(
         "--output-dir",
@@ -67,57 +81,57 @@ def main() -> None:
         help="Predictor confidence threshold for alerts.",
     )
     parser.add_argument(
-        "--model-conf-thresh",
-        type=float,
-        default=0.05,
-        help="Per-frame YOLO confidence threshold.",
-    )
-    parser.add_argument(
         "--nb-consecutive-frames",
         type=int,
         default=7,
         help="Temporal sliding window size.",
     )
-    parser.add_argument(
-        "--max-bbox-size",
-        type=float,
-        default=0.4,
-        help="Maximum detection width as image fraction.",
-    )
     args = parser.parse_args()
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    model_path = _find_onnx_model(args.model_dir)
-    logger.info("Using model: %s", model_path)
+    replay = _create_replay(args.conf_thresh, args.nb_consecutive_frames)
 
-    model = PyroDetectorModel(
-        model_path=model_path,
-        conf_thresh=args.conf_thresh,
-        model_conf_thresh=args.model_conf_thresh,
-        nb_consecutive_frames=args.nb_consecutive_frames,
-        max_bbox_size=args.max_bbox_size,
-    )
-
-    sequences = list_sequences(args.data_dir)
-    logger.info("Found %d sequences.", len(sequences))
+    infer_files = sorted(args.infer_dir.glob("*.json"))
+    logger.info("Found %d inference files.", len(infer_files))
 
     results: list[dict] = []
-    for seq_dir in tqdm(sequences, desc="Predicting"):
-        seq_id = seq_dir.name
-        frame_paths = get_sorted_frames(seq_dir)
+    for infer_path in tqdm(infer_files, desc="Predicting"):
+        seq_id = infer_path.stem
+        frame_detections = _load_sequence_detections(infer_path)
 
-        if not frame_paths:
+        if not frame_detections:
             logger.warning("No frames in %s, skipping.", seq_id)
             continue
 
-        output = model.predict_sequence(frame_paths)
+        # Locate sequence dir for GT (handles nested wildfire/fp layout)
+        seq_dir = args.data_dir / seq_id
+        if not seq_dir.is_dir():
+            candidates = list(args.data_dir.glob(f"*/{seq_id}"))
+            if not candidates:
+                logger.warning("No data dir for %s, skipping.", seq_id)
+                continue
+            seq_dir = candidates[0]
 
         gt = is_wf_sequence(seq_dir)
-        first_ts = parse_timestamp(frame_paths[0].name)
-        trigger_idx = output.trigger_frame_index
+        first_ts = parse_timestamp(frame_detections[0][0])
+
+        # Replay temporal logic
+        cam_key = seq_id
+        replay._states[cam_key] = replay._new_state()
+
+        confidences: list[float] = []
+        trigger_idx: int | None = None
+        for i, (_filename, preds) in enumerate(frame_detections):
+            conf = replay._update_states(_DUMMY_FRAME, preds, cam_key)
+            confidences.append(float(conf))
+            if conf > args.conf_thresh and trigger_idx is None:
+                trigger_idx = i
+
+        del replay._states[cam_key]
+
         confirmed_ts = (
-            parse_timestamp(frame_paths[trigger_idx].name)
+            parse_timestamp(frame_detections[trigger_idx][0])
             if trigger_idx is not None
             else None
         )
@@ -126,15 +140,15 @@ def main() -> None:
             {
                 "sequence_id": seq_id,
                 "is_positive_gt": gt,
-                "is_positive_pred": output.is_positive,
-                "num_frames": output.details["num_frames"],
-                "num_detections_total": output.details["num_detections_total"],
+                "is_positive_pred": trigger_idx is not None,
+                "num_frames": len(frame_detections),
+                "num_detections_total": sum(1 for c in confidences if c > 0),
                 "confirmed_frame_index": trigger_idx,
                 "confirmed_timestamp": (
                     confirmed_ts.isoformat() if confirmed_ts else None
                 ),
                 "first_timestamp": first_ts.isoformat(),
-                "per_frame_confidences": output.details["per_frame_confidences"],
+                "per_frame_confidences": confidences,
             }
         )
 

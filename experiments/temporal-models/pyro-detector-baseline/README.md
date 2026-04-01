@@ -10,16 +10,18 @@ models against the actual production system.
 
 1. Wrap `pyro-predictor`'s `Predictor` class (YOLO ONNX detection + per-camera
    sliding-window temporal smoothing) as a pyrocore `TemporalModel` subclass.
-2. Run the Predictor on every frame of each sequence, using a unique camera ID
-   per sequence to isolate sliding-window state.
-3. Classify a sequence as positive when the Predictor's aggregated confidence
+2. Run YOLO inference once per frame and cache detections (`infer` stage).
+3. Replay cached detections through the Predictor's temporal logic (`predict`
+   stage) — classifies a sequence as positive when the aggregated confidence
    exceeds `conf_thresh`.
-4. Compute sequence-level metrics (precision, recall, F1, FPR, TTD).
+4. Grid-search `conf_thresh` x `nb_consecutive_frames` on cached detections
+   (`sweep` stage) to find optimal parameters.
+5. Compute sequence-level metrics (precision, recall, F1, FPR, TTD).
 
 The Predictor mirrors production behavior (defaults from `pyro-engine`'s
 `Engine` class):
-- YOLO ONNX model for single-frame detection (same weights as other experiments,
-  from `pyronear/yolo11s_mighty-mongoose_v5.1.0`)
+- YOLO ONNX model for single-frame detection (weights from
+  `pyronear/yolo11s_nimble-narwhal_v6.0.0`)
 - Per-camera sliding window of 7 consecutive frames
 - Aggregated confidence output in [0, 1]
 
@@ -61,8 +63,11 @@ uv run dvc metrics show
 
 ```
 prepare (download ONNX model from HuggingFace)
-  -> predict (01_raw -> 07_model_output)
-    -> evaluate (-> 08_reporting)
+  -> infer (01_raw -> 03_primary)          # YOLO-only, cached per-frame detections
+    -> predict (03_primary -> 07_model_output)  # replay temporal logic (fixed params)
+      -> evaluate (-> 08_reporting)
+    -> sweep (03_primary -> 08_reporting/sweep) # grid-search temporal params
+  -> package (01_raw -> 06_models)
 ```
 
 ## Parameters
