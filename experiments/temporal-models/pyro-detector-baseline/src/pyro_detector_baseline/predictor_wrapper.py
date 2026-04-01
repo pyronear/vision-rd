@@ -12,9 +12,9 @@ from PIL import Image
 
 def create_predictor(
     model_path: str | None = None,
-    conf_thresh: float = 0.15,
+    conf_thresh: float = 0.35,
     model_conf_thresh: float = 0.05,
-    nb_consecutive_frames: int = 8,
+    nb_consecutive_frames: int = 7,
     max_bbox_size: float = 0.4,
     frame_size: tuple[int, int] | None = None,
 ):

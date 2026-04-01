@@ -61,7 +61,7 @@ def main() -> None:
     parser.add_argument(
         "--conf-thresh",
         type=float,
-        default=0.15,
+        default=0.35,
         help="Predictor confidence threshold for alerts.",
     )
     parser.add_argument(
@@ -73,7 +73,7 @@ def main() -> None:
     parser.add_argument(
         "--nb-consecutive-frames",
         type=int,
-        default=8,
+        default=7,
         help="Temporal sliding window size.",
     )
     parser.add_argument(
