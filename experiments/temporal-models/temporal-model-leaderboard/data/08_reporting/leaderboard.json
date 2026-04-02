@@ -12,5 +12,33 @@
     "fpr": 0.0537,
     "mean_ttd_seconds": 142.0,
     "median_ttd_seconds": 58.0
+  },
+  {
+    "model_name": "pyro-detector-baseline",
+    "num_sequences": 298,
+    "tp": 143,
+    "fp": 24,
+    "fn": 6,
+    "tn": 125,
+    "precision": 0.8563,
+    "recall": 0.9597,
+    "f1": 0.9051,
+    "fpr": 0.1611,
+    "mean_ttd_seconds": 27.0,
+    "median_ttd_seconds": 7.0
+  },
+  {
+    "model_name": "mtb-change-detection",
+    "num_sequences": 298,
+    "tp": 139,
+    "fp": 55,
+    "fn": 10,
+    "tn": 94,
+    "precision": 0.7165,
+    "recall": 0.9329,
+    "f1": 0.8105,
+    "fpr": 0.3691,
+    "mean_ttd_seconds": 85.4,
+    "median_ttd_seconds": 25.0
   }
 ]
