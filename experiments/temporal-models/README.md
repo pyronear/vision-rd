@@ -17,16 +17,4 @@ See [temporal-model-leaderboard](temporal-model-leaderboard/README.md) for full 
 
 ## 📚 Related Papers
 
-Temporal/video models for smoke detection explored in the [literature survey](../../literature_survey/SUMMARY.md):
-
-| Paper | Year | Approach | Link |
-|-------|------|----------|------|
-| SmokeyNet (Dewangan et al.) | 2022 | ResNet34 + LSTM + ViT spatiotemporal architecture | [arXiv](https://arxiv.org/abs/2112.08598) |
-| SlowFastMTB (Choi et al.) | 2022 | SlowFast dual-pathway + MTB change detection | [DOI](https://doi.org/10.1093/jcde/qwac027) |
-| Lightweight Student LSTM (Jeong et al.) | 2020 | YOLOv3 + distilled LSTM on smoke-tube features | [DOI](https://doi.org/10.3390/s20195508) |
-| FLAME (Gragnaniello et al.) | 2024 | CNN detector + physics-informed motion filter | [DOI](https://doi.org/10.1007/s00521-024-10963-z) |
-| Fire-Tube (Park & Ko) | 2020 | ELASTIC-YOLOv3 + temporal tube with optical flow | [DOI](https://doi.org/10.3390/s20082202) |
-| ViT + 3D-CNN (Lilhore et al.) | 2026 | Vision Transformer with 3D-CNN spatiotemporal learning | [DOI](https://doi.org/10.1038/s41598-026-36687-9) |
-| TeSTra (Zhao & Krahenbuhl) | 2022 | O(1) streaming detection via temporal smoothing kernels | [arXiv](https://arxiv.org/abs/2209.09236) |
-| LSTR (Xu et al.) | 2021 | Dual long/short-term memory Transformer for online detection | [arXiv](https://arxiv.org/abs/2107.03377) |
-| MATR (Song et al.) | 2024 | Memory-augmented Transformer for online temporal localization | [arXiv](https://arxiv.org/abs/2408.02957) |
+See the [literature survey](../../literature_survey/SUMMARY.md) for temporal/video models for smoke detection.
