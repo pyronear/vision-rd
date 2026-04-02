@@ -1,8 +1,8 @@
-# Temporal Model Leaderboard
+# 🏆 Temporal Model Leaderboard
 
-Standardized evaluation and ranking of `TemporalModel` implementations on the [pyro-dataset](https://github.com/pyronear/pyro-dataset) sequential test set.
+Standardized evaluation and ranking of `TemporalModel` implementations on the [pyro-dataset](https://github.com/pyronear/pyro-dataset) **v2.2.0** sequential test set.
 
-## Leaderboard
+## 📊 Leaderboard
 
 | Rank | Model | Precision | Recall | F1 | FPR | Mean TTD (s) | Median TTD (s) |
 |------|-------|-----------|--------|----|-----|--------------|----------------|
@@ -10,26 +10,26 @@ Standardized evaluation and ranking of `TemporalModel` implementations on the [p
 
 *Evaluated on 298 sequences (149 wildfire + 149 false positive). Last updated: 2026-03-31.*
 
-## Models
+## 🤖 Models
 
 | Model | Description | Paper |
 |-------|-------------|-------|
 | [FSM Tracking Baseline](../tracking-fsm-baseline/) | YOLO11s detector + IoU-based FSM tracker. Requires temporal persistence (5 consecutive frames) before raising an alarm. Rule-based, no ML training. | [FLAME (Gragnaniello et al., 2024)](https://doi.org/10.1007/s00521-024-10963-z) |
 
-## Metrics
+## 📏 Metrics
 
 - **Precision, Recall, F1** -- sequence-level binary classification (smoke vs. no smoke)
 - **FPR** -- false positive rate
 - **Mean / Median TTD** -- time-to-detection in seconds for true positives (time from first frame to trigger frame)
 
-## Data
+## 📦 Data
 
 Test set imported via DVC from [pyro-dataset](https://github.com/pyronear/pyro-dataset):
 - 149 wildfire (positive) + 149 false positive (negative) sequences
 - Ground truth determined by directory structure (`wildfire/` vs `fp/`)
 - Max 20 frames per sequence, 30s apart
 
-## How to Reproduce
+## 🔄 How to Reproduce
 
 ```bash
 make install
@@ -37,7 +37,7 @@ uv run dvc pull            # pull test set + model packages from S3
 uv run dvc repro           # run evaluation pipeline
 ```
 
-## Adding a New Model
+## ➕ Adding a New Model
 
 1. Implement `TemporalModel` in a new experiment under `experiments/temporal-models/`
 2. Package the model (see [tracking-fsm-baseline](../tracking-fsm-baseline/) for the zip format)
