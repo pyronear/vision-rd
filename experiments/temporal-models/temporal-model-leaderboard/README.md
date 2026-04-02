@@ -16,9 +16,9 @@ Standardized evaluation and ranking of `TemporalModel` implementations on the [p
 
 | Model | Description | Paper |
 |-------|-------------|-------|
-| [FSM Tracking Baseline](../tracking-fsm-baseline/) | YOLO11s detector + IoU-based FSM tracker. Requires temporal persistence (5 consecutive frames) before raising an alarm. Rule-based, no ML training. | [FLAME (Gragnaniello et al., 2024)](https://doi.org/10.1007/s00521-024-10963-z) |
-| [Pyro-Detector Baseline](../pyro-detector-baseline/) | Production pyro-predictor: YOLO ONNX + per-camera sliding-window temporal smoothing. Alarm when aggregated confidence crosses threshold over N consecutive frames. | -- |
-| [MTB Change Detection](../mtb-change-detection/) | YOLO11s + pixel-wise frame differencing (MTB ratio) to reject static FPs, followed by IoU-based FSM tracker. | [SlowFastMTB (Choi, Kim & Oh, 2022)](https://doi.org/10.3390/s22155602) |
+| [FSM Tracking Baseline](../tracking-fsm-baseline/) | [YOLO11s `nimble-narwhal` v6.0.0](https://huggingface.co/pyronear/yolo11s_nimble-narwhal_v6.0.0) + IoU-based FSM tracker. Requires temporal persistence (5 consecutive frames) before raising an alarm. Rule-based, no ML training. | [FLAME (Gragnaniello et al., 2024)](https://doi.org/10.1007/s00521-024-10963-z) |
+| [Pyro-Detector Baseline](../pyro-detector-baseline/) | Production pyro-predictor: [YOLO11s ONNX `nimble-narwhal` v6.0.0](https://huggingface.co/pyronear/yolo11s_nimble-narwhal_v6.0.0) + per-camera sliding-window temporal smoothing. Alarm when aggregated confidence crosses threshold over N consecutive frames. | -- |
+| [MTB Change Detection](../mtb-change-detection/) | [YOLO11s `nimble-narwhal` v6.0.0](https://huggingface.co/pyronear/yolo11s_nimble-narwhal_v6.0.0) + pixel-wise frame differencing (MTB ratio) to reject static FPs, followed by IoU-based FSM tracker. | [SlowFastMTB (Choi, Kim & Oh, 2022)](https://doi.org/10.3390/s22155602) |
 
 ## 📏 Metrics
 
