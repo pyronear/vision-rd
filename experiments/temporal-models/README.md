@@ -11,7 +11,7 @@ Experiments exploring temporal/video-based approaches to reduce false positives 
 
 ## 🏆 Leaderboard
 
-Current rankings on the test set (298 sequences: 149 wildfire + 149 false positive):
+Current rankings on the [pyro-dataset](https://github.com/pyronear/pyro-dataset) **v2.2.0** test set (298 sequences: 149 wildfire + 149 false positive):
 
 | Rank | Model | Precision | Recall | F1 | FPR | Mean TTD | Median TTD |
 |------|-------|-----------|--------|----|-----|----------|------------|

@@ -15,6 +15,38 @@ stages:
     outs:
       - data/07_model_output/fsm-tracking-baseline
 
+  evaluate_mtb_change_detection:
+    cmd: >-
+      uv run python scripts/evaluate.py
+      --model-name mtb-change-detection
+      --model-type mtb-change-detection
+      --model-package data/01_raw/models/mtb-change-detection.zip
+      --test-dir data/01_raw/sequential_test/test
+      --output-dir data/07_model_output/mtb-change-detection
+    deps:
+      - scripts/evaluate.py
+      - src/temporal_model_leaderboard
+      - data/01_raw/sequential_test
+      - data/01_raw/models/mtb-change-detection.zip
+    outs:
+      - data/07_model_output/mtb-change-detection
+
+  evaluate_pyro_detector:
+    cmd: >-
+      uv run python scripts/evaluate.py
+      --model-name pyro-detector-baseline
+      --model-type pyro-detector-baseline
+      --model-package data/01_raw/models/pyro-detector-baseline.zip
+      --test-dir data/01_raw/sequential_test/test
+      --output-dir data/07_model_output/pyro-detector-baseline
+    deps:
+      - scripts/evaluate.py
+      - src/temporal_model_leaderboard
+      - data/01_raw/sequential_test
+      - data/01_raw/models/pyro-detector-baseline.zip
+    outs:
+      - data/07_model_output/pyro-detector-baseline
+
   leaderboard:
     cmd: >-
       uv run python scripts/leaderboard.py

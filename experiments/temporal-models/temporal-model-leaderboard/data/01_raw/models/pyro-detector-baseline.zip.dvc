@@ -1,0 +1,5 @@
+outs:
+- md5: 8df77be9c5cd9a120569730c4160098a
+  size: 38513179
+  hash: md5
+  path: pyro-detector-baseline.zip

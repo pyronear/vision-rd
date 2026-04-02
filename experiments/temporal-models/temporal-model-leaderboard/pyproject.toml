@@ -6,11 +6,15 @@ requires-python = ">=3.11"
 dependencies = [
     "pyrocore",
     "tracking-fsm-baseline",
+    "mtb-change-detection",
+    "pyro-detector-baseline",
 ]
 
 [tool.uv.sources]
 pyrocore = { path = "../../../lib/pyrocore" }
 tracking-fsm-baseline = { path = "../tracking-fsm-baseline" }
+mtb-change-detection = { path = "../mtb-change-detection" }
+pyro-detector-baseline = { path = "../pyro-detector-baseline" }
 
 [dependency-groups]
 dev = [

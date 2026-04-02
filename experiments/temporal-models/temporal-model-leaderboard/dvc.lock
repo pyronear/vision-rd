@@ -18,12 +18,12 @@ stages:
       nfiles: 32640
     - path: scripts/evaluate.py
       hash: md5
-      md5: 75f32f92f6ac1d1ba28eb9c7bf5343e1
-      size: 3761
+      md5: b0f7e0612d85e1691ef78aed9bd2c118
+      size: 3979
     - path: src/temporal_model_leaderboard
       hash: md5
-      md5: cbdb9e92766ca170b1bc87485d74c633.dir
-      size: 32176
+      md5: 423d337f89bfe4e71fb126ec3c665aae.dir
+      size: 32284
       nfiles: 12
     outs:
     - path: data/07_model_output/fsm-tracking-baseline
@@ -37,24 +37,86 @@ stages:
     deps:
     - path: data/07_model_output
       hash: md5
-      md5: 6af82611b2a69282012915498c595d56.dir
-      size: 46667
-      nfiles: 4
+      md5: 8679635cba572131844bd723271f57d5.dir
+      size: 139733
+      nfiles: 8
     - path: scripts/leaderboard.py
       hash: md5
       md5: 81dec9584c04f465c99ced1b8c733a08
       size: 2507
     - path: src/temporal_model_leaderboard
       hash: md5
-      md5: cbdb9e92766ca170b1bc87485d74c633.dir
-      size: 32176
+      md5: 423d337f89bfe4e71fb126ec3c665aae.dir
+      size: 32284
       nfiles: 12
     outs:
     - path: data/08_reporting/leaderboard.json
       hash: md5
-      md5: bdfd6120841f4649413c6426e8cd04aa
-      size: 283
+      md5: a0333c0f68c720abf9000938e20ad851
+      size: 842
     - path: data/08_reporting/leaderboard.txt
       hash: md5
-      md5: cc2e649cfd237e8d4d7108e3efee5707
-      size: 279
+      md5: 49c9c9ac97a732437dfee797ee73c523
+      size: 470
+  evaluate_mtb_change_detection:
+    cmd: uv run python scripts/evaluate.py --model-name mtb-change-detection 
+      --model-type mtb-change-detection --model-package 
+      data/01_raw/models/mtb-change-detection.zip --test-dir 
+      data/01_raw/sequential_test/test --output-dir 
+      data/07_model_output/mtb-change-detection
+    deps:
+    - path: data/01_raw/models/mtb-change-detection.zip
+      hash: md5
+      md5: af4db66fccf5be457dff99c0b66a30f5
+      size: 19260701
+    - path: data/01_raw/sequential_test
+      hash: md5
+      md5: 828edb7fb8f0909f0d6115d67ffbddc9.dir
+      size: 1594484536
+      nfiles: 32640
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: b0f7e0612d85e1691ef78aed9bd2c118
+      size: 3979
+    - path: src/temporal_model_leaderboard
+      hash: md5
+      md5: 423d337f89bfe4e71fb126ec3c665aae.dir
+      size: 32284
+      nfiles: 12
+    outs:
+    - path: data/07_model_output/mtb-change-detection
+      hash: md5
+      md5: 7b4f525b949035c54a0de70a635456c1.dir
+      size: 46552
+      nfiles: 2
+  evaluate_pyro_detector:
+    cmd: uv run python scripts/evaluate.py --model-name pyro-detector-baseline 
+      --model-type pyro-detector-baseline --model-package 
+      data/01_raw/models/pyro-detector-baseline.zip --test-dir 
+      data/01_raw/sequential_test/test --output-dir 
+      data/07_model_output/pyro-detector-baseline
+    deps:
+    - path: data/01_raw/models/pyro-detector-baseline.zip
+      hash: md5
+      md5: 8df77be9c5cd9a120569730c4160098a
+      size: 38513179
+    - path: data/01_raw/sequential_test
+      hash: md5
+      md5: 828edb7fb8f0909f0d6115d67ffbddc9.dir
+      size: 1594484536
+      nfiles: 32640
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: b0f7e0612d85e1691ef78aed9bd2c118
+      size: 3979
+    - path: src/temporal_model_leaderboard
+      hash: md5
+      md5: 423d337f89bfe4e71fb126ec3c665aae.dir
+      size: 32284
+      nfiles: 12
+    outs:
+    - path: data/07_model_output/pyro-detector-baseline
+      hash: md5
+      md5: 0ff18e7a674f5a7c8b0452f3ce20cc4a.dir
+      size: 46514
+      nfiles: 2
