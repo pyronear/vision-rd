@@ -1,0 +1,80 @@
+"""Data types for the adapted SmokeyNet temporal smoke detection model."""
+
+from dataclasses import dataclass, field
+from datetime import datetime
+from pathlib import Path
+
+
+@dataclass
+class Detection:
+    """A single YOLO detection with normalized center-based coordinates.
+
+    All spatial values are in [0, 1] relative to the image dimensions.
+    """
+
+    class_id: int
+    cx: float
+    cy: float
+    w: float
+    h: float
+    confidence: float
+
+
+@dataclass
+class FrameDetections:
+    """All detections from a single frame."""
+
+    frame_idx: int
+    frame_id: str
+    timestamp: datetime | None
+    detections: list[Detection]
+
+
+@dataclass
+class TubeEntry:
+    """A single entry in a smoke tube.
+
+    When ``detection`` is ``None``, this entry represents a gap frame where
+    YOLO did not detect the tracked region.  Gap features are filled via
+    linear interpolation at the feature level.
+    """
+
+    frame_idx: int
+    detection: Detection | None = None
+
+
+@dataclass
+class Tube:
+    """A smoke tube: a chain of detections across frames for the same region.
+
+    Tubes are constructed by greedy IoU matching across consecutive frames.
+    """
+
+    tube_id: int
+    entries: list[TubeEntry] = field(default_factory=list)
+    start_frame: int = 0
+    end_frame: int = 0
+
+
+@dataclass
+class SequenceData:
+    """All data for a single image sequence."""
+
+    sequence_id: str
+    num_frames: int
+    frame_detections: list[FrameDetections]
+    tubes: list[Tube]
+    is_positive: bool | None = None
+
+
+@dataclass
+class SequenceFeatures:
+    """Precomputed features for a single sequence, saved as .pt/.json."""
+
+    sequence_id: str
+    num_frames: int
+    num_detections: int
+    tubes: list[Tube]
+    is_positive: bool | None = None
+    features_path: Path | None = None
+    metadata_path: Path | None = None

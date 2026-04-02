@@ -1,0 +1,125 @@
+stages:
+  truncate:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/truncate_sequences.py
+        --input-dir data/01_raw/datasets_full/${item}
+        --output-dir data/01_raw/datasets/${item}
+        --max-frames ${truncate.max_frames}
+      deps:
+        - scripts/truncate_sequences.py
+        - data/01_raw/datasets_full/${item}
+      params:
+        - truncate.max_frames
+      outs:
+        - data/01_raw/datasets/${item}
+
+#   prepare:
+#     cmd: >-
+#       uv run python scripts/prepare.py
+#       --model-repo ${prepare.model_repo}
+#       --output-dir data/01_raw/models
+#     deps:
+#       - scripts/prepare.py
+#     params:
+#       - prepare
+#     outs:
+#       - data/01_raw/models/${prepare.model_filename}
+#
+#   extract_features:
+#     foreach:
+#       - train
+#       - val
+#     do:
+#       cmd: >-
+#         uv run python scripts/extract_features.py
+#         --data-dir data/01_raw/datasets/${item}
+#         --model-path data/01_raw/models/${prepare.model_filename}
+#         --output-dir data/03_primary/${item}
+#         --confidence-threshold ${infer.confidence_threshold}
+#         --iou-nms ${infer.iou_nms}
+#         --image-size ${infer.image_size}
+#         --roi-size ${extract.roi_size}
+#         --context-factor ${extract.context_factor}
+#         --max-detections-per-frame ${extract.max_detections_per_frame}
+#         --iou-threshold ${tubes.iou_threshold}
+#         --max-misses ${tubes.max_misses}
+#       deps:
+#         - scripts/extract_features.py
+#         - src/smokeynet_adapted/detector.py
+#         - src/smokeynet_adapted/tubes.py
+#         - src/smokeynet_adapted/backbone.py
+#         - src/smokeynet_adapted/types.py
+#         - data/01_raw/datasets/${item}
+#         - data/01_raw/models/${prepare.model_filename}
+#       params:
+#         - prepare.model_filename
+#         - infer
+#         - extract
+#         - tubes
+#       outs:
+#         - data/03_primary/${item}
+#
+#   train:
+#     cmd: >-
+#       uv run python scripts/train.py
+#       --train-dir data/03_primary/train
+#       --val-dir data/03_primary/val
+#       --output-dir data/06_models
+#       --params-path params.yaml
+#     deps:
+#       - scripts/train.py
+#       - src/smokeynet_adapted
+#       - data/03_primary/train
+#       - data/03_primary/val
+#     params:
+#       - train
+#     outs:
+#       - data/06_models/best_checkpoint.pt
+#     plots:
+#       - data/06_models/csv_logs/
+#
+#   package:
+#     cmd: >-
+#       uv run python scripts/package.py
+#       --yolo-weights-path data/01_raw/models/${prepare.model_filename}
+#       --net-weights-path data/06_models/best_checkpoint.pt
+#       --params-path params.yaml
+#       --output-path data/06_models/model.zip
+#     deps:
+#       - scripts/package.py
+#       - src/smokeynet_adapted/package.py
+#       - data/01_raw/models/${prepare.model_filename}
+#       - data/06_models/best_checkpoint.pt
+#     params:
+#       - prepare.model_filename
+#       - infer
+#       - extract
+#       - tubes
+#       - train
+#     outs:
+#       - data/06_models/model.zip
+#
+#   evaluate:
+#     foreach:
+#       - train
+#       - val
+#     do:
+#       cmd: >-
+#         uv run python scripts/evaluate.py
+#         --data-dir data/01_raw/datasets/${item}
+#         --model-package data/06_models/model.zip
+#         --output-dir data/08_reporting/${item}
+#       deps:
+#         - scripts/evaluate.py
+#         - src/smokeynet_adapted/model.py
+#         - data/06_models/model.zip
+#         - data/01_raw/datasets/${item}
+#       metrics:
+#         - data/08_reporting/${item}/metrics.json:
+#             cache: false
+#       plots:
+#         - data/08_reporting/${item}/plots
