@@ -29,6 +29,14 @@ MODEL_REGISTRY: dict[str, tuple[str, str]] = {
         "tracking_fsm_baseline.model",
         "FsmTrackingModel",
     ),
+    "mtb-change-detection": (
+        "mtb_change_detection.model",
+        "MtbChangeDetectionModel",
+    ),
+    "pyro-detector-baseline": (
+        "pyro_detector_baseline.model",
+        "PyroDetectorModel",
+    ),
 }
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
