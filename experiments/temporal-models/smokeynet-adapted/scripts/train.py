@@ -75,6 +75,9 @@ def main() -> None:
         pretrained=True,
         num_layers=cfg.get("num_layers", 1),
         bidirectional=cfg.get("bidirectional", False),
+        finetune=cfg.get("finetune", False),
+        finetune_last_n_blocks=cfg.get("finetune_last_n_blocks", 0),
+        backbone_lr=cfg.get("backbone_lr"),
     )
 
     callbacks = [
