@@ -221,3 +221,18 @@ def test_timm_backbone_finetune_unsupported_family_raises():
     # Error message should mention the backbone's top-level children so the
     # operator knows which stage names are available.
     assert "children" in msg.lower()
+
+
+def test_timm_backbone_frozen_forward_matches_no_grad_eval():
+    torch.manual_seed(0)
+    bb = TimmBackbone(name="resnet18", pretrained=False, finetune=False)
+    x = torch.randn(2, 3, 224, 224)
+    # Put the module into train mode; frozen path must still force eval().
+    bb.train()
+    assert bb.backbone.training is False
+    out_a = bb(x)
+    # Independent reference: call the underlying timm model directly in eval/no_grad.
+    bb.backbone.eval()
+    with torch.no_grad():
+        out_b = bb.backbone(x)
+    assert torch.allclose(out_a, out_b, atol=1e-6)
