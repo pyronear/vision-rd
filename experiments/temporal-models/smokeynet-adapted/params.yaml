@@ -54,3 +54,85 @@ train_gru:
   max_epochs: 30
   early_stop_patience: 5
   seed: 42
+
+train_gru_seed43:
+  arch: gru
+  backbone: resnet18
+  hidden_dim: 128
+  num_layers: 1
+  bidirectional: false
+  max_frames: 20
+  batch_size: 32
+  num_workers: 4
+  learning_rate: 0.001
+  weight_decay: 0.01
+  max_epochs: 30
+  early_stop_patience: 5
+  seed: 43
+
+train_gru_seed44:
+  arch: gru
+  backbone: resnet18
+  hidden_dim: 128
+  num_layers: 1
+  bidirectional: false
+  max_frames: 20
+  batch_size: 32
+  num_workers: 4
+  learning_rate: 0.001
+  weight_decay: 0.01
+  max_epochs: 30
+  early_stop_patience: 5
+  seed: 44
+
+train_gru_convnext:
+  arch: gru
+  backbone: convnext_tiny
+  finetune: false
+  hidden_dim: 128
+  num_layers: 1
+  bidirectional: false
+  max_frames: 20
+  batch_size: 32
+  num_workers: 4
+  learning_rate: 0.001
+  weight_decay: 0.01
+  max_epochs: 30
+  early_stop_patience: 5
+  seed: 42
+
+train_gru_finetune:
+  arch: gru
+  backbone: resnet18
+  finetune: true
+  finetune_last_n_blocks: 1
+  backbone_lr: 0.00001
+  hidden_dim: 128
+  num_layers: 1
+  bidirectional: false
+  max_frames: 20
+  batch_size: 32
+  num_workers: 4
+  learning_rate: 0.001
+  weight_decay: 0.01
+  max_epochs: 30
+  early_stop_patience: 5
+  seed: 42
+
+train_gru_convnext_finetune:
+  arch: gru
+  backbone: convnext_tiny
+  finetune: true
+  finetune_last_n_blocks: 1
+  backbone_lr: 0.00001
+  hidden_dim: 128
+  num_layers: 1
+  bidirectional: false
+  max_frames: 20
+  batch_size: 32
+  num_workers: 4
+  learning_rate: 0.001
+  weight_decay: 0.01
+  max_epochs: 30
+  early_stop_patience: 5
+  seed: 42
