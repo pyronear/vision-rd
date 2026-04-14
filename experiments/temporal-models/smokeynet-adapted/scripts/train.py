@@ -1,18 +1,11 @@
-"""Train the SmokeyNetAdapted model.
+"""Train the basic temporal smoke classifier (mean_pool or gru arch).
 
-Loads precomputed RoI features from data/03_primary/, trains with
-PyTorch Lightning, and saves the best checkpoint.
-
-Usage:
-    uv run python scripts/train.py \
-        --train-dir data/03_primary/train \
-        --val-dir data/03_primary/val \
-        --output-dir data/06_models \
-        --params-path params.yaml
+Reads a single named section from ``params.yaml`` (e.g. ``train_gru``)
+so each DVC stage owns its own params.
 """
 
 import argparse
-import logging
+import sys
 from pathlib import Path
 
 import lightning as L
@@ -22,109 +15,108 @@ from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from lightning.pytorch.loggers import CSVLogger, TensorBoardLogger
 from torch.utils.data import DataLoader
 
-from smokeynet_adapted.dataset import SmokeyNetDataset
-from smokeynet_adapted.training import SmokeyNetLightningModule
-
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-logger = logging.getLogger(__name__)
+from smokeynet_adapted.dataset import TubePatchDataset
+from smokeynet_adapted.lit_temporal import LitTemporalClassifier
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Train SmokeyNetAdapted model.")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--arch", choices=["mean_pool", "gru"], required=True)
     parser.add_argument("--train-dir", type=Path, required=True)
     parser.add_argument("--val-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--params-path", type=Path, required=True)
+    parser.add_argument("--params-key", required=True, help="Key in params.yaml")
     args = parser.parse_args()
 
-    params = yaml.safe_load(args.params_path.read_text())
-    train_cfg = params["train"]
+    cfg = yaml.safe_load(args.params_path.read_text())[args.params_key]
+    if cfg["arch"] != args.arch:
+        raise ValueError(
+            f"--arch={args.arch} mismatches "
+            f"params[{args.params_key}].arch={cfg['arch']}"
+        )
 
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-
-    L.seed_everything(train_cfg["seed"])
-
-    # Datasets
-    train_ds = SmokeyNetDataset(args.train_dir)
-    val_ds = SmokeyNetDataset(args.val_dir)
-    logger.info(
-        "Train: %d sequences, Val: %d sequences",
-        len(train_ds),
-        len(val_ds),
+    device_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu"
+    print(
+        f"CUDA available: {torch.cuda.is_available()} | "
+        f"device count: {torch.cuda.device_count()} | "
+        f"device: {device_name}",
+        file=sys.stderr,
+        flush=True,
     )
 
-    def _collate_single(batch):
-        """Identity collate for batch_size=1 (avoids stacking Tube objects)."""
-        return batch[0]
+    L.seed_everything(cfg["seed"], workers=True)
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+
+    train_ds = TubePatchDataset(args.train_dir, max_frames=cfg["max_frames"])
+    val_ds = TubePatchDataset(args.val_dir, max_frames=cfg["max_frames"])
 
     train_loader = DataLoader(
         train_ds,
-        batch_size=1,
+        batch_size=cfg["batch_size"],
         shuffle=True,
-        num_workers=0,
-        collate_fn=_collate_single,
+        num_workers=cfg["num_workers"],
+        persistent_workers=cfg["num_workers"] > 0,
     )
     val_loader = DataLoader(
         val_ds,
-        batch_size=1,
+        batch_size=cfg["batch_size"],
         shuffle=False,
-        num_workers=0,
-        collate_fn=_collate_single,
+        num_workers=cfg["num_workers"],
+        persistent_workers=cfg["num_workers"] > 0,
     )
 
-    # Model
-    module = SmokeyNetLightningModule(
-        d_model=train_cfg["d_model"],
-        lstm_layers=train_cfg["lstm_layers"],
-        spatial_layers=train_cfg["spatial_layers"],
-        spatial_heads=train_cfg["spatial_heads"],
-        learning_rate=train_cfg["learning_rate"],
-        weight_decay=train_cfg["weight_decay"],
-        sequence_loss_weight=train_cfg["sequence_loss_weight"],
-        detection_loss_weight=train_cfg["detection_loss_weight"],
-        sequence_pos_weight=train_cfg["sequence_pos_weight"],
-        detection_pos_weight=train_cfg["detection_pos_weight"],
-        warmup_epochs=train_cfg["warmup_epochs"],
-        total_epochs=train_cfg["epochs"],
+    lit = LitTemporalClassifier(
+        backbone=cfg["backbone"],
+        arch=cfg["arch"],
+        hidden_dim=cfg["hidden_dim"],
+        learning_rate=cfg["learning_rate"],
+        weight_decay=cfg["weight_decay"],
+        pretrained=True,
+        num_layers=cfg.get("num_layers", 1),
+        bidirectional=cfg.get("bidirectional", False),
     )
 
-    # Callbacks
-    checkpoint_cb = ModelCheckpoint(
-        dirpath=args.output_dir,
-        filename="best_checkpoint",
-        monitor="val_loss",
-        mode="min",
-        save_top_k=1,
-    )
-    early_stop_cb = EarlyStopping(
-        monitor="val_loss",
-        patience=10,
-        mode="min",
-    )
+    callbacks = [
+        ModelCheckpoint(
+            dirpath=args.output_dir,
+            filename="best",
+            monitor="val/f1",
+            mode="max",
+            save_top_k=1,
+            save_weights_only=False,
+        ),
+        EarlyStopping(
+            monitor="val/f1", mode="max", patience=cfg["early_stop_patience"]
+        ),
+    ]
+    loggers = [
+        CSVLogger(save_dir=args.output_dir, name="csv_logs"),
+        TensorBoardLogger(save_dir=args.output_dir, name="tb_logs"),
+    ]
 
-    # Loggers
-    tb_logger = TensorBoardLogger(save_dir=args.output_dir, name="tb_logs")
-    csv_logger = CSVLogger(save_dir=args.output_dir, name="csv_logs")
-
-    # Trainer
-    accelerator = "gpu" if torch.cuda.is_available() else "cpu"
     trainer = L.Trainer(
-        max_epochs=train_cfg["epochs"],
-        accelerator=accelerator,
+        max_epochs=cfg["max_epochs"],
+        callbacks=callbacks,
+        logger=loggers,
+        log_every_n_steps=10,
+        deterministic=True,
+        accelerator="auto",
         devices=1,
-        accumulate_grad_batches=train_cfg["gradient_accumulation_steps"],
-        callbacks=[checkpoint_cb, early_stop_cb],
-        logger=[tb_logger, csv_logger],
-        log_every_n_steps=1,
-        enable_progress_bar=True,
     )
-
-    trainer.fit(module, train_loader, val_loader)
-
-    logger.info(
-        "Training complete. Best checkpoint: %s",
-        checkpoint_cb.best_model_path,
+    print(
+        f"Trainer accelerator flag: {trainer._accelerator_connector._accelerator_flag}",
+        file=sys.stderr,
+        flush=True,
     )
+    trainer.fit(lit, train_loader, val_loader)
+
+    best = args.output_dir / "best.ckpt"
+    target = args.output_dir / "best_checkpoint.pt"
+    if best.exists():
+        if target.exists():
+            target.unlink()
+        best.rename(target)
 
 
 if __name__ == "__main__":

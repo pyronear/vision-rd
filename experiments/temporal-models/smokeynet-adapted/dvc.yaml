@@ -83,6 +83,52 @@ stages:
       outs:
         - data/08_reporting/tubes/${item}
 
+  train_mean_pool:
+    cmd: >-
+      uv run python scripts/train.py
+      --arch mean_pool
+      --train-dir data/05_model_input/train
+      --val-dir data/05_model_input/val
+      --output-dir data/06_models/mean_pool
+      --params-path params.yaml
+      --params-key train_mean_pool
+    deps:
+      - scripts/train.py
+      - src/smokeynet_adapted/dataset.py
+      - src/smokeynet_adapted/temporal_classifier.py
+      - src/smokeynet_adapted/lit_temporal.py
+      - data/05_model_input/train
+      - data/05_model_input/val
+    params:
+      - train_mean_pool
+    outs:
+      - data/06_models/mean_pool/best_checkpoint.pt
+    plots:
+      - data/06_models/mean_pool/csv_logs/
+
+  train_gru:
+    cmd: >-
+      uv run python scripts/train.py
+      --arch gru
+      --train-dir data/05_model_input/train
+      --val-dir data/05_model_input/val
+      --output-dir data/06_models/gru
+      --params-path params.yaml
+      --params-key train_gru
+    deps:
+      - scripts/train.py
+      - src/smokeynet_adapted/dataset.py
+      - src/smokeynet_adapted/temporal_classifier.py
+      - src/smokeynet_adapted/lit_temporal.py
+      - data/05_model_input/train
+      - data/05_model_input/val
+    params:
+      - train_gru
+    outs:
+      - data/06_models/gru/best_checkpoint.pt
+    plots:
+      - data/06_models/gru/csv_logs/
+
 #   prepare:
 #     cmd: >-
 #       uv run python scripts/prepare.py

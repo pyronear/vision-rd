@@ -27,26 +27,30 @@ model_input:
   context_factor: 1.5
   patch_size: 224
 
-train:
-  d_model: 512
-  lstm_layers: 2
-  lstm_bidirectional: false
-  spatial_layers: 4
-  spatial_heads: 8
+train_mean_pool:
+  arch: mean_pool
+  backbone: resnet18
+  hidden_dim: 128
   max_frames: 20
-  learning_rate: 0.0001
+  batch_size: 32
+  num_workers: 4
+  learning_rate: 0.001
   weight_decay: 0.01
-  epochs: 50
-  batch_size: 1
-  gradient_accumulation_steps: 8
-  sequence_loss_weight: 1.0
-  detection_loss_weight: 1.0
-  sequence_pos_weight: 5.0
-  detection_pos_weight: 40.0
-  optimizer: "adamw"
-  scheduler: "cosine"
-  warmup_epochs: 5
-  freeze_backbone_epochs: 5
-  backbone_lr_factor: 0.1
-  classification_threshold: 0.5
+  max_epochs: 30
+  early_stop_patience: 5
+  seed: 42
+
+train_gru:
+  arch: gru
+  backbone: resnet18
+  hidden_dim: 128
+  num_layers: 1
+  bidirectional: false
+  max_frames: 20
+  batch_size: 32
+  num_workers: 4
+  learning_rate: 0.001
+  weight_decay: 0.01
+  max_epochs: 30
+  early_stop_patience: 5
   seed: 42

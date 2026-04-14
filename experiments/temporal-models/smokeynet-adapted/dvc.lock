@@ -263,3 +263,116 @@ stages:
       md5: 87c9cd1891e075bf930f5ae399725dd7.dir
       size: 976932275
       nfiles: 38471
+  train_mean_pool:
+    cmd: uv run python scripts/train.py --arch mean_pool --train-dir 
+      data/05_model_input/train --val-dir data/05_model_input/val --output-dir 
+      data/06_models/mean_pool --params-path params.yaml --params-key 
+      train_mean_pool
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 87c9cd1891e075bf930f5ae399725dd7.dir
+      size: 976932275
+      nfiles: 38471
+    - path: data/05_model_input/val
+      hash: md5
+      md5: e662d34ba87b486399cbb444f0b3a1d2.dir
+      size: 89476209
+      nfiles: 3645
+    - path: scripts/train.py
+      hash: md5
+      md5: 6c6041e95bdd61fff5616dbc1496798d
+      size: 3857
+    - path: src/smokeynet_adapted/dataset.py
+      hash: md5
+      md5: 9f8c8b88ff8a1f9c6b20ba0878aef765
+      size: 2467
+    - path: src/smokeynet_adapted/lit_temporal.py
+      hash: md5
+      md5: 6b8631be32f69f27963052267c3a0c68
+      size: 3515
+    - path: src/smokeynet_adapted/temporal_classifier.py
+      hash: md5
+      md5: 99027136b7a3ce393f5f5dcb7a6c1957
+      size: 4329
+    params:
+      params.yaml:
+        train_mean_pool:
+          arch: mean_pool
+          backbone: resnet18
+          hidden_dim: 128
+          max_frames: 20
+          batch_size: 32
+          num_workers: 4
+          learning_rate: 0.001
+          weight_decay: 0.01
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+    outs:
+    - path: data/06_models/mean_pool/best_checkpoint.pt
+      hash: md5
+      md5: 87791097b2fde2c866159a0d70b00739
+      size: 45588715
+    - path: data/06_models/mean_pool/csv_logs/
+      hash: md5
+      md5: 55e8ecb537cfaa8c235af679c907dbe1.dir
+      size: 4397
+      nfiles: 2
+  train_gru:
+    cmd: uv run python scripts/train.py --arch gru --train-dir 
+      data/05_model_input/train --val-dir data/05_model_input/val --output-dir 
+      data/06_models/gru --params-path params.yaml --params-key train_gru
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 87c9cd1891e075bf930f5ae399725dd7.dir
+      size: 976932275
+      nfiles: 38471
+    - path: data/05_model_input/val
+      hash: md5
+      md5: e662d34ba87b486399cbb444f0b3a1d2.dir
+      size: 89476209
+      nfiles: 3645
+    - path: scripts/train.py
+      hash: md5
+      md5: 6c6041e95bdd61fff5616dbc1496798d
+      size: 3857
+    - path: src/smokeynet_adapted/dataset.py
+      hash: md5
+      md5: 9f8c8b88ff8a1f9c6b20ba0878aef765
+      size: 2467
+    - path: src/smokeynet_adapted/lit_temporal.py
+      hash: md5
+      md5: 6b8631be32f69f27963052267c3a0c68
+      size: 3515
+    - path: src/smokeynet_adapted/temporal_classifier.py
+      hash: md5
+      md5: 99027136b7a3ce393f5f5dcb7a6c1957
+      size: 4329
+    params:
+      params.yaml:
+        train_gru:
+          arch: gru
+          backbone: resnet18
+          hidden_dim: 128
+          num_layers: 1
+          bidirectional: false
+          max_frames: 20
+          batch_size: 32
+          num_workers: 4
+          learning_rate: 0.001
+          weight_decay: 0.01
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+    outs:
+    - path: data/06_models/gru/best_checkpoint.pt
+      hash: md5
+      md5: 18ff2f455874ee70436fcabd4c86fc52
+      size: 47961233
+    - path: data/06_models/gru/csv_logs/
+      hash: md5
+      md5: a2b8c5e6c057a8e13e29f90469a8ec1f.dir
+      size: 3266
+      nfiles: 2
