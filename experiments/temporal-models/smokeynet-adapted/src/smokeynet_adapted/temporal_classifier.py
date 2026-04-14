@@ -93,3 +93,43 @@ class GRUHead(nn.Module):
         else:
             last = h_n[-1]
         return self.mlp(last).squeeze(-1)
+
+
+class TemporalSmokeClassifier(nn.Module):
+    """Frozen backbone applied per-frame plus a temporal head.
+
+    Produces a single binary logit per tube.
+    """
+
+    def __init__(
+        self,
+        backbone: str,
+        arch: str,
+        hidden_dim: int,
+        pretrained: bool = True,
+        num_layers: int = 1,
+        bidirectional: bool = False,
+    ) -> None:
+        super().__init__()
+        self.backbone = FrozenTimmBackbone(name=backbone, pretrained=pretrained)
+        feat_dim = self.backbone.feat_dim
+        if arch == "mean_pool":
+            self.head: nn.Module = MeanPoolHead(
+                feat_dim=feat_dim, hidden_dim=hidden_dim
+            )
+        elif arch == "gru":
+            self.head = GRUHead(
+                feat_dim=feat_dim,
+                hidden_dim=hidden_dim,
+                num_layers=num_layers,
+                bidirectional=bidirectional,
+            )
+        else:
+            raise ValueError(f"unknown arch: {arch!r} (expected 'mean_pool' or 'gru')")
+        self.arch = arch
+
+    def forward(self, patches: Tensor, mask: Tensor) -> Tensor:
+        b, t, c, h, w = patches.shape
+        flat = patches.reshape(b * t, c, h, w)
+        feats = self.backbone(flat).reshape(b, t, -1)
+        return self.head(feats, mask)

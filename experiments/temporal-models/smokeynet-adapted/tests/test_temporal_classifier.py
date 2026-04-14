@@ -1,11 +1,13 @@
 """Tests for TemporalSmokeClassifier and its components."""
 
+import pytest
 import torch
 
 from smokeynet_adapted.temporal_classifier import (
     FrozenTimmBackbone,
     GRUHead,
     MeanPoolHead,
+    TemporalSmokeClassifier,
 )
 
 
@@ -80,3 +82,73 @@ def test_gru_head_bidirectional_doubles_hidden_then_projects():
     mask = torch.ones(2, 5, dtype=torch.bool)
     logits = head(feats, mask)
     assert logits.shape == (2,)
+
+
+def test_classifier_mean_pool_forward_shape():
+    clf = TemporalSmokeClassifier(
+        backbone="resnet18",
+        arch="mean_pool",
+        hidden_dim=64,
+        pretrained=False,
+    )
+    patches = torch.randn(2, 5, 3, 224, 224)
+    mask = torch.ones(2, 5, dtype=torch.bool)
+    logits = clf(patches, mask)
+    assert logits.shape == (2,)
+
+
+def test_classifier_gru_forward_shape():
+    clf = TemporalSmokeClassifier(
+        backbone="resnet18",
+        arch="gru",
+        hidden_dim=64,
+        pretrained=False,
+        num_layers=1,
+        bidirectional=False,
+    )
+    patches = torch.randn(2, 5, 3, 224, 224)
+    mask = torch.ones(2, 5, dtype=torch.bool)
+    logits = clf(patches, mask)
+    assert logits.shape == (2,)
+
+
+def test_classifier_only_head_params_are_trainable():
+    clf = TemporalSmokeClassifier(
+        backbone="resnet18",
+        arch="gru",
+        hidden_dim=64,
+        pretrained=False,
+        num_layers=1,
+        bidirectional=False,
+    )
+    trainable = [n for n, p in clf.named_parameters() if p.requires_grad]
+    assert all(n.startswith("head.") for n in trainable)
+    assert any(n.startswith("head.gru") for n in trainable)
+
+
+def test_classifier_unknown_arch_raises():
+    with pytest.raises(ValueError, match="arch"):
+        TemporalSmokeClassifier(
+            backbone="resnet18",
+            arch="lstm",
+            hidden_dim=64,
+            pretrained=False,
+        )
+
+
+def test_classifier_handles_padded_batches():
+    clf = TemporalSmokeClassifier(
+        backbone="resnet18",
+        arch="gru",
+        hidden_dim=32,
+        pretrained=False,
+        num_layers=1,
+        bidirectional=False,
+    )
+    patches = torch.randn(3, 20, 3, 224, 224)
+    mask = torch.zeros(3, 20, dtype=torch.bool)
+    mask[0, :20] = True
+    mask[1, :10] = True
+    mask[2, :3] = True
+    logits = clf(patches, mask)
+    assert logits.shape == (3,)
