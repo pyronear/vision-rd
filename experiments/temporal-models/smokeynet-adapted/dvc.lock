@@ -194,3 +194,72 @@ stages:
       md5: 44ad961ee8db4f5399295d6fa3619175.dir
       size: 445626390
       nfiles: 2841
+  build_model_input@val:
+    cmd: uv run python scripts/build_model_input.py --tubes-dir 
+      data/03_primary/tubes/val --raw-dir data/01_raw/datasets/val --output-dir 
+      data/05_model_input/val --context-factor 1.5 --patch-size 224
+    deps:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: 409ed7d0573adcb3be98f7ceab63cf25.dir
+      size: 444161180
+      nfiles: 8752
+    - path: data/03_primary/tubes/val
+      hash: md5
+      md5: 13fdf62f351f21d8b1b164f2c4f55182.dir
+      size: 1032671
+      nfiles: 285
+    - path: scripts/build_model_input.py
+      hash: md5
+      md5: 2f1f24ff73973afad767806e84aafe15
+      size: 3710
+    - path: src/smokeynet_adapted/model_input.py
+      hash: md5
+      md5: fa9e8bd01b4a5228feeeb8d689405f88
+      size: 3612
+    params:
+      params.yaml:
+        model_input:
+          context_factor: 1.5
+          patch_size: 224
+    outs:
+    - path: data/05_model_input/val
+      hash: md5
+      md5: e662d34ba87b486399cbb444f0b3a1d2.dir
+      size: 89476209
+      nfiles: 3645
+  build_model_input@train:
+    cmd: uv run python scripts/build_model_input.py --tubes-dir 
+      data/03_primary/tubes/train --raw-dir data/01_raw/datasets/train 
+      --output-dir data/05_model_input/train --context-factor 1.5 --patch-size 
+      224
+    deps:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: caf37d4bf513efd49b9617378fff1ffa.dir
+      size: 4776619781
+      nfiles: 89870
+    - path: data/03_primary/tubes/train
+      hash: md5
+      md5: 4d97291cf6cb7f7879430564826e0440.dir
+      size: 10910972
+      nfiles: 2842
+    - path: scripts/build_model_input.py
+      hash: md5
+      md5: 2f1f24ff73973afad767806e84aafe15
+      size: 3710
+    - path: src/smokeynet_adapted/model_input.py
+      hash: md5
+      md5: fa9e8bd01b4a5228feeeb8d689405f88
+      size: 3612
+    params:
+      params.yaml:
+        model_input:
+          context_factor: 1.5
+          patch_size: 224
+    outs:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 87c9cd1891e075bf930f5ae399725dd7.dir
+      size: 976932275
+      nfiles: 38471

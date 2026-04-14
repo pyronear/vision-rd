@@ -23,6 +23,10 @@ build_tubes:
   min_tube_length: 4
   min_detected_entries: 2
 
+model_input:
+  context_factor: 1.5
+  patch_size: 224
+
 train:
   d_model: 512
   lstm_layers: 2

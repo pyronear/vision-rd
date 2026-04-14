@@ -42,6 +42,28 @@ stages:
       outs:
         - data/03_primary/tubes/${item}
 
+  build_model_input:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/build_model_input.py
+        --tubes-dir data/03_primary/tubes/${item}
+        --raw-dir data/01_raw/datasets/${item}
+        --output-dir data/05_model_input/${item}
+        --context-factor ${model_input.context_factor}
+        --patch-size ${model_input.patch_size}
+      deps:
+        - scripts/build_model_input.py
+        - src/smokeynet_adapted/model_input.py
+        - data/03_primary/tubes/${item}
+        - data/01_raw/datasets/${item}
+      params:
+        - model_input
+      outs:
+        - data/05_model_input/${item}
+
   render_tubes:
     foreach:
       - train
