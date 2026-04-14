@@ -9,6 +9,7 @@ from smokeynet_adapted.tubes import (
     interpolate_gaps,
     match_detections,
     select_longest_tube,
+    tube_from_record,
 )
 from smokeynet_adapted.types import Detection, FrameDetections, Tube, TubeEntry
 
@@ -254,9 +255,7 @@ def _make_tube(tube_id: int, length: int, n_gap: int = 0) -> Tube:
     for i in range(n_det):
         entries.append(TubeEntry(frame_idx=i, detection=_det(0.5, 0.5)))
     for i in range(n_gap):
-        entries.append(
-            TubeEntry(frame_idx=n_det + i, detection=None, is_gap=True)
-        )
+        entries.append(TubeEntry(frame_idx=n_det + i, detection=None, is_gap=True))
     return Tube(
         tube_id=tube_id,
         entries=entries,
@@ -365,3 +364,81 @@ class TestInterpolateGaps:
         out = interpolate_gaps(tube)
         assert out.entries[0].is_gap is False
         assert out.entries[0].detection is obs
+
+
+# ── tube_from_record ─────────────────────────────────────────────────────
+
+
+class TestTubeFromRecord:
+    def test_rebuilds_observed_entry(self):
+        record = {
+            "tube": {
+                "start_frame": 0,
+                "end_frame": 0,
+                "entries": [
+                    {
+                        "frame_idx": 0,
+                        "frame_id": "f0",
+                        "bbox": [0.4, 0.5, 0.2, 0.3],
+                        "is_gap": False,
+                        "confidence": 0.9,
+                    }
+                ],
+            }
+        }
+        tube = tube_from_record(record)
+        assert tube.start_frame == 0
+        assert tube.end_frame == 0
+        assert len(tube.entries) == 1
+        e = tube.entries[0]
+        assert e.frame_idx == 0
+        assert e.is_gap is False
+        assert e.detection is not None
+        assert e.detection.cx == 0.4
+        assert e.detection.cy == 0.5
+        assert e.detection.w == 0.2
+        assert e.detection.h == 0.3
+        assert e.detection.confidence == 0.9
+
+    def test_rebuilds_gap_entry(self):
+        record = {
+            "tube": {
+                "start_frame": 0,
+                "end_frame": 0,
+                "entries": [
+                    {
+                        "frame_idx": 0,
+                        "frame_id": "f0",
+                        "bbox": [0.5, 0.5, 0.1, 0.1],
+                        "is_gap": True,
+                        "confidence": 0.0,
+                    }
+                ],
+            }
+        }
+        tube = tube_from_record(record)
+        e = tube.entries[0]
+        assert e.is_gap is True
+        assert e.detection is not None
+        assert e.detection.confidence == 0.0
+
+    def test_rebuilds_missing_bbox_as_none_detection(self):
+        record = {
+            "tube": {
+                "start_frame": 0,
+                "end_frame": 0,
+                "entries": [
+                    {
+                        "frame_idx": 0,
+                        "frame_id": "f0",
+                        "bbox": None,
+                        "is_gap": True,
+                        "confidence": None,
+                    }
+                ],
+            }
+        }
+        tube = tube_from_record(record)
+        e = tube.entries[0]
+        assert e.detection is None
+        assert e.is_gap is True

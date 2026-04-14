@@ -935,9 +935,7 @@ def interpolate_gaps(tube: Tube) -> Tube:
         The same tube object, mutated in place. Returned for chaining.
     """
     observed = [
-        (i, e.detection)
-        for i, e in enumerate(tube.entries)
-        if e.detection is not None
+        (i, e.detection) for i, e in enumerate(tube.entries) if e.detection is not None
     ]
     if not observed:
         return tube
@@ -1008,3 +1006,52 @@ def select_longest_tube(tubes: list[Tube]) -> Tube | None:
         return (length, n_observed)
 
     return max(tubes, key=_key)
+
+
+def tube_from_record(record: dict) -> Tube:
+    """Rebuild a :class:`Tube` from a tube JSON record.
+
+    Inverse of ``_serialize_tube`` in ``scripts/build_tubes.py``. Pure
+    function; no I/O.
+
+    Entries with ``bbox=None`` are reconstructed with ``detection=None``
+    (pre-interpolation gap shape). Otherwise a :class:`Detection` is
+    built from the bbox + confidence; ``confidence=None`` falls back to
+    ``0.0``.
+
+    Args:
+        record: Parsed tube record. Only the ``tube`` sub-object is
+            consulted; other top-level keys are ignored.
+
+    Returns:
+        A :class:`Tube` with ``tube_id=0`` (the on-disk dataset is
+        single-tube-per-sequence so the id is informational only).
+    """
+    t = record["tube"]
+    entries: list[TubeEntry] = []
+    for e in t["entries"]:
+        bbox = e["bbox"]
+        if bbox is None:
+            det: Detection | None = None
+        else:
+            det = Detection(
+                class_id=0,
+                cx=bbox[0],
+                cy=bbox[1],
+                w=bbox[2],
+                h=bbox[3],
+                confidence=e["confidence"] if e["confidence"] is not None else 0.0,
+            )
+        entries.append(
+            TubeEntry(
+                frame_idx=e["frame_idx"],
+                detection=det,
+                is_gap=e["is_gap"],
+            )
+        )
+    return Tube(
+        tube_id=0,
+        entries=entries,
+        start_frame=t["start_frame"],
+        end_frame=t["end_frame"],
+    )
