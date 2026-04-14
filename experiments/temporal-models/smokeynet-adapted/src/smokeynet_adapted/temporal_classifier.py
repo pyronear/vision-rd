@@ -53,6 +53,9 @@ class TimmBackbone(nn.Module):
             stages = [
                 getattr(self.backbone, f"layer{i}") for i in range(1, 5)
             ]
+        elif name.startswith("convnext"):
+            # timm's convnext exposes a `stages` ModuleList
+            stages = list(self.backbone.stages)
         else:
             stage_names = [
                 n_ for n_, _ in self.backbone.named_children()

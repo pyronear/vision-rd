@@ -193,3 +193,16 @@ def test_timm_backbone_finetune_train_mode_propagates_resnet18():
     bb.train()
     assert bb.backbone.layer4.training is True
     assert bb.backbone.layer1.training is False
+
+
+def test_timm_backbone_finetune_convnext_tiny_unfreezes_only_last_stage():
+    bb = TimmBackbone(
+        name="convnext_tiny",
+        pretrained=False,
+        finetune=True,
+        finetune_last_n_blocks=1,
+    )
+    trainable_names = [n for n, p in bb.named_parameters() if p.requires_grad]
+    assert trainable_names
+    # timm's convnext wraps blocks under `stages.<i>.*`; last stage is index 3
+    assert all(".stages.3." in n for n in trainable_names), trainable_names
