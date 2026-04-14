@@ -1,6 +1,9 @@
 import pandas as pd
 
-from smokeynet_adapted.training_plots import aggregate_train_loss_per_epoch
+from smokeynet_adapted.training_plots import (
+    aggregate_train_loss_per_epoch,
+    extract_val_metrics_per_epoch,
+)
 
 
 def test_aggregate_train_loss_per_epoch_means_per_epoch():
@@ -48,3 +51,50 @@ def test_aggregate_train_loss_per_epoch_returns_empty_when_no_train_rows():
     result = aggregate_train_loss_per_epoch(df)
 
     assert len(result) == 0
+
+
+def test_extract_val_metrics_per_epoch_one_row_per_epoch():
+    df = pd.DataFrame(
+        {
+            "epoch": [0, 0, 1, 1, 2],
+            "step": [0, 1, 2, 3, 4],
+            "train/loss": [1.0, 2.0, 3.0, 4.0, None],
+            "val/loss": [None, 0.5, None, 0.4, 0.3],
+            "val/accuracy": [None, 0.8, None, 0.85, 0.9],
+            "val/f1": [None, 0.7, None, 0.75, 0.8],
+            "val/precision": [None, 0.6, None, 0.65, 0.7],
+            "val/recall": [None, 0.9, None, 0.92, 0.95],
+        }
+    )
+
+    result = extract_val_metrics_per_epoch(df)
+
+    assert list(result.columns) == [
+        "epoch",
+        "val/loss",
+        "val/accuracy",
+        "val/f1",
+        "val/precision",
+        "val/recall",
+    ]
+    assert list(result["epoch"]) == [0, 1, 2]
+    assert list(result["val/f1"]) == [0.7, 0.75, 0.8]
+
+
+def test_extract_val_metrics_per_epoch_skips_rows_missing_f1():
+    df = pd.DataFrame(
+        {
+            "epoch": [0, 1],
+            "step": [0, 1],
+            "train/loss": [1.0, 2.0],
+            "val/loss": [None, 0.4],
+            "val/accuracy": [None, 0.85],
+            "val/f1": [None, 0.75],
+            "val/precision": [None, 0.65],
+            "val/recall": [None, 0.92],
+        }
+    )
+
+    result = extract_val_metrics_per_epoch(df)
+
+    assert list(result["epoch"]) == [1]
