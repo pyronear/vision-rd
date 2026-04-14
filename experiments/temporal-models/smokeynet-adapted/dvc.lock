@@ -7,9 +7,9 @@ stages:
     deps:
     - path: data/01_raw/datasets_full/train
       hash: md5
-      md5: 22ee5d57943a0ff900121ca28b18f2a8.dir
-      size: 7149007108
-      nfiles: 135742
+      md5: f02174099bc4dc115dad2b69d3b4e78e.dir
+      size: 7543045856
+      nfiles: 142052
     - path: scripts/truncate_sequences.py
       hash: md5
       md5: 50ac7865933889df116cf61d7f35bc63
@@ -20,9 +20,9 @@ stages:
     outs:
     - path: data/01_raw/datasets/train
       hash: md5
-      md5: 93396ffb1654e2023eb75168251ef01b.dir
-      size: 4462554268
-      nfiles: 84784
+      md5: caf37d4bf513efd49b9617378fff1ffa.dir
+      size: 4776619781
+      nfiles: 89870
   truncate@val:
     cmd: uv run python scripts/truncate_sequences.py --input-dir 
       data/01_raw/datasets_full/val --output-dir data/01_raw/datasets/val 
@@ -30,9 +30,9 @@ stages:
     deps:
     - path: data/01_raw/datasets_full/val
       hash: md5
-      md5: 2ca47638a4b0cc9ca7d4011376c54e45.dir
-      size: 631259421
-      nfiles: 12448
+      md5: b58404e2160d272fd736fad3aa561223.dir
+      size: 668383256
+      nfiles: 13044
     - path: scripts/truncate_sequences.py
       hash: md5
       md5: 50ac7865933889df116cf61d7f35bc63
@@ -43,6 +43,88 @@ stages:
     outs:
     - path: data/01_raw/datasets/val
       hash: md5
-      md5: c178b34b1bd867a3f2e9c5dad9a838ae.dir
-      size: 415167241
-      nfiles: 8268
+      md5: 409ed7d0573adcb3be98f7ceab63cf25.dir
+      size: 444161180
+      nfiles: 8752
+  build_tubes@val:
+    cmd: uv run python scripts/build_tubes.py --input-dir 
+      data/01_raw/datasets/val --output-dir data/03_primary/tubes/val 
+      --iou-threshold 0.2 --max-misses 2 --min-tube-length 4 
+      --min-detected-entries 2
+    deps:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: 409ed7d0573adcb3be98f7ceab63cf25.dir
+      size: 444161180
+      nfiles: 8752
+    - path: scripts/build_tubes.py
+      hash: md5
+      md5: 8b8262362c680431f45c8280a775d4d7
+      size: 5695
+    - path: src/smokeynet_adapted/data.py
+      hash: md5
+      md5: 73a30d5d96ad20dcaf34ea3f93677785
+      size: 5777
+    - path: src/smokeynet_adapted/tubes.py
+      hash: md5
+      md5: 056e31097d6d112fb80a9cbd6d7e7fe1
+      size: 32682
+    - path: src/smokeynet_adapted/types.py
+      hash: md5
+      md5: 9d0ceb3e25bd2fd16fb74ee2b4a7724e
+      size: 1926
+    params:
+      params.yaml:
+        build_tubes:
+          min_tube_length: 4
+          min_detected_entries: 2
+        tubes:
+          iou_threshold: 0.2
+          max_misses: 2
+    outs:
+    - path: data/03_primary/tubes/val
+      hash: md5
+      md5: 13fdf62f351f21d8b1b164f2c4f55182.dir
+      size: 1032671
+      nfiles: 285
+  build_tubes@train:
+    cmd: uv run python scripts/build_tubes.py --input-dir 
+      data/01_raw/datasets/train --output-dir data/03_primary/tubes/train 
+      --iou-threshold 0.2 --max-misses 2 --min-tube-length 4 
+      --min-detected-entries 2
+    deps:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: caf37d4bf513efd49b9617378fff1ffa.dir
+      size: 4776619781
+      nfiles: 89870
+    - path: scripts/build_tubes.py
+      hash: md5
+      md5: 8b8262362c680431f45c8280a775d4d7
+      size: 5695
+    - path: src/smokeynet_adapted/data.py
+      hash: md5
+      md5: 73a30d5d96ad20dcaf34ea3f93677785
+      size: 5777
+    - path: src/smokeynet_adapted/tubes.py
+      hash: md5
+      md5: 056e31097d6d112fb80a9cbd6d7e7fe1
+      size: 32682
+    - path: src/smokeynet_adapted/types.py
+      hash: md5
+      md5: 9d0ceb3e25bd2fd16fb74ee2b4a7724e
+      size: 1926
+    params:
+      params.yaml:
+        build_tubes:
+          min_tube_length: 4
+          min_detected_entries: 2
+        tubes:
+          iou_threshold: 0.2
+          max_misses: 2
+    outs:
+    - path: data/03_primary/tubes/train
+      hash: md5
+      md5: 4d97291cf6cb7f7879430564826e0440.dir
+      size: 10910972
+      nfiles: 2842

@@ -19,6 +19,10 @@ tubes:
   iou_threshold: 0.2
   max_misses: 2
 
+build_tubes:
+  min_tube_length: 4
+  min_detected_entries: 2
+
 train:
   d_model: 512
   lstm_layers: 2
