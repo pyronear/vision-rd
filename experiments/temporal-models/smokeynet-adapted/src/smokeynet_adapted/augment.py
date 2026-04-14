@@ -58,3 +58,46 @@ class SpatialTubeTransform:
 
         item["patches"] = patches
         return item
+
+
+class PhotometricTubeTransform:
+    """Per-tube-consistent brightness / contrast / saturation.
+
+    Operates on ``[0, 1]`` tensors (pre-normalization). One set of factors
+    sampled per call, applied in fixed order (brightness -> contrast ->
+    saturation) to every frame.
+    """
+
+    def __init__(
+        self,
+        brightness_range: tuple[float, float],
+        contrast_range: tuple[float, float],
+        saturation_range: tuple[float, float],
+    ) -> None:
+        self.brightness_range = brightness_range
+        self.contrast_range = contrast_range
+        self.saturation_range = saturation_range
+
+    @staticmethod
+    def _sample(r: tuple[float, float]) -> float:
+        lo, hi = r
+        return float(lo + torch.rand(()).item() * (hi - lo))
+
+    def __call__(self, item: dict) -> dict:
+        patches: Tensor = item["patches"]  # [T, 3, H, W], values in [0, 1]
+
+        b = self._sample(self.brightness_range)
+        c = self._sample(self.contrast_range)
+        s = self._sample(self.saturation_range)
+
+        if b != 1.0:
+            patches = TVF.adjust_brightness(patches, brightness_factor=b)
+        if c != 1.0:
+            patches = TVF.adjust_contrast(patches, contrast_factor=c)
+        if s != 1.0:
+            patches = TVF.adjust_saturation(patches, saturation_factor=s)
+
+        # Clamp to valid photometric range; adjust_contrast can push slightly
+        # below 0 / above 1 and the downstream ImageNet normalize expects [0, 1].
+        item["patches"] = patches.clamp_(0.0, 1.0)
+        return item

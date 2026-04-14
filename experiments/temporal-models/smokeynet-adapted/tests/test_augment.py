@@ -2,7 +2,7 @@
 
 import torch
 
-from smokeynet_adapted.augment import SpatialTubeTransform
+from smokeynet_adapted.augment import PhotometricTubeTransform, SpatialTubeTransform
 
 
 def _make_item(t: int = 5, n_valid: int | None = None) -> dict:
@@ -101,3 +101,51 @@ def test_spatial_affine_applied_same_per_frame():
     # Shape preserved + valid frames still valid.
     assert out2["patches"].shape == (3, 3, 224, 224)
     assert out2["mask"].all()
+
+
+def test_photometric_identity_preserves_input():
+    """Factors collapsed to 1.0 → output equals input."""
+    torch.manual_seed(0)
+    item = _make_item(t=4)
+    before = item["patches"].clone()
+    t = PhotometricTubeTransform(
+        brightness_range=(1.0, 1.0),
+        contrast_range=(1.0, 1.0),
+        saturation_range=(1.0, 1.0),
+    )
+    out = t(item)
+    assert torch.allclose(out["patches"], before, atol=1e-6)
+
+
+def test_photometric_same_factor_across_frames():
+    """Brightness/contrast/saturation factors are sampled once per tube;
+    the inter-frame difference pattern is preserved."""
+    torch.manual_seed(0)
+    item = _make_item(t=3)
+    before = item["patches"].clone()
+    # Compute pre-diffs between frames
+    pre_diff_01 = before[0] - before[1]
+    pre_diff_12 = before[1] - before[2]
+
+    t = PhotometricTubeTransform(
+        brightness_range=(0.8, 1.2),
+        contrast_range=(1.0, 1.0),  # isolate: brightness-only
+        saturation_range=(1.0, 1.0),
+    )
+    out = t(item)
+    # Brightness is a per-pixel multiplicative factor; same factor per frame
+    # means diffs scale by the same factor. So the ratio is preserved.
+    post_diff_01 = out["patches"][0] - out["patches"][1]
+    post_diff_12 = out["patches"][1] - out["patches"][2]
+    # Avoid division-by-zero regions — use intersection so neither denominator is zero
+    nz = (pre_diff_01.abs() > 1e-3) & (pre_diff_12.abs() > 1e-3)
+    if nz.any():
+        ratios_01 = post_diff_01[nz] / pre_diff_01[nz]
+        ratios_12 = post_diff_12[nz] / pre_diff_12[nz]
+        # All ratios should be the same single brightness factor
+        assert torch.allclose(
+            ratios_01, ratios_01[0].expand_as(ratios_01), atol=1e-4
+        )
+        assert torch.allclose(
+            ratios_12, ratios_12[0].expand_as(ratios_12), atol=1e-4
+        )
