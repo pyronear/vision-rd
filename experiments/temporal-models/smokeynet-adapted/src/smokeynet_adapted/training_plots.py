@@ -1,7 +1,5 @@
 """Per-run training curve plotting from Lightning CSVLogger metrics."""
 
-from pathlib import Path
-
 import pandas as pd
 
 
