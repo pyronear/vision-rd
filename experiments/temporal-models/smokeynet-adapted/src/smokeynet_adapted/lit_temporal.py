@@ -19,6 +19,9 @@ class LitTemporalClassifier(L.LightningModule):
         pretrained: whether to load pretrained backbone weights.
         num_layers: GRU layers (ignored when arch != gru).
         bidirectional: GRU direction (ignored when arch != gru).
+        finetune: if True, unfreeze backbone blocks and use two param groups.
+        finetune_last_n_blocks: number of backbone blocks to unfreeze.
+        backbone_lr: learning rate for backbone params (required when finetune=True).
     """
 
     def __init__(
@@ -31,6 +34,9 @@ class LitTemporalClassifier(L.LightningModule):
         pretrained: bool = True,
         num_layers: int = 1,
         bidirectional: bool = False,
+        finetune: bool = False,
+        finetune_last_n_blocks: int = 0,
+        backbone_lr: float | None = None,
     ) -> None:
         super().__init__()
         self.save_hyperparameters()
@@ -41,10 +47,14 @@ class LitTemporalClassifier(L.LightningModule):
             pretrained=pretrained,
             num_layers=num_layers,
             bidirectional=bidirectional,
+            finetune=finetune,
+            finetune_last_n_blocks=finetune_last_n_blocks,
         )
         self.loss_fn = torch.nn.BCEWithLogitsLoss()
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
+        self.finetune = finetune
+        self.backbone_lr = backbone_lr
         self._val_preds: list[float] = []
         self._val_labels: list[float] = []
 
@@ -88,9 +98,32 @@ class LitTemporalClassifier(L.LightningModule):
         self._val_labels.clear()
 
     def configure_optimizers(self):
+        if not self.finetune:
+            head_params = [p for p in self.model.head.parameters() if p.requires_grad]
+            return torch.optim.AdamW(
+                head_params,
+                lr=self.learning_rate,
+                weight_decay=self.weight_decay,
+            )
+
+        if self.backbone_lr is None:
+            raise ValueError("backbone_lr must be set when finetune=True")
+
+        backbone_params = [
+            p for p in self.model.backbone.parameters() if p.requires_grad
+        ]
         head_params = [p for p in self.model.head.parameters() if p.requires_grad]
         return torch.optim.AdamW(
-            head_params,
-            lr=self.learning_rate,
-            weight_decay=self.weight_decay,
+            [
+                {
+                    "params": head_params,
+                    "lr": self.learning_rate,
+                    "weight_decay": self.weight_decay,
+                },
+                {
+                    "params": backbone_params,
+                    "lr": self.backbone_lr,
+                    "weight_decay": self.weight_decay,
+                },
+            ]
         )
