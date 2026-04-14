@@ -4,6 +4,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
+from matplotlib.ticker import MaxNLocator
 
 
 def aggregate_train_loss_per_epoch(df: pd.DataFrame) -> pd.Series:
@@ -77,6 +78,7 @@ def plot_training_curves(csv_path: Path, output_path: Path, title: str) -> None:
 
             ax.set_title(metric)
             ax.grid(alpha=0.3)
+            ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
         for ax in axes[1]:
             ax.set_xlabel("epoch")

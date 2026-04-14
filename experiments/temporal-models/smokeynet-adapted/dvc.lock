@@ -1932,13 +1932,13 @@ stages:
       size: 1604
     - path: src/smokeynet_adapted/training_plots.py
       hash: md5
-      md5: 035a4eb5418dfd19558c06b3a47c772b
-      size: 2513
+      md5: ed6f2335921666b7c7f33990a655ec2b
+      size: 2621
     outs:
     - path: data/08_reporting/training/gru/training_curves.png
       hash: md5
-      md5: 7439e03de5e7b0243d52a9e57f4bfc81
-      size: 160199
+      md5: 302e532b9df32f83720a3b8bb5e03ee7
+      size: 152757
   plot_training@gru_seed43:
     cmd: uv run python scripts/plot_training.py --csv-log-dir 
       data/06_models/gru_seed43/csv_logs --output-path 
@@ -1956,8 +1956,8 @@ stages:
       size: 1604
     - path: src/smokeynet_adapted/training_plots.py
       hash: md5
-      md5: 035a4eb5418dfd19558c06b3a47c772b
-      size: 2513
+      md5: ed6f2335921666b7c7f33990a655ec2b
+      size: 2621
     outs:
     - path: data/08_reporting/training/gru_seed43/training_curves.png
       hash: md5
@@ -1980,8 +1980,8 @@ stages:
       size: 1604
     - path: src/smokeynet_adapted/training_plots.py
       hash: md5
-      md5: 035a4eb5418dfd19558c06b3a47c772b
-      size: 2513
+      md5: ed6f2335921666b7c7f33990a655ec2b
+      size: 2621
     outs:
     - path: data/08_reporting/training/gru_seed44/training_curves.png
       hash: md5
@@ -2004,8 +2004,8 @@ stages:
       size: 1604
     - path: src/smokeynet_adapted/training_plots.py
       hash: md5
-      md5: 035a4eb5418dfd19558c06b3a47c772b
-      size: 2513
+      md5: ed6f2335921666b7c7f33990a655ec2b
+      size: 2621
     outs:
     - path: data/08_reporting/training/gru_convnext/training_curves.png
       hash: md5
@@ -2028,13 +2028,13 @@ stages:
       size: 1604
     - path: src/smokeynet_adapted/training_plots.py
       hash: md5
-      md5: 035a4eb5418dfd19558c06b3a47c772b
-      size: 2513
+      md5: ed6f2335921666b7c7f33990a655ec2b
+      size: 2621
     outs:
     - path: data/08_reporting/training/gru_finetune/training_curves.png
       hash: md5
-      md5: 191295de424d10789cfde87733fedeaf
-      size: 219858
+      md5: 70ff62ec4472d474eae4aedf6e900d1a
+      size: 217708
   plot_training@gru_convnext_finetune:
     cmd: uv run python scripts/plot_training.py --csv-log-dir 
       data/06_models/gru_convnext_finetune/csv_logs --output-path 
@@ -2052,8 +2052,8 @@ stages:
       size: 1604
     - path: src/smokeynet_adapted/training_plots.py
       hash: md5
-      md5: 035a4eb5418dfd19558c06b3a47c772b
-      size: 2513
+      md5: ed6f2335921666b7c7f33990a655ec2b
+      size: 2621
     outs:
     - path: data/08_reporting/training/gru_convnext_finetune/training_curves.png
       hash: md5
