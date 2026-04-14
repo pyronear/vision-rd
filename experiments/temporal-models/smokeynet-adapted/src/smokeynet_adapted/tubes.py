@@ -912,6 +912,79 @@ def plot_tube_summary(
     return fig
 
 
+def interpolate_gaps(tube: Tube) -> Tube:
+    """Fill gap entries with a geometrically-interpolated bbox.
+
+    For each entry whose ``detection`` is ``None``:
+
+    * **Interior gap** (observed dets on both sides): linearly interpolate
+      ``(cx, cy, w, h)`` between the nearest observed detection before and
+      after, using the entry's index as the position parameter.
+    * **Boundary gap** (no observation on one side): repeat the nearest
+      observed detection on the other side.
+
+    Synthesized detections always carry ``confidence=0.0``. The returned
+    tube has ``is_gap=True`` flags on every previously-empty entry.
+
+    Observed entries are left untouched.
+
+    Args:
+        tube: Tube whose gap entries (``detection=None``) need filling.
+
+    Returns:
+        The same tube object, mutated in place. Returned for chaining.
+    """
+    observed = [
+        (i, e.detection)
+        for i, e in enumerate(tube.entries)
+        if e.detection is not None
+    ]
+    if not observed:
+        return tube
+
+    for i, entry in enumerate(tube.entries):
+        if entry.detection is not None:
+            continue
+
+        before = next(
+            ((j, d) for j, d in reversed(observed) if j < i),
+            None,
+        )
+        after = next(
+            ((j, d) for j, d in observed if j > i),
+            None,
+        )
+
+        if before is not None and after is not None:
+            j_b, d_b = before
+            j_a, d_a = after
+            t = (i - j_b) / (j_a - j_b)
+            cx = d_b.cx + t * (d_a.cx - d_b.cx)
+            cy = d_b.cy + t * (d_a.cy - d_b.cy)
+            w = d_b.w + t * (d_a.w - d_b.w)
+            h = d_b.h + t * (d_a.h - d_b.h)
+            class_id = d_b.class_id
+        elif before is not None:
+            d = before[1]
+            cx, cy, w, h, class_id = d.cx, d.cy, d.w, d.h, d.class_id
+        else:
+            assert after is not None
+            d = after[1]
+            cx, cy, w, h, class_id = d.cx, d.cy, d.w, d.h, d.class_id
+
+        entry.detection = Detection(
+            class_id=class_id,
+            cx=cx,
+            cy=cy,
+            w=w,
+            h=h,
+            confidence=0.0,
+        )
+        entry.is_gap = True
+
+    return tube
+
+
 def select_longest_tube(tubes: list[Tube]) -> Tube | None:
     """Pick the single longest tube from a list.
 

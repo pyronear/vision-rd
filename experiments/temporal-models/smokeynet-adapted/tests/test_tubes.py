@@ -1,9 +1,12 @@
 """Tests for smokeynet_adapted.tubes."""
 
+import pytest
+
 from smokeynet_adapted.tubes import (
     build_tubes,
     compute_containment,
     compute_iou,
+    interpolate_gaps,
     match_detections,
     select_longest_tube,
 )
@@ -281,3 +284,84 @@ class TestSelectLongestTube:
         result = select_longest_tube([a, b])
         assert result is not None
         assert result.tube_id == 0
+
+
+# ── interpolate_gaps ─────────────────────────────────────────────────────
+
+
+def _entry(idx: int, det: Detection | None, is_gap: bool = False) -> TubeEntry:
+    return TubeEntry(frame_idx=idx, detection=det, is_gap=is_gap)
+
+
+class TestInterpolateGaps:
+    def test_interior_length_one_lerps_midpoint(self):
+        before = Detection(0, cx=0.2, cy=0.3, w=0.1, h=0.1, confidence=0.9)
+        after = Detection(0, cx=0.4, cy=0.5, w=0.2, h=0.2, confidence=0.7)
+        tube = Tube(
+            tube_id=0,
+            entries=[
+                _entry(0, before),
+                _entry(1, None, is_gap=True),
+                _entry(2, after),
+            ],
+            start_frame=0,
+            end_frame=2,
+        )
+        out = interpolate_gaps(tube)
+        gap = out.entries[1]
+        assert gap.is_gap is True
+        assert gap.detection is not None
+        assert gap.detection.cx == pytest.approx(0.3)
+        assert gap.detection.cy == pytest.approx(0.4)
+        assert gap.detection.w == pytest.approx(0.15)
+        assert gap.detection.h == pytest.approx(0.15)
+        assert gap.detection.confidence == pytest.approx(0.0)
+
+    def test_leading_gap_repeats_first_observed(self):
+        first = Detection(0, cx=0.5, cy=0.5, w=0.1, h=0.1, confidence=0.8)
+        tube = Tube(
+            tube_id=0,
+            entries=[
+                _entry(0, None, is_gap=True),
+                _entry(1, first),
+            ],
+            start_frame=0,
+            end_frame=1,
+        )
+        out = interpolate_gaps(tube)
+        g = out.entries[0]
+        assert g.is_gap is True
+        assert g.detection is not None
+        assert g.detection.cx == pytest.approx(0.5)
+        assert g.detection.cy == pytest.approx(0.5)
+        assert g.detection.confidence == pytest.approx(0.0)
+
+    def test_trailing_gap_repeats_last_observed(self):
+        last = Detection(0, cx=0.7, cy=0.2, w=0.05, h=0.05, confidence=0.9)
+        tube = Tube(
+            tube_id=0,
+            entries=[
+                _entry(0, last),
+                _entry(1, None, is_gap=True),
+            ],
+            start_frame=0,
+            end_frame=1,
+        )
+        out = interpolate_gaps(tube)
+        g = out.entries[1]
+        assert g.is_gap is True
+        assert g.detection is not None
+        assert g.detection.cx == pytest.approx(0.7)
+        assert g.detection.confidence == pytest.approx(0.0)
+
+    def test_observed_entries_unchanged(self):
+        obs = Detection(0, cx=0.5, cy=0.5, w=0.1, h=0.1, confidence=0.9)
+        tube = Tube(
+            tube_id=0,
+            entries=[_entry(0, obs)],
+            start_frame=0,
+            end_frame=0,
+        )
+        out = interpolate_gaps(tube)
+        assert out.entries[0].is_gap is False
+        assert out.entries[0].detection is obs
