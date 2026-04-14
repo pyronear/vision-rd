@@ -167,9 +167,16 @@ class TemporalSmokeClassifier(nn.Module):
         pretrained: bool = True,
         num_layers: int = 1,
         bidirectional: bool = False,
+        finetune: bool = False,
+        finetune_last_n_blocks: int = 0,
     ) -> None:
         super().__init__()
-        self.backbone = TimmBackbone(name=backbone, pretrained=pretrained)
+        self.backbone = TimmBackbone(
+            name=backbone,
+            pretrained=pretrained,
+            finetune=finetune,
+            finetune_last_n_blocks=finetune_last_n_blocks,
+        )
         feat_dim = self.backbone.feat_dim
         if arch == "mean_pool":
             self.head: nn.Module = MeanPoolHead(

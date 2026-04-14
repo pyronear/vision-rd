@@ -236,3 +236,21 @@ def test_timm_backbone_frozen_forward_matches_no_grad_eval():
     with torch.no_grad():
         out_b = bb.backbone(x)
     assert torch.allclose(out_a, out_b, atol=1e-6)
+
+
+def test_classifier_finetune_mode_exposes_backbone_params_as_trainable():
+    clf = TemporalSmokeClassifier(
+        backbone="resnet18",
+        arch="gru",
+        hidden_dim=32,
+        pretrained=False,
+        num_layers=1,
+        bidirectional=False,
+        finetune=True,
+        finetune_last_n_blocks=1,
+    )
+    trainable = [n for n, p in clf.named_parameters() if p.requires_grad]
+    assert any(".layer4." in n for n in trainable), trainable
+    assert any(n.startswith("head.") for n in trainable)
+    # Earlier backbone layers must still be frozen.
+    assert not any(".layer1." in n for n in trainable)
