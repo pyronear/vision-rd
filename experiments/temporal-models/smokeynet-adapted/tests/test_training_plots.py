@@ -105,8 +105,16 @@ def test_extract_val_metrics_per_epoch_skips_rows_missing_f1():
 
 def _write_fixture_csv(path):
     rows = [
-        ["epoch", "step", "train/loss", "val/accuracy", "val/f1", "val/loss",
-         "val/precision", "val/recall"],
+        [
+            "epoch",
+            "step",
+            "train/loss",
+            "val/accuracy",
+            "val/f1",
+            "val/loss",
+            "val/precision",
+            "val/recall",
+        ],
         [0, 0, 0.9, None, None, None, None, None],
         [0, 1, 0.8, None, None, None, None, None],
         [0, 2, None, 0.7, 0.65, 0.5, 0.6, 0.7],

@@ -36,16 +36,12 @@ _SUBPLOT_GRID = [
 ]
 
 
-def plot_training_curves(
-    csv_path: Path, output_path: Path, title: str
-) -> None:
+def plot_training_curves(csv_path: Path, output_path: Path, title: str) -> None:
     df = pd.read_csv(csv_path)
     train_series = aggregate_train_loss_per_epoch(df)
     val_df = extract_val_metrics_per_epoch(df)
     best_epoch = (
-        val_df.loc[val_df["val/f1"].idxmax(), "epoch"]
-        if not val_df.empty
-        else None
+        val_df.loc[val_df["val/f1"].idxmax(), "epoch"] if not val_df.empty else None
     )
 
     with plt.style.context("seaborn-v0_8-whitegrid"):
@@ -67,15 +63,17 @@ def plot_training_curves(
                 ax.plot(xs, ys, marker=".", linewidth=1.8)
             else:
                 ax.text(
-                    0.5, 0.5, "no data yet",
-                    ha="center", va="center", transform=ax.transAxes,
+                    0.5,
+                    0.5,
+                    "no data yet",
+                    ha="center",
+                    va="center",
+                    transform=ax.transAxes,
                     color="gray",
                 )
 
             if best_epoch is not None:
-                ax.axvline(
-                    best_epoch, color="gray", linestyle="--", alpha=0.6
-                )
+                ax.axvline(best_epoch, color="gray", linestyle="--", alpha=0.6)
 
             ax.set_title(metric)
             ax.grid(alpha=0.3)
