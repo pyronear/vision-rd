@@ -1,80 +1,73 @@
-"""PyTorch Dataset for training SmokeyNetAdapted from precomputed features."""
+"""PyTorch Dataset for the basic temporal smoke classifier.
+
+Reads cropped PNG patches produced by ``scripts/build_model_input.py``
+and returns per-tube tensors padded to a fixed length with a mask.
+"""
 
 import json
 from pathlib import Path
 
 import torch
+from PIL import Image
 from torch import Tensor
 from torch.utils.data import Dataset
+from torchvision.transforms.functional import to_tensor
 
-from .types import Detection, Tube, TubeEntry
+IMAGENET_MEAN = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
+IMAGENET_STD = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
 
 
-class SmokeyNetDataset(Dataset):
-    """Dataset of sequences with precomputed RoI features and tube metadata.
+class TubePatchDataset(Dataset):
+    """Dataset of cropped tube patches stored as PNG folders.
 
-    Each sequence is stored as:
-    - ``<sequence_id>.pt``: dict with ``roi_features``, ``frame_indices``,
-      ``bbox_coords``, ``detection_labels``, ``sequence_label``.
-    - ``<sequence_id>.json``: tube metadata for reconstruction.
+    Each item:
 
-    Args:
-        data_dir: Path to the directory containing ``.pt`` and ``.json`` files.
-    """
+    .. code-block:: python
 
-    def __init__(self, data_dir: Path) -> None:
-        self.data_dir = Path(data_dir)
-        self.sequence_ids = sorted(p.stem for p in self.data_dir.glob("*.pt"))
-
-    def __len__(self) -> int:
-        return len(self.sequence_ids)
-
-    def __getitem__(self, idx: int) -> dict[str, Tensor | list[Tube] | str]:
-        seq_id = self.sequence_ids[idx]
-        pt_path = self.data_dir / f"{seq_id}.pt"
-        json_path = self.data_dir / f"{seq_id}.json"
-
-        data = torch.load(pt_path, weights_only=True)
-        tubes = _load_tubes_from_json(json_path)
-
-        return {
-            "sequence_id": seq_id,
-            "roi_features": data["roi_features"],
-            "frame_indices": data["frame_indices"],
-            "bbox_coords": data["bbox_coords"],
-            "detection_labels": data["detection_labels"],
-            "sequence_label": data["sequence_label"],
-            "tubes": tubes,
+        {
+            "patches": Tensor[max_frames, 3, 224, 224],  # float32, ImageNet-normalized
+            "mask":    Tensor[max_frames] bool,           # True = real frame
+            "label":   Tensor[] float32,                  # 0.0 fp, 1.0 smoke
+            "sequence_id": str,
         }
 
+    Args:
+        split_dir: Directory containing ``_index.json`` and one
+            sub-directory per tube.
+        max_frames: Pad/truncate length.
+    """
 
-def _load_tubes_from_json(json_path: Path) -> list[Tube]:
-    """Load tube metadata from a JSON file."""
-    with open(json_path) as f:
-        tube_dicts = json.load(f)["tubes"]
+    def __init__(self, split_dir: Path, max_frames: int) -> None:
+        self.split_dir = Path(split_dir)
+        self.max_frames = max_frames
+        index = json.loads((self.split_dir / "_index.json").read_text())
+        self.index: list[dict] = index
 
-    tubes = []
-    for td in tube_dicts:
-        entries = []
-        for ed in td["entries"]:
-            det = None
-            if ed.get("detection") is not None:
-                d = ed["detection"]
-                det = Detection(
-                    class_id=d["class_id"],
-                    cx=d["cx"],
-                    cy=d["cy"],
-                    w=d["w"],
-                    h=d["h"],
-                    confidence=d["confidence"],
-                )
-            entries.append(TubeEntry(frame_idx=ed["frame_idx"], detection=det))
-        tubes.append(
-            Tube(
-                tube_id=td["tube_id"],
-                entries=entries,
-                start_frame=td["start_frame"],
-                end_frame=td["end_frame"],
-            )
-        )
-    return tubes
+    def __len__(self) -> int:
+        return len(self.index)
+
+    def __getitem__(self, idx: int) -> dict[str, Tensor | str]:
+        record = self.index[idx]
+        seq_id: str = record["sequence_id"]
+        label_int: int = record["label_int"]
+        seq_dir = self.split_dir / seq_id
+
+        meta = json.loads((seq_dir / "meta.json").read_text())
+        frame_files = [seq_dir / f["filename"] for f in meta["frames"]]
+        n = min(len(frame_files), self.max_frames)
+
+        patches = torch.zeros(self.max_frames, 3, 224, 224, dtype=torch.float32)
+        mask = torch.zeros(self.max_frames, dtype=torch.bool)
+        for i in range(n):
+            img = Image.open(frame_files[i]).convert("RGB")
+            tensor = to_tensor(img)  # CHW float32 in [0, 1]
+            tensor = (tensor - IMAGENET_MEAN) / IMAGENET_STD
+            patches[i] = tensor
+            mask[i] = True
+
+        return {
+            "patches": patches,
+            "mask": mask,
+            "label": torch.tensor(float(label_int), dtype=torch.float32),
+            "sequence_id": seq_id,
+        }
