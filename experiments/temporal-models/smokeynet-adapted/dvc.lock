@@ -381,7 +381,7 @@ stages:
       data/05_model_input/train --checkpoint 
       data/06_models/mean_pool/best_checkpoint.pt --output-dir 
       data/08_reporting/train/mean_pool --params-path params.yaml --params-key 
-      train_mean_pool
+      train_mean_pool --render-tubes-dir data/08_reporting/tubes/train
     deps:
     - path: data/05_model_input/train
       hash: md5
@@ -392,10 +392,15 @@ stages:
       hash: md5
       md5: 87791097b2fde2c866159a0d70b00739
       size: 45588715
+    - path: data/08_reporting/tubes/train
+      hash: md5
+      md5: 44ad961ee8db4f5399295d6fa3619175.dir
+      size: 445626390
+      nfiles: 2841
     - path: scripts/evaluate.py
       hash: md5
-      md5: 796846477824274af25b0629f2c8b3dd
-      size: 6438
+      md5: 4172cdb32d15ab90041a2f9b6fd9a29e
+      size: 8483
     - path: src/smokeynet_adapted/dataset.py
       hash: md5
       md5: 9f8c8b88ff8a1f9c6b20ba0878aef765
@@ -431,6 +436,11 @@ stages:
       hash: md5
       md5: 80d1a0886c085db0a95605ca6f41ba4e
       size: 26882
+    - path: data/08_reporting/train/mean_pool/errors
+      hash: md5
+      md5: 4f6a44b0ca92bc4451309a881a7493b7.dir
+      size: 39142631
+      nfiles: 288
     - path: data/08_reporting/train/mean_pool/metrics.json
       hash: md5
       md5: a1a648b69caf7783a806e08edb9198cb
@@ -439,6 +449,10 @@ stages:
       hash: md5
       md5: 44ed9cc29742fc2b6b69264b9edcdd1e
       size: 21070
+    - path: data/08_reporting/train/mean_pool/predictions.json
+      hash: md5
+      md5: 2bcdfafe9c3532d4ea8fcb620f6c20b3
+      size: 483173
     - path: data/08_reporting/train/mean_pool/roc_curve.png
       hash: md5
       md5: 631ca963c64b38d9430fdb29356b74b6
@@ -448,7 +462,7 @@ stages:
       data/05_model_input/val --checkpoint 
       data/06_models/mean_pool/best_checkpoint.pt --output-dir 
       data/08_reporting/val/mean_pool --params-path params.yaml --params-key 
-      train_mean_pool
+      train_mean_pool --render-tubes-dir data/08_reporting/tubes/val
     deps:
     - path: data/05_model_input/val
       hash: md5
@@ -459,10 +473,15 @@ stages:
       hash: md5
       md5: 87791097b2fde2c866159a0d70b00739
       size: 45588715
+    - path: data/08_reporting/tubes/val
+      hash: md5
+      md5: 37516349f11a4598ec8e6ead7bcb4896.dir
+      size: 42457438
+      nfiles: 284
     - path: scripts/evaluate.py
       hash: md5
-      md5: 796846477824274af25b0629f2c8b3dd
-      size: 6438
+      md5: 4172cdb32d15ab90041a2f9b6fd9a29e
+      size: 8483
     - path: src/smokeynet_adapted/dataset.py
       hash: md5
       md5: 9f8c8b88ff8a1f9c6b20ba0878aef765
@@ -498,6 +517,11 @@ stages:
       hash: md5
       md5: 98da68d62a81163ea9f9297e90f8ecc3
       size: 27712
+    - path: data/08_reporting/val/mean_pool/errors
+      hash: md5
+      md5: f09a9f3c9aec3ba8989023df7534f02c.dir
+      size: 3248890
+      nfiles: 27
     - path: data/08_reporting/val/mean_pool/metrics.json
       hash: md5
       md5: 20d4ad929ee9dc8fb9ffc3b528b9592a
@@ -506,6 +530,10 @@ stages:
       hash: md5
       md5: 8c9099cc8f33be0d8372d8345c5352f9
       size: 18826
+    - path: data/08_reporting/val/mean_pool/predictions.json
+      hash: md5
+      md5: 0bdba74fe7b0f05570aaa1be55131b85
+      size: 48395
     - path: data/08_reporting/val/mean_pool/roc_curve.png
       hash: md5
       md5: bf984b2fd61bb08a3062298de59e538c
@@ -515,7 +543,7 @@ stages:
       data/05_model_input/train --checkpoint 
       data/06_models/gru/best_checkpoint.pt --output-dir 
       data/08_reporting/train/gru --params-path params.yaml --params-key 
-      train_gru
+      train_gru --render-tubes-dir data/08_reporting/tubes/train
     deps:
     - path: data/05_model_input/train
       hash: md5
@@ -526,10 +554,15 @@ stages:
       hash: md5
       md5: 18ff2f455874ee70436fcabd4c86fc52
       size: 47961233
+    - path: data/08_reporting/tubes/train
+      hash: md5
+      md5: 44ad961ee8db4f5399295d6fa3619175.dir
+      size: 445626390
+      nfiles: 2841
     - path: scripts/evaluate.py
       hash: md5
-      md5: 796846477824274af25b0629f2c8b3dd
-      size: 6438
+      md5: 4172cdb32d15ab90041a2f9b6fd9a29e
+      size: 8483
     - path: src/smokeynet_adapted/dataset.py
       hash: md5
       md5: 9f8c8b88ff8a1f9c6b20ba0878aef765
@@ -567,6 +600,11 @@ stages:
       hash: md5
       md5: 96e26ba82d8ea2b9352bef963689fd36
       size: 23596
+    - path: data/08_reporting/train/gru/errors
+      hash: md5
+      md5: 862b3da0520f39a9a5730a546861543c.dir
+      size: 34670260
+      nfiles: 258
     - path: data/08_reporting/train/gru/metrics.json
       hash: md5
       md5: 55d656d8d9dae42e058d88b34a06d279
@@ -575,6 +613,10 @@ stages:
       hash: md5
       md5: 35aff66f2790c43718ac7d31edcc5595
       size: 19662
+    - path: data/08_reporting/train/gru/predictions.json
+      hash: md5
+      md5: 4a12a473bdf56111466e36e0a23422b0
+      size: 482854
     - path: data/08_reporting/train/gru/roc_curve.png
       hash: md5
       md5: a7e34004a4c15332e1c0592b8bb4a3d0
@@ -583,7 +625,7 @@ stages:
     cmd: uv run python scripts/evaluate.py --arch gru --data-dir 
       data/05_model_input/val --checkpoint data/06_models/gru/best_checkpoint.pt
       --output-dir data/08_reporting/val/gru --params-path params.yaml 
-      --params-key train_gru
+      --params-key train_gru --render-tubes-dir data/08_reporting/tubes/val
     deps:
     - path: data/05_model_input/val
       hash: md5
@@ -594,10 +636,15 @@ stages:
       hash: md5
       md5: 18ff2f455874ee70436fcabd4c86fc52
       size: 47961233
+    - path: data/08_reporting/tubes/val
+      hash: md5
+      md5: 37516349f11a4598ec8e6ead7bcb4896.dir
+      size: 42457438
+      nfiles: 284
     - path: scripts/evaluate.py
       hash: md5
-      md5: 796846477824274af25b0629f2c8b3dd
-      size: 6438
+      md5: 4172cdb32d15ab90041a2f9b6fd9a29e
+      size: 8483
     - path: src/smokeynet_adapted/dataset.py
       hash: md5
       md5: 9f8c8b88ff8a1f9c6b20ba0878aef765
@@ -635,6 +682,11 @@ stages:
       hash: md5
       md5: ace5aa09d4a096bc550d8f6fc696e3a7
       size: 23519
+    - path: data/08_reporting/val/gru/errors
+      hash: md5
+      md5: 1827bd27794ec33872b03a68311ce6fe.dir
+      size: 2037855
+      nfiles: 18
     - path: data/08_reporting/val/gru/metrics.json
       hash: md5
       md5: 108fec0926ae6024b989942b96715117
@@ -643,6 +695,10 @@ stages:
       hash: md5
       md5: ec4c47d42bfd61eb3245f4b8b777eb3c
       size: 17984
+    - path: data/08_reporting/val/gru/predictions.json
+      hash: md5
+      md5: ff4d736df27a2d6ad834befb8c110307
+      size: 48369
     - path: data/08_reporting/val/gru/roc_curve.png
       hash: md5
       md5: 3adf32d13b73b0ee6e8735360ee2f94d

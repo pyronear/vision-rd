@@ -142,6 +142,7 @@ stages:
         --output-dir data/08_reporting/${item}/mean_pool
         --params-path params.yaml
         --params-key train_mean_pool
+        --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
         - src/smokeynet_adapted/temporal_classifier.py
@@ -149,8 +150,13 @@ stages:
         - src/smokeynet_adapted/dataset.py
         - data/06_models/mean_pool/best_checkpoint.pt
         - data/05_model_input/${item}
+        - data/08_reporting/tubes/${item}
       params:
         - train_mean_pool
+      outs:
+        - data/08_reporting/${item}/mean_pool/errors
+        - data/08_reporting/${item}/mean_pool/predictions.json:
+            cache: false
       metrics:
         - data/08_reporting/${item}/mean_pool/metrics.json:
             cache: false
@@ -173,6 +179,7 @@ stages:
         --output-dir data/08_reporting/${item}/gru
         --params-path params.yaml
         --params-key train_gru
+        --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
         - src/smokeynet_adapted/temporal_classifier.py
@@ -180,8 +187,13 @@ stages:
         - src/smokeynet_adapted/dataset.py
         - data/06_models/gru/best_checkpoint.pt
         - data/05_model_input/${item}
+        - data/08_reporting/tubes/${item}
       params:
         - train_gru
+      outs:
+        - data/08_reporting/${item}/gru/errors
+        - data/08_reporting/${item}/gru/predictions.json:
+            cache: false
       metrics:
         - data/08_reporting/${item}/gru/metrics.json:
             cache: false

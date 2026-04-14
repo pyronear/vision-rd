@@ -7,6 +7,7 @@ classification metrics + PR/ROC curves, and writes them under
 
 import argparse
 import json
+import shutil
 from pathlib import Path
 
 import lightning as L
@@ -64,6 +65,7 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--params-path", type=Path, required=True)
     parser.add_argument("--params-key", required=True)
+    parser.add_argument("--render-tubes-dir", type=Path, required=True)
     args = parser.parse_args()
 
     cfg = yaml.safe_load(args.params_path.read_text())[args.params_key]
@@ -97,6 +99,7 @@ def main() -> None:
 
     all_probs: list[float] = []
     all_labels: list[float] = []
+    all_sequence_ids: list[str] = []
     with torch.no_grad():
         for batch in loader:
             patches = batch["patches"].to(device)
@@ -105,6 +108,7 @@ def main() -> None:
             probs = torch.sigmoid(logits).cpu().tolist()
             all_probs.extend(probs)
             all_labels.extend(batch["label"].tolist())
+            all_sequence_ids.extend(batch["sequence_id"])
 
     probs = np.asarray(all_probs)
     labels = np.asarray(all_labels)
@@ -187,6 +191,64 @@ def main() -> None:
     plt.close(fig)
 
     print(json.dumps(metrics, indent=2))
+
+    arch_name = args.output_dir.name
+    split = args.output_dir.parent.name
+
+    predictions = [
+        {
+            "sequence_id": seq_id,
+            "truth": int(truth),
+            "prob": float(prob),
+            "predicted": int(pred),
+            "correct": bool(int(truth) == int(pred)),
+        }
+        for seq_id, truth, prob, pred in zip(
+            all_sequence_ids, labels, probs, preds, strict=True
+        )
+    ]
+    predictions.sort(key=lambda r: r["prob"], reverse=True)
+    (args.output_dir / "predictions.json").write_text(json.dumps(predictions, indent=2))
+
+    errors_dir = args.output_dir / "errors"
+    shutil.rmtree(errors_dir, ignore_errors=True)
+    (errors_dir / "fp").mkdir(parents=True, exist_ok=True)
+    (errors_dir / "fn").mkdir(parents=True, exist_ok=True)
+
+    label_name = {0: "fp", 1: "smoke"}
+    n_fp_copied = 0
+    n_fn_copied = 0
+    n_missing = 0
+    for entry in predictions:
+        if entry["correct"]:
+            continue
+        truth = entry["truth"]
+        predicted = entry["predicted"]
+        seq_id = entry["sequence_id"]
+        prob = entry["prob"]
+        truth_label = label_name[truth]
+        src = args.render_tubes_dir / truth_label / f"{seq_id}.png"
+        if truth == 0 and predicted == 1:
+            bucket = "fp"
+        elif truth == 1 and predicted == 0:
+            bucket = "fn"
+        else:
+            continue
+        dst = errors_dir / bucket / f"prob={prob:.3f}_{seq_id}.png"
+        if not src.exists():
+            print(f"WARNING: missing render {src}")
+            n_missing += 1
+            continue
+        shutil.copy2(src, dst)
+        if bucket == "fp":
+            n_fp_copied += 1
+        else:
+            n_fn_copied += 1
+
+    print(
+        f"[{arch_name}/{split}] {n_fp_copied} FPs copied, "
+        f"{n_fn_copied} FNs copied, {n_missing} renders missing"
+    )
 
 
 if __name__ == "__main__":
