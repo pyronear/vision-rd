@@ -318,6 +318,27 @@ stages:
     plots:
       - data/06_models/gru_convnext_finetune/csv_logs/
 
+  plot_training:
+    foreach:
+      - gru
+      - gru_seed43
+      - gru_seed44
+      - gru_convnext
+      - gru_finetune
+      - gru_convnext_finetune
+    do:
+      cmd: >-
+        uv run python scripts/plot_training.py
+        --csv-log-dir data/06_models/${item}/csv_logs
+        --output-path data/08_reporting/training/${item}/training_curves.png
+        --title ${item}
+      deps:
+        - scripts/plot_training.py
+        - src/smokeynet_adapted/training_plots.py
+        - data/06_models/${item}/csv_logs
+      plots:
+        - data/08_reporting/training/${item}/training_curves.png
+
   evaluate_gru_seed43:
     foreach:
       - train
