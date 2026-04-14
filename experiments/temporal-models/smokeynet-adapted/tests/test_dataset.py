@@ -101,3 +101,39 @@ def test_dataset_returns_sequence_id(tmp_path):
     ds = TubePatchDataset(split, max_frames=20)
     sample = ds[0]
     assert sample["sequence_id"] == "seq42"
+
+
+def test_dataset_transform_none_preserves_legacy_normalization(tmp_path):
+    """transform=None must keep the existing ImageNet-normalize behavior."""
+    split = _make_split(tmp_path, [("a", 1, 1)])
+    ds = TubePatchDataset(split, max_frames=20, transform=None)
+    sample = ds[0]
+    raw = 50.0 / 255.0
+    assert not torch.allclose(sample["patches"][0], torch.full((3, 224, 224), raw))
+
+
+def test_dataset_transform_applied_when_provided(tmp_path):
+    """When a transform is provided, dataset returns un-normalized [0,1] patches
+    into the transform; the transform's output is what the caller sees."""
+    split = _make_split(tmp_path, [("a", 1, 3)])
+
+    captured: dict = {}
+
+    def capture(item):
+        captured["patches_dtype"] = item["patches"].dtype
+        captured["patches_max"] = float(item["patches"].max())
+        captured["patches_min"] = float(item["patches"].min())
+        captured["mask_sum"] = int(item["mask"].sum())
+        item["patches"] = item["patches"] + 1.0  # mutate to prove it flows through
+        return item
+
+    ds = TubePatchDataset(split, max_frames=20, transform=capture)
+    sample = ds[0]
+
+    # The transform saw un-normalized [0,1] tensors
+    assert captured["patches_dtype"] == torch.float32
+    assert captured["patches_min"] >= 0.0
+    assert captured["patches_max"] <= 1.0
+    assert captured["mask_sum"] == 3
+    # And its mutation flowed through to the caller
+    assert float(sample["patches"].max()) > 1.0

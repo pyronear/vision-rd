@@ -4,7 +4,10 @@ Reads cropped PNG patches produced by ``scripts/build_model_input.py``
 and returns per-tube tensors padded to a fixed length with a mask.
 """
 
+from __future__ import annotations
+
 import json
+from collections.abc import Callable
 from pathlib import Path
 
 import torch
@@ -25,21 +28,33 @@ class TubePatchDataset(Dataset):
     .. code-block:: python
 
         {
-            "patches": Tensor[max_frames, 3, 224, 224],  # float32, ImageNet-normalized
+            "patches": Tensor[max_frames, 3, 224, 224],  # float32
             "mask":    Tensor[max_frames] bool,           # True = real frame
             "label":   Tensor[] float32,                  # 0.0 fp, 1.0 smoke
             "sequence_id": str,
         }
 
+    When ``transform`` is ``None`` (legacy behavior), patches are
+    ImageNet-normalized in place. When a ``transform`` callable is provided,
+    patches flow into it as un-normalized ``[0, 1]`` tensors and the transform
+    is responsible for normalization as its final step.
+
     Args:
         split_dir: Directory containing ``_index.json`` and one
             sub-directory per tube.
         max_frames: Pad/truncate length.
+        transform: Optional callable ``item -> item`` applied after loading.
     """
 
-    def __init__(self, split_dir: Path, max_frames: int) -> None:
+    def __init__(
+        self,
+        split_dir: Path,
+        max_frames: int,
+        transform: Callable[[dict], dict] | None = None,
+    ) -> None:
         self.split_dir = Path(split_dir)
         self.max_frames = max_frames
+        self.transform = transform
         index = json.loads((self.split_dir / "_index.json").read_text())
         self.index: list[dict] = index
 
@@ -60,14 +75,19 @@ class TubePatchDataset(Dataset):
         mask = torch.zeros(self.max_frames, dtype=torch.bool)
         for i in range(n):
             img = Image.open(frame_files[i]).convert("RGB")
-            tensor = to_tensor(img)  # CHW float32 in [0, 1]
-            tensor = (tensor - IMAGENET_MEAN) / IMAGENET_STD
-            patches[i] = tensor
+            patches[i] = to_tensor(img)  # CHW float32 in [0, 1]
             mask[i] = True
 
-        return {
+        item: dict = {
             "patches": patches,
             "mask": mask,
             "label": torch.tensor(float(label_int), dtype=torch.float32),
             "sequence_id": seq_id,
         }
+
+        if self.transform is None:
+            # Legacy path: inline ImageNet normalization (valid frames only).
+            item["patches"][:n] = (item["patches"][:n] - IMAGENET_MEAN) / IMAGENET_STD
+            return item
+
+        return self.transform(item)
