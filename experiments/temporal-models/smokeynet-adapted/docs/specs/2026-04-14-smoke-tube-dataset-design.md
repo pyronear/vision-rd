@@ -183,12 +183,15 @@ Add:
 CLI entrypoint:
 
 ```
-python scripts/build_tubes.py \
+uv run python scripts/build_tubes.py \
   --input-dir  data/01_raw/datasets/<split> \
   --output-dir data/03_primary/tubes/<split> \
   [--iou-threshold 0.2] [--max-misses 2] \
   [--min-tube-length 4] [--min-detected-entries 2]
 ```
+
+All commands are run via `uv run` (matches the existing `make` /
+`dvc.yaml` conventions in this experiment).
 
 Walks `{wildfire,fp}/*/`, runs the pipeline above per sequence, writes
 JSON per surviving sequence plus `_summary.json`.
@@ -268,9 +271,12 @@ No end-to-end script test for v1. The notebook is the smoke test.
 1. `make lint && make test` pass in `smokeynet-adapted/`.
 2. `uv run dvc repro build_tubes@train` and `build_tubes@val` both
    succeed and populate `data/03_primary/tubes/{train,val}/`.
-3. `_summary.json` shows a reasonable dropout rate. If WF dropouts
-   exceed ~10%, loosen `min_tube_length` or `min_detected_entries`
-   before freezing the dataset.
+3. `_summary.json` shows a reasonable dropout rate. Pre-spike
+   measurement on a 200-sequence FP sample with `iou_threshold=0.2`,
+   `max_misses=2`, `min_tube_length=4`: **~94% survival** in both
+   train and val (median longest-tube length 10-11 frames). If WF
+   dropouts exceed ~10%, loosen `min_tube_length` or
+   `min_detected_entries` before freezing the dataset.
 4. `notebooks/02-visualize-built-tubes.ipynb` loads a handful of
    `<sequence_id>.json` files and renders correct tube timelines +
    filmstrips for both smoke and FP sequences.
