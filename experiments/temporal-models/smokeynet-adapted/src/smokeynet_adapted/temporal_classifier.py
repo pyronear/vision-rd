@@ -31,3 +31,22 @@ class FrozenTimmBackbone(nn.Module):
     @torch.no_grad()
     def forward(self, x: Tensor) -> Tensor:
         return self.backbone(x)
+
+
+class MeanPoolHead(nn.Module):
+    """Masked mean over time + 2-layer MLP yielding a single logit."""
+
+    def __init__(self, feat_dim: int, hidden_dim: int) -> None:
+        super().__init__()
+        self.mlp = nn.Sequential(
+            nn.Linear(feat_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, 1),
+        )
+
+    def forward(self, feats: Tensor, mask: Tensor) -> Tensor:
+        m = mask.unsqueeze(-1).to(feats.dtype)
+        summed = (feats * m).sum(dim=1)
+        counts = m.sum(dim=1).clamp(min=1.0)
+        pooled = summed / counts
+        return self.mlp(pooled).squeeze(-1)
