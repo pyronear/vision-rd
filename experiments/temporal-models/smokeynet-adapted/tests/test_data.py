@@ -1,10 +1,11 @@
 """Tests for label-file parsing."""
 
+import json
 from pathlib import Path
 
 import pytest
 
-from smokeynet_adapted.data import load_detections
+from smokeynet_adapted.data import load_detections, load_tube_record
 
 
 def _write_label(tmp_path: Path, frame_id: str, text: str) -> Path:
@@ -42,3 +43,32 @@ def test_load_detections_empty_file_returns_empty_list(tmp_path):
 def test_load_detections_missing_file_returns_empty_list(tmp_path):
     seq = _write_label(tmp_path, "f1", "")
     assert load_detections(seq, "nonexistent") == []
+
+
+# ── load_tube_record ─────────────────────────────────────────────────────
+
+
+def test_load_tube_record_roundtrip(tmp_path):
+    path = tmp_path / "seq.json"
+    record = {
+        "sequence_id": "abc",
+        "split": "val",
+        "label": "smoke",
+        "source": "gt",
+        "num_frames": 3,
+        "tube": {
+            "start_frame": 0,
+            "end_frame": 2,
+            "entries": [
+                {
+                    "frame_idx": 0,
+                    "frame_id": "f0",
+                    "bbox": [0.5, 0.5, 0.1, 0.1],
+                    "is_gap": False,
+                    "confidence": 1.0,
+                }
+            ],
+        },
+    }
+    path.write_text(json.dumps(record))
+    assert load_tube_record(path) == record

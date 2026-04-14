@@ -1,5 +1,6 @@
 """Data I/O utilities for sequence discovery and ground-truth labelling."""
 
+import json
 import re
 from datetime import datetime
 from pathlib import Path
@@ -183,3 +184,19 @@ def load_frame_detections(sequence_dir: Path) -> list[FrameDetections]:
         )
         for idx, fpath in enumerate(frame_paths)
     ]
+
+
+def load_tube_record(path: Path) -> dict:
+    """Read+parse a tube JSON file.
+
+    Trivial wrapper around :func:`json.loads`; exists so callers
+    (scripts, notebooks) have a single named entry point for tube I/O.
+
+    Args:
+        path: Path to a tube ``.json`` file produced by
+            ``scripts/build_tubes.py``.
+
+    Returns:
+        The parsed record as a plain dict.
+    """
+    return json.loads(path.read_text())
