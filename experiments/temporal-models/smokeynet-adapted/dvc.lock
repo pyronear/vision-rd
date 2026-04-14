@@ -394,8 +394,8 @@ stages:
       size: 45588715
     - path: scripts/evaluate.py
       hash: md5
-      md5: e4cbdcbc0cc4571486b8742ebf857fe3
-      size: 4373
+      md5: 796846477824274af25b0629f2c8b3dd
+      size: 6438
     - path: src/smokeynet_adapted/dataset.py
       hash: md5
       md5: 9f8c8b88ff8a1f9c6b20ba0878aef765
@@ -423,10 +423,18 @@ stages:
           early_stop_patience: 5
           seed: 42
     outs:
+    - path: data/08_reporting/train/mean_pool/confusion_matrix.png
+      hash: md5
+      md5: 9b31c6187fc33306a2cc306a532ace1e
+      size: 23249
+    - path: data/08_reporting/train/mean_pool/confusion_matrix_normalized.png
+      hash: md5
+      md5: 80d1a0886c085db0a95605ca6f41ba4e
+      size: 26882
     - path: data/08_reporting/train/mean_pool/metrics.json
       hash: md5
-      md5: 3895dc0fdf84a334c60f386615bee72c
-      size: 329
+      md5: a1a648b69caf7783a806e08edb9198cb
+      size: 526
     - path: data/08_reporting/train/mean_pool/pr_curve.png
       hash: md5
       md5: 44ed9cc29742fc2b6b69264b9edcdd1e
@@ -453,8 +461,8 @@ stages:
       size: 45588715
     - path: scripts/evaluate.py
       hash: md5
-      md5: e4cbdcbc0cc4571486b8742ebf857fe3
-      size: 4373
+      md5: 796846477824274af25b0629f2c8b3dd
+      size: 6438
     - path: src/smokeynet_adapted/dataset.py
       hash: md5
       md5: 9f8c8b88ff8a1f9c6b20ba0878aef765
@@ -482,10 +490,18 @@ stages:
           early_stop_patience: 5
           seed: 42
     outs:
+    - path: data/08_reporting/val/mean_pool/confusion_matrix.png
+      hash: md5
+      md5: f30a71513025b1b8a14a887bf6ab2eec
+      size: 21617
+    - path: data/08_reporting/val/mean_pool/confusion_matrix_normalized.png
+      hash: md5
+      md5: 98da68d62a81163ea9f9297e90f8ecc3
+      size: 27712
     - path: data/08_reporting/val/mean_pool/metrics.json
       hash: md5
-      md5: 646bde63da1f06f3db98449e9d4e280c
-      size: 322
+      md5: 20d4ad929ee9dc8fb9ffc3b528b9592a
+      size: 518
     - path: data/08_reporting/val/mean_pool/pr_curve.png
       hash: md5
       md5: 8c9099cc8f33be0d8372d8345c5352f9
@@ -512,8 +528,8 @@ stages:
       size: 47961233
     - path: scripts/evaluate.py
       hash: md5
-      md5: e4cbdcbc0cc4571486b8742ebf857fe3
-      size: 4373
+      md5: 796846477824274af25b0629f2c8b3dd
+      size: 6438
     - path: src/smokeynet_adapted/dataset.py
       hash: md5
       md5: 9f8c8b88ff8a1f9c6b20ba0878aef765
@@ -543,10 +559,18 @@ stages:
           early_stop_patience: 5
           seed: 42
     outs:
+    - path: data/08_reporting/train/gru/confusion_matrix.png
+      hash: md5
+      md5: 8e727977a71ff7e228a39fa1cbf694ba
+      size: 23100
+    - path: data/08_reporting/train/gru/confusion_matrix_normalized.png
+      hash: md5
+      md5: 96e26ba82d8ea2b9352bef963689fd36
+      size: 23596
     - path: data/08_reporting/train/gru/metrics.json
       hash: md5
-      md5: 45ddc6bf1d370ce923a3f601d60fd0c6
-      size: 326
+      md5: 55d656d8d9dae42e058d88b34a06d279
+      size: 522
     - path: data/08_reporting/train/gru/pr_curve.png
       hash: md5
       md5: 35aff66f2790c43718ac7d31edcc5595
@@ -572,8 +596,8 @@ stages:
       size: 47961233
     - path: scripts/evaluate.py
       hash: md5
-      md5: e4cbdcbc0cc4571486b8742ebf857fe3
-      size: 4373
+      md5: 796846477824274af25b0629f2c8b3dd
+      size: 6438
     - path: src/smokeynet_adapted/dataset.py
       hash: md5
       md5: 9f8c8b88ff8a1f9c6b20ba0878aef765
@@ -603,10 +627,18 @@ stages:
           early_stop_patience: 5
           seed: 42
     outs:
+    - path: data/08_reporting/val/gru/confusion_matrix.png
+      hash: md5
+      md5: 44c297c90bf4fed739b95fdde567b2ec
+      size: 19692
+    - path: data/08_reporting/val/gru/confusion_matrix_normalized.png
+      hash: md5
+      md5: ace5aa09d4a096bc550d8f6fc696e3a7
+      size: 23519
     - path: data/08_reporting/val/gru/metrics.json
       hash: md5
-      md5: dfe72c6c7ec06c8a9ec047ae5f7d122c
-      size: 322
+      md5: 108fec0926ae6024b989942b96715117
+      size: 520
     - path: data/08_reporting/val/gru/pr_curve.png
       hash: md5
       md5: ec4c47d42bfd61eb3245f4b8b777eb3c

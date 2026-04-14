@@ -157,6 +157,8 @@ stages:
       plots:
         - data/08_reporting/${item}/mean_pool/pr_curve.png
         - data/08_reporting/${item}/mean_pool/roc_curve.png
+        - data/08_reporting/${item}/mean_pool/confusion_matrix.png
+        - data/08_reporting/${item}/mean_pool/confusion_matrix_normalized.png
 
   evaluate_gru:
     foreach:
@@ -186,6 +188,8 @@ stages:
       plots:
         - data/08_reporting/${item}/gru/pr_curve.png
         - data/08_reporting/${item}/gru/roc_curve.png
+        - data/08_reporting/${item}/gru/confusion_matrix.png
+        - data/08_reporting/${item}/gru/confusion_matrix_normalized.png
 
 #   prepare:
 #     cmd: >-

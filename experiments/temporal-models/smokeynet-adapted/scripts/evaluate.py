@@ -27,6 +27,35 @@ from smokeynet_adapted.dataset import TubePatchDataset
 from smokeynet_adapted.lit_temporal import LitTemporalClassifier
 
 
+def plot_confusion_matrix(
+    matrix: np.ndarray,
+    output_path: Path,
+    title: str,
+    normalized: bool,
+) -> None:
+    labels = ["fp", "smoke"]
+    fig, ax = plt.subplots(figsize=(4, 4))
+    im = ax.imshow(matrix, cmap="Blues")
+    fig.colorbar(im, ax=ax)
+    ax.set_xticks(range(len(labels)))
+    ax.set_yticks(range(len(labels)))
+    ax.set_xticklabels(labels)
+    ax.set_yticklabels(labels)
+    ax.set_xlabel("predicted")
+    ax.set_ylabel("actual")
+    ax.set_title(title)
+    vmax = float(matrix.max()) if matrix.size else 0.0
+    threshold = vmax * 0.5
+    for i in range(matrix.shape[0]):
+        for j in range(matrix.shape[1]):
+            value = matrix[i, j]
+            text = f"{value * 100:.1f}%" if normalized else f"{int(value)}"
+            color = "white" if value > threshold else "black"
+            ax.text(j, i, text, ha="center", va="center", color=color, fontsize=11)
+    fig.savefig(output_path, dpi=120, bbox_inches="tight")
+    plt.close(fig)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arch", choices=["mean_pool", "gru"], required=True)
@@ -92,6 +121,13 @@ def main() -> None:
         float(roc_auc_score(labels, probs)) if 0 < labels.sum() < len(labels) else 0.0
     )
 
+    neg_total = tn + fp
+    pos_total = tp + fn
+    fp_as_fp = tn / neg_total if neg_total > 0 else 0.0
+    fp_as_smoke = fp / neg_total if neg_total > 0 else 0.0
+    smoke_as_fp = fn / pos_total if pos_total > 0 else 0.0
+    smoke_as_smoke = tp / pos_total if pos_total > 0 else 0.0
+
     metrics = {
         "accuracy": accuracy,
         "precision": precision,
@@ -100,10 +136,34 @@ def main() -> None:
         "pr_auc": pr_auc,
         "roc_auc": roc_auc,
         "confusion_matrix": {"tn": tn, "fp": fp, "fn": fn, "tp": tp},
+        "confusion_matrix_normalized": {
+            "fp_as_fp": fp_as_fp,
+            "fp_as_smoke": fp_as_smoke,
+            "smoke_as_fp": smoke_as_fp,
+            "smoke_as_smoke": smoke_as_smoke,
+        },
         "n_samples": int(len(labels)),
         "n_positive": int(labels.sum()),
     }
     (args.output_dir / "metrics.json").write_text(json.dumps(metrics, indent=2))
+
+    split_name = args.output_dir.parent.name
+    cm_abs = np.array([[tn, fp], [fn, tp]], dtype=float)
+    cm_norm = np.array(
+        [[fp_as_fp, fp_as_smoke], [smoke_as_fp, smoke_as_smoke]], dtype=float
+    )
+    plot_confusion_matrix(
+        cm_abs,
+        args.output_dir / "confusion_matrix.png",
+        title=f"{args.arch} / {split_name} (counts)",
+        normalized=False,
+    )
+    plot_confusion_matrix(
+        cm_norm,
+        args.output_dir / "confusion_matrix_normalized.png",
+        title=f"{args.arch} / {split_name} (row-normalized)",
+        normalized=True,
+    )
 
     p, r, _ = precision_recall_curve(labels, probs)
     fig, ax = plt.subplots(figsize=(5, 5))
