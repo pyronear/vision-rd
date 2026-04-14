@@ -4,7 +4,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-from .types import Detection
+from .types import Detection, FrameDetections
 
 _TIMESTAMP_RE = re.compile(r"(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2})")
 
@@ -158,3 +158,28 @@ def load_detections(sequence_dir: Path, frame_id: str) -> list[Detection]:
             )
         )
     return dets
+
+
+def load_frame_detections(sequence_dir: Path) -> list[FrameDetections]:
+    """Load all per-frame detections for a sequence in temporal order.
+
+    Iterates frames returned by :func:`get_sorted_frames` and reads the
+    corresponding label file via :func:`load_detections`.
+
+    Args:
+        sequence_dir: Path to the sequence directory.
+
+    Returns:
+        Ordered list of :class:`FrameDetections`, one per image. Frames
+        with no labels yield an entry with an empty ``detections`` list.
+    """
+    frame_paths = get_sorted_frames(sequence_dir)
+    return [
+        FrameDetections(
+            frame_idx=idx,
+            frame_id=fpath.stem,
+            timestamp=parse_timestamp(fpath.stem),
+            detections=load_detections(sequence_dir, fpath.stem),
+        )
+        for idx, fpath in enumerate(frame_paths)
+    ]
