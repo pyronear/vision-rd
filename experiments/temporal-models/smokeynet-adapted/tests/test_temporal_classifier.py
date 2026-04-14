@@ -206,3 +206,18 @@ def test_timm_backbone_finetune_convnext_tiny_unfreezes_only_last_stage():
     assert trainable_names
     # timm's convnext wraps blocks under `stages.<i>.*`; last stage is index 3
     assert all(".stages.3." in n for n in trainable_names), trainable_names
+
+
+def test_timm_backbone_finetune_unsupported_family_raises():
+    with pytest.raises(NotImplementedError) as exc:
+        TimmBackbone(
+            name="vit_small_patch16_224",
+            pretrained=False,
+            finetune=True,
+            finetune_last_n_blocks=1,
+        )
+    msg = str(exc.value)
+    assert "vit_small_patch16_224" in msg
+    # Error message should mention the backbone's top-level children so the
+    # operator knows which stage names are available.
+    assert "children" in msg.lower()
