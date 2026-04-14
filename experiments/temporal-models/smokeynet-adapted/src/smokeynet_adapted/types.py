@@ -34,13 +34,15 @@ class FrameDetections:
 class TubeEntry:
     """A single entry in a smoke tube.
 
-    When ``detection`` is ``None``, this entry represents a gap frame where
-    YOLO did not detect the tracked region.  Gap features are filled via
-    linear interpolation at the feature level.
+    ``is_gap`` flags entries whose ``detection`` was not observed by the
+    detector and was instead filled in by gap interpolation. After
+    interpolation, gap entries always have a ``Detection`` (lerped bbox,
+    confidence=0.0); pre-interpolation gaps have ``detection=None``.
     """
 
     frame_idx: int
     detection: Detection | None = None
+    is_gap: bool = False
 
 
 @dataclass
