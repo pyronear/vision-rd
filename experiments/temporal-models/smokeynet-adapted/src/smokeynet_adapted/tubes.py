@@ -910,3 +910,28 @@ def plot_tube_summary(
         fig.suptitle(title, fontsize=10, y=1.01)
 
     return fig
+
+
+def select_longest_tube(tubes: list[Tube]) -> Tube | None:
+    """Pick the single longest tube from a list.
+
+    Length is measured as ``end_frame - start_frame + 1`` (so gaps count
+    toward length). Ties are broken by the number of non-gap entries --
+    the tube with more real observations wins. If still tied, the first
+    in the input order wins.
+
+    Args:
+        tubes: Candidate tubes.
+
+    Returns:
+        The selected tube, or ``None`` if ``tubes`` is empty.
+    """
+    if not tubes:
+        return None
+
+    def _key(tube: Tube) -> tuple[int, int]:
+        length = tube.end_frame - tube.start_frame + 1
+        n_observed = sum(1 for e in tube.entries if e.detection is not None)
+        return (length, n_observed)
+
+    return max(tubes, key=_key)

@@ -5,8 +5,9 @@ from smokeynet_adapted.tubes import (
     compute_containment,
     compute_iou,
     match_detections,
+    select_longest_tube,
 )
-from smokeynet_adapted.types import Detection, FrameDetections
+from smokeynet_adapted.types import Detection, FrameDetections, Tube, TubeEntry
 
 
 def _det(cx: float, cy: float, w: float = 0.1, h: float = 0.1, conf: float = 0.8):
@@ -238,3 +239,45 @@ class TestBuildTubes:
         assert len(tubes) == 1
         assert tubes[0].start_frame == 3
         assert tubes[0].end_frame == 4
+
+
+# ── select_longest_tube ──────────────────────────────────────────────────
+
+
+def _make_tube(tube_id: int, length: int, n_gap: int = 0) -> Tube:
+    """Build a tube with `length` total entries; last `n_gap` are gaps."""
+    n_det = length - n_gap
+    entries: list[TubeEntry] = []
+    for i in range(n_det):
+        entries.append(TubeEntry(frame_idx=i, detection=_det(0.5, 0.5)))
+    for i in range(n_gap):
+        entries.append(
+            TubeEntry(frame_idx=n_det + i, detection=None, is_gap=True)
+        )
+    return Tube(
+        tube_id=tube_id,
+        entries=entries,
+        start_frame=0,
+        end_frame=length - 1,
+    )
+
+
+class TestSelectLongestTube:
+    def test_empty_returns_none(self):
+        assert select_longest_tube([]) is None
+
+    def test_picks_longest(self):
+        a = _make_tube(0, length=3)
+        b = _make_tube(1, length=7)
+        c = _make_tube(2, length=5)
+        result = select_longest_tube([a, b, c])
+        assert result is not None
+        assert result.tube_id == 1
+
+    def test_tie_break_by_non_gap_count(self):
+        # Both span 5 frames; a has 5 dets, b has only 3 (2 gaps).
+        a = _make_tube(0, length=5, n_gap=0)
+        b = _make_tube(1, length=5, n_gap=2)
+        result = select_longest_tube([a, b])
+        assert result is not None
+        assert result.tube_id == 0
