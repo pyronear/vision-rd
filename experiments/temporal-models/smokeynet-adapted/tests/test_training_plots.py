@@ -1,8 +1,11 @@
+import csv
+
 import pandas as pd
 
 from smokeynet_adapted.training_plots import (
     aggregate_train_loss_per_epoch,
     extract_val_metrics_per_epoch,
+    plot_training_curves,
 )
 
 
@@ -98,3 +101,33 @@ def test_extract_val_metrics_per_epoch_skips_rows_missing_f1():
     result = extract_val_metrics_per_epoch(df)
 
     assert list(result["epoch"]) == [1]
+
+
+def _write_fixture_csv(path):
+    rows = [
+        ["epoch", "step", "train/loss", "val/accuracy", "val/f1", "val/loss",
+         "val/precision", "val/recall"],
+        [0, 0, 0.9, None, None, None, None, None],
+        [0, 1, 0.8, None, None, None, None, None],
+        [0, 2, None, 0.7, 0.65, 0.5, 0.6, 0.7],
+        [1, 3, 0.6, None, None, None, None, None],
+        [1, 4, 0.5, None, None, None, None, None],
+        [1, 5, None, 0.85, 0.82, 0.3, 0.8, 0.85],
+        [2, 6, 0.4, None, None, None, None, None],
+        [2, 7, None, 0.9, 0.88, 0.25, 0.85, 0.9],
+    ]
+    with open(path, "w", newline="") as f:
+        writer = csv.writer(f)
+        for row in rows:
+            writer.writerow(["" if v is None else v for v in row])
+
+
+def test_plot_training_curves_writes_png(tmp_path):
+    csv_path = tmp_path / "metrics.csv"
+    _write_fixture_csv(csv_path)
+    out_path = tmp_path / "out" / "training_curves.png"
+
+    plot_training_curves(csv_path, out_path, title="test_variant")
+
+    assert out_path.exists()
+    assert out_path.stat().st_size > 0
