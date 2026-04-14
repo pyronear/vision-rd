@@ -101,3 +101,75 @@ class PhotometricTubeTransform:
         # below 0 / above 1 and the downstream ImageNet normalize expects [0, 1].
         item["patches"] = patches.clamp_(0.0, 1.0)
         return item
+
+
+class TemporalTubeTransform:
+    """Sub-sequence sampling + random stride + per-frame drop with re-compaction.
+
+    Operates on ``(patches: [T, 3, H, W], mask: [T])``. Output valid frames
+    always occupy positions ``[0..k-1]`` so ``pack_padded_sequence`` (used by
+    the GRU head) sees a contiguous valid prefix.
+    """
+
+    def __init__(
+        self,
+        subseq_prob: float,
+        subseq_min_len: int,
+        stride_prob: float,
+        frame_drop_prob: float,
+        min_valid_after_drop: int,
+    ) -> None:
+        self.subseq_prob = subseq_prob
+        self.subseq_min_len = subseq_min_len
+        self.stride_prob = stride_prob
+        self.frame_drop_prob = frame_drop_prob
+        self.min_valid_after_drop = min_valid_after_drop
+
+    def __call__(self, item: dict) -> dict:
+        patches: Tensor = item["patches"]  # [T, 3, H, W]
+        mask: Tensor = item["mask"]  # [T] bool
+
+        valid_idx = torch.nonzero(mask, as_tuple=False).flatten().tolist()
+        n = len(valid_idx)
+        if n == 0:
+            return item
+
+        # 1. Sub-sequence sampling
+        if torch.rand(()).item() < self.subseq_prob and n > self.subseq_min_len:
+            k = int(
+                torch.randint(self.subseq_min_len, n + 1, (1,)).item()
+            )
+            start = int(torch.randint(0, n - k + 1, (1,)).item())
+            valid_idx = valid_idx[start : start + k]
+
+        # 2. Random stride
+        if torch.rand(()).item() < self.stride_prob and len(valid_idx) > 2:
+            valid_idx = valid_idx[::2]
+
+        # 3. Per-frame drop, clamped to a floor
+        if self.frame_drop_prob > 0.0 and len(valid_idx) > self.min_valid_after_drop:
+            keeps = torch.rand(len(valid_idx)) >= self.frame_drop_prob
+            # Enforce floor: if we dropped too many, randomly restore indices.
+            n_kept = int(keeps.sum())
+            if n_kept < self.min_valid_after_drop:
+                dropped_positions = torch.nonzero(~keeps, as_tuple=False).flatten()
+                n_to_restore = self.min_valid_after_drop - n_kept
+                perm = torch.randperm(len(dropped_positions))[:n_to_restore]
+                for pos in dropped_positions[perm].tolist():
+                    keeps[pos] = True
+            valid_idx = [
+                idx
+                for idx, keep in zip(valid_idx, keeps.tolist(), strict=False)
+                if keep
+            ]
+
+        # Re-compact to a fresh padded tensor.
+        out_patches = torch.zeros_like(patches)
+        out_mask = torch.zeros_like(mask)
+        for new_pos, src_pos in enumerate(valid_idx):
+            out_patches[new_pos] = patches[src_pos]
+            out_mask[new_pos] = True
+
+        item["patches"] = out_patches
+        item["mask"] = out_mask
+        return item

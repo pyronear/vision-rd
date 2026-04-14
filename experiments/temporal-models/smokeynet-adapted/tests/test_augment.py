@@ -2,7 +2,11 @@
 
 import torch
 
-from smokeynet_adapted.augment import PhotometricTubeTransform, SpatialTubeTransform
+from smokeynet_adapted.augment import (
+    PhotometricTubeTransform,
+    SpatialTubeTransform,
+    TemporalTubeTransform,
+)
 
 
 def _make_item(t: int = 5, n_valid: int | None = None) -> dict:
@@ -149,3 +153,136 @@ def test_photometric_same_factor_across_frames():
         assert torch.allclose(
             ratios_12, ratios_12[0].expand_as(ratios_12), atol=1e-4
         )
+
+
+def _make_padded_item(t: int, n_valid: int) -> dict:
+    """Tube with `n_valid` valid frames tagged by scalar value and rest padded."""
+    patches = torch.zeros(t, 3, 224, 224, dtype=torch.float32)
+    for i in range(n_valid):
+        patches[i] = float(i + 1) / 100.0  # distinguishable per frame
+    mask = torch.zeros(t, dtype=torch.bool)
+    mask[:n_valid] = True
+    return {"patches": patches, "mask": mask}
+
+
+def test_temporal_identity_returns_input_unchanged():
+    torch.manual_seed(0)
+    item = _make_padded_item(t=20, n_valid=10)
+    before_patches = item["patches"].clone()
+    before_mask = item["mask"].clone()
+    t = TemporalTubeTransform(
+        subseq_prob=0.0,
+        subseq_min_len=4,
+        stride_prob=0.0,
+        frame_drop_prob=0.0,
+        min_valid_after_drop=4,
+    )
+    out = t(item)
+    assert torch.equal(out["patches"], before_patches)
+    assert torch.equal(out["mask"], before_mask)
+
+
+def test_temporal_mask_prefix_invariant_always_holds():
+    """After any temporal transform the valid frames must occupy [0..k-1]."""
+    for seed in range(30):
+        torch.manual_seed(seed)
+        item = _make_padded_item(t=20, n_valid=12)
+        t = TemporalTubeTransform(
+            subseq_prob=0.5,
+            subseq_min_len=4,
+            stride_prob=0.25,
+            frame_drop_prob=0.15,
+            min_valid_after_drop=4,
+        )
+        out = t(item)
+        k = int(out["mask"].sum())
+        assert out["mask"][:k].all(), f"seed={seed}: non-contiguous True prefix"
+        assert not out["mask"][k:].any(), f"seed={seed}: stray True after prefix"
+        # Padded positions are zeros
+        if k < 20:
+            assert out["patches"][k:].abs().sum() == 0.0
+
+
+def test_temporal_subsequence_contiguous_slice():
+    """With subseq_prob=1, the valid frames of the output are a contiguous
+    slice of the valid frames of the input."""
+    torch.manual_seed(42)
+    item = _make_padded_item(t=20, n_valid=10)
+    # Original per-frame tags: 0.01, 0.02, ..., 0.10 (on first pixel)
+    original_tags = [
+        float(item["patches"][i, 0, 0, 0].item()) for i in range(10)
+    ]
+    t = TemporalTubeTransform(
+        subseq_prob=1.0,
+        subseq_min_len=4,
+        stride_prob=0.0,
+        frame_drop_prob=0.0,
+        min_valid_after_drop=4,
+    )
+    out = t(item)
+    k = int(out["mask"].sum())
+    out_tags = [float(out["patches"][i, 0, 0, 0].item()) for i in range(k)]
+    # Find out_tags as a contiguous slice of original_tags
+    assert k >= 4
+    for start in range(10 - k + 1):
+        if original_tags[start : start + k] == out_tags:
+            break
+    else:
+        raise AssertionError(
+            f"out_tags {out_tags} is not a contiguous slice of {original_tags}"
+        )
+
+
+def test_temporal_stride_halves_length():
+    """stride_prob=1 means every second frame kept: length ~= ceil(n/2)."""
+    torch.manual_seed(0)
+    item = _make_padded_item(t=20, n_valid=10)
+    t = TemporalTubeTransform(
+        subseq_prob=0.0,
+        subseq_min_len=4,
+        stride_prob=1.0,
+        frame_drop_prob=0.0,
+        min_valid_after_drop=2,
+    )
+    out = t(item)
+    k = int(out["mask"].sum())
+    assert k == 5  # ceil(10/2)
+
+
+def test_temporal_frame_drop_respects_floor():
+    """Very aggressive drop prob still leaves at least min_valid_after_drop."""
+    for seed in range(20):
+        torch.manual_seed(seed)
+        item = _make_padded_item(t=20, n_valid=10)
+        t = TemporalTubeTransform(
+            subseq_prob=0.0,
+            subseq_min_len=4,
+            stride_prob=0.0,
+            frame_drop_prob=0.99,
+            min_valid_after_drop=4,
+        )
+        out = t(item)
+        k = int(out["mask"].sum())
+        assert k >= 4, f"seed={seed}: dropped below floor ({k})"
+
+
+def test_temporal_compacts_dropped_frames_to_zero_prefix():
+    """After drop, remaining valid patches are at positions [0..k-1], not
+    scattered with zeros in between."""
+    torch.manual_seed(0)
+    item = _make_padded_item(t=20, n_valid=6)
+    # Tag each valid frame uniquely in its top-left pixel
+    for i in range(6):
+        item["patches"][i, 0, 0, 0] = float(i + 1)
+    t = TemporalTubeTransform(
+        subseq_prob=0.0,
+        subseq_min_len=4,
+        stride_prob=0.0,
+        frame_drop_prob=0.5,
+        min_valid_after_drop=3,
+    )
+    out = t(item)
+    k = int(out["mask"].sum())
+    # Every valid output frame must carry a nonzero tag (i.e. not a zero pad).
+    for i in range(k):
+        assert out["patches"][i, 0, 0, 0].item() > 0.5
