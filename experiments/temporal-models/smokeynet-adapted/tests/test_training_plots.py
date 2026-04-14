@@ -1,0 +1,50 @@
+import pandas as pd
+
+from smokeynet_adapted.training_plots import aggregate_train_loss_per_epoch
+
+
+def test_aggregate_train_loss_per_epoch_means_per_epoch():
+    df = pd.DataFrame(
+        {
+            "epoch": [0, 0, 0, 1, 1, 2],
+            "step": [0, 1, 2, 3, 4, 5],
+            "train/loss": [1.0, 2.0, 3.0, 4.0, 6.0, 8.0],
+            "val/f1": [None, None, None, None, None, None],
+        }
+    )
+
+    result = aggregate_train_loss_per_epoch(df)
+
+    assert list(result.index) == [0, 1, 2]
+    assert list(result.values) == [2.0, 5.0, 8.0]
+
+
+def test_aggregate_train_loss_per_epoch_ignores_val_only_rows():
+    df = pd.DataFrame(
+        {
+            "epoch": [0, 0, 1],
+            "step": [0, 1, 2],
+            "train/loss": [1.0, None, 3.0],
+            "val/f1": [None, 0.9, None],
+        }
+    )
+
+    result = aggregate_train_loss_per_epoch(df)
+
+    assert list(result.index) == [0, 1]
+    assert list(result.values) == [1.0, 3.0]
+
+
+def test_aggregate_train_loss_per_epoch_returns_empty_when_no_train_rows():
+    df = pd.DataFrame(
+        {
+            "epoch": [0, 1],
+            "step": [0, 1],
+            "train/loss": [None, None],
+            "val/f1": [0.9, 0.95],
+        }
+    )
+
+    result = aggregate_train_loss_per_epoch(df)
+
+    assert len(result) == 0
