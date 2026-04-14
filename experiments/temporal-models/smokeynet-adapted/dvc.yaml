@@ -129,6 +129,64 @@ stages:
     plots:
       - data/06_models/gru/csv_logs/
 
+  evaluate_mean_pool:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/evaluate.py
+        --arch mean_pool
+        --data-dir data/05_model_input/${item}
+        --checkpoint data/06_models/mean_pool/best_checkpoint.pt
+        --output-dir data/08_reporting/${item}/mean_pool
+        --params-path params.yaml
+        --params-key train_mean_pool
+      deps:
+        - scripts/evaluate.py
+        - src/smokeynet_adapted/temporal_classifier.py
+        - src/smokeynet_adapted/lit_temporal.py
+        - src/smokeynet_adapted/dataset.py
+        - data/06_models/mean_pool/best_checkpoint.pt
+        - data/05_model_input/${item}
+      params:
+        - train_mean_pool
+      metrics:
+        - data/08_reporting/${item}/mean_pool/metrics.json:
+            cache: false
+      plots:
+        - data/08_reporting/${item}/mean_pool/pr_curve.png
+        - data/08_reporting/${item}/mean_pool/roc_curve.png
+
+  evaluate_gru:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/evaluate.py
+        --arch gru
+        --data-dir data/05_model_input/${item}
+        --checkpoint data/06_models/gru/best_checkpoint.pt
+        --output-dir data/08_reporting/${item}/gru
+        --params-path params.yaml
+        --params-key train_gru
+      deps:
+        - scripts/evaluate.py
+        - src/smokeynet_adapted/temporal_classifier.py
+        - src/smokeynet_adapted/lit_temporal.py
+        - src/smokeynet_adapted/dataset.py
+        - data/06_models/gru/best_checkpoint.pt
+        - data/05_model_input/${item}
+      params:
+        - train_gru
+      metrics:
+        - data/08_reporting/${item}/gru/metrics.json:
+            cache: false
+      plots:
+        - data/08_reporting/${item}/gru/pr_curve.png
+        - data/08_reporting/${item}/gru/roc_curve.png
+
 #   prepare:
 #     cmd: >-
 #       uv run python scripts/prepare.py

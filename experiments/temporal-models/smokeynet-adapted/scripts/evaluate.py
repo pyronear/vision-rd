@@ -1,153 +1,132 @@
-"""Evaluate SmokeyNetAdapted on a data split.
+"""Evaluate a trained temporal classifier on a split.
 
-Loads a packaged model, runs it on every sequence in the split, and
-writes per-sequence results and aggregated metrics.
-
-Usage:
-    uv run python scripts/evaluate.py \
-        --data-dir data/01_raw/datasets/val \
-        --model-package data/06_models/model.zip \
-        --output-dir data/08_reporting/val
+Loads the best checkpoint, runs inference over the dataset, computes
+classification metrics + PR/ROC curves, and writes them under
+``--output-dir``.
 """
 
 import argparse
 import json
-import logging
-import statistics
 from pathlib import Path
 
-from pyrocore.types import Frame
-from tqdm import tqdm
-
-from smokeynet_adapted.data import (
-    get_sorted_frames,
-    is_wf_sequence,
-    list_sequences,
-    parse_timestamp,
+import lightning as L
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+import yaml
+from sklearn.metrics import (
+    average_precision_score,
+    confusion_matrix,
+    precision_recall_curve,
+    roc_auc_score,
+    roc_curve,
 )
-from smokeynet_adapted.model import SmokeyNetModel
+from torch.utils.data import DataLoader
 
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-logger = logging.getLogger(__name__)
+from smokeynet_adapted.dataset import TubePatchDataset
+from smokeynet_adapted.lit_temporal import LitTemporalClassifier
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Evaluate SmokeyNetAdapted on a data split."
-    )
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--arch", choices=["mean_pool", "gru"], required=True)
     parser.add_argument("--data-dir", type=Path, required=True)
-    parser.add_argument("--model-package", type=Path, required=True)
+    parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--params-path", type=Path, required=True)
+    parser.add_argument("--params-key", required=True)
     args = parser.parse_args()
 
+    cfg = yaml.safe_load(args.params_path.read_text())[args.params_key]
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    plots_dir = args.output_dir / "plots"
-    plots_dir.mkdir(parents=True, exist_ok=True)
 
-    logger.info("Loading model from %s", args.model_package)
-    model = SmokeyNetModel.from_package(args.model_package)
+    L.seed_everything(cfg["seed"], workers=True)
 
-    sequences = list_sequences(args.data_dir)
-    logger.info("Found %d sequences in %s", len(sequences), args.data_dir)
-
-    results = []
-    for seq_dir in tqdm(sequences, desc="Evaluating"):
-        seq_id = seq_dir.name
-        gt = is_wf_sequence(seq_dir)
-
-        frame_paths = get_sorted_frames(seq_dir)
-        if not frame_paths:
-            continue
-
-        frames = [
-            Frame(
-                frame_id=p.stem,
-                image_path=p,
-                timestamp=parse_timestamp(p.stem),
-            )
-            for p in frame_paths
-        ]
-
-        output = model.predict(frames)
-
-        # Compute TTD for true positives
-        ttd_seconds = None
-        if gt and output.is_positive and output.trigger_frame_index is not None:
-            first_ts = frames[0].timestamp
-            trigger_ts = frames[output.trigger_frame_index].timestamp
-            if first_ts is not None and trigger_ts is not None:
-                ttd_seconds = (trigger_ts - first_ts).total_seconds()
-
-        results.append(
-            {
-                "sequence_id": seq_id,
-                "ground_truth": gt,
-                "predicted": output.is_positive,
-                "probability": output.details.get("probability"),
-                "ttd_seconds": ttd_seconds,
-                "num_detections": output.details.get("num_detections_total", 0),
-                "num_tubes": output.details.get("num_tubes", 0),
-            }
-        )
-
-    # Compute metrics
-    tp = sum(1 for r in results if r["ground_truth"] and r["predicted"])
-    fp = sum(1 for r in results if not r["ground_truth"] and r["predicted"])
-    fn = sum(1 for r in results if r["ground_truth"] and not r["predicted"])
-    tn = sum(1 for r in results if not r["ground_truth"] and not r["predicted"])
-
-    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-    recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-    f1 = (
-        2 * precision * recall / (precision + recall)
-        if (precision + recall) > 0
-        else 0.0
+    lit = LitTemporalClassifier.load_from_checkpoint(
+        str(args.checkpoint),
+        backbone=cfg["backbone"],
+        arch=cfg["arch"],
+        hidden_dim=cfg["hidden_dim"],
+        learning_rate=cfg["learning_rate"],
+        weight_decay=cfg["weight_decay"],
+        pretrained=False,
+        num_layers=cfg.get("num_layers", 1),
+        bidirectional=cfg.get("bidirectional", False),
     )
-    fpr = fp / (fp + tn) if (fp + tn) > 0 else 0.0
+    lit.eval()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+    lit.to(device)
 
-    ttd_values = [r["ttd_seconds"] for r in results if r["ttd_seconds"] is not None]
-    mean_ttd = statistics.mean(ttd_values) if ttd_values else None
-    median_ttd = statistics.median(ttd_values) if ttd_values else None
+    ds = TubePatchDataset(args.data_dir, max_frames=cfg["max_frames"])
+    loader = DataLoader(
+        ds,
+        batch_size=cfg["batch_size"],
+        shuffle=False,
+        num_workers=cfg["num_workers"],
+    )
+
+    all_probs: list[float] = []
+    all_labels: list[float] = []
+    with torch.no_grad():
+        for batch in loader:
+            patches = batch["patches"].to(device)
+            mask = batch["mask"].to(device)
+            logits = lit(patches, mask)
+            probs = torch.sigmoid(logits).cpu().tolist()
+            all_probs.extend(probs)
+            all_labels.extend(batch["label"].tolist())
+
+    probs = np.asarray(all_probs)
+    labels = np.asarray(all_labels)
+    preds = (probs > 0.5).astype(int)
+
+    cm = confusion_matrix(labels, preds, labels=[0, 1]).tolist()
+    tn, fp, fn, tp = cm[0][0], cm[0][1], cm[1][0], cm[1][1]
+    accuracy = (tp + tn) / max(tp + tn + fp + fn, 1)
+    precision = tp / max(tp + fp, 1)
+    recall = tp / max(tp + fn, 1)
+    f1 = 2 * precision * recall / max(precision + recall, 1e-8)
+    pr_auc = float(average_precision_score(labels, probs)) if labels.sum() > 0 else 0.0
+    roc_auc = (
+        float(roc_auc_score(labels, probs)) if 0 < labels.sum() < len(labels) else 0.0
+    )
 
     metrics = {
-        "num_sequences": len(results),
-        "tp": tp,
-        "fp": fp,
-        "fn": fn,
-        "tn": tn,
-        "precision": round(precision, 4),
-        "recall": round(recall, 4),
-        "f1": round(f1, 4),
-        "fpr": round(fpr, 4),
-        "mean_ttd_seconds": (round(mean_ttd, 1) if mean_ttd is not None else None),
-        "median_ttd_seconds": (
-            round(median_ttd, 1) if median_ttd is not None else None
-        ),
+        "accuracy": accuracy,
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+        "pr_auc": pr_auc,
+        "roc_auc": roc_auc,
+        "confusion_matrix": {"tn": tn, "fp": fp, "fn": fn, "tp": tp},
+        "n_samples": int(len(labels)),
+        "n_positive": int(labels.sum()),
     }
+    (args.output_dir / "metrics.json").write_text(json.dumps(metrics, indent=2))
 
-    # Save results
-    results_path = args.output_dir / "results.json"
-    results_path.write_text(json.dumps(results, indent=2))
+    p, r, _ = precision_recall_curve(labels, probs)
+    fig, ax = plt.subplots(figsize=(5, 5))
+    ax.plot(r, p)
+    ax.set_xlabel("recall")
+    ax.set_ylabel("precision")
+    ax.set_title(f"PR (AP={pr_auc:.3f})")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    fig.savefig(args.output_dir / "pr_curve.png", dpi=120, bbox_inches="tight")
+    plt.close(fig)
 
-    metrics_path = args.output_dir / "metrics.json"
-    metrics_path.write_text(json.dumps(metrics, indent=2))
+    fpr, tpr, _ = roc_curve(labels, probs)
+    fig, ax = plt.subplots(figsize=(5, 5))
+    ax.plot(fpr, tpr)
+    ax.plot([0, 1], [0, 1], "k--", alpha=0.4)
+    ax.set_xlabel("false positive rate")
+    ax.set_ylabel("true positive rate")
+    ax.set_title(f"ROC (AUC={roc_auc:.3f})")
+    fig.savefig(args.output_dir / "roc_curve.png", dpi=120, bbox_inches="tight")
+    plt.close(fig)
 
-    logger.info("Saved %d results to %s", len(results), results_path)
-    logger.info("Saved metrics to %s", metrics_path)
-    logger.info(
-        "  P=%.4f  R=%.4f  F1=%.4f  FPR=%.4f",
-        metrics["precision"],
-        metrics["recall"],
-        metrics["f1"],
-        metrics["fpr"],
-    )
-    if mean_ttd is not None:
-        logger.info(
-            "  Mean TTD=%.1fs  Median TTD=%.1fs",
-            mean_ttd,
-            median_ttd,
-        )
-    logger.info("  TP=%d FP=%d FN=%d TN=%d", tp, fp, fn, tn)
+    print(json.dumps(metrics, indent=2))
 
 
 if __name__ == "__main__":
