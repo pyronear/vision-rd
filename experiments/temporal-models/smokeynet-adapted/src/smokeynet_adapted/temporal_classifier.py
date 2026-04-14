@@ -9,28 +9,83 @@ from torch.nn.utils.rnn import pack_padded_sequence
 class TimmBackbone(nn.Module):
     """Wraps a pretrained timm model as a per-frame feature extractor.
 
-    Always frozen: parameters have ``requires_grad=False`` and the inner
-    model is forced to ``eval()`` mode regardless of the parent module's
-    training flag (so BatchNorm/Dropout stay deterministic).
+    When ``finetune=False`` (default), all params are frozen and the
+    inner model is forced into ``eval()`` mode regardless of the parent
+    module's training flag; forward is wrapped in ``torch.no_grad()``.
+
+    When ``finetune=True``, the last ``finetune_last_n_blocks`` blocks
+    are unfrozen (family-specific resolution); everything else stays
+    frozen, and ``.train()`` propagates normally so BatchNorm on
+    unfrozen blocks updates.
     """
 
-    def __init__(self, name: str, pretrained: bool = True) -> None:
+    def __init__(
+        self,
+        name: str,
+        pretrained: bool = True,
+        finetune: bool = False,
+        finetune_last_n_blocks: int = 0,
+    ) -> None:
         super().__init__()
         self.backbone = timm.create_model(
             name, pretrained=pretrained, num_classes=0, global_pool="avg"
         )
+        self.feat_dim: int = self.backbone.num_features
+        self.finetune = finetune
+        self.name = name
+
+        if not finetune:
+            for p in self.backbone.parameters():
+                p.requires_grad = False
+            self.backbone.eval()
+            return
+
+        # Finetune path: freeze everything first, then unfreeze last N blocks.
         for p in self.backbone.parameters():
             p.requires_grad = False
-        self.backbone.eval()
-        self.feat_dim: int = self.backbone.num_features
+        self._unfreeze_last_n_blocks(finetune_last_n_blocks)
+
+    def _unfreeze_last_n_blocks(self, n: int) -> None:
+        if n <= 0:
+            return
+        name = self.name
+        if name.startswith("resnet"):
+            stages = [
+                getattr(self.backbone, f"layer{i}") for i in range(1, 5)
+            ]
+        else:
+            stage_names = [
+                n_ for n_, _ in self.backbone.named_children()
+            ]
+            raise NotImplementedError(
+                f"finetune=True is not implemented for backbone family "
+                f"{name!r}. Top-level children: {stage_names}. Add an "
+                f"explicit unfreeze rule in TimmBackbone._unfreeze_last_n_blocks."
+            )
+        for stage in stages[-n:]:
+            for p in stage.parameters():
+                p.requires_grad = True
 
     def train(self, mode: bool = True) -> "TimmBackbone":
         super().train(mode)
-        self.backbone.eval()
+        if not self.finetune:
+            self.backbone.eval()
+        else:
+            # Keep frozen sub-modules in eval mode so their BatchNorm
+            # running stats stay deterministic.
+            for module in self.backbone.modules():
+                if not any(p.requires_grad for p in module.parameters(recurse=False)):
+                    has_trainable_descendant = any(
+                        p.requires_grad for p in module.parameters()
+                    )
+                    if not has_trainable_descendant:
+                        module.eval()
         return self
 
-    @torch.no_grad()
     def forward(self, x: Tensor) -> Tensor:
+        if not self.finetune:
+            with torch.no_grad():
+                return self.backbone(x)
         return self.backbone(x)
 
 

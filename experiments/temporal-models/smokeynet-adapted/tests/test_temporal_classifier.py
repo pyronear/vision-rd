@@ -4,10 +4,10 @@ import pytest
 import torch
 
 from smokeynet_adapted.temporal_classifier import (
-    TimmBackbone,
     GRUHead,
     MeanPoolHead,
     TemporalSmokeClassifier,
+    TimmBackbone,
 )
 
 
@@ -152,3 +152,44 @@ def test_classifier_handles_padded_batches():
     mask[2, :3] = True
     logits = clf(patches, mask)
     assert logits.shape == (3,)
+
+
+def test_timm_backbone_frozen_default_has_no_trainable_params():
+    bb = TimmBackbone(name="resnet18", pretrained=False)
+    assert [p for p in bb.parameters() if p.requires_grad] == []
+
+
+def test_timm_backbone_finetune_resnet18_unfreezes_only_layer4():
+    bb = TimmBackbone(
+        name="resnet18",
+        pretrained=False,
+        finetune=True,
+        finetune_last_n_blocks=1,
+    )
+    trainable_names = [n for n, p in bb.named_parameters() if p.requires_grad]
+    assert trainable_names, "expected some trainable params"
+    assert all(".layer4." in n for n in trainable_names), trainable_names
+
+
+def test_timm_backbone_finetune_resnet18_n2_unfreezes_layer3_and_layer4():
+    bb = TimmBackbone(
+        name="resnet18",
+        pretrained=False,
+        finetune=True,
+        finetune_last_n_blocks=2,
+    )
+    trainable_names = [n for n, p in bb.named_parameters() if p.requires_grad]
+    assert trainable_names
+    assert all((".layer3." in n) or (".layer4." in n) for n in trainable_names)
+
+
+def test_timm_backbone_finetune_train_mode_propagates_resnet18():
+    bb = TimmBackbone(
+        name="resnet18",
+        pretrained=False,
+        finetune=True,
+        finetune_last_n_blocks=1,
+    )
+    bb.train()
+    assert bb.backbone.layer4.training is True
+    assert bb.backbone.layer1.training is False
