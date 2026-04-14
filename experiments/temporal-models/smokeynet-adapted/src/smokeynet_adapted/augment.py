@@ -163,12 +163,14 @@ class TemporalTubeTransform:
                 if keep
             ]
 
-        # Re-compact to a fresh padded tensor.
+        # Re-compact to a fresh padded tensor via one vectorized gather.
         out_patches = torch.zeros_like(patches)
-        out_mask = torch.zeros_like(mask)
-        for new_pos, src_pos in enumerate(valid_idx):
-            out_patches[new_pos] = patches[src_pos]
-            out_mask[new_pos] = True
+        out_mask = torch.zeros(mask.shape, dtype=torch.bool, device=mask.device)
+        k = len(valid_idx)
+        if k > 0:
+            idx = torch.as_tensor(valid_idx, dtype=torch.long, device=patches.device)
+            out_patches[:k] = patches.index_select(0, idx)
+            out_mask[:k] = True
 
         item["patches"] = out_patches
         item["mask"] = out_mask
