@@ -175,3 +175,71 @@ class TemporalTubeTransform:
         item["patches"] = out_patches
         item["mask"] = out_mask
         return item
+
+
+IMAGENET_MEAN = (0.485, 0.456, 0.406)
+IMAGENET_STD = (0.229, 0.224, 0.225)
+
+
+class NormalizeTransform:
+    """ImageNet normalize of the valid frames in a tube (mask-aware)."""
+
+    def __init__(
+        self,
+        mean: tuple[float, float, float] = IMAGENET_MEAN,
+        std: tuple[float, float, float] = IMAGENET_STD,
+    ) -> None:
+        self.mean = torch.tensor(mean).view(3, 1, 1)
+        self.std = torch.tensor(std).view(3, 1, 1)
+
+    def __call__(self, item: dict) -> dict:
+        patches: Tensor = item["patches"]
+        mask: Tensor = item["mask"]
+        n = int(mask.sum())
+        if n > 0:
+            patches[:n] = (patches[:n] - self.mean) / self.std
+        item["patches"] = patches
+        return item
+
+
+class ComposeTransform:
+    """Tiny fixed-order transform composer. Each stage takes and returns a dict."""
+
+    def __init__(self, stages: list) -> None:
+        self.stages = stages
+
+    def __call__(self, item: dict) -> dict:
+        for stage in self.stages:
+            item = stage(item)
+        return item
+
+
+def build_tube_augment(config: dict, train: bool) -> ComposeTransform:
+    """Build the transform pipeline from the ``augment:`` config section.
+
+    - ``train=False`` or ``config["enabled"]=False`` -> normalize only.
+    - Otherwise -> spatial -> photometric -> temporal -> normalize.
+    """
+    enabled = bool(config.get("enabled", True))
+    if not (train and enabled):
+        return ComposeTransform([NormalizeTransform()])
+
+    spatial = SpatialTubeTransform(
+        flip_prob=float(config["spatial"]["flip_prob"]),
+        rotation_deg=float(config["spatial"]["rotation_deg"]),
+        scale_range=tuple(config["spatial"]["scale_range"]),
+        translate_frac=float(config["spatial"]["translate_frac"]),
+    )
+    photometric = PhotometricTubeTransform(
+        brightness_range=tuple(config["photometric"]["brightness_range"]),
+        contrast_range=tuple(config["photometric"]["contrast_range"]),
+        saturation_range=tuple(config["photometric"]["saturation_range"]),
+    )
+    temporal = TemporalTubeTransform(
+        subseq_prob=float(config["temporal"]["subseq_prob"]),
+        subseq_min_len=int(config["temporal"]["subseq_min_len"]),
+        stride_prob=float(config["temporal"]["stride_prob"]),
+        frame_drop_prob=float(config["temporal"]["frame_drop_prob"]),
+        min_valid_after_drop=int(config["temporal"]["min_valid_after_drop"]),
+    )
+    return ComposeTransform([spatial, photometric, temporal, NormalizeTransform()])

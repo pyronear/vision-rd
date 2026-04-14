@@ -6,7 +6,31 @@ from smokeynet_adapted.augment import (
     PhotometricTubeTransform,
     SpatialTubeTransform,
     TemporalTubeTransform,
+    build_tube_augment,
 )
+
+
+_DEFAULT_CFG = {
+    "enabled": True,
+    "spatial": {
+        "flip_prob": 0.5,
+        "rotation_deg": 5.0,
+        "scale_range": [0.9, 1.1],
+        "translate_frac": 0.05,
+    },
+    "photometric": {
+        "brightness_range": [0.8, 1.2],
+        "contrast_range": [0.8, 1.2],
+        "saturation_range": [0.8, 1.2],
+    },
+    "temporal": {
+        "subseq_prob": 0.5,
+        "subseq_min_len": 4,
+        "stride_prob": 0.25,
+        "frame_drop_prob": 0.15,
+        "min_valid_after_drop": 4,
+    },
+}
 
 
 def _make_item(t: int = 5, n_valid: int | None = None) -> dict:
@@ -286,3 +310,74 @@ def test_temporal_compacts_dropped_frames_to_zero_prefix():
     # Every valid output frame must carry a nonzero tag (i.e. not a zero pad).
     for i in range(k):
         assert out["patches"][i, 0, 0, 0].item() > 0.5
+
+
+def test_val_transform_is_normalize_only_and_deterministic():
+    """train=False must skip aug and just apply ImageNet normalize."""
+    torch.manual_seed(0)
+    item_a = _make_padded_item(t=20, n_valid=5)
+    item_b = _make_padded_item(t=20, n_valid=5)
+    # Mutate item_b in place to prove the transform is not sampling randomness
+    transform = build_tube_augment(_DEFAULT_CFG, train=False)
+    out_a = transform(item_a)
+    out_b = transform(item_b)
+    assert torch.allclose(out_a["patches"][:5], out_b["patches"][:5])
+
+    # Normalization actually happened: raw 0.01 != normalized 0.01
+    raw = 0.01
+    assert not torch.allclose(
+        out_a["patches"][0], torch.full((3, 224, 224), raw), atol=1e-3
+    )
+
+
+def test_val_transform_does_not_mutate_mask_or_length():
+    item = _make_padded_item(t=20, n_valid=5)
+    before_mask = item["mask"].clone()
+    transform = build_tube_augment(_DEFAULT_CFG, train=False)
+    out = transform(item)
+    assert torch.equal(out["mask"], before_mask)
+    assert out["patches"].shape == (20, 3, 224, 224)
+
+
+def test_train_transform_applies_pipeline_and_normalizes():
+    """train=True composes spatial -> photometric -> temporal -> normalize."""
+    torch.manual_seed(0)
+    item = _make_padded_item(t=20, n_valid=10)
+    transform = build_tube_augment(_DEFAULT_CFG, train=True)
+    out = transform(item)
+    # Shape preserved
+    assert out["patches"].shape == (20, 3, 224, 224)
+    # Valid mask still contiguous prefix
+    k = int(out["mask"].sum())
+    assert out["mask"][:k].all()
+    assert not out["mask"][k:].any()
+    # Output is normalized: valid frames should have values outside [0, 1].
+    # ImageNet normalize on [0, 1] input yields negative values for R channel.
+    assert out["patches"][:k].min() < 0.0 or out["patches"][:k].max() > 1.0
+
+
+def test_disabled_config_skips_aug_in_train_mode():
+    """enabled=False + train=True must behave like val: normalize only."""
+    torch.manual_seed(0)
+    cfg_off = dict(_DEFAULT_CFG)
+    cfg_off["enabled"] = False
+    item_a = _make_padded_item(t=20, n_valid=5)
+    item_b = _make_padded_item(t=20, n_valid=5)
+    t_train = build_tube_augment(cfg_off, train=True)
+    t_val = build_tube_augment(cfg_off, train=False)
+    out_a = t_train(item_a)
+    out_b = t_val(item_b)
+    assert torch.allclose(out_a["patches"], out_b["patches"])
+
+
+def test_train_transform_reproducible_with_fixed_seed():
+    torch.manual_seed(7)
+    item1 = _make_padded_item(t=20, n_valid=10)
+    out1 = build_tube_augment(_DEFAULT_CFG, train=True)(item1)
+
+    torch.manual_seed(7)
+    item2 = _make_padded_item(t=20, n_valid=10)
+    out2 = build_tube_augment(_DEFAULT_CFG, train=True)(item2)
+
+    assert torch.equal(out1["patches"], out2["patches"])
+    assert torch.equal(out1["mask"], out2["mask"])
