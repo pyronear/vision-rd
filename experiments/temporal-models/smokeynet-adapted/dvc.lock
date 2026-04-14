@@ -63,12 +63,12 @@ stages:
       size: 5695
     - path: src/smokeynet_adapted/data.py
       hash: md5
-      md5: 73a30d5d96ad20dcaf34ea3f93677785
-      size: 5777
+      md5: 4f576a411281e0252b72b4a9ca9d786b
+      size: 6218
     - path: src/smokeynet_adapted/tubes.py
       hash: md5
-      md5: 056e31097d6d112fb80a9cbd6d7e7fe1
-      size: 32682
+      md5: 06f07b749b612f5efb4c77f7e084a741
+      size: 34155
     - path: src/smokeynet_adapted/types.py
       hash: md5
       md5: 9d0ceb3e25bd2fd16fb74ee2b4a7724e
@@ -104,12 +104,12 @@ stages:
       size: 5695
     - path: src/smokeynet_adapted/data.py
       hash: md5
-      md5: 73a30d5d96ad20dcaf34ea3f93677785
-      size: 5777
+      md5: 4f576a411281e0252b72b4a9ca9d786b
+      size: 6218
     - path: src/smokeynet_adapted/tubes.py
       hash: md5
-      md5: 056e31097d6d112fb80a9cbd6d7e7fe1
-      size: 32682
+      md5: 06f07b749b612f5efb4c77f7e084a741
+      size: 34155
     - path: src/smokeynet_adapted/types.py
       hash: md5
       md5: 9d0ceb3e25bd2fd16fb74ee2b4a7724e
@@ -128,3 +128,69 @@ stages:
       md5: 4d97291cf6cb7f7879430564826e0440.dir
       size: 10910972
       nfiles: 2842
+  render_tubes@val:
+    cmd: uv run python scripts/render_tubes.py --tubes-dir 
+      data/03_primary/tubes/val --raw-dir data/01_raw/datasets/val --output-dir 
+      data/08_reporting/tubes/val
+    deps:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: 409ed7d0573adcb3be98f7ceab63cf25.dir
+      size: 444161180
+      nfiles: 8752
+    - path: data/03_primary/tubes/val
+      hash: md5
+      md5: 13fdf62f351f21d8b1b164f2c4f55182.dir
+      size: 1032671
+      nfiles: 285
+    - path: scripts/render_tubes.py
+      hash: md5
+      md5: e547e64ec9db01b4832f8121733d1bc7
+      size: 3362
+    - path: src/smokeynet_adapted/data.py
+      hash: md5
+      md5: 4f576a411281e0252b72b4a9ca9d786b
+      size: 6218
+    - path: src/smokeynet_adapted/tubes.py
+      hash: md5
+      md5: 06f07b749b612f5efb4c77f7e084a741
+      size: 34155
+    outs:
+    - path: data/08_reporting/tubes/val
+      hash: md5
+      md5: 37516349f11a4598ec8e6ead7bcb4896.dir
+      size: 42457438
+      nfiles: 284
+  render_tubes@train:
+    cmd: uv run python scripts/render_tubes.py --tubes-dir 
+      data/03_primary/tubes/train --raw-dir data/01_raw/datasets/train 
+      --output-dir data/08_reporting/tubes/train
+    deps:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: caf37d4bf513efd49b9617378fff1ffa.dir
+      size: 4776619781
+      nfiles: 89870
+    - path: data/03_primary/tubes/train
+      hash: md5
+      md5: 4d97291cf6cb7f7879430564826e0440.dir
+      size: 10910972
+      nfiles: 2842
+    - path: scripts/render_tubes.py
+      hash: md5
+      md5: e547e64ec9db01b4832f8121733d1bc7
+      size: 3362
+    - path: src/smokeynet_adapted/data.py
+      hash: md5
+      md5: 4f576a411281e0252b72b4a9ca9d786b
+      size: 6218
+    - path: src/smokeynet_adapted/tubes.py
+      hash: md5
+      md5: 06f07b749b612f5efb4c77f7e084a741
+      size: 34155
+    outs:
+    - path: data/08_reporting/tubes/train
+      hash: md5
+      md5: 44ad961ee8db4f5399295d6fa3619175.dir
+      size: 445626390
+      nfiles: 2841

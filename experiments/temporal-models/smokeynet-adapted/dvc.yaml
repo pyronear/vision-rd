@@ -42,6 +42,25 @@ stages:
       outs:
         - data/03_primary/tubes/${item}
 
+  render_tubes:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/render_tubes.py
+        --tubes-dir data/03_primary/tubes/${item}
+        --raw-dir data/01_raw/datasets/${item}
+        --output-dir data/08_reporting/tubes/${item}
+      deps:
+        - scripts/render_tubes.py
+        - src/smokeynet_adapted/tubes.py
+        - src/smokeynet_adapted/data.py
+        - data/03_primary/tubes/${item}
+        - data/01_raw/datasets/${item}
+      outs:
+        - data/08_reporting/tubes/${item}
+
 #   prepare:
 #     cmd: >-
 #       uv run python scripts/prepare.py
