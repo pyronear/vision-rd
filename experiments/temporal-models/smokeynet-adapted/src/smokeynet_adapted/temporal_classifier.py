@@ -6,7 +6,7 @@ from torch import Tensor, nn
 from torch.nn.utils.rnn import pack_padded_sequence
 
 
-class FrozenTimmBackbone(nn.Module):
+class TimmBackbone(nn.Module):
     """Wraps a pretrained timm model as a per-frame feature extractor.
 
     Always frozen: parameters have ``requires_grad=False`` and the inner
@@ -24,7 +24,7 @@ class FrozenTimmBackbone(nn.Module):
         self.backbone.eval()
         self.feat_dim: int = self.backbone.num_features
 
-    def train(self, mode: bool = True) -> "FrozenTimmBackbone":
+    def train(self, mode: bool = True) -> "TimmBackbone":
         super().train(mode)
         self.backbone.eval()
         return self
@@ -111,7 +111,7 @@ class TemporalSmokeClassifier(nn.Module):
         bidirectional: bool = False,
     ) -> None:
         super().__init__()
-        self.backbone = FrozenTimmBackbone(name=backbone, pretrained=pretrained)
+        self.backbone = TimmBackbone(name=backbone, pretrained=pretrained)
         feat_dim = self.backbone.feat_dim
         if arch == "mean_pool":
             self.head: nn.Module = MeanPoolHead(
