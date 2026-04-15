@@ -2593,3 +2593,76 @@ stages:
       hash: md5
       md5: e579f7492abf75c9671b89accfc93b10
       size: 27257
+  package:
+    cmd: uv run python scripts/package_model.py --variant gru_convnext_finetune 
+      --output data/06_models/gru_convnext_finetune/model.zip
+    deps:
+    - path: data/01_raw/models/best.pt
+      hash: md5
+      md5: fea4ddc8d904fcc5ff11ad900e040837
+      size: 19225626
+    - path: data/05_model_input/val
+      hash: md5
+      md5: e662d34ba87b486399cbb444f0b3a1d2.dir
+      size: 89476209
+      nfiles: 3645
+    - path: data/06_models/gru_convnext_finetune/best_checkpoint.pt
+      hash: md5
+      md5: 71017a101feb40151999041bc7bfd313
+      size: 239501471
+    - path: scripts/package_model.py
+      hash: md5
+      md5: 6047b0d8b1b135dd9399b26d0c1901eb
+      size: 5246
+    - path: src/smokeynet_adapted/calibration.py
+      hash: md5
+      md5: 2303307ff3b86f1186582f9db6982163
+      size: 1811
+    - path: src/smokeynet_adapted/package.py
+      hash: md5
+      md5: 6ca1a542949546a4017c029363be674d
+      size: 6695
+    - path: src/smokeynet_adapted/val_predict.py
+      hash: md5
+      md5: 30716090646cf21c42dff4fd6f501a08
+      size: 1974
+    params:
+      params.yaml:
+        build_tubes:
+          min_tube_length: 4
+          min_detected_entries: 2
+        model_input:
+          context_factor: 1.5
+          patch_size: 224
+        package:
+          target_recall: 0.95
+          infer_min_tube_length: 2
+          infer:
+            confidence_threshold: 0.01
+            iou_nms: 0.2
+            image_size: 1024
+        train_gru_convnext_finetune:
+          hidden_dim: 128
+          max_frames: 20
+          batch_size: 32
+          num_workers: 4
+          learning_rate: 0.001
+          weight_decay: 0.01
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          arch: gru
+          backbone: convnext_tiny
+          num_layers: 1
+          bidirectional: false
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+        tubes:
+          iou_threshold: 0.2
+          max_misses: 2
+    outs:
+    - path: data/06_models/gru_convnext_finetune/model.zip
+      hash: md5
+      md5: 2a37a325fced89f1e4216fbb57f520b6
+      size: 258728306
