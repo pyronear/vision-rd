@@ -162,7 +162,10 @@ def test_parity_logit_matches(classifier: TemporalSmokeClassifier) -> None:
         for p in sorted((FIXTURE / "images").glob("*.jpg"))
     ]
     yolo = _fake_yolo_from_gt(FIXTURE)
-    model = BboxTubeTemporalModel(yolo_model=yolo, classifier=classifier, config=CFG)
+    # Pin device to CPU so offline and online paths share numerics on any host.
+    model = BboxTubeTemporalModel(
+        yolo_model=yolo, classifier=classifier, config=CFG, device="cpu"
+    )
     out = model.predict(frames=frames)
 
     assert out.details["num_tubes_kept"] >= 1
