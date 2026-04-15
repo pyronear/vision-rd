@@ -2,8 +2,10 @@
 
 import zipfile
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import pytest
+import torch
 import yaml
 
 from smokeynet_adapted.package import (
@@ -13,7 +15,9 @@ from smokeynet_adapted.package import (
     MANIFEST_FILENAME,
     YOLO_WEIGHTS_FILENAME,
     build_model_package,
+    load_model_package,
 )
+from smokeynet_adapted.temporal_classifier import TemporalSmokeClassifier
 
 SAMPLE_CONFIG: dict = {
     "infer": {"confidence_threshold": 0.01, "iou_nms": 0.2, "image_size": 1024},
@@ -163,3 +167,123 @@ class TestBuildMissingWeightsRaises:
                 variant="gru_convnext_finetune",
                 output_path=tmp_path / "out.zip",
             )
+
+
+# Build a real tiny classifier state_dict so load_model_package can construct
+# and populate a TemporalSmokeClassifier from it.
+@pytest.fixture()
+def real_tiny_classifier_ckpt(tmp_path: Path) -> Path:
+    """A Lightning-style ckpt holding a TemporalSmokeClassifier state_dict.
+
+    Uses backbone=resnet18 for speed in tests, regardless of the production
+    variant.
+    """
+    model = TemporalSmokeClassifier(
+        backbone="resnet18",
+        arch="gru",
+        hidden_dim=32,
+        pretrained=False,
+        num_layers=1,
+        bidirectional=False,
+    )
+    # Lightning ckpt schema: torch.save({"state_dict": {...}, ...})
+    state_dict = {f"model.{k}": v for k, v in model.state_dict().items()}
+    ckpt_path = tmp_path / "tiny.ckpt"
+    torch.save({"state_dict": state_dict}, ckpt_path)
+    return ckpt_path
+
+
+@pytest.fixture()
+def real_tiny_config() -> dict:
+    cfg = {k: dict(v) if isinstance(v, dict) else v for k, v in SAMPLE_CONFIG.items()}
+    cfg["classifier"] = dict(cfg["classifier"])
+    cfg["classifier"]["backbone"] = "resnet18"
+    cfg["classifier"]["hidden_dim"] = 32
+    return cfg
+
+
+@pytest.fixture()
+def real_tiny_archive(
+    tmp_path: Path, dummy_yolo_weights: Path, real_tiny_classifier_ckpt: Path,
+    real_tiny_config: dict,
+) -> Path:
+    out = tmp_path / "tiny_model.zip"
+    build_model_package(
+        yolo_weights_path=dummy_yolo_weights,
+        classifier_ckpt_path=real_tiny_classifier_ckpt,
+        config=real_tiny_config,
+        variant="tiny",
+        output_path=out,
+    )
+    return out
+
+
+class TestLoadRoundtrip:
+    @patch("smokeynet_adapted.package._load_yolo")
+    def test_config_passthrough(
+        self,
+        mock_yolo: MagicMock,
+        real_tiny_archive: Path,
+        tmp_path: Path,
+        real_tiny_config: dict,
+    ) -> None:
+        mock_yolo.return_value = MagicMock(name="FakeYOLO")
+        pkg = load_model_package(real_tiny_archive, extract_dir=tmp_path / "ext")
+        assert pkg.config == real_tiny_config
+
+    @patch("smokeynet_adapted.package._load_yolo")
+    def test_yolo_returned(
+        self, mock_yolo: MagicMock, real_tiny_archive: Path, tmp_path: Path
+    ) -> None:
+        sentinel = MagicMock(name="FakeYOLO")
+        mock_yolo.return_value = sentinel
+        pkg = load_model_package(real_tiny_archive, extract_dir=tmp_path / "ext")
+        assert pkg.yolo_model is sentinel
+
+    @patch("smokeynet_adapted.package._load_yolo")
+    def test_classifier_forward_runs(
+        self,
+        mock_yolo: MagicMock,
+        real_tiny_archive: Path,
+        tmp_path: Path,
+    ) -> None:
+        mock_yolo.return_value = MagicMock(name="FakeYOLO")
+        pkg = load_model_package(real_tiny_archive, extract_dir=tmp_path / "ext")
+
+        patches = torch.zeros(1, 4, 3, 224, 224)
+        mask = torch.tensor([[True, True, True, True]])
+        with torch.no_grad():
+            logit = pkg.classifier(patches, mask)
+        assert logit.shape == (1,)
+
+
+class TestLoadRejectsBadArchive:
+    @patch("smokeynet_adapted.package._load_yolo")
+    def test_missing_manifest(
+        self, mock_yolo: MagicMock, tmp_path: Path
+    ) -> None:
+        bad = tmp_path / "bad.zip"
+        with zipfile.ZipFile(bad, "w") as zf:
+            zf.writestr(CONFIG_FILENAME, "infer: {}")
+        with pytest.raises(KeyError):
+            load_model_package(bad, extract_dir=tmp_path / "ext")
+
+    @patch("smokeynet_adapted.package._load_yolo")
+    def test_unsupported_format_version(
+        self, mock_yolo: MagicMock, tmp_path: Path
+    ) -> None:
+        bad = tmp_path / "bad.zip"
+        manifest = {
+            "format_version": 99,
+            "variant": "x",
+            "yolo_weights": YOLO_WEIGHTS_FILENAME,
+            "classifier_checkpoint": CLASSIFIER_CKPT_FILENAME,
+            "config": CONFIG_FILENAME,
+        }
+        with zipfile.ZipFile(bad, "w") as zf:
+            zf.writestr(MANIFEST_FILENAME, yaml.dump(manifest))
+            zf.writestr(YOLO_WEIGHTS_FILENAME, b"x")
+            zf.writestr(CLASSIFIER_CKPT_FILENAME, b"x")
+            zf.writestr(CONFIG_FILENAME, "{}")
+        with pytest.raises(ValueError, match="format_version"):
+            load_model_package(bad, extract_dir=tmp_path / "ext")
