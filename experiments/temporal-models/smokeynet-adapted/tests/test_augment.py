@@ -9,7 +9,6 @@ from smokeynet_adapted.augment import (
     build_tube_augment,
 )
 
-
 _DEFAULT_CFG = {
     "enabled": True,
     "spatial": {
@@ -171,12 +170,8 @@ def test_photometric_same_factor_across_frames():
         ratios_01 = post_diff_01[nz] / pre_diff_01[nz]
         ratios_12 = post_diff_12[nz] / pre_diff_12[nz]
         # All ratios should be the same single brightness factor
-        assert torch.allclose(
-            ratios_01, ratios_01[0].expand_as(ratios_01), atol=1e-4
-        )
-        assert torch.allclose(
-            ratios_12, ratios_12[0].expand_as(ratios_12), atol=1e-4
-        )
+        assert torch.allclose(ratios_01, ratios_01[0].expand_as(ratios_01), atol=1e-4)
+        assert torch.allclose(ratios_12, ratios_12[0].expand_as(ratios_12), atol=1e-4)
 
 
 def _make_padded_item(t: int, n_valid: int) -> dict:
@@ -233,9 +228,7 @@ def test_temporal_subsequence_contiguous_slice():
     torch.manual_seed(42)
     item = _make_padded_item(t=20, n_valid=10)
     # Original per-frame tags: 0.01, 0.02, ..., 0.10 (on first pixel)
-    original_tags = [
-        float(item["patches"][i, 0, 0, 0].item()) for i in range(10)
-    ]
+    original_tags = [float(item["patches"][i, 0, 0, 0].item()) for i in range(10)]
     t = TemporalTubeTransform(
         subseq_prob=1.0,
         subseq_min_len=4,

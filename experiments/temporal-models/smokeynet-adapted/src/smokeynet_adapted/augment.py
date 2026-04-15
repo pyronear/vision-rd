@@ -5,6 +5,8 @@ See ``docs/specs/2026-04-14-training-augmentation-design.md`` for design.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import torch
 from torch import Tensor
 from torchvision.transforms.v2 import functional as TVF
@@ -136,9 +138,7 @@ class TemporalTubeTransform:
 
         # 1. Sub-sequence sampling
         if torch.rand(()).item() < self.subseq_prob and n > self.subseq_min_len:
-            k = int(
-                torch.randint(self.subseq_min_len, n + 1, (1,)).item()
-            )
+            k = int(torch.randint(self.subseq_min_len, n + 1, (1,)).item())
             start = int(torch.randint(0, n - k + 1, (1,)).item())
             valid_idx = valid_idx[start : start + k]
 
@@ -182,7 +182,11 @@ IMAGENET_STD = (0.229, 0.224, 0.225)
 
 
 class NormalizeTransform:
-    """ImageNet normalize of the valid frames in a tube (mask-aware)."""
+    """ImageNet normalize of the valid frames in a tube (mask-aware).
+
+    Writes to a fresh output tensor so the caller's input is never mutated.
+    mean/std are lazily moved to the input tensor's device and dtype.
+    """
 
     def __init__(
         self,
@@ -197,15 +201,18 @@ class NormalizeTransform:
         mask: Tensor = item["mask"]
         n = int(mask.sum())
         if n > 0:
-            patches[:n] = (patches[:n] - self.mean) / self.std
-        item["patches"] = patches
+            mean = self.mean.to(patches.device, patches.dtype)
+            std = self.std.to(patches.device, patches.dtype)
+            out = patches.clone()
+            out[:n] = (patches[:n] - mean) / std
+            item["patches"] = out
         return item
 
 
 class ComposeTransform:
     """Tiny fixed-order transform composer. Each stage takes and returns a dict."""
 
-    def __init__(self, stages: list) -> None:
+    def __init__(self, stages: list[Callable[[dict], dict]]) -> None:
         self.stages = stages
 
     def __call__(self, item: dict) -> dict:
@@ -219,8 +226,12 @@ def build_tube_augment(config: dict, train: bool) -> ComposeTransform:
 
     - ``train=False`` or ``config["enabled"]=False`` -> normalize only.
     - Otherwise -> spatial -> photometric -> temporal -> normalize.
+
+    A missing ``enabled`` key defaults to ``False`` (disabled). This matches
+    the defensive default in ``scripts/train.py`` when the top-level
+    ``augment:`` section is absent from ``params.yaml``.
     """
-    enabled = bool(config.get("enabled", True))
+    enabled = bool(config.get("enabled", False))
     if not (train and enabled):
         return ComposeTransform([NormalizeTransform()])
 
