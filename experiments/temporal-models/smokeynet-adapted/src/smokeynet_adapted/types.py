@@ -59,17 +59,6 @@ class Tube:
 
 
 @dataclass
-class SequenceData:
-    """All data for a single image sequence."""
-
-    sequence_id: str
-    num_frames: int
-    frame_detections: list[FrameDetections]
-    tubes: list[Tube]
-    is_positive: bool | None = None
-
-
-@dataclass
 class SequenceFeatures:
     """Precomputed features for a single sequence, saved as .pt/.json."""
 

@@ -50,16 +50,12 @@ class TimmBackbone(nn.Module):
             return
         name = self.name
         if name.startswith("resnet"):
-            stages = [
-                getattr(self.backbone, f"layer{i}") for i in range(1, 5)
-            ]
+            stages = [getattr(self.backbone, f"layer{i}") for i in range(1, 5)]
         elif name.startswith("convnext"):
             # timm's convnext exposes a `stages` ModuleList
             stages = list(self.backbone.stages)
         else:
-            stage_names = [
-                n_ for n_, _ in self.backbone.named_children()
-            ]
+            stage_names = [n_ for n_, _ in self.backbone.named_children()]
             raise NotImplementedError(
                 f"finetune=True is not implemented for backbone family "
                 f"{name!r}. Top-level children: {stage_names}. Add an "

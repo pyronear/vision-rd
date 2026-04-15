@@ -5,7 +5,6 @@ from datetime import datetime
 from smokeynet_adapted.types import (
     Detection,
     FrameDetections,
-    SequenceData,
     Tube,
     TubeEntry,
 )
@@ -69,25 +68,3 @@ class TestTube:
         tube = Tube(tube_id=0, entries=entries, start_frame=0, end_frame=2)
         assert len(tube.entries) == 3
         assert tube.entries[1].detection is None
-
-
-class TestSequenceData:
-    def test_construction(self):
-        sd = SequenceData(
-            sequence_id="test_seq",
-            num_frames=10,
-            frame_detections=[],
-            tubes=[],
-            is_positive=True,
-        )
-        assert sd.sequence_id == "test_seq"
-        assert sd.is_positive is True
-
-    def test_default_is_positive(self):
-        sd = SequenceData(
-            sequence_id="test_seq",
-            num_frames=5,
-            frame_detections=[],
-            tubes=[],
-        )
-        assert sd.is_positive is None

@@ -8,11 +8,10 @@ packages = ["src/smokeynet_adapted"]
 [project]
 name = "smokeynet-adapted"
 version = "0.1.0"
-description = "Adapted SmokeyNet (YOLO + LSTM + ViT) for temporal smoke detection"
+description = "Temporal smoke classifier over YOLO-detected tube patches (timm backbone + mean-pool/GRU head)"
 requires-python = ">=3.11"
 dependencies = [
     "pyrocore",
-    "huggingface-hub>=0.24",
     "lightning>=2.2",
     "matplotlib>=3.8",
     "numpy>=1.26,<2",
@@ -25,7 +24,6 @@ dependencies = [
     "torch>=2.2",
     "torchvision>=0.17",
     "tqdm>=4.66",
-    "ultralytics>=8.3",
 ]
 
 [tool.uv.sources]

@@ -79,11 +79,7 @@ def test_lit_module_optimizer_uses_two_groups_when_finetune():
     assert lrs == [1e-5, 1e-3]
 
     # Every trainable param must land in exactly one group.
-    trainable = {
-        id(p)
-        for p in lit.model.parameters()
-        if p.requires_grad
-    }
+    trainable = {id(p) for p in lit.model.parameters() if p.requires_grad}
     grouped = [id(p) for g in opt.param_groups for p in g["params"]]
     assert set(grouped) == trainable
     assert len(grouped) == len(trainable), "duplicate params across groups"

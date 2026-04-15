@@ -63,9 +63,7 @@ def test_summarize_writes_markdown_with_expected_columns(tmp_path: Path):
     )
 
     output = tmp_path / "comparison.md"
-    compare_variants.summarize(
-        variant_dirs=[v1, v2], output_path=output
-    )
+    compare_variants.summarize(variant_dirs=[v1, v2], output_path=output)
 
     text = output.read_text()
     assert "| variant " in text
