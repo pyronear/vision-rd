@@ -68,44 +68,6 @@ def parse_timestamp(frame_id: str) -> datetime | None:
         return None
 
 
-def load_gt_labels(
-    sequence_dir: Path, frame_id: str
-) -> list[tuple[float, float, float, float]]:
-    """Load ground-truth bounding boxes for a frame.
-
-    Reads YOLO-format label files from ``sequence_dir/labels/``.
-    Only returns boxes from 5-column files (human annotations in WF
-    sequences).  6-column files (YOLO predictions in FP sequences)
-    are ignored since they are not real smoke.
-
-    Args:
-        sequence_dir: Path to the sequence directory.
-        frame_id: Frame filename stem.
-
-    Returns:
-        List of ``(cx, cy, w, h)`` normalised bboxes.
-    """
-    label_path = sequence_dir / "labels" / f"{frame_id}.txt"
-    if not label_path.is_file():
-        return []
-    content = label_path.read_text().strip()
-    if not content:
-        return []
-    boxes = []
-    for line in content.split("\n"):
-        parts = line.strip().split()
-        if len(parts) == 5:
-            boxes.append(
-                (
-                    float(parts[1]),
-                    float(parts[2]),
-                    float(parts[3]),
-                    float(parts[4]),
-                )
-            )
-    return boxes
-
-
 def load_detections(sequence_dir: Path, frame_id: str) -> list[Detection]:
     """Read a YOLO-format label file as :class:`Detection` objects.
 

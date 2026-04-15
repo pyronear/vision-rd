@@ -77,6 +77,7 @@ stages:
       deps:
         - scripts/render_tubes.py
         - src/smokeynet_adapted/tubes.py
+        - src/smokeynet_adapted/tube_viz.py
         - src/smokeynet_adapted/data.py
         - data/03_primary/tubes/${item}
         - data/01_raw/datasets/${item}

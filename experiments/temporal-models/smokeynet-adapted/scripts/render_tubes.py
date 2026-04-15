@@ -32,7 +32,8 @@ from smokeynet_adapted.data import (
     get_sorted_frames,
     load_tube_record,
 )
-from smokeynet_adapted.tubes import plot_tube_summary, tube_from_record
+from smokeynet_adapted.tube_viz import plot_tube_summary
+from smokeynet_adapted.tubes import tube_from_record
 
 
 def _render_one(

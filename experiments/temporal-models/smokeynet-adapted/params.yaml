@@ -1,3 +1,11 @@
+# Keys prefixed with `_` are shared defaults consumed via YAML merge keys
+# (`<<: *anchor`). They are NOT DVC stage parameters — no dvc.yaml stage lists
+# them under `params:`, so stage hashing ignores them.
+#
+# Caveat: `dvc exp run -S train_gru.seed=100` rewrites this file and would
+# materialize the merged dict (losing the anchor). That's fine for one-off
+# experiments; to keep anchors intact, edit params.yaml by hand.
+
 truncate:
   max_frames: 20
 
@@ -13,115 +21,57 @@ model_input:
   context_factor: 1.5
   patch_size: 224
 
+_train_defaults: &train_defaults
+  hidden_dim: 128
+  max_frames: 20
+  batch_size: 32
+  num_workers: 4
+  learning_rate: 0.001
+  weight_decay: 0.01
+  max_epochs: 30
+  early_stop_patience: 5
+  seed: 42
+
+_gru_defaults: &gru_defaults
+  <<: *train_defaults
+  arch: gru
+  backbone: resnet18
+  num_layers: 1
+  bidirectional: false
+
 train_mean_pool:
+  <<: *train_defaults
   arch: mean_pool
   backbone: resnet18
-  hidden_dim: 128
-  max_frames: 20
-  batch_size: 32
-  num_workers: 4
-  learning_rate: 0.001
-  weight_decay: 0.01
-  max_epochs: 30
-  early_stop_patience: 5
-  seed: 42
 
 train_gru:
-  arch: gru
-  backbone: resnet18
-  hidden_dim: 128
-  num_layers: 1
-  bidirectional: false
-  max_frames: 20
-  batch_size: 32
-  num_workers: 4
-  learning_rate: 0.001
-  weight_decay: 0.01
-  max_epochs: 30
-  early_stop_patience: 5
-  seed: 42
+  <<: *gru_defaults
 
 train_gru_seed43:
-  arch: gru
-  backbone: resnet18
-  hidden_dim: 128
-  num_layers: 1
-  bidirectional: false
-  max_frames: 20
-  batch_size: 32
-  num_workers: 4
-  learning_rate: 0.001
-  weight_decay: 0.01
-  max_epochs: 30
-  early_stop_patience: 5
+  <<: *gru_defaults
   seed: 43
 
 train_gru_seed44:
-  arch: gru
-  backbone: resnet18
-  hidden_dim: 128
-  num_layers: 1
-  bidirectional: false
-  max_frames: 20
-  batch_size: 32
-  num_workers: 4
-  learning_rate: 0.001
-  weight_decay: 0.01
-  max_epochs: 30
-  early_stop_patience: 5
+  <<: *gru_defaults
   seed: 44
 
 train_gru_convnext:
-  arch: gru
+  <<: *gru_defaults
   backbone: convnext_tiny
   finetune: false
-  hidden_dim: 128
-  num_layers: 1
-  bidirectional: false
-  max_frames: 20
-  batch_size: 32
-  num_workers: 4
-  learning_rate: 0.001
-  weight_decay: 0.01
-  max_epochs: 30
-  early_stop_patience: 5
-  seed: 42
 
 train_gru_finetune:
-  arch: gru
-  backbone: resnet18
+  <<: *gru_defaults
   finetune: true
   finetune_last_n_blocks: 1
   backbone_lr: 0.00001
-  hidden_dim: 128
-  num_layers: 1
-  bidirectional: false
-  max_frames: 20
-  batch_size: 32
-  num_workers: 4
-  learning_rate: 0.001
-  weight_decay: 0.01
-  max_epochs: 30
-  early_stop_patience: 5
-  seed: 42
 
 train_gru_convnext_finetune:
-  arch: gru
+  <<: *gru_defaults
   backbone: convnext_tiny
   finetune: true
   finetune_last_n_blocks: 1
   backbone_lr: 0.00001
-  hidden_dim: 128
-  num_layers: 1
-  bidirectional: false
-  max_frames: 20
-  batch_size: 32
-  num_workers: 4
-  learning_rate: 0.001
-  weight_decay: 0.01
-  max_epochs: 30
-  early_stop_patience: 5
-  seed: 42
 
 augment:
   enabled: true

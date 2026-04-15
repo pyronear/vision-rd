@@ -1,5 +1,11 @@
 # Basic Temporal Model Implementation Plan
 
+> **Historical note:** This plan was written when the original SmokeyNetAdapted
+> stack (`model.py`, `backbone.py`, `net.py`, `heads.py`, `detector.py`,
+> `spatial_attention.py`, `temporal_fusion.py`, `training.py`, `package.py`)
+> still coexisted with the new classifier. That stack was deleted in `ad008c6`.
+> References to those files below describe the state at plan time.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Train and evaluate two basic vision-based temporal smoke

@@ -4,7 +4,6 @@ import pytest
 
 from smokeynet_adapted.tubes import (
     build_tubes,
-    compute_containment,
     compute_iou,
     interpolate_gaps,
     match_detections,
@@ -55,49 +54,6 @@ class TestComputeIou:
         a = _det(0.3, 0.3, 0.2, 0.2)
         b = _det(0.4, 0.4, 0.2, 0.2)
         assert compute_iou(a, b) == compute_iou(b, a)
-
-
-# ── compute_containment ──────────────────────────────────────────────────
-
-
-class TestComputeContainment:
-    def test_identical_boxes(self):
-        det = _det(0.5, 0.5, 0.2, 0.2)
-        assert abs(compute_containment(det, det) - 1.0) < 1e-9
-
-    def test_small_inside_large(self):
-        """Small GT fully inside large YOLO det -> containment ~1.0."""
-        large = _det(0.5, 0.5, 0.2, 0.2)
-        small = _det(0.5, 0.5, 0.02, 0.02)
-        assert compute_containment(large, small) > 0.99
-
-    def test_small_inside_large_low_iou(self):
-        """Same case but IoU is very low due to size mismatch."""
-        large = _det(0.5, 0.5, 0.2, 0.2)
-        small = _det(0.5, 0.5, 0.02, 0.02)
-        assert compute_iou(large, small) < 0.05
-        assert compute_containment(large, small) > 0.99
-
-    def test_no_overlap(self):
-        a = _det(0.1, 0.1, 0.1, 0.1)
-        b = _det(0.9, 0.9, 0.1, 0.1)
-        assert compute_containment(a, b) == 0.0
-
-    def test_partial_overlap(self):
-        a = _det(0.5, 0.5, 0.2, 0.2)
-        b = _det(0.55, 0.55, 0.2, 0.2)
-        c = compute_containment(a, b)
-        assert 0.0 < c < 1.0
-
-    def test_zero_area(self):
-        a = _det(0.5, 0.5, 0.0, 0.0)
-        b = _det(0.5, 0.5, 0.1, 0.1)
-        assert compute_containment(a, b) == 0.0
-
-    def test_symmetric(self):
-        a = _det(0.5, 0.5, 0.2, 0.2)
-        b = _det(0.5, 0.5, 0.05, 0.05)
-        assert compute_containment(a, b) == compute_containment(b, a)
 
 
 # ── match_detections ─────────────────────────────────────────────────────

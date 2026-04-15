@@ -1,8 +1,14 @@
 # Basic Temporal Model — Design
 
 **Date:** 2026-04-14
-**Status:** Approved, ready for implementation plan
+**Status:** Implemented and superseded by the live pipeline.
 **Scope:** `experiments/temporal-models/smokeynet-adapted/`
+
+> **Historical note:** This spec was written while the original SmokeyNetAdapted
+> stack (`backbone.py`, `detector.py`, `heads.py`, `net.py`, `spatial_attention.py`,
+> `temporal_fusion.py`, `model.py`, `package.py`) still coexisted with the new
+> classifier. That stack was deleted in `ad008c6`. References to those files
+> below describe the state at design time.
 
 ## Goal
 
