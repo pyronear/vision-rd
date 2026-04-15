@@ -98,3 +98,11 @@ augment:
     stride_prob: 0.25
     frame_drop_prob: 0.15
     min_valid_after_drop: 4
+
+package:
+  target_recall: 0.95
+  infer_min_tube_length: 2
+  infer:
+    confidence_threshold: 0.01
+    iou_nms: 0.2
+    image_size: 1024
