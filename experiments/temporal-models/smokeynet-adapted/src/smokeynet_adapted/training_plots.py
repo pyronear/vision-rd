@@ -1,10 +1,29 @@
 """Per-run training curve plotting from Lightning CSVLogger metrics."""
 
+import re
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
+
+
+def find_latest_metrics_csv(csv_log_dir: Path) -> Path:
+    version_dirs = []
+    for child in csv_log_dir.iterdir():
+        if not child.is_dir():
+            continue
+        match = re.fullmatch(r"version_(\d+)", child.name)
+        if match:
+            version_dirs.append((int(match.group(1)), child))
+    if not version_dirs:
+        raise FileNotFoundError(f"No version_* directories under {csv_log_dir}")
+    version_dirs.sort(key=lambda pair: pair[0])
+    latest_dir = version_dirs[-1][1]
+    csv_path = latest_dir / "metrics.csv"
+    if not csv_path.exists():
+        raise FileNotFoundError(f"No metrics.csv at {csv_path}")
+    return csv_path
 
 
 def aggregate_train_loss_per_epoch(df: pd.DataFrame) -> pd.Series:

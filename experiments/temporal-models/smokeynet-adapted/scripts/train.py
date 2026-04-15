@@ -19,6 +19,10 @@ from smokeynet_adapted.augment import build_tube_augment
 from smokeynet_adapted.batch_samples import SampleTrainBatchesCallback
 from smokeynet_adapted.dataset import TubePatchDataset
 from smokeynet_adapted.lit_temporal import LitTemporalClassifier
+from smokeynet_adapted.training_plots import (
+    find_latest_metrics_csv,
+    plot_training_curves,
+)
 
 
 def main() -> None:
@@ -148,6 +152,14 @@ def main() -> None:
         if target.exists():
             target.unlink()
         best.rename(target)
+
+    try:
+        csv_path = find_latest_metrics_csv(args.output_dir / "csv_logs")
+        plot_path = args.output_dir / "plots" / "training_curves.png"
+        plot_training_curves(csv_path, plot_path, title=args.params_key)
+        print(f"Wrote {plot_path}", file=sys.stderr, flush=True)
+    except Exception as exc:
+        print(f"Training-curve plot failed: {exc}", file=sys.stderr, flush=True)
 
 
 if __name__ == "__main__":

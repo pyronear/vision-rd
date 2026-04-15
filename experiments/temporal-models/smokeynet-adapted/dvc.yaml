@@ -98,6 +98,7 @@ stages:
       - src/smokeynet_adapted/dataset.py
       - src/smokeynet_adapted/temporal_classifier.py
       - src/smokeynet_adapted/lit_temporal.py
+      - src/smokeynet_adapted/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -105,8 +106,9 @@ stages:
       - augment
     outs:
       - data/06_models/mean_pool/best_checkpoint.pt
-    plots:
       - data/06_models/mean_pool/csv_logs/
+    plots:
+      - data/06_models/mean_pool/plots/training_curves.png
 
   train_gru:
     cmd: >-
@@ -123,6 +125,7 @@ stages:
       - src/smokeynet_adapted/dataset.py
       - src/smokeynet_adapted/temporal_classifier.py
       - src/smokeynet_adapted/lit_temporal.py
+      - src/smokeynet_adapted/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -130,8 +133,9 @@ stages:
       - augment
     outs:
       - data/06_models/gru/best_checkpoint.pt
-    plots:
       - data/06_models/gru/csv_logs/
+    plots:
+      - data/06_models/gru/plots/training_curves.png
 
   evaluate_mean_pool:
     foreach:
@@ -222,6 +226,7 @@ stages:
       - src/smokeynet_adapted/dataset.py
       - src/smokeynet_adapted/temporal_classifier.py
       - src/smokeynet_adapted/lit_temporal.py
+      - src/smokeynet_adapted/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -229,8 +234,9 @@ stages:
       - augment
     outs:
       - data/06_models/gru_seed43/best_checkpoint.pt
-    plots:
       - data/06_models/gru_seed43/csv_logs/
+    plots:
+      - data/06_models/gru_seed43/plots/training_curves.png
 
   train_gru_seed44:
     cmd: >-
@@ -247,6 +253,7 @@ stages:
       - src/smokeynet_adapted/dataset.py
       - src/smokeynet_adapted/temporal_classifier.py
       - src/smokeynet_adapted/lit_temporal.py
+      - src/smokeynet_adapted/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -254,8 +261,9 @@ stages:
       - augment
     outs:
       - data/06_models/gru_seed44/best_checkpoint.pt
-    plots:
       - data/06_models/gru_seed44/csv_logs/
+    plots:
+      - data/06_models/gru_seed44/plots/training_curves.png
 
   train_gru_convnext:
     cmd: >-
@@ -272,6 +280,7 @@ stages:
       - src/smokeynet_adapted/dataset.py
       - src/smokeynet_adapted/temporal_classifier.py
       - src/smokeynet_adapted/lit_temporal.py
+      - src/smokeynet_adapted/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -279,8 +288,9 @@ stages:
       - augment
     outs:
       - data/06_models/gru_convnext/best_checkpoint.pt
-    plots:
       - data/06_models/gru_convnext/csv_logs/
+    plots:
+      - data/06_models/gru_convnext/plots/training_curves.png
 
   train_gru_finetune:
     cmd: >-
@@ -297,6 +307,7 @@ stages:
       - src/smokeynet_adapted/dataset.py
       - src/smokeynet_adapted/temporal_classifier.py
       - src/smokeynet_adapted/lit_temporal.py
+      - src/smokeynet_adapted/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -304,8 +315,9 @@ stages:
       - augment
     outs:
       - data/06_models/gru_finetune/best_checkpoint.pt
-    plots:
       - data/06_models/gru_finetune/csv_logs/
+    plots:
+      - data/06_models/gru_finetune/plots/training_curves.png
 
   train_gru_convnext_finetune:
     cmd: >-
@@ -322,6 +334,7 @@ stages:
       - src/smokeynet_adapted/dataset.py
       - src/smokeynet_adapted/temporal_classifier.py
       - src/smokeynet_adapted/lit_temporal.py
+      - src/smokeynet_adapted/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -329,29 +342,9 @@ stages:
       - augment
     outs:
       - data/06_models/gru_convnext_finetune/best_checkpoint.pt
-    plots:
       - data/06_models/gru_convnext_finetune/csv_logs/
-
-  plot_training:
-    foreach:
-      - gru
-      - gru_seed43
-      - gru_seed44
-      - gru_convnext
-      - gru_finetune
-      - gru_convnext_finetune
-    do:
-      cmd: >-
-        uv run python scripts/plot_training.py
-        --csv-log-dir data/06_models/${item}/csv_logs
-        --output-path data/08_reporting/training/${item}/training_curves.png
-        --title ${item}
-      deps:
-        - scripts/plot_training.py
-        - src/smokeynet_adapted/training_plots.py
-        - data/06_models/${item}/csv_logs
-      plots:
-        - data/08_reporting/training/${item}/training_curves.png
+    plots:
+      - data/06_models/gru_convnext_finetune/plots/training_curves.png
 
   evaluate_gru_seed43:
     foreach:
