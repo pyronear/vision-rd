@@ -94,40 +94,33 @@ def test_spatial_affine_shape_preserved():
 
 
 def test_spatial_affine_applied_same_per_frame():
-    """Rotation/scale/translate must be sampled once per tube: the relative
-    transform between any two valid frames' raw and augmented content is
-    identical (i.e. the affine is consistent across frames)."""
+    """Affine params must be sampled once per tube, not per frame.
+
+    Stack T identical frames, apply a non-trivial affine, assert every
+    output frame equals frame 0. If the transform resampled angle/scale/
+    translate per frame, the outputs would differ.
+    """
     torch.manual_seed(0)
-    item = _make_item(t=3)
-    # Same row tag index offset before -> same offset after
+    # Build a tube where every frame is the same asymmetric pattern.
+    one_frame = torch.zeros(3, 224, 224, dtype=torch.float32)
+    one_frame[:, :, :112] = 0.7
+    one_frame[:, :, 112:] = 0.3
+    one_frame[0, 30, :] = 1.0  # single tag row
+    patches = one_frame.unsqueeze(0).expand(5, -1, -1, -1).clone()
+    item = {"patches": patches, "mask": torch.ones(5, dtype=torch.bool)}
+
     t = SpatialTubeTransform(
-        flip_prob=1.0,
-        rotation_deg=0.0,
-        scale_range=(1.0, 1.0),
-        translate_frac=0.0,
-    )
-    t(item)
-    # All three frames flipped identically, so the red-tagged row still differs
-    # only by its original per-frame offset (not by a per-frame flip decision).
-    for i in range(3):
-        flipped_raw = torch.flip(item["patches"][i], dims=[-1])
-        # Rebuild `item["patches"]` for next comparison since `t` may have consumed
-        # it in-place; use a fresh clone above.
-        _ = flipped_raw
-    # Simple equality already covered by the previous test; this test asserts
-    # shape consistency with non-trivial affine params.
-    torch.manual_seed(1)
-    item2 = _make_item(t=3)
-    t2 = SpatialTubeTransform(
         flip_prob=0.0,
-        rotation_deg=5.0,
-        scale_range=(0.95, 1.05),
-        translate_frac=0.02,
+        rotation_deg=10.0,
+        scale_range=(0.85, 1.15),
+        translate_frac=0.08,
     )
-    out2 = t2(item2)
-    # Shape preserved + valid frames still valid.
-    assert out2["patches"].shape == (3, 3, 224, 224)
-    assert out2["mask"].all()
+    out = t(item)
+    for i in range(1, 5):
+        assert torch.equal(out["patches"][i], out["patches"][0]), (
+            f"frame {i} differs from frame 0 — affine params were not "
+            "shared across the tube"
+        )
 
 
 def test_photometric_identity_preserves_input():
