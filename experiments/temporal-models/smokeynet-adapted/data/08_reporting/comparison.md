@@ -8,3 +8,4 @@
 | gru_convnext | 0.960 | 0.988 | 0.991 | 4 | 5 | 6 | 20 |
 | gru_finetune | 0.915 | 0.971 | 0.976 | 13 | 18 | 20 | 27 |
 | gru_convnext_finetune | 0.963 | 0.993 | 0.994 | 2 | 4 | 4 | 18 |
+| gru_convnext_base_finetune | 0.967 | 0.989 | 0.991 | 3 | 5 | 6 | 10 |

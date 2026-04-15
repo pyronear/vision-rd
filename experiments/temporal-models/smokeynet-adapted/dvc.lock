@@ -2121,7 +2121,8 @@ stages:
     cmd: uv run python scripts/compare_variants.py --variant-dir 
       data/08_reporting/val/gru --variant-dir data/08_reporting/val/gru_convnext
       --variant-dir data/08_reporting/val/gru_finetune --variant-dir 
-      data/08_reporting/val/gru_convnext_finetune --output-path 
+      data/08_reporting/val/gru_convnext_finetune --variant-dir 
+      data/08_reporting/val/gru_convnext_base_finetune --output-path 
       data/08_reporting/comparison.md
     deps:
     - path: data/08_reporting/val/gru/metrics.json
@@ -2140,6 +2141,14 @@ stages:
       hash: md5
       md5: 4cf484497dc7837e1b4569e057a7fe71
       size: 48525
+    - path: data/08_reporting/val/gru_convnext_base_finetune/metrics.json
+      hash: md5
+      md5: 0b429d897bc5efa07f8083e890e5cfbc
+      size: 517
+    - path: data/08_reporting/val/gru_convnext_base_finetune/predictions.json
+      hash: md5
+      md5: 6bc8cff47e4b2038c776cc712c5e3cb9
+      size: 48539
     - path: data/08_reporting/val/gru_convnext_finetune/metrics.json
       hash: md5
       md5: 9b89d1b07b6d7ea522eda5579beedcd0
@@ -2163,8 +2172,8 @@ stages:
     outs:
     - path: data/08_reporting/comparison.md
       hash: md5
-      md5: 677a1dcf1e44e4befe8bc401639d7fff
-      size: 646
+      md5: bae9ba36f0fb8f27db5eca7101a5a18e
+      size: 718
   plot_training@gru:
     cmd: uv run python scripts/plot_training.py --csv-log-dir 
       data/06_models/gru/csv_logs --output-path 
@@ -2308,3 +2317,279 @@ stages:
       hash: md5
       md5: 9013530276a7d509770cfb047c344fc7
       size: 183754
+  train_gru_convnext_base_finetune:
+    cmd: uv run python scripts/train.py --arch gru --train-dir 
+      data/05_model_input/train --val-dir data/05_model_input/val --output-dir 
+      data/06_models/gru_convnext_base_finetune --params-path params.yaml 
+      --params-key train_gru_convnext_base_finetune
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 87c9cd1891e075bf930f5ae399725dd7.dir
+      size: 976932275
+      nfiles: 38471
+    - path: data/05_model_input/val
+      hash: md5
+      md5: e662d34ba87b486399cbb444f0b3a1d2.dir
+      size: 89476209
+      nfiles: 3645
+    - path: scripts/train.py
+      hash: md5
+      md5: 29abc7433be9df4510f8588252987293
+      size: 5401
+    - path: src/smokeynet_adapted/augment.py
+      hash: md5
+      md5: f52a42f92caa2fac859bf3a81a18971d
+      size: 9489
+    - path: src/smokeynet_adapted/dataset.py
+      hash: md5
+      md5: 2d685d135baa79b0916c936f37a052dd
+      size: 3177
+    - path: src/smokeynet_adapted/lit_temporal.py
+      hash: md5
+      md5: e92af1e071a4246beb0a9ed2d0f2c711
+      size: 4827
+    - path: src/smokeynet_adapted/temporal_classifier.py
+      hash: md5
+      md5: ab1d72d4f03f1aa2e14f9f343fdee883
+      size: 6682
+    - path: src/smokeynet_adapted/training_plots.py
+      hash: md5
+      md5: 48015bd154587ba3ba493ed5c337e27a
+      size: 3290
+    params:
+      params.yaml:
+        augment:
+          enabled: true
+          spatial:
+            flip_prob: 0.5
+            rotation_deg: 5.0
+            scale_range:
+            - 0.9
+            - 1.1
+            translate_frac: 0.05
+          photometric:
+            brightness_range:
+            - 0.8
+            - 1.2
+            contrast_range:
+            - 0.8
+            - 1.2
+            saturation_range:
+            - 0.8
+            - 1.2
+          temporal:
+            subseq_prob: 0.5
+            subseq_min_len: 4
+            stride_prob: 0.25
+            frame_drop_prob: 0.15
+            min_valid_after_drop: 4
+        train_gru_convnext_base_finetune:
+          hidden_dim: 128
+          max_frames: 20
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.001
+          weight_decay: 0.01
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          arch: gru
+          backbone: convnext_base
+          num_layers: 1
+          bidirectional: false
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+    outs:
+    - path: data/06_models/gru_convnext_base_finetune/best_checkpoint.pt
+      hash: md5
+      md5: 41e43317f093f19ccb9bc7ba287e1de8
+      size: 575519259
+    - path: data/06_models/gru_convnext_base_finetune/csv_logs/
+      hash: md5
+      md5: cd749b33572f3ff923e9938f9d0f9a9e.dir
+      size: 7737
+      nfiles: 2
+    - path: data/06_models/gru_convnext_base_finetune/plots/training_curves.png
+      hash: md5
+      md5: bcab08eea60b004fb7de66c610b2ef4a
+      size: 194924
+  evaluate_gru_convnext_base_finetune@train:
+    cmd: uv run python scripts/evaluate.py --arch gru --data-dir 
+      data/05_model_input/train --checkpoint 
+      data/06_models/gru_convnext_base_finetune/best_checkpoint.pt --output-dir 
+      data/08_reporting/train/gru_convnext_base_finetune --params-path 
+      params.yaml --params-key train_gru_convnext_base_finetune 
+      --render-tubes-dir data/08_reporting/tubes/train
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 87c9cd1891e075bf930f5ae399725dd7.dir
+      size: 976932275
+      nfiles: 38471
+    - path: data/06_models/gru_convnext_base_finetune/best_checkpoint.pt
+      hash: md5
+      md5: 41e43317f093f19ccb9bc7ba287e1de8
+      size: 575519259
+    - path: data/08_reporting/tubes/train
+      hash: md5
+      md5: 44ad961ee8db4f5399295d6fa3619175.dir
+      size: 445626390
+      nfiles: 2841
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 4172cdb32d15ab90041a2f9b6fd9a29e
+      size: 8483
+    - path: src/smokeynet_adapted/dataset.py
+      hash: md5
+      md5: 2d685d135baa79b0916c936f37a052dd
+      size: 3177
+    - path: src/smokeynet_adapted/lit_temporal.py
+      hash: md5
+      md5: e92af1e071a4246beb0a9ed2d0f2c711
+      size: 4827
+    - path: src/smokeynet_adapted/temporal_classifier.py
+      hash: md5
+      md5: ab1d72d4f03f1aa2e14f9f343fdee883
+      size: 6682
+    params:
+      params.yaml:
+        train_gru_convnext_base_finetune:
+          hidden_dim: 128
+          max_frames: 20
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.001
+          weight_decay: 0.01
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          arch: gru
+          backbone: convnext_base
+          num_layers: 1
+          bidirectional: false
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+    outs:
+    - path: 
+        data/08_reporting/train/gru_convnext_base_finetune/confusion_matrix.png
+      hash: md5
+      md5: c5f9413ed752e3970181170b93c38c06
+      size: 23050
+    - path: 
+        data/08_reporting/train/gru_convnext_base_finetune/confusion_matrix_normalized.png
+      hash: md5
+      md5: 0193b1a7e248729f969501b1197e30fb
+      size: 23266
+    - path: data/08_reporting/train/gru_convnext_base_finetune/errors
+      hash: md5
+      md5: cab4f2cf8d04bf6ac1f73d02f48190a2.dir
+      size: 10840464
+      nfiles: 88
+    - path: data/08_reporting/train/gru_convnext_base_finetune/metrics.json
+      hash: md5
+      md5: bb8758befa76a8b5f3c4243eeb6d0d7d
+      size: 525
+    - path: data/08_reporting/train/gru_convnext_base_finetune/pr_curve.png
+      hash: md5
+      md5: d60500eb9a0711f4ce3ce4cbb0cefbfc
+      size: 17519
+    - path: data/08_reporting/train/gru_convnext_base_finetune/predictions.json
+      hash: md5
+      md5: f16b40b5d0a14c8fd70567e485e37fc9
+      size: 484460
+    - path: data/08_reporting/train/gru_convnext_base_finetune/roc_curve.png
+      hash: md5
+      md5: b085b63dfd9c017293dc6fa3b0a7f7a6
+      size: 27560
+  evaluate_gru_convnext_base_finetune@val:
+    cmd: uv run python scripts/evaluate.py --arch gru --data-dir 
+      data/05_model_input/val --checkpoint 
+      data/06_models/gru_convnext_base_finetune/best_checkpoint.pt --output-dir 
+      data/08_reporting/val/gru_convnext_base_finetune --params-path params.yaml
+      --params-key train_gru_convnext_base_finetune --render-tubes-dir 
+      data/08_reporting/tubes/val
+    deps:
+    - path: data/05_model_input/val
+      hash: md5
+      md5: e662d34ba87b486399cbb444f0b3a1d2.dir
+      size: 89476209
+      nfiles: 3645
+    - path: data/06_models/gru_convnext_base_finetune/best_checkpoint.pt
+      hash: md5
+      md5: 41e43317f093f19ccb9bc7ba287e1de8
+      size: 575519259
+    - path: data/08_reporting/tubes/val
+      hash: md5
+      md5: 37516349f11a4598ec8e6ead7bcb4896.dir
+      size: 42457438
+      nfiles: 284
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 4172cdb32d15ab90041a2f9b6fd9a29e
+      size: 8483
+    - path: src/smokeynet_adapted/dataset.py
+      hash: md5
+      md5: 2d685d135baa79b0916c936f37a052dd
+      size: 3177
+    - path: src/smokeynet_adapted/lit_temporal.py
+      hash: md5
+      md5: e92af1e071a4246beb0a9ed2d0f2c711
+      size: 4827
+    - path: src/smokeynet_adapted/temporal_classifier.py
+      hash: md5
+      md5: ab1d72d4f03f1aa2e14f9f343fdee883
+      size: 6682
+    params:
+      params.yaml:
+        train_gru_convnext_base_finetune:
+          hidden_dim: 128
+          max_frames: 20
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.001
+          weight_decay: 0.01
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          arch: gru
+          backbone: convnext_base
+          num_layers: 1
+          bidirectional: false
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+    outs:
+    - path: 
+        data/08_reporting/val/gru_convnext_base_finetune/confusion_matrix.png
+      hash: md5
+      md5: 00ef9aeb3bdd575dcd5b3cd758768809
+      size: 20717
+    - path: 
+        data/08_reporting/val/gru_convnext_base_finetune/confusion_matrix_normalized.png
+      hash: md5
+      md5: 648e4e5eba069a6bea718808153d8a7f
+      size: 23420
+    - path: data/08_reporting/val/gru_convnext_base_finetune/errors
+      hash: md5
+      md5: 65ec828b089c38711e109595d1919d17.dir
+      size: 1282723
+      nfiles: 9
+    - path: data/08_reporting/val/gru_convnext_base_finetune/metrics.json
+      hash: md5
+      md5: 0b429d897bc5efa07f8083e890e5cfbc
+      size: 517
+    - path: data/08_reporting/val/gru_convnext_base_finetune/pr_curve.png
+      hash: md5
+      md5: e415260e97e6896c169792c62d2dc84f
+      size: 17506
+    - path: data/08_reporting/val/gru_convnext_base_finetune/predictions.json
+      hash: md5
+      md5: 6bc8cff47e4b2038c776cc712c5e3cb9
+      size: 48539
+    - path: data/08_reporting/val/gru_convnext_base_finetune/roc_curve.png
+      hash: md5
+      md5: e579f7492abf75c9671b89accfc93b10
+      size: 27257

@@ -73,6 +73,14 @@ train_gru_convnext_finetune:
   finetune_last_n_blocks: 1
   backbone_lr: 0.00001
 
+train_gru_convnext_base_finetune:
+  <<: *gru_defaults
+  backbone: convnext_base
+  batch_size: 16
+  finetune: true
+  finetune_last_n_blocks: 1
+  backbone_lr: 0.00001
+
 augment:
   enabled: true
   spatial:
