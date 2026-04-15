@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 .venv/
 .ipynb_checkpoints/
+.cache/
 data/08_reporting/augment_samples/
 data/06_models/*/batch_samples/
 data/06_models/*/best-v*.ckpt
