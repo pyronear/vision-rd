@@ -1,5 +1,7 @@
 """Tests for the basic temporal classifier Lightning module."""
 
+from unittest.mock import MagicMock
+
 import torch
 
 from bbox_tube_temporal.lit_temporal import LitTemporalClassifier
@@ -99,3 +101,46 @@ def test_lit_module_optimizer_stays_single_group_when_frozen():
     opt = lit.configure_optimizers()
     assert len(opt.param_groups) == 1
     assert opt.param_groups[0]["lr"] == 1e-3
+
+
+def test_lit_temporal_transformer_forward_shape():
+    lit = LitTemporalClassifier(
+        backbone="vit_small_patch16_224",
+        arch="transformer",
+        hidden_dim=64,
+        learning_rate=1e-4,
+        weight_decay=0.05,
+        pretrained=False,
+        transformer_num_layers=2,
+        transformer_num_heads=6,
+        transformer_ffn_dim=1536,
+        transformer_dropout=0.0,
+        max_frames=20,
+        global_pool="token",
+    )
+    patches = torch.randn(2, 4, 3, 224, 224)
+    mask = torch.ones(2, 4, dtype=torch.bool)
+    out = lit(patches, mask)
+    assert out.shape == (2,)
+
+
+def test_lit_temporal_cosine_warmup_returns_scheduler_dict(tmp_path):
+    lit = LitTemporalClassifier(
+        backbone="resnet18",
+        arch="mean_pool",
+        hidden_dim=16,
+        learning_rate=1e-3,
+        weight_decay=1e-2,
+        pretrained=False,
+        use_cosine_warmup=True,
+        warmup_frac=0.1,
+    )
+    # configure_optimizers reads self.trainer; attach a minimal stub.
+    stub = MagicMock()
+    stub.estimated_stepping_batches = 100
+    lit.trainer = stub
+    out = lit.configure_optimizers()
+    assert isinstance(out, dict)
+    assert "optimizer" in out
+    assert "lr_scheduler" in out
+    assert out["lr_scheduler"]["interval"] == "step"

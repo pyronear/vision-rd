@@ -1,5 +1,7 @@
 """PyTorch Lightning wrapper around TemporalSmokeClassifier."""
 
+import math
+
 import lightning as L
 import torch
 from torch import Tensor
@@ -37,6 +39,14 @@ class LitTemporalClassifier(L.LightningModule):
         finetune: bool = False,
         finetune_last_n_blocks: int = 0,
         backbone_lr: float | None = None,
+        transformer_num_layers: int = 2,
+        transformer_num_heads: int = 6,
+        transformer_ffn_dim: int = 1536,
+        transformer_dropout: float = 0.1,
+        max_frames: int = 20,
+        global_pool: str = "avg",
+        use_cosine_warmup: bool = False,
+        warmup_frac: float = 0.05,
     ) -> None:
         super().__init__()
         self.save_hyperparameters()
@@ -49,12 +59,20 @@ class LitTemporalClassifier(L.LightningModule):
             bidirectional=bidirectional,
             finetune=finetune,
             finetune_last_n_blocks=finetune_last_n_blocks,
+            transformer_num_layers=transformer_num_layers,
+            transformer_num_heads=transformer_num_heads,
+            transformer_ffn_dim=transformer_ffn_dim,
+            transformer_dropout=transformer_dropout,
+            max_frames=max_frames,
+            global_pool=global_pool,
         )
         self.loss_fn = torch.nn.BCEWithLogitsLoss()
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
         self.finetune = finetune
         self.backbone_lr = backbone_lr
+        self.use_cosine_warmup = use_cosine_warmup
+        self.warmup_frac = warmup_frac
         self._val_preds: list[float] = []
         self._val_labels: list[float] = []
 
@@ -100,30 +118,47 @@ class LitTemporalClassifier(L.LightningModule):
     def configure_optimizers(self):
         if not self.finetune:
             head_params = [p for p in self.model.head.parameters() if p.requires_grad]
-            return torch.optim.AdamW(
+            optimizer = torch.optim.AdamW(
                 head_params,
                 lr=self.learning_rate,
                 weight_decay=self.weight_decay,
             )
-
-        if self.backbone_lr is None:
-            raise ValueError("backbone_lr must be set when finetune=True")
-
-        backbone_params = [
-            p for p in self.model.backbone.parameters() if p.requires_grad
-        ]
-        head_params = [p for p in self.model.head.parameters() if p.requires_grad]
-        return torch.optim.AdamW(
-            [
-                {
-                    "params": head_params,
-                    "lr": self.learning_rate,
-                    "weight_decay": self.weight_decay,
-                },
-                {
-                    "params": backbone_params,
-                    "lr": self.backbone_lr,
-                    "weight_decay": self.weight_decay,
-                },
+        else:
+            if self.backbone_lr is None:
+                raise ValueError("backbone_lr must be set when finetune=True")
+            backbone_params = [
+                p for p in self.model.backbone.parameters() if p.requires_grad
             ]
-        )
+            head_params = [p for p in self.model.head.parameters() if p.requires_grad]
+            optimizer = torch.optim.AdamW(
+                [
+                    {
+                        "params": head_params,
+                        "lr": self.learning_rate,
+                        "weight_decay": self.weight_decay,
+                    },
+                    {
+                        "params": backbone_params,
+                        "lr": self.backbone_lr,
+                        "weight_decay": self.weight_decay,
+                    },
+                ]
+            )
+
+        if not self.use_cosine_warmup:
+            return optimizer
+
+        total_steps = int(self.trainer.estimated_stepping_batches)
+        warmup_steps = max(1, int(total_steps * self.warmup_frac))
+
+        def lr_lambda(step: int) -> float:
+            if step < warmup_steps:
+                return step / warmup_steps
+            progress = (step - warmup_steps) / max(1, total_steps - warmup_steps)
+            return 0.5 * (1.0 + math.cos(math.pi * progress))
+
+        scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": {"scheduler": scheduler, "interval": "step"},
+        }

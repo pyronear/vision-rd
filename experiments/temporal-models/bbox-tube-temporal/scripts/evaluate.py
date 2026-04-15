@@ -59,7 +59,9 @@ def plot_confusion_matrix(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--arch", choices=["mean_pool", "gru"], required=True)
+    parser.add_argument(
+        "--arch", choices=["mean_pool", "gru", "transformer"], required=True
+    )
     parser.add_argument("--data-dir", type=Path, required=True)
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -83,6 +85,14 @@ def main() -> None:
         pretrained=False,
         num_layers=cfg.get("num_layers", 1),
         bidirectional=cfg.get("bidirectional", False),
+        transformer_num_layers=cfg.get("transformer_num_layers", 2),
+        transformer_num_heads=cfg.get("transformer_num_heads", 6),
+        transformer_ffn_dim=cfg.get("transformer_ffn_dim", 1536),
+        transformer_dropout=cfg.get("transformer_dropout", 0.1),
+        max_frames=cfg.get("max_frames", 20),
+        global_pool=cfg.get("global_pool", "avg"),
+        use_cosine_warmup=cfg.get("use_cosine_warmup", False),
+        warmup_frac=cfg.get("warmup_frac", 0.05),
     )
     lit.eval()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

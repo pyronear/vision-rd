@@ -27,7 +27,9 @@ from bbox_tube_temporal.training_plots import (
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--arch", choices=["mean_pool", "gru"], required=True)
+    parser.add_argument(
+        "--arch", choices=["mean_pool", "gru", "transformer"], required=True
+    )
     parser.add_argument("--train-dir", type=Path, required=True)
     parser.add_argument("--val-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -103,6 +105,14 @@ def main() -> None:
         finetune=cfg.get("finetune", False),
         finetune_last_n_blocks=cfg.get("finetune_last_n_blocks", 0),
         backbone_lr=cfg.get("backbone_lr"),
+        transformer_num_layers=cfg.get("transformer_num_layers", 2),
+        transformer_num_heads=cfg.get("transformer_num_heads", 6),
+        transformer_ffn_dim=cfg.get("transformer_ffn_dim", 1536),
+        transformer_dropout=cfg.get("transformer_dropout", 0.1),
+        max_frames=cfg.get("max_frames", 20),
+        global_pool=cfg.get("global_pool", "avg"),
+        use_cosine_warmup=cfg.get("use_cosine_warmup", False),
+        warmup_frac=cfg.get("warmup_frac", 0.05),
     )
 
     callbacks = [
