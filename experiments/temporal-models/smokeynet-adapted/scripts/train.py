@@ -16,6 +16,7 @@ from lightning.pytorch.loggers import CSVLogger, TensorBoardLogger
 from torch.utils.data import DataLoader
 
 from smokeynet_adapted.augment import build_tube_augment
+from smokeynet_adapted.batch_samples import SampleTrainBatchesCallback
 from smokeynet_adapted.dataset import TubePatchDataset
 from smokeynet_adapted.lit_temporal import LitTemporalClassifier
 
@@ -28,6 +29,12 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--params-path", type=Path, required=True)
     parser.add_argument("--params-key", required=True, help="Key in params.yaml")
+    parser.add_argument(
+        "--sample-batches",
+        type=int,
+        default=3,
+        help="Dump this many training batches as PNG grids at epoch 0 (0 disables)",
+    )
     args = parser.parse_args()
 
     full_params = yaml.safe_load(args.params_path.read_text())
@@ -107,6 +114,13 @@ def main() -> None:
             monitor="val/f1", mode="max", patience=cfg["early_stop_patience"]
         ),
     ]
+    if args.sample_batches > 0:
+        callbacks.append(
+            SampleTrainBatchesCallback(
+                output_dir=args.output_dir / "batch_samples",
+                n_batches=args.sample_batches,
+            )
+        )
     loggers = [
         CSVLogger(save_dir=args.output_dir, name="csv_logs"),
         TensorBoardLogger(save_dir=args.output_dir, name="tb_logs"),

@@ -3,3 +3,4 @@ __pycache__/
 .venv/
 .ipynb_checkpoints/
 data/08_reporting/augment_samples/
+data/06_models/*/batch_samples/
