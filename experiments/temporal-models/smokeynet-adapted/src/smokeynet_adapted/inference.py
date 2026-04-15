@@ -158,3 +158,27 @@ def crop_tube_patches(
         mask[slot] = True
 
     return patches, mask
+
+
+def score_tubes(
+    classifier: Any,
+    *,
+    patches_per_tube: list[torch.Tensor],
+    masks_per_tube: list[torch.Tensor],
+) -> torch.Tensor:
+    """Run one batched classifier forward over all tubes.
+
+    Args:
+        classifier: A callable ``(patches[N,T,3,H,W], mask[N,T]) -> logits[N]``.
+        patches_per_tube: One ``[T, 3, H, W]`` tensor per tube.
+        masks_per_tube: One ``[T]`` bool tensor per tube.
+
+    Returns:
+        ``Tensor[N]`` of logits (empty tensor if no tubes).
+    """
+    if not patches_per_tube:
+        return torch.zeros(0)
+    patches = torch.stack(patches_per_tube, dim=0)
+    mask = torch.stack(masks_per_tube, dim=0)
+    with torch.no_grad():
+        return classifier(patches, mask)

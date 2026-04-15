@@ -14,6 +14,7 @@ from smokeynet_adapted.inference import (
     crop_tube_patches,
     filter_and_interpolate_tubes,
     run_yolo_on_frames,
+    score_tubes,
 )
 from smokeynet_adapted.types import Detection, FrameDetections, Tube, TubeEntry
 
@@ -248,3 +249,25 @@ class TestCropTubePatches:
         )
         assert patches.shape == (2, 3, 224, 224)
         assert mask.tolist() == [True, True]
+
+
+class TestScoreTubes:
+    def test_empty_input_returns_empty(self) -> None:
+        classifier = MagicMock()
+        logits = score_tubes(classifier, patches_per_tube=[], masks_per_tube=[])
+        assert logits.shape == (0,)
+        classifier.assert_not_called()
+
+    def test_single_batched_forward(self) -> None:
+        classifier = MagicMock(return_value=torch.tensor([1.2, -0.3]))
+        patches = [torch.zeros(4, 3, 8, 8), torch.zeros(4, 3, 8, 8)]
+        masks = [torch.tensor([True, True, True, True]),
+                 torch.tensor([True, True, False, False])]
+
+        logits = score_tubes(classifier, patches_per_tube=patches, masks_per_tube=masks)
+
+        assert classifier.call_count == 1
+        args, _ = classifier.call_args
+        assert args[0].shape == (2, 4, 3, 8, 8)
+        assert args[1].shape == (2, 4)
+        assert logits.tolist() == pytest.approx([1.2, -0.3], rel=1e-5)
