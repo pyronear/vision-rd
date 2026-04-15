@@ -26,10 +26,18 @@ class TimmBackbone(nn.Module):
         finetune: bool = False,
         finetune_last_n_blocks: int = 0,
         global_pool: str = "avg",
+        img_size: int | None = None,
     ) -> None:
         super().__init__()
+        # DINOv2 ViT-S/14 was pretrained at 518x518 and hardcodes self.img_size;
+        # passing img_size lets timm interpolate pos_embed to our 224 input.
+        extra = {"img_size": img_size} if img_size is not None else {}
         self.backbone = timm.create_model(
-            name, pretrained=pretrained, num_classes=0, global_pool=global_pool
+            name,
+            pretrained=pretrained,
+            num_classes=0,
+            global_pool=global_pool,
+            **extra,
         )
         self.feat_dim: int = self.backbone.num_features
         self.finetune = finetune
@@ -229,6 +237,7 @@ class TemporalSmokeClassifier(nn.Module):
         transformer_dropout: float = 0.1,
         max_frames: int = 20,
         global_pool: str = "avg",
+        img_size: int | None = None,
     ) -> None:
         super().__init__()
         self.backbone = TimmBackbone(
@@ -237,6 +246,7 @@ class TemporalSmokeClassifier(nn.Module):
             finetune=finetune,
             finetune_last_n_blocks=finetune_last_n_blocks,
             global_pool=global_pool,
+            img_size=img_size,
         )
         feat_dim = self.backbone.feat_dim
         if arch == "mean_pool":

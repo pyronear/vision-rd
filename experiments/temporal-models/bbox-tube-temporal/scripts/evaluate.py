@@ -91,6 +91,7 @@ def main() -> None:
         transformer_dropout=cfg.get("transformer_dropout", 0.1),
         max_frames=cfg.get("max_frames", 20),
         global_pool=cfg.get("global_pool", "avg"),
+        img_size=cfg.get("img_size"),
         use_cosine_warmup=cfg.get("use_cosine_warmup", False),
         warmup_frac=cfg.get("warmup_frac", 0.05),
     )

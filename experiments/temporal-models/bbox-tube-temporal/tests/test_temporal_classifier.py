@@ -311,6 +311,20 @@ def test_timm_backbone_vit_s14_dinov2_finetune_unfreezes_last_block():
     assert all(".blocks.11." in n for n in trainable_names), trainable_names
 
 
+def test_timm_backbone_vit_s14_dinov2_img_size_224_forward():
+    # DINOv2 ViT-S/14 was pretrained at 518x518 and would reject 224 input
+    # without the img_size override (triggers pos_embed interpolation).
+    bb = TimmBackbone(
+        name="vit_small_patch14_dinov2.lvd142m",
+        pretrained=False,
+        global_pool="token",
+        img_size=224,
+    )
+    x = torch.randn(2, 3, 224, 224)
+    out = bb(x)
+    assert out.shape == (2, 384)
+
+
 def test_transformer_head_returns_logits_per_batch():
     head = TransformerHead(
         feat_dim=384,

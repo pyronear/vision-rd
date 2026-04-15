@@ -89,6 +89,7 @@ _vit_defaults: &vit_defaults
   weight_decay: 0.05
   max_epochs: 30
   global_pool: token
+  img_size: 224
   transformer_num_layers: 2
   transformer_num_heads: 6
   transformer_ffn_dim: 1536

@@ -45,6 +45,7 @@ class LitTemporalClassifier(L.LightningModule):
         transformer_dropout: float = 0.1,
         max_frames: int = 20,
         global_pool: str = "avg",
+        img_size: int | None = None,
         use_cosine_warmup: bool = False,
         warmup_frac: float = 0.05,
     ) -> None:
@@ -65,6 +66,7 @@ class LitTemporalClassifier(L.LightningModule):
             transformer_dropout=transformer_dropout,
             max_frames=max_frames,
             global_pool=global_pool,
+            img_size=img_size,
         )
         self.loss_fn = torch.nn.BCEWithLogitsLoss()
         self.learning_rate = learning_rate
