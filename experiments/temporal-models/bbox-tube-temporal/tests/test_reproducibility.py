@@ -146,18 +146,26 @@ def test_training_is_bitwise_reproducible_with_fixed_seed(tmp_path: Path) -> Non
     )
 
 
-def _fit_once_transformer(seed: int, train_dir: Path, val_dir: Path, log_dir: Path) -> dict:
+def _fit_once_transformer(
+    seed: int, train_dir: Path, val_dir: Path, log_dir: Path
+) -> dict:
     L.seed_everything(seed, workers=True)
 
     train_ds = TubePatchDataset(train_dir, max_frames=5)
     val_ds = TubePatchDataset(val_dir, max_frames=5)
     train_loader = DataLoader(
-        train_ds, batch_size=2, shuffle=True,
-        num_workers=2, persistent_workers=True,
+        train_ds,
+        batch_size=2,
+        shuffle=True,
+        num_workers=2,
+        persistent_workers=True,
     )
     val_loader = DataLoader(
-        val_ds, batch_size=2, shuffle=False,
-        num_workers=2, persistent_workers=True,
+        val_ds,
+        batch_size=2,
+        shuffle=False,
+        num_workers=2,
+        persistent_workers=True,
     )
 
     lit = LitTemporalClassifier(
@@ -176,10 +184,16 @@ def _fit_once_transformer(seed: int, train_dir: Path, val_dir: Path, log_dir: Pa
     )
 
     trainer = L.Trainer(
-        max_epochs=2, accelerator="cpu", devices=1, deterministic=True,
-        logger=False, enable_checkpointing=False,
-        enable_progress_bar=False, enable_model_summary=False,
-        log_every_n_steps=1, default_root_dir=log_dir,
+        max_epochs=2,
+        accelerator="cpu",
+        devices=1,
+        deterministic=True,
+        logger=False,
+        enable_checkpointing=False,
+        enable_progress_bar=False,
+        enable_model_summary=False,
+        log_every_n_steps=1,
+        default_root_dir=log_dir,
     )
     trainer.fit(lit, train_loader, val_loader)
     return {k: v.detach().clone() for k, v in lit.state_dict().items()}
@@ -189,7 +203,8 @@ def test_transformer_training_is_bitwise_reproducible_with_fixed_seed(
     tmp_path: Path,
 ) -> None:
     train_dir = _make_split(
-        tmp_path, "train",
+        tmp_path,
+        "train",
         [("a", 1, 5), ("b", 0, 4), ("c", 1, 3), ("d", 0, 5)],
     )
     val_dir = _make_split(tmp_path, "val", [("e", 1, 4), ("f", 0, 3)])

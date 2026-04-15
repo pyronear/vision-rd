@@ -232,9 +232,7 @@ def transformer_classifier() -> TemporalSmokeClassifier:
     return model
 
 
-def _offline_logit_with_cfg(
-    classifier: TemporalSmokeClassifier, cfg: dict
-) -> float:
+def _offline_logit_with_cfg(classifier: TemporalSmokeClassifier, cfg: dict) -> float:
     """Variant of _offline_logit that reads patch_size/normalization from cfg."""
     fdets = load_frame_detections(FIXTURE)
     tubes = build_tubes(fdets, iou_threshold=0.2, max_misses=2)
@@ -254,9 +252,7 @@ def _offline_logit_with_cfg(
         assert det is not None
         img = np.array(Image.open(frame_paths[entry.frame_idx]).convert("RGB"))
         h_img, w_img, _ = img.shape
-        cx, cy, w, h = expand_bbox(
-            det.cx, det.cy, det.w, det.h, mi["context_factor"]
-        )
+        cx, cy, w, h = expand_bbox(det.cx, det.cy, det.w, det.h, mi["context_factor"])
         box = norm_bbox_to_pixel_square(cx, cy, w, h, w_img, h_img)
         p = crop_and_resize(img, box, mi["patch_size"])
         pt = to_tensor(Image.fromarray(p))
