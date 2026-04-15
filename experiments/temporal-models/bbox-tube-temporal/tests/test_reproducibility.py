@@ -144,3 +144,66 @@ def test_training_is_bitwise_reproducible_with_fixed_seed(tmp_path: Path) -> Non
         "too trivial to distinguish seeds, so same-seed equality does not prove "
         "reproducibility. Increase training work."
     )
+
+
+def _fit_once_transformer(seed: int, train_dir: Path, val_dir: Path, log_dir: Path) -> dict:
+    L.seed_everything(seed, workers=True)
+
+    train_ds = TubePatchDataset(train_dir, max_frames=5)
+    val_ds = TubePatchDataset(val_dir, max_frames=5)
+    train_loader = DataLoader(
+        train_ds, batch_size=2, shuffle=True,
+        num_workers=2, persistent_workers=True,
+    )
+    val_loader = DataLoader(
+        val_ds, batch_size=2, shuffle=False,
+        num_workers=2, persistent_workers=True,
+    )
+
+    lit = LitTemporalClassifier(
+        backbone="vit_small_patch16_224",
+        arch="transformer",
+        hidden_dim=16,
+        learning_rate=1e-4,
+        weight_decay=5e-2,
+        pretrained=False,
+        transformer_num_layers=1,
+        transformer_num_heads=2,
+        transformer_ffn_dim=64,
+        transformer_dropout=0.0,
+        max_frames=5,
+        global_pool="token",
+    )
+
+    trainer = L.Trainer(
+        max_epochs=2, accelerator="cpu", devices=1, deterministic=True,
+        logger=False, enable_checkpointing=False,
+        enable_progress_bar=False, enable_model_summary=False,
+        log_every_n_steps=1, default_root_dir=log_dir,
+    )
+    trainer.fit(lit, train_loader, val_loader)
+    return {k: v.detach().clone() for k, v in lit.state_dict().items()}
+
+
+def test_transformer_training_is_bitwise_reproducible_with_fixed_seed(
+    tmp_path: Path,
+) -> None:
+    train_dir = _make_split(
+        tmp_path, "train",
+        [("a", 1, 5), ("b", 0, 4), ("c", 1, 3), ("d", 0, 5)],
+    )
+    val_dir = _make_split(tmp_path, "val", [("e", 1, 4), ("f", 0, 3)])
+
+    run1 = _fit_once_transformer(SEED, train_dir, val_dir, tmp_path / "run1")
+    run2 = _fit_once_transformer(SEED, train_dir, val_dir, tmp_path / "run2")
+    run_other = _fit_once_transformer(
+        OTHER_SEED, train_dir, val_dir, tmp_path / "run_other"
+    )
+
+    assert run1.keys() == run2.keys() == run_other.keys()
+    for key in run1:
+        assert torch.equal(run1[key], run2[key]), (
+            f"Same-seed transformer runs diverged at {key!r}"
+        )
+    differing = [key for key in run1 if not torch.equal(run1[key], run_other[key])]
+    assert differing, "Different-seed run produced identical transformer weights"

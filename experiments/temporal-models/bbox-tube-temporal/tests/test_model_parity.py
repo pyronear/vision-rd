@@ -169,3 +169,123 @@ def test_parity_logit_matches(classifier: TemporalSmokeClassifier) -> None:
     online = max(out.details["tube_logits"])
 
     assert online == pytest.approx(offline, abs=1e-5)
+
+
+CFG_TRANSFORMER: dict = {
+    "infer": {"confidence_threshold": 0.01, "iou_nms": 0.2, "image_size": 224},
+    "tubes": {
+        "iou_threshold": 0.2,
+        "max_misses": 2,
+        "min_tube_length": 2,
+        "infer_min_tube_length": 2,
+        "min_detected_entries": 2,
+        "interpolate_gaps": True,
+    },
+    "model_input": {
+        "context_factor": 1.5,
+        "patch_size": 224,
+        "normalization": {
+            "mean": [0.485, 0.456, 0.406],
+            "std": [0.229, 0.224, 0.225],
+        },
+    },
+    "classifier": {
+        "backbone": "vit_small_patch16_224",
+        "arch": "transformer",
+        "hidden_dim": 32,
+        "max_frames": 5,
+        "pretrained": False,
+        "global_pool": "token",
+        "transformer_num_layers": 1,
+        "transformer_num_heads": 2,
+        "transformer_ffn_dim": 64,
+        "transformer_dropout": 0.0,
+    },
+    "decision": {
+        "aggregation": "max_logit",
+        "threshold": 0.0,
+        "target_recall": 0.95,
+        "trigger_rule": "end_of_winner",
+    },
+}
+
+
+@pytest.fixture(scope="module")
+def transformer_classifier() -> TemporalSmokeClassifier:
+    torch.manual_seed(0)
+    model = TemporalSmokeClassifier(
+        backbone="vit_small_patch16_224",
+        arch="transformer",
+        hidden_dim=32,
+        pretrained=False,
+        global_pool="token",
+        transformer_num_layers=1,
+        transformer_num_heads=2,
+        transformer_ffn_dim=64,
+        transformer_dropout=0.0,
+        max_frames=5,
+    )
+    model.eval()
+    return model
+
+
+def _offline_logit_with_cfg(
+    classifier: TemporalSmokeClassifier, cfg: dict
+) -> float:
+    """Variant of _offline_logit that reads patch_size/normalization from cfg."""
+    fdets = load_frame_detections(FIXTURE)
+    tubes = build_tubes(fdets, iou_threshold=0.2, max_misses=2)
+    tube = select_longest_tube(tubes)
+    assert tube is not None
+    interpolate_gaps(tube)
+
+    mi = cfg["model_input"]
+    t_max = cfg["classifier"]["max_frames"]
+    patches = torch.zeros(t_max, 3, mi["patch_size"], mi["patch_size"])
+    mask = torch.zeros(t_max, dtype=torch.bool)
+    frame_paths = sorted((FIXTURE / "images").glob("*.jpg"))
+    mean = torch.tensor(mi["normalization"]["mean"]).view(3, 1, 1)
+    std = torch.tensor(mi["normalization"]["std"]).view(3, 1, 1)
+    for slot, entry in enumerate(tube.entries[:t_max]):
+        det = entry.detection
+        assert det is not None
+        img = np.array(Image.open(frame_paths[entry.frame_idx]).convert("RGB"))
+        h_img, w_img, _ = img.shape
+        cx, cy, w, h = expand_bbox(
+            det.cx, det.cy, det.w, det.h, mi["context_factor"]
+        )
+        box = norm_bbox_to_pixel_square(cx, cy, w, h, w_img, h_img)
+        p = crop_and_resize(img, box, mi["patch_size"])
+        pt = to_tensor(Image.fromarray(p))
+        patches[slot] = (pt - mean) / std
+        mask[slot] = True
+
+    with torch.no_grad():
+        logit = classifier(patches.unsqueeze(0), mask.unsqueeze(0))
+    return float(logit.item())
+
+
+def test_parity_logit_matches_transformer(
+    transformer_classifier: TemporalSmokeClassifier,
+) -> None:
+    offline = _offline_logit_with_cfg(transformer_classifier, CFG_TRANSFORMER)
+
+    frames = [
+        Frame(frame_id=p.stem, image_path=p, timestamp=None)
+        for p in sorted((FIXTURE / "images").glob("*.jpg"))
+    ]
+    yolo = _fake_yolo_from_gt(FIXTURE)
+    # Pin device to CPU so offline (CPU-only) and online paths share numerics;
+    # ViT has enough float32 drift between CPU/GPU to break 1e-5 parity.
+    model = BboxTubeTemporalModel(
+        yolo_model=yolo,
+        classifier=transformer_classifier,
+        config=CFG_TRANSFORMER,
+        device="cpu",
+    )
+    out = model.predict(frames=frames)
+
+    assert out.details["num_tubes_kept"] >= 1
+    online = max(out.details["tube_logits"])
+
+    assert online == pytest.approx(offline, abs=1e-5)
