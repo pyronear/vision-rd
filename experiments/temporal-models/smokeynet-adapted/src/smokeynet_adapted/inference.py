@@ -9,7 +9,8 @@ from typing import Any
 
 from pyrocore.types import Frame
 
-from .types import Detection, FrameDetections
+from .tubes import interpolate_gaps as _interpolate_gaps
+from .types import Detection, FrameDetections, Tube
 
 
 def run_yolo_on_frames(
@@ -75,3 +76,37 @@ def run_yolo_on_frames(
             )
         )
     return out
+
+
+def filter_and_interpolate_tubes(
+    tubes: list[Tube],
+    *,
+    min_tube_length: int,
+    min_detected_entries: int,
+    interpolate_gaps: bool,
+) -> list[Tube]:
+    """Filter tubes by length / observation count, then optionally interpolate gaps.
+
+    Args:
+        tubes: Candidate tubes (output of :func:`~smokeynet_adapted.tubes.build_tubes`).
+        min_tube_length: Keep tubes where
+            ``end_frame - start_frame + 1 >= min_tube_length``.
+        min_detected_entries: Keep tubes with at least this many non-gap entries.
+        interpolate_gaps: If True, fill gap entries in surviving tubes via
+            :func:`~smokeynet_adapted.tubes.interpolate_gaps`.
+
+    Returns:
+        Surviving tubes in original order.
+    """
+    survivors: list[Tube] = []
+    for t in tubes:
+        length = t.end_frame - t.start_frame + 1
+        if length < min_tube_length:
+            continue
+        n_obs = sum(1 for e in t.entries if e.detection is not None)
+        if n_obs < min_detected_entries:
+            continue
+        if interpolate_gaps:
+            _interpolate_gaps(t)
+        survivors.append(t)
+    return survivors

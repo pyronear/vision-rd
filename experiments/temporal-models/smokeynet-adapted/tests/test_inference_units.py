@@ -8,8 +8,8 @@ import pytest
 import torch
 from pyrocore.types import Frame
 
-from smokeynet_adapted.inference import run_yolo_on_frames
-from smokeynet_adapted.types import FrameDetections
+from smokeynet_adapted.inference import filter_and_interpolate_tubes, run_yolo_on_frames
+from smokeynet_adapted.types import Detection, FrameDetections, Tube, TubeEntry
 
 
 def _fake_yolo_result(
@@ -95,3 +95,72 @@ class TestRunYoloOnFrames:
         )
         assert result == []
         yolo.predict.assert_not_called()
+
+
+def _tube(tid: int, entries: list[tuple[int, Detection | None]]) -> Tube:
+    return Tube(
+        tube_id=tid,
+        entries=[TubeEntry(frame_idx=i, detection=d) for (i, d) in entries],
+        start_frame=entries[0][0],
+        end_frame=entries[-1][0],
+    )
+
+
+def _det(cx: float = 0.5, cy: float = 0.5, w: float = 0.1, h: float = 0.1) -> Detection:
+    return Detection(class_id=0, cx=cx, cy=cy, w=w, h=h, confidence=0.9)
+
+
+class TestFilterAndInterpolate:
+    def test_drops_tubes_shorter_than_min_length(self) -> None:
+        tubes = [
+            _tube(0, [(0, _det()), (1, _det())]),             # length 2 - keep
+            _tube(1, [(3, _det())]),                           # length 1 - drop
+        ]
+        out = filter_and_interpolate_tubes(
+            tubes, min_tube_length=2, min_detected_entries=1, interpolate_gaps=False
+        )
+        assert [t.tube_id for t in out] == [0]
+
+    def test_drops_tubes_with_too_few_observed(self) -> None:
+        tubes = [
+            _tube(0, [(0, _det()), (1, None), (2, None), (3, None)]),
+            _tube(1, [(0, _det()), (1, _det()), (2, None), (3, None)]),
+        ]
+        out = filter_and_interpolate_tubes(
+            tubes, min_tube_length=2, min_detected_entries=2, interpolate_gaps=False
+        )
+        assert [t.tube_id for t in out] == [1]
+
+    def test_interpolation_applied_when_enabled(self) -> None:
+        tubes = [
+            _tube(
+                0,
+                [
+                    (0, _det(cx=0.2)),
+                    (1, None),
+                    (2, _det(cx=0.4)),
+                ],
+            ),
+        ]
+        out = filter_and_interpolate_tubes(
+            tubes, min_tube_length=2, min_detected_entries=2, interpolate_gaps=True
+        )
+        assert len(out) == 1
+        mid = out[0].entries[1]
+        assert mid.is_gap is True
+        assert mid.detection is not None
+        assert mid.detection.cx == pytest.approx(0.3)
+
+    def test_interpolation_skipped_when_disabled(self) -> None:
+        tubes = [
+            _tube(0, [(0, _det()), (1, None), (2, _det())]),
+        ]
+        out = filter_and_interpolate_tubes(
+            tubes, min_tube_length=2, min_detected_entries=2, interpolate_gaps=False
+        )
+        assert out[0].entries[1].detection is None
+
+    def test_empty_input(self) -> None:
+        assert filter_and_interpolate_tubes(
+            [], min_tube_length=2, min_detected_entries=1, interpolate_gaps=True
+        ) == []
