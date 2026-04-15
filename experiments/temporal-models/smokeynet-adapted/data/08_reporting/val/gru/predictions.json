@@ -2,1988 +2,1988 @@
   {
     "sequence_id": "pyronear-sdis-77_croix-augas_161_2024-08-19T07-58-07",
     "truth": 1,
-    "prob": 0.9961532950401306,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_blsmoboc_999_2019-07-16T21-45-53",
-    "truth": 1,
-    "prob": 0.9944022297859192,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_lpemoboc_999_2020-08-22T21-56-03",
-    "truth": 1,
-    "prob": 0.9942910671234131,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_courmettes_160_2024-02-27T13-35-30",
-    "truth": 1,
-    "prob": 0.9942641854286194,
+    "prob": 0.9997389912605286,
     "predicted": 1,
     "correct": true
   },
   {
     "sequence_id": "pyronear-force-06_courmettes_275_2024-02-24T13-14-16",
     "truth": 1,
-    "prob": 0.9938961863517761,
+    "prob": 0.9990102052688599,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "hpwren-figlib_bhsmoboc_999_2018-07-27T22-44-14",
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-02-27T13-35-30",
     "truth": 1,
-    "prob": 0.9928257465362549,
+    "prob": 0.9988240599632263,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_ferion_142_2024-01-08T11-52-23",
+    "sequence_id": "hpwren-figlib_lpemoboc_999_2020-08-22T21-56-03",
     "truth": 1,
-    "prob": 0.991546094417572,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-77_videlles-02_80_2025-08-24T16-42-08",
-    "truth": 1,
-    "prob": 0.9910144209861755,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_piwmoboc_999_2020-09-05T23-28-09",
-    "truth": 1,
-    "prob": 0.9909868836402893,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_ferion_142_2024-02-25T09-47-14",
-    "truth": 1,
-    "prob": 0.9902846217155457,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_serre-de-barre_350_2024-08-26T14-07-47",
-    "truth": 1,
-    "prob": 0.9893640279769897,
+    "prob": 0.9982616305351257,
     "predicted": 1,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-77_croix-augas-01_60_2025-08-27T10-44-06",
     "truth": 1,
-    "prob": 0.9889280796051025,
+    "prob": 0.9982540011405945,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "hpwren-figlib_piemoboc_999_2020-08-23T23-12-05",
+    "sequence_id": "pyronear-force-06_ferion_142_2024-02-25T09-47-14",
     "truth": 1,
-    "prob": 0.9888172149658203,
+    "prob": 0.997892439365387,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "hpwren-figlib_hpnmoboc_999_2017-06-13T21-01-25",
+    "sequence_id": "hpwren-figlib_blsmoboc_999_2019-07-16T21-45-53",
     "truth": 1,
-    "prob": 0.9886466860771179,
+    "prob": 0.9975951313972473,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "hpwren-figlib_smnmoboc_999_2018-07-06T20-31-27",
+    "sequence_id": "hpwren-figlib_bhsmoboc_999_2018-07-27T22-44-14",
     "truth": 1,
-    "prob": 0.9875097274780273,
+    "prob": 0.9974823594093323,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_290_2024-03-17T11-15-46",
+    "sequence_id": "pyronear-force-06_ferion_142_2024-01-08T11-52-23",
     "truth": 1,
-    "prob": 0.9861482381820679,
+    "prob": 0.9969694018363953,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "hpwren-figlib_smertcs8moboc_999_2017-07-13T23-23-55",
+    "sequence_id": "hpwren-figlib_piwmoboc_999_2020-09-05T23-28-09",
     "truth": 1,
-    "prob": 0.9857832193374634,
+    "prob": 0.9969013929367065,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-77_croix-augas_59_2024-07-07T21-53-42",
+    "sequence_id": "pyronear-sdis-77_videlles-02_80_2025-08-24T16-42-08",
     "truth": 1,
-    "prob": 0.985275387763977,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_serre-de-barre_160_2024-08-29T11-43-07",
-    "truth": 1,
-    "prob": 0.98447185754776,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_290_2024-02-03T17-05-08",
-    "truth": 1,
-    "prob": 0.9839783310890198,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-77_croix-augas-02_100_2025-08-24T07-00-15",
-    "truth": 1,
-    "prob": 0.9837729334831238,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_pismoboc_999_2019-10-06T20-16-09",
-    "truth": 1,
-    "prob": 0.9835702180862427,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_110_2024-09-05T11-05-34",
-    "truth": 1,
-    "prob": 0.9833327531814575,
+    "prob": 0.9963562488555908,
     "predicted": 1,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_brison_020_2024-02-24T15-00-16",
     "truth": 1,
-    "prob": 0.9826447367668152,
+    "prob": 0.9961515069007874,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "hpwren-figlib_rmwmoboc_999_2019-08-26T21-45-06",
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_350_2024-08-26T14-07-47",
     "truth": 1,
-    "prob": 0.9825835824012756,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_110_2024-03-08T09-20-28",
-    "truth": 1,
-    "prob": 0.9825718402862549,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_omwmoboc_999_2020-06-19T00-25-41",
-    "truth": 1,
-    "prob": 0.9822090864181519,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_valbonne_067_2024-02-16T10-12-36",
-    "truth": 1,
-    "prob": 0.9809957146644592,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_wcemoboc_999_2021-07-11T19-59-54",
-    "truth": 1,
-    "prob": 0.9809871912002563,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_ferion_142_2024-01-09T10-08-39",
-    "truth": 1,
-    "prob": 0.9807416796684265,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_bhnmoboc_999_2018-05-04T23-50-10",
-    "truth": 1,
-    "prob": 0.9804120063781738,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_courmettes_275_2024-02-12T13-55-28",
-    "truth": 1,
-    "prob": 0.9796531200408936,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-02-23T11-07-07",
-    "truth": 1,
-    "prob": 0.9783174991607666,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_valbonne_138_2024-01-12T11-45-43",
-    "truth": 1,
-    "prob": 0.978029191493988,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_rmnmoboc_999_2018-05-04T23-49-00",
-    "truth": 1,
-    "prob": 0.9770219922065735,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_cabanelle_327_2024-02-18T10-22-35",
-    "truth": 1,
-    "prob": 0.9766303300857544,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_ferion_142_2024-02-12T11-13-17",
-    "truth": 1,
-    "prob": 0.9757744669914246,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_110_2024-02-21T08-07-40",
-    "truth": 1,
-    "prob": 0.9752600789070129,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-10T10-02-45",
-    "truth": 1,
-    "prob": 0.9746007323265076,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_courmettes_275_2024-02-17T17-36-57",
-    "truth": 1,
-    "prob": 0.9741172790527344,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_courmettes_160_2024-01-09T15-58-27",
-    "truth": 1,
-    "prob": 0.9740399122238159,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_127_2023-03-01T19-58-13",
-    "truth": 1,
-    "prob": 0.9737363457679749,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_courmettes_275_2023-10-29T08-23-21",
-    "truth": 1,
-    "prob": 0.9718526005744934,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_020_2024-03-21T08-46-45",
-    "truth": 1,
-    "prob": 0.9717928171157837,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_029_2024-01-27T11-13-13",
-    "truth": 1,
-    "prob": 0.9712114930152893,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_rmemoboc_999_2020-02-26T19-46-02",
-    "truth": 1,
-    "prob": 0.9709621667861938,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_rmwmoboc_999_2018-07-29T00-08-06",
-    "truth": 1,
-    "prob": 0.9707979559898376,
+    "prob": 0.9961058497428894,
     "predicted": 1,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_brison_20_2024-01-02T14-34-40",
     "truth": 1,
-    "prob": 0.9669271111488342,
+    "prob": 0.9956650137901306,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-02-23T12-38-40",
+    "sequence_id": "pyronear-sdis-07_marguerite_029_2024-01-27T11-13-13",
     "truth": 1,
-    "prob": 0.9666128754615784,
+    "prob": 0.995404839515686,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_courmettes_160_2024-02-13T13-31-45",
+    "sequence_id": "pyronear-force-06_cabanelle_327_2024-02-18T10-22-35",
     "truth": 1,
-    "prob": 0.9662350416183472,
+    "prob": 0.9950993657112122,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_courmettes_212_2024-02-23T12-08-17",
+    "sequence_id": "hpwren-figlib_omwmoboc_999_2020-06-19T00-25-41",
     "truth": 1,
-    "prob": 0.9658933281898499,
+    "prob": 0.9945744872093201,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "hpwren-figlib_wcnmoboc_999_2018-07-27T22-37-18",
+    "sequence_id": "hpwren-figlib_piemoboc_999_2020-08-23T23-12-05",
     "truth": 1,
-    "prob": 0.9648003578186035,
+    "prob": 0.9941828846931458,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_ferion_287_2023-11-01T09-22-26",
+    "sequence_id": "pyronear-force-06_valbonne_067_2024-02-16T10-12-36",
     "truth": 1,
-    "prob": 0.9624558091163635,
+    "prob": 0.9931799173355103,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_marguerite_339_2024-02-07T15-44-11",
+    "sequence_id": "pyronear-force-06_courmettes_275_2024-02-12T13-55-28",
     "truth": 1,
-    "prob": 0.9622560143470764,
+    "prob": 0.9925876259803772,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_020_2024-01-18T10-26-11",
+    "sequence_id": "hpwren-figlib_hpnmoboc_999_2017-06-13T21-01-25",
     "truth": 1,
-    "prob": 0.9611338376998901,
+    "prob": 0.9924706220626831,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_127_2023-10-22T07-50-48",
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-03-17T11-15-46",
     "truth": 1,
-    "prob": 0.960054337978363,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_mlosmoboc_999_2020-08-29T19-55-23",
-    "truth": 1,
-    "prob": 0.9593302011489868,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_185_2023-09-19T08-59-22",
-    "truth": 1,
-    "prob": 0.9588268995285034,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_bhwmoboc_999_2019-10-01T22-40-16",
-    "truth": 1,
-    "prob": 0.9583433270454407,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_mlwmoboc_999_2019-09-22T22-29-17",
-    "truth": 1,
-    "prob": 0.9565694332122803,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_valbonne_138_2024-01-06T11-28-03",
-    "truth": 1,
-    "prob": 0.9559237957000732,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_cabanelle_327_2024-04-03T08-00-52",
-    "truth": 1,
-    "prob": 0.9552715420722961,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_110_2024-02-23T10-57-19",
-    "truth": 1,
-    "prob": 0.9551231861114502,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-06-07T11-03-47",
-    "truth": 1,
-    "prob": 0.9530705809593201,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_courmettes_80_2023-11-04T11-56-11",
-    "truth": 1,
-    "prob": 0.9529548287391663,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_cabanelle_125_2024-02-24T08-30-54",
-    "truth": 1,
-    "prob": 0.9519311785697937,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_339_2023-09-13T05-19-50",
-    "truth": 0,
-    "prob": 0.9505242109298706,
-    "predicted": 1,
-    "correct": false
-  },
-  {
-    "sequence_id": "hpwren-figlib_lpsmoboc_999_2020-08-06T18-00-05",
-    "truth": 1,
-    "prob": 0.9505037665367126,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-01-14T15-52-45",
-    "truth": 1,
-    "prob": 0.9502797722816467,
+    "prob": 0.9909329414367676,
     "predicted": 1,
     "correct": true
   },
   {
     "sequence_id": "hpwren-figlib_smertcs9moboc_999_2018-06-13T00-08-57",
     "truth": 1,
-    "prob": 0.9496460556983948,
+    "prob": 0.9908984303474426,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "hpwren-figlib_omemoboc_999_2020-08-06T17-59-37",
+    "sequence_id": "pyronear-force-06_ferion_142_2024-02-12T11-13-17",
     "truth": 1,
-    "prob": 0.9494725465774536,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_mlsmoboc_999_2018-06-06T19-50-15",
-    "truth": 1,
-    "prob": 0.9494398832321167,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_110_2024-01-21T13-36-55",
-    "truth": 1,
-    "prob": 0.9459990859031677,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-77_croix-augas-01_327_2025-08-03T12-26-52",
-    "truth": 1,
-    "prob": 0.94549560546875,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_cabanelle_125_2024-02-27T13-22-55",
-    "truth": 1,
-    "prob": 0.944476306438446,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_029_2024-02-19T09-19-50",
-    "truth": 1,
-    "prob": 0.9410701394081116,
+    "prob": 0.9908410310745239,
     "predicted": 1,
     "correct": true
   },
   {
     "sequence_id": "pyronear-force-06_courmettes_160_2024-04-06T12-35-34",
     "truth": 1,
-    "prob": 0.9401687979698181,
+    "prob": 0.9905499815940857,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_valbonne_349_2024-04-20T19-02-34",
+    "sequence_id": "hpwren-figlib_pismoboc_999_2019-10-06T20-16-09",
     "truth": 1,
-    "prob": 0.938325047492981,
+    "prob": 0.9903344511985779,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_cabanelle_244_2024-02-23T10-22-27",
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_160_2024-08-29T11-43-07",
     "truth": 1,
-    "prob": 0.9373806118965149,
+    "prob": 0.9901971817016602,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_ferion_287_2023-11-01T11-51-09",
+    "sequence_id": "pyronear-force-06_courmettes_212_2024-02-23T12-08-17",
     "truth": 1,
-    "prob": 0.9372498989105225,
+    "prob": 0.9901446104049683,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-77_croix-augas_110_2024-07-22T12-13-32",
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-02-13T13-31-45",
     "truth": 1,
-    "prob": 0.9371911883354187,
+    "prob": 0.9900814890861511,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2024-02-24T08-30-54",
+    "truth": 1,
+    "prob": 0.989740252494812,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "hpwren-figlib_wcemoboc_999_2021-07-11T19-59-54",
+    "truth": 1,
+    "prob": 0.9883429408073425,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_020_2024-01-18T10-26-11",
+    "truth": 1,
+    "prob": 0.9877915382385254,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-02-23T11-07-07",
+    "truth": 1,
+    "prob": 0.9865719079971313,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_142_2024-01-09T10-08-39",
+    "truth": 1,
+    "prob": 0.986486554145813,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-10T10-02-45",
+    "truth": 1,
+    "prob": 0.9846910834312439,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-09-05T11-05-34",
+    "truth": 1,
+    "prob": 0.984571099281311,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "hpwren-figlib_bhnmoboc_999_2018-05-04T23-50-10",
+    "truth": 1,
+    "prob": 0.9842796325683594,
     "predicted": 1,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_marguerite_029_2024-03-18T09-18-12",
     "truth": 1,
-    "prob": 0.934920072555542,
+    "prob": 0.9842074513435364,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-77_croix-augas_059_2024-09-14T16-02-50",
+    "sequence_id": "hpwren-figlib_smertcs8moboc_999_2017-07-13T23-23-55",
     "truth": 1,
-    "prob": 0.9345976114273071,
+    "prob": 0.9841868281364441,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_valbonne_349_2024-06-07T21-33-22",
-    "truth": 0,
-    "prob": 0.9311558604240417,
-    "predicted": 1,
-    "correct": false
-  },
-  {
-    "sequence_id": "pyronear-sdis-77_croix-augas_161_2024-07-08T14-29-32",
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-02-03T17-05-08",
     "truth": 1,
-    "prob": 0.9283694624900818,
+    "prob": 0.9832325577735901,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_cabanelle_125_2024-02-16T12-11-03",
+    "sequence_id": "hpwren-figlib_rmwmoboc_999_2019-08-26T21-45-06",
     "truth": 1,
-    "prob": 0.9270269870758057,
+    "prob": 0.9828234910964966,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_courmettes_160_2024-01-26T14-01-12",
+    "sequence_id": "pyronear-sdis-77_croix-augas_59_2024-07-07T21-53-42",
     "truth": 1,
-    "prob": 0.9198801517486572,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-77_croix-augas_265_2024-07-24T15-22-11",
-    "truth": 1,
-    "prob": 0.9182958006858826,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_339_2024-03-13T16-25-38",
-    "truth": 1,
-    "prob": 0.9164311289787292,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sis-67_haguenau-02_267_2025-08-14T06-58-35",
-    "truth": 1,
-    "prob": 0.9150885939598083,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-77_croix-augas_059_2024-07-10T11-06-02",
-    "truth": 1,
-    "prob": 0.9069042801856995,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-77_nemours-01_52_2025-08-07T09-39-01",
-    "truth": 1,
-    "prob": 0.9068918228149414,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_39_2023-10-16T09-00-30",
-    "truth": 0,
-    "prob": 0.9000819325447083,
-    "predicted": 1,
-    "correct": false
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_290_2024-03-14T14-48-14",
-    "truth": 1,
-    "prob": 0.8982068300247192,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_20_2024-02-26T18-37-56",
-    "truth": 0,
-    "prob": 0.8970374464988708,
-    "predicted": 1,
-    "correct": false
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_020_2024-01-30T17-50-05",
-    "truth": 1,
-    "prob": 0.8920536041259766,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-77_croix-augas_8_2024-07-21T09-59-26",
-    "truth": 0,
-    "prob": 0.8884871602058411,
-    "predicted": 1,
-    "correct": false
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_courmettes_160_2023-10-23T16-46-08",
-    "truth": 1,
-    "prob": 0.8873212933540344,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_losmoboc_999_2019-07-16T00-12-23",
-    "truth": 1,
-    "prob": 0.8872094750404358,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_110_2024-02-12T10-30-12",
-    "truth": 1,
-    "prob": 0.8841105699539185,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_311_2023-10-14T09-18-50",
-    "truth": 1,
-    "prob": 0.8838974237442017,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_339_2024-02-24T16-34-58",
-    "truth": 1,
-    "prob": 0.8819543123245239,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_courmettes_212_2023-10-30T13-21-53",
-    "truth": 1,
-    "prob": 0.8806537389755249,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_lpnmoboc_999_2018-07-06T20-32-01",
-    "truth": 1,
-    "prob": 0.880027174949646,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_110_2024-03-27T15-58-18",
-    "truth": 1,
-    "prob": 0.8775234222412109,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_ferion_142_2023-10-26T08-33-36",
-    "truth": 1,
-    "prob": 0.8756893277168274,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sis-67_haguenau-02_220_2025-08-31T07-28-30",
-    "truth": 1,
-    "prob": 0.8740585446357727,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_valbonne_138_2024-01-15T10-19-43",
-    "truth": 1,
-    "prob": 0.8733198046684265,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-31T16-38-38",
-    "truth": 1,
-    "prob": 0.8641828894615173,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_200_2024-02-21T15-16-17",
-    "truth": 1,
-    "prob": 0.8570765852928162,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_omsmoboc_999_2019-10-06T19-10-39",
-    "truth": 1,
-    "prob": 0.8484797477722168,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_courmettes_212_2024-01-25T11-56-08",
-    "truth": 1,
-    "prob": 0.8425629138946533,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_290_2024-04-01T07-00-27",
-    "truth": 0,
-    "prob": 0.8378371596336365,
-    "predicted": 1,
-    "correct": false
-  },
-  {
-    "sequence_id": "pyronear-force-06_courmettes_212_2024-04-03T10-07-21",
-    "truth": 1,
-    "prob": 0.8320057392120361,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_omnmoboc_999_2021-03-20T04-44-42",
-    "truth": 1,
-    "prob": 0.7959526777267456,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_valbonne_349_2023-11-01T11-27-15",
-    "truth": 1,
-    "prob": 0.7951046824455261,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_courmettes_080_2024-01-26T14-58-34",
-    "truth": 1,
-    "prob": 0.7946841716766357,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-03-20T15-57-21",
-    "truth": 1,
-    "prob": 0.7941203713417053,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "hpwren-figlib_lpwmoboc_999_2020-12-03T07-11-07",
-    "truth": 1,
-    "prob": 0.7928959727287292,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-77_croix-augas_8_2024-07-29T05-48-10",
-    "truth": 0,
-    "prob": 0.7617286443710327,
-    "predicted": 1,
-    "correct": false
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_185_2024-02-23T14-03-21",
-    "truth": 1,
-    "prob": 0.7604793906211853,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_courmettes_080_2024-09-07T11-41-38",
-    "truth": 1,
-    "prob": 0.7498600482940674,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_courmettes_160_2024-04-10T18-08-18",
-    "truth": 1,
-    "prob": 0.7431425452232361,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2024-03-19T13-37-18",
-    "truth": 1,
-    "prob": 0.7413970828056335,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-77_croix-augas_246_2025-05-08T16-47-18",
-    "truth": 0,
-    "prob": 0.7356985211372375,
-    "predicted": 1,
-    "correct": false
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_serre-de-barre_250_2024-09-21T11-38-27",
-    "truth": 1,
-    "prob": 0.7319473028182983,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-01-26T11-40-42",
-    "truth": 1,
-    "prob": 0.7299559712409973,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_311_2023-09-17T10-05-58",
-    "truth": 1,
-    "prob": 0.7216508984565735,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_courmettes_275_2024-04-09T14-37-29",
-    "truth": 1,
-    "prob": 0.7185971736907959,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_courmettes_212_2023-10-28T15-32-06",
-    "truth": 1,
-    "prob": 0.7010055184364319,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_226_2023-02-01T18-19-53",
-    "truth": 1,
-    "prob": 0.6949560642242432,
+    "prob": 0.9819847941398621,
     "predicted": 1,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_brison_311_2023-10-05T16-05-13",
     "truth": 1,
-    "prob": 0.686271607875824,
+    "prob": 0.981052041053772,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_courmettes_275_2024-01-27T12-17-07",
+    "sequence_id": "pyronear-force-06_valbonne_138_2024-01-12T11-45-43",
     "truth": 1,
-    "prob": 0.6775631308555603,
+    "prob": 0.9805028438568115,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-12_pouncho-agast_337_2024-09-03T13-07-45",
+    "sequence_id": "pyronear-force-06_valbonne_138_2024-01-06T11-28-03",
+    "truth": 1,
+    "prob": 0.9790748953819275,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_327_2024-04-03T08-00-52",
+    "truth": 1,
+    "prob": 0.9789172410964966,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2024-02-07T15-44-11",
+    "truth": 1,
+    "prob": 0.976906955242157,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2024-02-16T12-11-03",
+    "truth": 1,
+    "prob": 0.9756351113319397,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_059_2024-09-14T16-02-50",
+    "truth": 1,
+    "prob": 0.975634753704071,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_161_2024-07-08T14-29-32",
+    "truth": 1,
+    "prob": 0.9755843877792358,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-06-07T11-03-47",
+    "truth": 1,
+    "prob": 0.974481999874115,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "hpwren-figlib_mlwmoboc_999_2019-09-22T22-29-17",
+    "truth": 1,
+    "prob": 0.9711281657218933,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_020_2024-03-21T08-46-45",
+    "truth": 1,
+    "prob": 0.9705278277397156,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "hpwren-figlib_smnmoboc_999_2018-07-06T20-31-27",
+    "truth": 1,
+    "prob": 0.9687302112579346,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-01-09T15-58-27",
+    "truth": 1,
+    "prob": 0.9683133363723755,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-03-08T09-20-28",
+    "truth": 1,
+    "prob": 0.9670848250389099,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "hpwren-figlib_mlosmoboc_999_2020-08-29T19-55-23",
+    "truth": 1,
+    "prob": 0.9669504165649414,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-02-21T08-07-40",
+    "truth": 1,
+    "prob": 0.9638922810554504,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas-02_100_2025-08-24T07-00-15",
+    "truth": 1,
+    "prob": 0.9632778763771057,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-01-21T13-36-55",
+    "truth": 1,
+    "prob": 0.9611325263977051,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-03-14T14-48-14",
+    "truth": 1,
+    "prob": 0.9603442549705505,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "hpwren-figlib_omemoboc_999_2020-08-06T17-59-37",
+    "truth": 1,
+    "prob": 0.9597977995872498,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-02-23T10-57-19",
+    "truth": 1,
+    "prob": 0.9581288695335388,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_265_2024-07-24T15-22-11",
+    "truth": 1,
+    "prob": 0.9571174383163452,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_110_2024-07-22T12-13-32",
+    "truth": 1,
+    "prob": 0.9545557498931885,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_8_2024-07-21T09-59-26",
     "truth": 0,
-    "prob": 0.6756693124771118,
+    "prob": 0.9539900422096252,
     "predicted": 1,
     "correct": false
   },
   {
-    "sequence_id": "pyronear-force-06_valbonne_067_2024-01-15T10-22-06",
+    "sequence_id": "pyronear-force-06_valbonne_349_2024-04-20T19-02-34",
     "truth": 1,
-    "prob": 0.6711481213569641,
+    "prob": 0.9515831470489502,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-01-14T15-52-45",
+    "truth": 1,
+    "prob": 0.9514135122299194,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-02-12T10-30-12",
+    "truth": 1,
+    "prob": 0.9507920145988464,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_courmettes_80_2023-11-04T11-56-11",
+    "truth": 1,
+    "prob": 0.9505451917648315,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-02-23T12-38-40",
+    "truth": 1,
+    "prob": 0.9502578377723694,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "hpwren-figlib_rmnmoboc_999_2018-05-04T23-49-00",
+    "truth": 1,
+    "prob": 0.9499751925468445,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_39_2023-10-16T09-00-30",
+    "truth": 0,
+    "prob": 0.9488246440887451,
+    "predicted": 1,
+    "correct": false
+  },
+  {
+    "sequence_id": "hpwren-figlib_rmemoboc_999_2020-02-26T19-46-02",
+    "truth": 1,
+    "prob": 0.9486631751060486,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2024-03-19T13-37-18",
+    "truth": 1,
+    "prob": 0.9461346864700317,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas-01_327_2025-08-03T12-26-52",
+    "truth": 1,
+    "prob": 0.9446943402290344,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-01-26T14-01-12",
+    "truth": 1,
+    "prob": 0.9416182041168213,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_212_2024-04-03T10-07-21",
+    "truth": 1,
+    "prob": 0.9382254481315613,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_311_2023-09-17T10-05-58",
+    "truth": 1,
+    "prob": 0.9370929002761841,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-04-10T18-08-18",
+    "truth": 1,
+    "prob": 0.9366289377212524,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "hpwren-figlib_rmwmoboc_999_2018-07-29T00-08-06",
+    "truth": 1,
+    "prob": 0.9355096220970154,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_020_2024-01-30T17-50-05",
+    "truth": 1,
+    "prob": 0.9347738027572632,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_127_2023-10-22T07-50-48",
+    "truth": 1,
+    "prob": 0.9341564178466797,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sis-67_haguenau-02_267_2025-08-14T06-58-35",
+    "truth": 1,
+    "prob": 0.9312200546264648,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_nemours-01_52_2025-08-07T09-39-01",
+    "truth": 1,
+    "prob": 0.9294764995574951,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_courmettes_212_2023-10-30T13-21-53",
+    "truth": 1,
+    "prob": 0.926851212978363,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "hpwren-figlib_omsmoboc_999_2019-10-06T19-10-39",
+    "truth": 1,
+    "prob": 0.9235436320304871,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_029_2024-02-19T09-19-50",
+    "truth": 1,
+    "prob": 0.9212667346000671,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_287_2024-01-19T12-06-48",
+    "truth": 1,
+    "prob": 0.9210087060928345,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2024-02-27T13-22-55",
+    "truth": 1,
+    "prob": 0.920149564743042,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-31T16-38-38",
+    "truth": 1,
+    "prob": 0.9191346168518066,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_185_2023-09-19T08-59-22",
+    "truth": 1,
+    "prob": 0.9184389710426331,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2024-02-17T17-36-57",
+    "truth": 1,
+    "prob": 0.9182501435279846,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "hpwren-figlib_bhwmoboc_999_2019-10-01T22-40-16",
+    "truth": 1,
+    "prob": 0.9092477560043335,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_185_2024-02-23T14-03-21",
+    "truth": 1,
+    "prob": 0.9029211401939392,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_287_2023-11-01T09-22-26",
+    "truth": 1,
+    "prob": 0.902839720249176,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2024-03-13T16-25-38",
+    "truth": 1,
+    "prob": 0.896616518497467,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_courmettes_275_2023-10-29T08-23-21",
+    "truth": 1,
+    "prob": 0.8965950608253479,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "hpwren-figlib_lpwmoboc_999_2020-12-03T07-11-07",
+    "truth": 1,
+    "prob": 0.895050048828125,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "hpwren-figlib_mlsmoboc_999_2018-06-06T19-50-15",
+    "truth": 1,
+    "prob": 0.8933355212211609,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_311_2023-10-14T09-18-50",
+    "truth": 1,
+    "prob": 0.8926335573196411,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_059_2024-07-10T11-06-02",
+    "truth": 1,
+    "prob": 0.8899055123329163,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "hpwren-figlib_wcnmoboc_999_2018-07-27T22-37-18",
+    "truth": 1,
+    "prob": 0.8850391507148743,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-01-26T11-40-42",
+    "truth": 1,
+    "prob": 0.8807275891304016,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_349_2023-11-01T11-27-15",
+    "truth": 1,
+    "prob": 0.8770571947097778,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_212_2024-01-25T11-56-08",
+    "truth": 1,
+    "prob": 0.8694900870323181,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-03-20T15-57-21",
+    "truth": 1,
+    "prob": 0.8627530336380005,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_287_2023-11-01T11-51-09",
+    "truth": 1,
+    "prob": 0.8553762435913086,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "hpwren-figlib_omnmoboc_999_2021-03-20T04-44-42",
+    "truth": 1,
+    "prob": 0.8470534086227417,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_127_2023-03-01T19-58-13",
+    "truth": 1,
+    "prob": 0.8356466293334961,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sis-67_haguenau-02_220_2025-08-31T07-28-30",
+    "truth": 1,
+    "prob": 0.8268769383430481,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_080_2024-01-26T14-58-34",
+    "truth": 1,
+    "prob": 0.8227183818817139,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2023-09-13T05-19-50",
+    "truth": 0,
+    "prob": 0.8174450397491455,
+    "predicted": 1,
+    "correct": false
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_138_2024-01-15T10-19-43",
+    "truth": 1,
+    "prob": 0.8135577440261841,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_080_2024-09-07T11-41-38",
+    "truth": 1,
+    "prob": 0.8105080723762512,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2024-08-16T19-42-46",
+    "truth": 0,
+    "prob": 0.7991943359375,
+    "predicted": 1,
+    "correct": false
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2024-02-24T16-34-58",
+    "truth": 1,
+    "prob": 0.7968325018882751,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_246_2025-05-08T16-47-18",
+    "truth": 0,
+    "prob": 0.7928749918937683,
+    "predicted": 1,
+    "correct": false
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_226_2023-02-01T18-19-53",
+    "truth": 1,
+    "prob": 0.7778469324111938,
     "predicted": 1,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_brison_20_2024-02-11T07-59-41",
     "truth": 0,
-    "prob": 0.6684362292289734,
+    "prob": 0.7570829391479492,
     "predicted": 1,
     "correct": false
   },
   {
-    "sequence_id": "pyronear-sdis-07_marguerite_339_2024-08-16T19-42-46",
-    "truth": 0,
-    "prob": 0.6574361324310303,
-    "predicted": 1,
-    "correct": false
-  },
-  {
-    "sequence_id": "pyronear-force-06_ferion_287_2024-01-19T12-06-48",
+    "sequence_id": "hpwren-figlib_losmoboc_999_2019-07-16T00-12-23",
     "truth": 1,
-    "prob": 0.6411673426628113,
+    "prob": 0.7550686001777649,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-23T15-55-10",
+    "sequence_id": "pyronear-force-06_courmettes_275_2024-04-09T14-37-29",
     "truth": 1,
-    "prob": 0.6096380352973938,
+    "prob": 0.746114194393158,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_226_2023-10-20T17-08-48",
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-02-23T10-22-27",
+    "truth": 1,
+    "prob": 0.7435864210128784,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_courmettes_160_2023-10-23T16-46-08",
+    "truth": 1,
+    "prob": 0.7280239462852478,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_142_2023-10-26T08-33-36",
+    "truth": 1,
+    "prob": 0.7263565063476562,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_20_2024-02-26T18-37-56",
     "truth": 0,
-    "prob": 0.5936580300331116,
+    "prob": 0.7257586121559143,
     "predicted": 1,
     "correct": false
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_290_2024-02-26T17-11-33",
-    "truth": 0,
-    "prob": 0.5831091403961182,
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-03-27T15-58-18",
+    "truth": 1,
+    "prob": 0.7061803936958313,
     "predicted": 1,
-    "correct": false
+    "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-77_croix-augas_059_2024-09-22T12-30-49",
     "truth": 1,
-    "prob": 0.5817194581031799,
+    "prob": 0.6957842707633972,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_39_2023-07-08T04-30-41",
-    "truth": 0,
-    "prob": 0.5679691433906555,
-    "predicted": 1,
-    "correct": false
-  },
-  {
-    "sequence_id": "pyronear-force-06_cabanelle_291_2023-10-12T08-06-27",
-    "truth": 0,
-    "prob": 0.5655101537704468,
-    "predicted": 1,
-    "correct": false
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_110_2024-03-11T07-05-37",
-    "truth": 0,
-    "prob": 0.5636811256408691,
-    "predicted": 1,
-    "correct": false
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_339_2024-03-18T18-14-59",
+    "sequence_id": "hpwren-figlib_lpsmoboc_999_2020-08-06T18-00-05",
     "truth": 1,
-    "prob": 0.5576315522193909,
+    "prob": 0.6905019283294678,
     "predicted": 1,
     "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_200_2024-02-21T15-16-17",
+    "truth": 1,
+    "prob": 0.664522111415863,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_courmettes_212_2023-10-28T15-32-06",
+    "truth": 1,
+    "prob": 0.6433775424957275,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-04-01T07-00-27",
+    "truth": 0,
+    "prob": 0.6351379156112671,
+    "predicted": 1,
+    "correct": false
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_226_2023-10-20T17-08-48",
+    "truth": 0,
+    "prob": 0.611656904220581,
+    "predicted": 1,
+    "correct": false
   },
   {
     "sequence_id": "pyronear-sdis-07_brison_39_2023-05-22T07-38-33",
     "truth": 1,
-    "prob": 0.5567067265510559,
+    "prob": 0.6088969111442566,
     "predicted": 1,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_courmettes_160_2024-02-19T10-31-56",
+    "sequence_id": "pyronear-force-06_valbonne_067_2024-01-15T10-22-06",
     "truth": 1,
-    "prob": 0.5390657186508179,
+    "prob": 0.5441723465919495,
     "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_cabanelle_327_2024-04-04T19-22-21",
-    "truth": 1,
-    "prob": 0.5278270244598389,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_ferion_142_2023-11-04T07-48-54",
-    "truth": 1,
-    "prob": 0.5206995606422424,
-    "predicted": 1,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_20_2024-07-20T07-35-38",
-    "truth": 0,
-    "prob": 0.5122193098068237,
-    "predicted": 1,
-    "correct": false
-  },
-  {
-    "sequence_id": "pyronear-test_st-peray_322_2023-08-03T05-18-08",
-    "truth": 0,
-    "prob": 0.48919662833213806,
-    "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_marguerite_339_2023-06-14T06-41-47",
     "truth": 0,
-    "prob": 0.4878453314304352,
-    "predicted": 0,
-    "correct": true
+    "prob": 0.5421580672264099,
+    "predicted": 1,
+    "correct": false
   },
   {
-    "sequence_id": "pyronear-force-06_valbonne_67_2023-10-03T05-22-38",
+    "sequence_id": "pyronear-sdis-07_brison_39_2023-07-08T04-30-41",
     "truth": 0,
-    "prob": 0.45853298902511597,
+    "prob": 0.47964656352996826,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_courmettes_275_2023-10-14T07-57-10",
+    "sequence_id": "pyronear-force-06_valbonne_349_2024-06-07T21-33-22",
     "truth": 0,
-    "prob": 0.4140051007270813,
+    "prob": 0.4658072888851166,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_serre-de-barre_310_2024-09-08T10-10-05",
-    "truth": 0,
-    "prob": 0.4139880836009979,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_cabanelle_46_2023-10-22T07-13-33",
-    "truth": 0,
-    "prob": 0.3905898928642273,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sis-67_haguenau-01_300_2025-08-15T17-39-56",
+    "sequence_id": "hpwren-figlib_lpnmoboc_999_2018-07-06T20-32-01",
     "truth": 1,
-    "prob": 0.3841727077960968,
+    "prob": 0.44189250469207764,
     "predicted": 0,
     "correct": false
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_290_2024-07-12T08-41-56",
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_150_2024-09-22T19-26-40",
     "truth": 0,
-    "prob": 0.3784492015838623,
+    "prob": 0.43831324577331543,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_8_2024-07-29T05-48-10",
+    "truth": 0,
+    "prob": 0.425708144903183,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-02-19T10-31-56",
+    "truth": 1,
+    "prob": 0.3972178101539612,
+    "predicted": 0,
+    "correct": false
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2024-03-18T18-14-59",
+    "truth": 1,
+    "prob": 0.383064329624176,
+    "predicted": 0,
+    "correct": false
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_20_2024-07-20T07-35-38",
+    "truth": 0,
+    "prob": 0.3826747238636017,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-test_st-peray_322_2023-08-03T05-18-08",
+    "truth": 0,
+    "prob": 0.32782870531082153,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-force-06_courmettes_212_2024-06-26T18-15-28",
     "truth": 0,
-    "prob": 0.35145044326782227,
+    "prob": 0.3170362710952759,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_cabanelle_244_2024-07-13T10-11-28",
+    "sequence_id": "pyronear-force-06_courmettes_275_2024-01-27T12-17-07",
+    "truth": 1,
+    "prob": 0.3089052140712738,
+    "predicted": 0,
+    "correct": false
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_310_2024-09-08T10-10-05",
     "truth": 0,
-    "prob": 0.34490612149238586,
+    "prob": 0.28854960203170776,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_200_2024-06-21T09-05-10",
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-03-11T07-05-37",
     "truth": 0,
-    "prob": 0.3373173177242279,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-05T08-02-09",
-    "truth": 0,
-    "prob": 0.3202926516532898,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-test_st-peray_322_2023-08-30T16-33-40",
-    "truth": 0,
-    "prob": 0.30153289437294006,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_290_2024-02-13T18-26-25",
-    "truth": 0,
-    "prob": 0.2930460572242737,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_226_2023-07-24T04-25-04",
-    "truth": 0,
-    "prob": 0.289191871881485,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_serre-de-barre_150_2024-09-22T19-26-40",
-    "truth": 0,
-    "prob": 0.27638858556747437,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-77_croix-augas_265_2024-08-14T09-22-50",
-    "truth": 0,
-    "prob": 0.26551663875579834,
+    "prob": 0.249720498919487,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_brison_110_2024-01-16T11-00-04",
     "truth": 0,
-    "prob": 0.2595478296279907,
+    "prob": 0.24421513080596924,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-09-18T11-18-32",
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-23T15-55-10",
+    "truth": 1,
+    "prob": 0.22168846428394318,
+    "predicted": 0,
+    "correct": false
+  },
+  {
+    "sequence_id": "pyronear-sdis-12_pouncho-agast_337_2024-09-03T13-07-45",
     "truth": 0,
-    "prob": 0.2559938132762909,
+    "prob": 0.21786320209503174,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_ferion_142_2023-10-18T15-07-01",
+    "sequence_id": "pyronear-test_st-peray_322_2023-08-30T16-33-40",
     "truth": 0,
-    "prob": 0.20140835642814636,
+    "prob": 0.1936795711517334,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_20_2024-03-18T06-44-24",
+    "sequence_id": "pyronear-sdis-07_brison_200_2024-06-21T09-05-10",
     "truth": 0,
-    "prob": 0.19602197408676147,
+    "prob": 0.17878492176532745,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_serre-de-barre_350_2024-08-16T16-19-20",
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_250_2024-09-21T11-38-27",
+    "truth": 1,
+    "prob": 0.17721112072467804,
+    "predicted": 0,
+    "correct": false
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-02-26T17-11-33",
     "truth": 0,
-    "prob": 0.18537387251853943,
+    "prob": 0.17583417892456055,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_valbonne_349_2023-10-31T08-08-44",
+    "sequence_id": "pyronear-force-06_valbonne_67_2023-10-03T05-22-38",
     "truth": 0,
-    "prob": 0.15668873488903046,
+    "prob": 0.17316655814647675,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-test_st-peray_322_2023-07-27T13-56-34",
+    "sequence_id": "pyronear-force-06_ferion_142_2023-11-04T07-48-54",
+    "truth": 1,
+    "prob": 0.16969303786754608,
+    "predicted": 0,
+    "correct": false
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_265_2024-08-14T09-22-50",
     "truth": 0,
-    "prob": 0.1405322253704071,
+    "prob": 0.14243866503238678,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_valbonne_349_2023-10-21T16-09-11",
+    "sequence_id": "pyronear-force-06_cabanelle_327_2024-04-04T19-22-21",
+    "truth": 1,
+    "prob": 0.12258663028478622,
+    "predicted": 0,
+    "correct": false
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-07-12T08-41-56",
     "truth": 0,
-    "prob": 0.13322080671787262,
+    "prob": 0.1074429452419281,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_valbonne_67_2024-06-26T18-59-12",
+    "sequence_id": "pyronear-force-06_courmettes_275_2023-10-14T07-57-10",
     "truth": 0,
-    "prob": 0.13279585540294647,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_courmettes_160_2024-06-25T13-40-40",
-    "truth": 0,
-    "prob": 0.12688399851322174,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_cabanelle_291_2023-10-15T11-06-20",
-    "truth": 0,
-    "prob": 0.1248435229063034,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_courmettes_275_2023-11-06T14-35-31",
-    "truth": 0,
-    "prob": 0.11394517123699188,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_valbonne_223_2023-11-02T09-08-30",
-    "truth": 0,
-    "prob": 0.10628467053174973,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_cabanelle_327_2024-07-06T11-36-13",
-    "truth": 0,
-    "prob": 0.10542099922895432,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_20_2024-03-06T07-20-23",
-    "truth": 0,
-    "prob": 0.10538376122713089,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_339_2023-07-04T07-23-31",
-    "truth": 0,
-    "prob": 0.10214100033044815,
+    "prob": 0.09317294508218765,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-force-06_valbonne_138_2023-10-29T07-02-15",
     "truth": 0,
-    "prob": 0.09562966972589493,
+    "prob": 0.07211676239967346,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_valbonne_349_2023-10-31T09-32-16",
+    "sequence_id": "pyronear-force-06_cabanelle_291_2023-10-12T08-06-27",
     "truth": 0,
-    "prob": 0.08201495558023453,
+    "prob": 0.07206180691719055,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_311_2023-07-04T05-56-26",
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_350_2024-08-16T16-19-20",
     "truth": 0,
-    "prob": 0.0781593769788742,
+    "prob": 0.061076413840055466,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_cabanelle_46_2024-07-08T17-07-07",
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-07-13T10-11-28",
     "truth": 0,
-    "prob": 0.0728239119052887,
+    "prob": 0.05386359244585037,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_226_2023-07-28T05-42-34",
+    "sequence_id": "pyronear-sdis-07_brison_20_2024-03-18T06-44-24",
     "truth": 0,
-    "prob": 0.07267191261053085,
+    "prob": 0.05141781270503998,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_courmettes_275_2024-06-25T13-25-13",
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-02-13T18-26-25",
     "truth": 0,
-    "prob": 0.06826113164424896,
+    "prob": 0.048009324818849564,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_valbonne_67_2024-07-10T05-26-49",
+    "sequence_id": "pyronear-test_st-peray_322_2023-07-27T13-56-34",
     "truth": 0,
-    "prob": 0.06622324138879776,
+    "prob": 0.047936029732227325,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_200_2024-02-26T18-38-27",
+    "sequence_id": "pyronear-force-06_valbonne_223_2023-11-02T09-08-30",
     "truth": 0,
-    "prob": 0.06297964602708817,
+    "prob": 0.04783114045858383,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_courmettes_275_2023-10-20T10-31-13",
+    "sequence_id": "pyronear-sdis-07_brison_226_2023-07-24T04-25-04",
     "truth": 0,
-    "prob": 0.06117166951298714,
+    "prob": 0.0420059859752655,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_311_2023-08-17T07-23-43",
+    "sequence_id": "pyronear-force-06_cabanelle_46_2023-10-22T07-13-33",
     "truth": 0,
-    "prob": 0.05616527423262596,
+    "prob": 0.04038950055837631,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-engie_salaunes-2_270_2023-07-21T05-00-37",
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-05T08-02-09",
     "truth": 0,
-    "prob": 0.05433071777224541,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_226_2023-08-21T16-36-33",
-    "truth": 0,
-    "prob": 0.053697481751441956,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_39_2023-06-13T05-50-20",
-    "truth": 0,
-    "prob": 0.05005606636404991,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_valbonne_223_2023-10-19T06-09-48",
-    "truth": 0,
-    "prob": 0.050004757940769196,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-11-03T10-15-24",
-    "truth": 0,
-    "prob": 0.04763151705265045,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_200_2024-03-30T14-49-54",
-    "truth": 0,
-    "prob": 0.044625476002693176,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_282_2023-09-30T07-31-12",
-    "truth": 0,
-    "prob": 0.044143859297037125,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_339_2023-10-21T07-55-21",
-    "truth": 0,
-    "prob": 0.042072877287864685,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_ferion_204_2023-11-05T13-28-54",
-    "truth": 0,
-    "prob": 0.04144202545285225,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-12_pouncho-agast_83_2024-09-04T10-49-02",
-    "truth": 0,
-    "prob": 0.0352809876203537,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_serre-de-barre_257_2024-09-04T17-07-37",
-    "truth": 0,
-    "prob": 0.03249732404947281,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_brison_200_2024-01-17T16-53-29",
-    "truth": 0,
-    "prob": 0.030284574255347252,
+    "prob": 0.03939570114016533,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_brison_226_2023-11-01T16-54-46",
     "truth": 0,
-    "prob": 0.029524751007556915,
+    "prob": 0.0373552031815052,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-30T13-50-41",
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-06-25T13-40-40",
     "truth": 0,
-    "prob": 0.02841000072658062,
+    "prob": 0.03617794066667557,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-engie_salaunes-2_270_2023-10-31T07-03-48",
+    "sequence_id": "pyronear-force-06_valbonne_349_2023-10-31T09-32-16",
     "truth": 0,
-    "prob": 0.02547069825232029,
+    "prob": 0.030023228377103806,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-12_pouncho-agast_70_2024-08-16T15-52-45",
+    "sequence_id": "pyronear-force-06_valbonne_223_2023-10-19T06-09-48",
     "truth": 0,
-    "prob": 0.024899033829569817,
+    "prob": 0.027068249881267548,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_courmettes_275_2023-10-10T07-28-58",
+    "sequence_id": "pyronear-force-06_ferion_142_2023-10-18T15-07-01",
     "truth": 0,
-    "prob": 0.02376844920217991,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_cabanelle_244_2024-07-08T07-22-53",
-    "truth": 0,
-    "prob": 0.02073952555656433,
+    "prob": 0.02609151229262352,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sis-67_haguenau_100_2025-07-07T23-27-16",
     "truth": 0,
-    "prob": 0.020632529631257057,
+    "prob": 0.02447572536766529,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_cabanelle_244_2024-06-10T13-21-14",
+    "sequence_id": "pyronear-force-06_valbonne_349_2023-10-31T08-08-44",
     "truth": 0,
-    "prob": 0.020419714972376823,
+    "prob": 0.020174764096736908,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2024-02-22T07-29-26",
+    "sequence_id": "pyronear-sdis-07_brison_200_2024-02-26T18-38-27",
     "truth": 0,
-    "prob": 0.02013446018099785,
+    "prob": 0.018784280866384506,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_courmettes_160_2024-06-10T12-42-28",
+    "sequence_id": "pyronear-sdis-07_brison_200_2024-03-30T14-49-54",
     "truth": 0,
-    "prob": 0.020104603841900826,
+    "prob": 0.01846272312104702,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_cabanelle_244_2024-07-08T13-43-03",
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-09-18T11-18-32",
     "truth": 0,
-    "prob": 0.01929190382361412,
+    "prob": 0.016535626724362373,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-10T14-28-48",
+    "sequence_id": "pyronear-sdis-07_brison_226_2023-08-21T16-36-33",
     "truth": 0,
-    "prob": 0.018300600349903107,
+    "prob": 0.014379976317286491,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-12_pouncho-agast_337_2024-09-04T18-13-16",
+    "sequence_id": "pyronear-force-06_cabanelle_327_2024-07-06T11-36-13",
     "truth": 0,
-    "prob": 0.016093101352453232,
+    "prob": 0.013801333494484425,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_311_2024-09-19T19-29-47",
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-30T13-50-41",
     "truth": 0,
-    "prob": 0.016021018847823143,
+    "prob": 0.012022826820611954,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_20_2024-06-25T16-57-40",
+    "sequence_id": "pyronear-sdis-07_brison_226_2023-07-28T05-42-34",
     "truth": 0,
-    "prob": 0.015076352283358574,
+    "prob": 0.011857103556394577,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_ferion_60_2023-10-19T12-54-39",
+    "sequence_id": "pyronear-force-06_courmettes_275_2023-11-06T14-35-31",
     "truth": 0,
-    "prob": 0.014870040118694305,
+    "prob": 0.010461688973009586,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_200_2024-03-08T13-01-01",
+    "sequence_id": "pyronear-force-06_cabanelle_291_2023-10-15T11-06-20",
     "truth": 0,
-    "prob": 0.014136635698378086,
+    "prob": 0.010000612586736679,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_290_2024-03-08T12-57-42",
+    "sequence_id": "pyronear-engie_salaunes-2_270_2023-07-21T05-00-37",
     "truth": 0,
-    "prob": 0.013731679879128933,
+    "prob": 0.008967654779553413,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2024-01-23T09-57-05",
+    "sequence_id": "pyronear-force-06_valbonne_67_2024-06-26T18-59-12",
     "truth": 0,
-    "prob": 0.01225352194160223,
+    "prob": 0.008006530813872814,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_courmettes_212_2024-06-10T19-56-14",
+    "sequence_id": "pyronear-sdis-07_brison_200_2024-01-17T16-53-29",
     "truth": 0,
-    "prob": 0.01224046852439642,
+    "prob": 0.0069176810793578625,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_cabanelle_244_2024-06-04T17-56-49",
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2023-07-04T07-23-31",
     "truth": 0,
-    "prob": 0.011477941647171974,
+    "prob": 0.006142634432762861,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_cabanelle_244_2024-06-22T08-25-23",
+    "sequence_id": "pyronear-force-06_valbonne_349_2023-10-21T16-09-11",
     "truth": 0,
-    "prob": 0.010456147603690624,
+    "prob": 0.005960401613265276,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_cabanelle_125_2024-06-15T20-27-54",
+    "sequence_id": "pyronear-force-06_cabanelle_46_2024-07-08T17-07-07",
     "truth": 0,
-    "prob": 0.010335973463952541,
+    "prob": 0.004583228845149279,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_226_2023-10-26T08-11-36",
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_257_2024-09-04T17-07-37",
     "truth": 0,
-    "prob": 0.009768213145434856,
+    "prob": 0.004515473265200853,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_cabanelle_244_2023-10-11T10-19-11",
+    "sequence_id": "pyronear-sis-67_haguenau-01_300_2025-08-15T17-39-56",
+    "truth": 1,
+    "prob": 0.004319262690842152,
+    "predicted": 0,
+    "correct": false
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_67_2024-07-10T05-26-49",
     "truth": 0,
-    "prob": 0.009724072180688381,
+    "prob": 0.00416942685842514,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_brison_290_2024-03-27T10-21-45",
     "truth": 0,
-    "prob": 0.009535086341202259,
+    "prob": 0.004004005342721939,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-engie_salaunes-2_180_2023-08-04T18-07-34",
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-11-03T10-15-24",
     "truth": 0,
-    "prob": 0.009519041515886784,
+    "prob": 0.003922886680811644,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_courmettes_212_2024-06-05T06-37-05",
+    "sequence_id": "pyronear-sdis-12_pouncho-agast_70_2024-08-16T15-52-45",
     "truth": 0,
-    "prob": 0.00934718269854784,
+    "prob": 0.003867512568831444,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_cabanelle_291_2023-10-22T10-51-18",
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-03-08T12-57-42",
     "truth": 0,
-    "prob": 0.008169208653271198,
+    "prob": 0.0038649272173643112,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_cabanelle_125_2023-10-13T14-51-17",
+    "sequence_id": "pyronear-sdis-12_pouncho-agast_83_2024-09-04T10-49-02",
     "truth": 0,
-    "prob": 0.00807297695428133,
+    "prob": 0.003787283319979906,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_cabanelle_244_2024-06-17T11-06-43",
+    "sequence_id": "pyronear-force-06_courmettes_275_2024-06-25T13-25-13",
     "truth": 0,
-    "prob": 0.007257990073412657,
+    "prob": 0.003575829789042473,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_ferion_287_2023-10-24T15-55-14",
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2023-10-21T07-55-21",
     "truth": 0,
-    "prob": 0.006739586126059294,
+    "prob": 0.003378507914021611,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-engie_salaunes-2_90_2023-10-31T08-11-45",
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-10T14-28-48",
     "truth": 0,
-    "prob": 0.0066144997254014015,
+    "prob": 0.0033767246641218662,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_serre-de-barre_310_2024-09-09T19-18-38",
+    "sequence_id": "pyronear-sdis-07_brison_39_2023-06-13T05-50-20",
     "truth": 0,
-    "prob": 0.00660736346617341,
+    "prob": 0.0026371516287326813,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_brison_20_2024-06-20T13-49-58",
+    "sequence_id": "pyronear-engie_salaunes-2_270_2023-10-31T07-03-48",
     "truth": 0,
-    "prob": 0.006183672696352005,
+    "prob": 0.002177789807319641,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-06-10T13-21-14",
+    "truth": 0,
+    "prob": 0.0019096414325758815,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_311_2023-07-04T05-56-26",
+    "truth": 0,
+    "prob": 0.001858572824858129,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_311_2023-08-17T07-23-43",
+    "truth": 0,
+    "prob": 0.0016722597647458315,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-06-10T12-42-28",
+    "truth": 0,
+    "prob": 0.001668787794187665,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_282_2023-09-30T07-31-12",
+    "truth": 0,
+    "prob": 0.0016241729026660323,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_311_2024-09-19T19-29-47",
+    "truth": 0,
+    "prob": 0.0015746422577649355,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_20_2024-03-06T07-20-23",
+    "truth": 0,
+    "prob": 0.0014030032325536013,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-engie_salaunes-2_180_2023-10-31T15-21-16",
     "truth": 0,
-    "prob": 0.00579038867726922,
+    "prob": 0.0011944990837946534,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-19T15-00-22",
+    "sequence_id": "pyronear-force-06_cabanelle_244_2023-10-11T10-19-11",
     "truth": 0,
-    "prob": 0.005302050616592169,
+    "prob": 0.0011094105429947376,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_courmettes_160_2024-06-27T09-20-36",
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-07-08T13-43-03",
     "truth": 0,
-    "prob": 0.005063463468104601,
+    "prob": 0.000970599998254329,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-20T11-54-30",
+    "sequence_id": "pyronear-force-06_ferion_204_2023-11-05T13-28-54",
     "truth": 0,
-    "prob": 0.005051904823631048,
+    "prob": 0.0006889934302307665,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_200_2024-03-08T13-01-01",
+    "truth": 0,
+    "prob": 0.0005597426788881421,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2024-01-23T09-57-05",
+    "truth": 0,
+    "prob": 0.0005377920460887253,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-12_pouncho-agast_337_2024-09-04T18-13-16",
+    "truth": 0,
+    "prob": 0.0005125243333168328,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_60_2023-10-19T12-54-39",
+    "truth": 0,
+    "prob": 0.0004915018798783422,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-engie_salaunes-2_180_2023-08-04T18-07-34",
+    "truth": 0,
+    "prob": 0.0004812219995073974,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_20_2024-06-25T16-57-40",
+    "truth": 0,
+    "prob": 0.00045759693603031337,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_212_2024-06-05T06-37-05",
+    "truth": 0,
+    "prob": 0.0004306455666664988,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-06-22T08-25-23",
+    "truth": 0,
+    "prob": 0.00041494477773085237,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_226_2023-10-26T08-11-36",
+    "truth": 0,
+    "prob": 0.0003472956595942378,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_20_2024-06-20T13-49-58",
+    "truth": 0,
+    "prob": 0.00033629717654548585,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_310_2024-09-09T19-18-38",
+    "truth": 0,
+    "prob": 0.0003210270660929382,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_brison_200_2024-09-08T13-40-11",
     "truth": 0,
-    "prob": 0.005048440303653479,
+    "prob": 0.00024349782324861735,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_courmettes_160_2024-06-16T08-05-12",
+    "sequence_id": "pyronear-force-06_courmettes_212_2024-06-10T19-56-14",
     "truth": 0,
-    "prob": 0.004547173157334328,
+    "prob": 0.00021234808082226664,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_marguerite_185_2024-07-16T21-58-32",
     "truth": 0,
-    "prob": 0.004485461860895157,
+    "prob": 0.00021111582464072853,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_courmettes_160_2023-10-24T14-40-19",
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-06-17T11-06-43",
     "truth": 0,
-    "prob": 0.003979658707976341,
+    "prob": 0.00018357056251261383,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_ferion_287_2023-10-20T16-27-24",
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-20T11-54-30",
     "truth": 0,
-    "prob": 0.00390592310577631,
+    "prob": 0.00013007708184886724,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_serre-de-barre_203_2024-09-04T19-32-39",
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-06-04T17-56-49",
     "truth": 0,
-    "prob": 0.003412550315260887,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_serre-de-barre_257_2024-09-04T19-23-17",
-    "truth": 0,
-    "prob": 0.003356112400069833,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-13T09-34-30",
-    "truth": 0,
-    "prob": 0.0033472373615950346,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_185_2023-07-28T17-15-02",
-    "truth": 0,
-    "prob": 0.0031996641773730516,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-30T06-39-26",
-    "truth": 0,
-    "prob": 0.003140197368338704,
+    "prob": 0.00012062364112352952,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_serre-de-barre_0_2024-09-22T11-35-32",
     "truth": 0,
-    "prob": 0.0030888726469129324,
+    "prob": 0.00011365366663085297,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-09-18T06-58-23",
+    "sequence_id": "pyronear-force-06_cabanelle_291_2023-10-22T10-51-18",
     "truth": 0,
-    "prob": 0.002981065306812525,
+    "prob": 0.00011209228250663728,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2023-10-20T10-31-13",
+    "truth": 0,
+    "prob": 0.00010685444431146607,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-19T15-00-22",
+    "truth": 0,
+    "prob": 0.0001003066572593525,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_serre-de-barre_0_2024-09-22T16-03-39",
     "truth": 0,
-    "prob": 0.0027367533184587955,
+    "prob": 8.847731078276411e-05,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_cabanelle_125_2024-07-05T14-39-27",
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-06-27T09-20-36",
     "truth": 0,
-    "prob": 0.002583662513643503,
+    "prob": 8.569505007471889e-05,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-11-04T07-35-29",
+    "sequence_id": "pyronear-force-06_courmettes_160_2023-10-24T14-40-19",
     "truth": 0,
-    "prob": 0.002525392221286893,
+    "prob": 6.599950575036928e-05,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_courmettes_80_2024-06-22T06-31-29",
+    "sequence_id": "pyronear-engie_salaunes-2_90_2023-10-31T08-11-45",
     "truth": 0,
-    "prob": 0.0025209542363882065,
+    "prob": 6.437544652726501e-05,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-09-20T17-27-36",
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-06-16T08-05-12",
     "truth": 0,
-    "prob": 0.002284012036398053,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-12_pouncho-agast_346_2024-08-17T09-12-20",
-    "truth": 0,
-    "prob": 0.0022486376110464334,
+    "prob": 5.919019895372912e-05,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_marguerite_29_2024-01-30T11-55-01",
     "truth": 0,
-    "prob": 0.0021974549163132906,
+    "prob": 4.8991314542945474e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2023-10-10T07-28-58",
+    "truth": 0,
+    "prob": 4.8691174015402794e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_185_2023-07-28T17-15-02",
+    "truth": 0,
+    "prob": 4.8392368626082316e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_287_2023-10-24T15-55-14",
+    "truth": 0,
+    "prob": 4.5248969399835914e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2024-02-22T07-29-26",
+    "truth": 0,
+    "prob": 4.129954322706908e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-09-20T17-27-36",
+    "truth": 0,
+    "prob": 3.973820639657788e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_287_2023-10-20T16-27-24",
+    "truth": 0,
+    "prob": 3.9503494917880744e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_203_2024-09-04T19-32-39",
+    "truth": 0,
+    "prob": 3.743281195056625e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-07-08T07-22-53",
+    "truth": 0,
+    "prob": 3.710388773470186e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2024-06-15T20-27-54",
+    "truth": 0,
+    "prob": 3.317728260299191e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-09-18T06-58-23",
+    "truth": 0,
+    "prob": 3.0945819162297994e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-11-04T07-35-29",
+    "truth": 0,
+    "prob": 2.8696193112409674e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_257_2024-09-04T19-23-17",
+    "truth": 0,
+    "prob": 2.7899586712010205e-05,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_marguerite_29_2023-09-21T15-00-06",
     "truth": 0,
-    "prob": 0.0018058737041428685,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_339_2023-11-02T16-31-54",
-    "truth": 0,
-    "prob": 0.0017655089031904936,
+    "prob": 2.7496067559695803e-05,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-engie_salaunes-2_0_2023-08-27T09-47-37",
     "truth": 0,
-    "prob": 0.0017247973009943962,
+    "prob": 2.5883075068122707e-05,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-19T12-37-17",
+    "sequence_id": "pyronear-sdis-12_pouncho-agast_346_2024-08-17T09-12-20",
     "truth": 0,
-    "prob": 0.0017036637291312218,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_cabanelle_125_2024-06-16T11-43-13",
-    "truth": 0,
-    "prob": 0.0016485943924635649,
+    "prob": 2.3323849745793268e-05,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-13T11-59-03",
     "truth": 0,
-    "prob": 0.0016240538097918034,
+    "prob": 2.2877948140376247e-05,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-force-06_cabanelle_125_2024-07-06T14-17-15",
+    "sequence_id": "pyronear-force-06_cabanelle_125_2023-10-13T14-51-17",
     "truth": 0,
-    "prob": 0.0016234808135777712,
+    "prob": 1.8499013094697148e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-19T12-37-17",
+    "truth": 0,
+    "prob": 1.7679272787063383e-05,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_marguerite_29_2024-06-25T20-35-20",
     "truth": 0,
-    "prob": 0.0015950408997014165,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_courmettes_275_2024-06-05T09-05-44",
-    "truth": 0,
-    "prob": 0.0015494705876335502,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-19T13-24-19",
-    "truth": 0,
-    "prob": 0.0015384495491161942,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_courmettes_275_2024-06-23T13-47-13",
-    "truth": 0,
-    "prob": 0.0015313033945858479,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_cabanelle_125_2024-07-03T15-28-05",
-    "truth": 0,
-    "prob": 0.0014459373196586967,
+    "prob": 1.7115911759901792e-05,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-20T15-11-37",
     "truth": 0,
-    "prob": 0.0014193482929840684,
+    "prob": 1.7093336282414384e-05,
     "predicted": 0,
     "correct": true
   },
   {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-18T12-31-20",
+    "sequence_id": "pyronear-force-06_courmettes_275_2024-06-05T09-05-44",
     "truth": 0,
-    "prob": 0.0014179162681102753,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-29T13-45-12",
-    "truth": 0,
-    "prob": 0.0012866281904280186,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-force-06_courmettes_275_2023-10-20T15-58-54",
-    "truth": 0,
-    "prob": 0.001135599915869534,
+    "prob": 1.674730629019905e-05,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-engie_salaunes-2_0_2023-11-05T10-43-51",
     "truth": 0,
-    "prob": 0.001057938439771533,
+    "prob": 1.6455796867376193e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-19T13-24-19",
+    "truth": 0,
+    "prob": 1.6197987861232832e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-13T09-34-30",
+    "truth": 0,
+    "prob": 1.602558040758595e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2024-06-23T13-47-13",
+    "truth": 0,
+    "prob": 1.5561754480586387e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-18T12-31-20",
+    "truth": 0,
+    "prob": 1.4407859453058336e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-30T06-39-26",
+    "truth": 0,
+    "prob": 1.3823020708514377e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-29T13-45-12",
+    "truth": 0,
+    "prob": 1.2993020391149912e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2024-06-16T11-43-13",
+    "truth": 0,
+    "prob": 1.2620274901564699e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_80_2024-06-22T06-31-29",
+    "truth": 0,
+    "prob": 1.2077919564035255e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2024-07-06T14-17-15",
+    "truth": 0,
+    "prob": 1.0358372492191847e-05,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2023-11-02T16-31-54",
+    "truth": 0,
+    "prob": 9.7766169346869e-06,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-29T15-37-46",
     "truth": 0,
-    "prob": 0.0010564925614744425,
-    "predicted": 0,
-    "correct": true
-  },
-  {
-    "sequence_id": "pyronear-sdis-07_marguerite_29_2024-01-22T08-15-33",
-    "truth": 0,
-    "prob": 0.0009001485886983573,
+    "prob": 8.893895937944762e-06,
     "predicted": 0,
     "correct": true
   },
   {
     "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-26T11-16-26",
     "truth": 0,
-    "prob": 0.0008596059633418918,
+    "prob": 8.143799277604558e-06,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2024-07-05T14-39-27",
+    "truth": 0,
+    "prob": 7.80039954406675e-06,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2023-10-20T15-58-54",
+    "truth": 0,
+    "prob": 7.374055257969303e-06,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2024-07-03T15-28-05",
+    "truth": 0,
+    "prob": 5.0611606638995e-06,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2024-01-22T08-15-33",
+    "truth": 0,
+    "prob": 4.603392426361097e-06,
     "predicted": 0,
     "correct": true
   }
