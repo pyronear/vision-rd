@@ -121,8 +121,8 @@ def _det(cx: float = 0.5, cy: float = 0.5, w: float = 0.1, h: float = 0.1) -> De
 class TestFilterAndInterpolate:
     def test_drops_tubes_shorter_than_min_length(self) -> None:
         tubes = [
-            _tube(0, [(0, _det()), (1, _det())]),             # length 2 - keep
-            _tube(1, [(3, _det())]),                           # length 1 - drop
+            _tube(0, [(0, _det()), (1, _det())]),  # length 2 - keep
+            _tube(1, [(3, _det())]),  # length 1 - drop
         ]
         out = filter_and_interpolate_tubes(
             tubes, min_tube_length=2, min_detected_entries=1, interpolate_gaps=False
@@ -169,9 +169,12 @@ class TestFilterAndInterpolate:
         assert out[0].entries[1].detection is None
 
     def test_empty_input(self) -> None:
-        assert filter_and_interpolate_tubes(
-            [], min_tube_length=2, min_detected_entries=1, interpolate_gaps=True
-        ) == []
+        assert (
+            filter_and_interpolate_tubes(
+                [], min_tube_length=2, min_detected_entries=1, interpolate_gaps=True
+            )
+            == []
+        )
 
 
 @pytest.fixture()
@@ -262,8 +265,10 @@ class TestScoreTubes:
     def test_single_batched_forward(self) -> None:
         classifier = MagicMock(return_value=torch.tensor([1.2, -0.3]))
         patches = [torch.zeros(4, 3, 8, 8), torch.zeros(4, 3, 8, 8)]
-        masks = [torch.tensor([True, True, True, True]),
-                 torch.tensor([True, True, False, False])]
+        masks = [
+            torch.tensor([True, True, True, True]),
+            torch.tensor([True, True, False, False]),
+        ]
 
         logits = score_tubes(classifier, patches_per_tube=patches, masks_per_tube=masks)
 
@@ -281,7 +286,7 @@ class TestPickWinnerAndTrigger:
 
     def test_argmax_and_threshold_crossed(self) -> None:
         tubes = [
-            _tube(10, [(0, _det()), (1, _det())]),       # end_frame = 1
+            _tube(10, [(0, _det()), (1, _det())]),  # end_frame = 1
             _tube(20, [(2, _det()), (3, _det()), (4, _det())]),  # end_frame = 4
         ]
         logits = torch.tensor([-1.0, 0.5])

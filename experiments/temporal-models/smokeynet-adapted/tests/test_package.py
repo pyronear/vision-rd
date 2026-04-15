@@ -112,8 +112,7 @@ class TestBuildArchive:
     ) -> None:
         with zipfile.ZipFile(built_archive, "r") as zf:
             assert (
-                zf.read(CLASSIFIER_CKPT_FILENAME)
-                == dummy_classifier_ckpt.read_bytes()
+                zf.read(CLASSIFIER_CKPT_FILENAME) == dummy_classifier_ckpt.read_bytes()
             )
 
 
@@ -144,9 +143,7 @@ class TestConfigRoundTrip:
 
 
 class TestBuildMissingWeightsRaises:
-    def test_missing_yolo(
-        self, tmp_path: Path, dummy_classifier_ckpt: Path
-    ) -> None:
+    def test_missing_yolo(self, tmp_path: Path, dummy_classifier_ckpt: Path) -> None:
         with pytest.raises(FileNotFoundError):
             build_model_package(
                 yolo_weights_path=tmp_path / "nope.pt",
@@ -204,7 +201,9 @@ def real_tiny_config() -> dict:
 
 @pytest.fixture()
 def real_tiny_archive(
-    tmp_path: Path, dummy_yolo_weights: Path, real_tiny_classifier_ckpt: Path,
+    tmp_path: Path,
+    dummy_yolo_weights: Path,
+    real_tiny_classifier_ckpt: Path,
     real_tiny_config: dict,
 ) -> Path:
     out = tmp_path / "tiny_model.zip"
@@ -259,9 +258,7 @@ class TestLoadRoundtrip:
 
 class TestLoadRejectsBadArchive:
     @patch("smokeynet_adapted.package._load_yolo")
-    def test_missing_manifest(
-        self, mock_yolo: MagicMock, tmp_path: Path
-    ) -> None:
+    def test_missing_manifest(self, mock_yolo: MagicMock, tmp_path: Path) -> None:
         bad = tmp_path / "bad.zip"
         with zipfile.ZipFile(bad, "w") as zf:
             zf.writestr(CONFIG_FILENAME, "infer: {}")

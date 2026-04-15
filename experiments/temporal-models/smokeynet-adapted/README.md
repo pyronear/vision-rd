@@ -85,3 +85,39 @@ See `params.yaml`. Highlights:
 ## Layout
 
 Kedro-style data layers under `data/` (`01_raw`, `03_primary`, `05_model_input`, `06_models`, `07_model_output`, `08_reporting`); source under `src/smokeynet_adapted/`; CLI entry points under `scripts/`; design docs under `docs/specs/` and `docs/plans/`.
+
+## Deployment (TemporalModel)
+
+`SmokeynetTemporalModel` (in `src/smokeynet_adapted/model.py`) implements
+`pyrocore.TemporalModel`. It ships with a YOLO companion detector inside a
+single archive built by `scripts/package_model.py`.
+
+Pipeline inside `predict()`: truncate → YOLO → build+filter tubes → crop
+224x224 patches → classifier forward → `max_logit` aggregation →
+threshold-based decision (`trigger_frame_index = winner_tube.end_frame`).
+
+### Build the archive
+
+```bash
+uv run dvc repro package
+# -> data/06_models/gru_convnext_finetune/model.zip
+```
+
+The packager also calibrates `decision.threshold` on val for
+`target_recall=0.95` and bakes it into the archive's `config.yaml`.
+
+### Use the archive
+
+```python
+from pathlib import Path
+from smokeynet_adapted.model import SmokeynetTemporalModel
+
+model = SmokeynetTemporalModel.from_package(
+    Path("data/06_models/gru_convnext_finetune/model.zip")
+)
+output = model.predict_sequence(frame_paths)  # list[Path]
+```
+
+See `docs/specs/2026-04-15-temporal-model-protocol-design.md` for the full
+design, including the train/inference parity guarantees enforced by
+`tests/test_model_parity.py`.
