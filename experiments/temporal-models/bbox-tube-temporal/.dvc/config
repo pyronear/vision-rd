@@ -2,4 +2,4 @@
     remote = s3remote
     analytics = false
 ['remote "s3remote"']
-    url = s3://pyro-vision-rd/dvc/experiments/smokeynet-adapted/
+    url = s3://pyro-vision-rd/dvc/experiments/bbox-tube-temporal/
