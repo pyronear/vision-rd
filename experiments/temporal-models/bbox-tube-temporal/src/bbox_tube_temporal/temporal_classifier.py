@@ -153,6 +153,60 @@ class GRUHead(nn.Module):
         return self.mlp(last).squeeze(-1)
 
 
+class TransformerHead(nn.Module):
+    """Learnable [CLS] + learned positional embeddings + Transformer encoder.
+
+    Returns one logit per tube. Padded positions are masked out of
+    attention via ``src_key_padding_mask``.
+    """
+
+    def __init__(
+        self,
+        feat_dim: int,
+        num_layers: int,
+        num_heads: int,
+        ffn_dim: int,
+        dropout: float,
+        max_frames: int,
+    ) -> None:
+        super().__init__()
+        self.cls_token = nn.Parameter(torch.zeros(1, 1, feat_dim))
+        nn.init.trunc_normal_(self.cls_token, std=0.02)
+        # +1 for the prepended CLS position.
+        self.pos_embed = nn.Parameter(torch.zeros(1, max_frames + 1, feat_dim))
+        nn.init.trunc_normal_(self.pos_embed, std=0.02)
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=feat_dim,
+            nhead=num_heads,
+            dim_feedforward=ffn_dim,
+            dropout=dropout,
+            batch_first=True,
+            norm_first=True,
+            activation="gelu",
+        )
+        self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        self.classifier = nn.Linear(feat_dim, 1)
+        self.max_frames = max_frames
+
+    def forward(self, feats: Tensor, mask: Tensor) -> Tensor:
+        b, t, _ = feats.shape
+        if t > self.max_frames:
+            raise ValueError(
+                f"TransformerHead received T={t} frames but was configured "
+                f"with max_frames={self.max_frames}"
+            )
+        cls = self.cls_token.expand(b, 1, -1)
+        x = torch.cat([cls, feats], dim=1)  # (B, T+1, D)
+        x = x + self.pos_embed[:, : t + 1, :]
+        # True = pad (ignored) per torch convention; our input mask is True = real.
+        cls_real = torch.ones(b, 1, dtype=torch.bool, device=mask.device)
+        real_mask = torch.cat([cls_real, mask], dim=1)
+        key_padding_mask = ~real_mask  # (B, T+1), True = pad
+        out = self.encoder(x, src_key_padding_mask=key_padding_mask)
+        cls_out = out[:, 0, :]
+        return self.classifier(cls_out).squeeze(-1)
+
+
 class TemporalSmokeClassifier(nn.Module):
     """Frozen backbone applied per-frame plus a temporal head.
 
@@ -169,6 +223,12 @@ class TemporalSmokeClassifier(nn.Module):
         bidirectional: bool = False,
         finetune: bool = False,
         finetune_last_n_blocks: int = 0,
+        transformer_num_layers: int = 2,
+        transformer_num_heads: int = 6,
+        transformer_ffn_dim: int = 1536,
+        transformer_dropout: float = 0.1,
+        max_frames: int = 20,
+        global_pool: str = "avg",
     ) -> None:
         super().__init__()
         self.backbone = TimmBackbone(
@@ -176,6 +236,7 @@ class TemporalSmokeClassifier(nn.Module):
             pretrained=pretrained,
             finetune=finetune,
             finetune_last_n_blocks=finetune_last_n_blocks,
+            global_pool=global_pool,
         )
         feat_dim = self.backbone.feat_dim
         if arch == "mean_pool":
@@ -189,8 +250,20 @@ class TemporalSmokeClassifier(nn.Module):
                 num_layers=num_layers,
                 bidirectional=bidirectional,
             )
+        elif arch == "transformer":
+            self.head = TransformerHead(
+                feat_dim=feat_dim,
+                num_layers=transformer_num_layers,
+                num_heads=transformer_num_heads,
+                ffn_dim=transformer_ffn_dim,
+                dropout=transformer_dropout,
+                max_frames=max_frames,
+            )
         else:
-            raise ValueError(f"unknown arch: {arch!r} (expected 'mean_pool' or 'gru')")
+            raise ValueError(
+                f"unknown arch: {arch!r} "
+                f"(expected 'mean_pool', 'gru', or 'transformer')"
+            )
         self.arch = arch
 
     def forward(self, patches: Tensor, mask: Tensor) -> Tensor:

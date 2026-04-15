@@ -8,6 +8,7 @@ from bbox_tube_temporal.temporal_classifier import (
     MeanPoolHead,
     TemporalSmokeClassifier,
     TimmBackbone,
+    TransformerHead,
 )
 
 
@@ -308,3 +309,98 @@ def test_timm_backbone_vit_s14_dinov2_finetune_unfreezes_last_block():
     trainable_names = [n for n, p in bb.named_parameters() if p.requires_grad]
     assert trainable_names
     assert all(".blocks.11." in n for n in trainable_names), trainable_names
+
+
+def test_transformer_head_returns_logits_per_batch():
+    head = TransformerHead(
+        feat_dim=384,
+        num_layers=2,
+        num_heads=6,
+        ffn_dim=1536,
+        dropout=0.0,
+        max_frames=20,
+    )
+    feats = torch.randn(3, 20, 384)
+    mask = torch.ones(3, 20, dtype=torch.bool)
+    logits = head(feats, mask)
+    assert logits.shape == (3,)
+
+
+def test_transformer_head_respects_mask():
+    torch.manual_seed(0)
+    head = TransformerHead(
+        feat_dim=16,
+        num_layers=1,
+        num_heads=2,
+        ffn_dim=32,
+        dropout=0.0,
+        max_frames=20,
+    )
+    head.eval()
+    real = torch.randn(2, 16)
+    a = torch.zeros(20, 16)
+    a[:2] = real
+    b = a.clone()
+    b[2:] = 1e3  # junk in padded positions
+    feats = torch.stack([a, b])
+    mask = torch.zeros(2, 20, dtype=torch.bool)
+    mask[:, :2] = True
+    logits = head(feats, mask)
+    assert torch.allclose(logits[0], logits[1], atol=1e-4), logits
+
+
+def test_classifier_transformer_forward_shape_vit_backbone():
+    clf = TemporalSmokeClassifier(
+        backbone="vit_small_patch16_224",
+        arch="transformer",
+        hidden_dim=64,  # unused for transformer; kept for API symmetry
+        pretrained=False,
+        transformer_num_layers=2,
+        transformer_num_heads=6,
+        transformer_ffn_dim=1536,
+        transformer_dropout=0.0,
+        max_frames=20,
+        global_pool="token",
+    )
+    patches = torch.randn(2, 5, 3, 224, 224)
+    mask = torch.ones(2, 5, dtype=torch.bool)
+    logits = clf(patches, mask)
+    assert logits.shape == (2,)
+
+
+def test_classifier_transformer_frozen_only_head_trainable():
+    clf = TemporalSmokeClassifier(
+        backbone="vit_small_patch16_224",
+        arch="transformer",
+        hidden_dim=64,
+        pretrained=False,
+        transformer_num_layers=2,
+        transformer_num_heads=6,
+        transformer_ffn_dim=1536,
+        transformer_dropout=0.0,
+        max_frames=20,
+        global_pool="token",
+    )
+    trainable = [n for n, p in clf.named_parameters() if p.requires_grad]
+    assert all(n.startswith("head.") for n in trainable), trainable
+
+
+def test_classifier_transformer_finetune_exposes_last_vit_block():
+    clf = TemporalSmokeClassifier(
+        backbone="vit_small_patch16_224",
+        arch="transformer",
+        hidden_dim=64,
+        pretrained=False,
+        transformer_num_layers=2,
+        transformer_num_heads=6,
+        transformer_ffn_dim=1536,
+        transformer_dropout=0.0,
+        max_frames=20,
+        global_pool="token",
+        finetune=True,
+        finetune_last_n_blocks=1,
+    )
+    trainable = [n for n, p in clf.named_parameters() if p.requires_grad]
+    assert any(".blocks.11." in n for n in trainable), trainable
+    assert any(n.startswith("head.") for n in trainable)
+    assert not any(".blocks.0." in n for n in trainable)
