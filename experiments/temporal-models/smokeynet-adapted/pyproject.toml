@@ -24,6 +24,7 @@ dependencies = [
     "torch>=2.2",
     "torchvision>=0.17",
     "tqdm>=4.66",
+    "ultralytics>=8.3",
 ]
 
 [tool.uv.sources]
