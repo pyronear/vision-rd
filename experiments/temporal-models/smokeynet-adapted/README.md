@@ -60,6 +60,14 @@ All variants share the `truncate -> build_tubes -> build_model_input` inputs; th
 | `train_gru_finetune` | resnet18 | GRU | 42 | last 1 block |
 | `train_gru_convnext_finetune` | convnext_tiny | GRU | 42 | last 1 block |
 
+## Reproducibility
+
+Training is seeded end-to-end: same `seed` + same hardware + same `num_workers` → bitwise-identical final weights and logged metrics. The seed is configured per variant as `train_<variant>.seed` in `params.yaml` and can be overridden ad hoc via `uv run dvc exp run -S train_gru.seed=100`.
+
+Mechanism (in `scripts/train.py`): `L.seed_everything(cfg["seed"], workers=True)` seeds torch / numpy / random / `PYTHONHASHSEED` and causes Lightning to inject a deterministic `worker_init_fn` into every DataLoader; `Trainer(deterministic=True)` sets `torch.use_deterministic_algorithms(True)`, disables cuDNN benchmark mode, and sets `CUBLAS_WORKSPACE_CONFIG=":4096:8"`.
+
+Caveats: GPU reproducibility holds on the same GPU model + driver + CUDA version; bitwise equality across different GPUs is not guaranteed. The executable spec is `tests/test_reproducibility.py`, which fits two short runs on CPU with the same seed and asserts every `state_dict` tensor is identical.
+
 ## Key params
 
 See `params.yaml`. Highlights:
