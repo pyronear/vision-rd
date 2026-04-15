@@ -182,3 +182,29 @@ def score_tubes(
     mask = torch.stack(masks_per_tube, dim=0)
     with torch.no_grad():
         return classifier(patches, mask)
+
+
+def pick_winner_and_trigger(
+    *,
+    tubes: list[Tube],
+    logits: torch.Tensor,
+    threshold: float,
+) -> tuple[bool, int | None, int | None]:
+    """Aggregate per-tube logits into a sequence-level decision.
+
+    Rule: ``winner = argmax(logits)``. If ``logits[winner] >= threshold``,
+    the sequence is positive and the trigger frame is the winner tube's
+    ``end_frame``. Otherwise the sequence is negative (but ``winner_tube_id``
+    is still returned for diagnostics).
+
+    Returns:
+        Tuple ``(is_positive, trigger_frame_index, winner_tube_id)``.
+        All three are ``None``-ish when ``tubes`` is empty.
+    """
+    if not tubes:
+        return False, None, None
+    idx = int(torch.argmax(logits).item())
+    winner = tubes[idx]
+    is_positive = float(logits[idx].item()) >= threshold
+    trigger = winner.end_frame if is_positive else None
+    return is_positive, trigger, winner.tube_id

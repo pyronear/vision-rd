@@ -13,6 +13,7 @@ from pyrocore.types import Frame
 from smokeynet_adapted.inference import (
     crop_tube_patches,
     filter_and_interpolate_tubes,
+    pick_winner_and_trigger,
     run_yolo_on_frames,
     score_tubes,
 )
@@ -271,3 +272,31 @@ class TestScoreTubes:
         assert args[0].shape == (2, 4, 3, 8, 8)
         assert args[1].shape == (2, 4)
         assert logits.tolist() == pytest.approx([1.2, -0.3], rel=1e-5)
+
+
+class TestPickWinnerAndTrigger:
+    def test_no_tubes_returns_negative(self) -> None:
+        res = pick_winner_and_trigger(tubes=[], logits=torch.zeros(0), threshold=0.0)
+        assert res == (False, None, None)
+
+    def test_argmax_and_threshold_crossed(self) -> None:
+        tubes = [
+            _tube(10, [(0, _det()), (1, _det())]),       # end_frame = 1
+            _tube(20, [(2, _det()), (3, _det()), (4, _det())]),  # end_frame = 4
+        ]
+        logits = torch.tensor([-1.0, 0.5])
+        res = pick_winner_and_trigger(tubes=tubes, logits=logits, threshold=0.0)
+        assert res == (True, 4, 20)
+
+    def test_argmax_below_threshold(self) -> None:
+        tubes = [
+            _tube(1, [(0, _det()), (1, _det())]),
+            _tube(2, [(2, _det()), (3, _det())]),
+        ]
+        logits = torch.tensor([-2.0, -0.5])
+        is_positive, trigger, winner = pick_winner_and_trigger(
+            tubes=tubes, logits=logits, threshold=0.0
+        )
+        assert is_positive is False
+        assert trigger is None
+        assert winner == 2
