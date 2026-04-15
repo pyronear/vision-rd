@@ -468,6 +468,28 @@ stages:
         - data/08_reporting/${item}/gru_convnext_base_finetune/confusion_matrix.png
         - data/08_reporting/${item}/gru_convnext_base_finetune/confusion_matrix_normalized.png
 
+  package:
+    cmd: >-
+      uv run python scripts/package_model.py
+      --variant gru_convnext_finetune
+      --output data/06_models/gru_convnext_finetune/model.zip
+    deps:
+      - data/06_models/gru_convnext_finetune/best_checkpoint.pt
+      - data/01_raw/models/best.pt
+      - data/05_model_input/val
+      - scripts/package_model.py
+      - src/smokeynet_adapted/package.py
+      - src/smokeynet_adapted/calibration.py
+      - src/smokeynet_adapted/val_predict.py
+    params:
+      - package
+      - tubes
+      - build_tubes
+      - model_input
+      - train_gru_convnext_finetune
+    outs:
+      - data/06_models/gru_convnext_finetune/model.zip
+
   compare_variants:
     cmd: >-
       uv run python scripts/compare_variants.py
