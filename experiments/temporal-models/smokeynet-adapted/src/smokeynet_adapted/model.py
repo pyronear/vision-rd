@@ -23,6 +23,20 @@ from .package import ModelPackage, load_model_package
 from .tubes import build_tubes
 
 
+def _select_device(device: str | torch.device | None) -> torch.device:
+    """Resolve the requested device, auto-picking the best available when None.
+
+    Preference order: CUDA > MPS (Apple Silicon) > CPU.
+    """
+    if device is not None:
+        return torch.device(device)
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    if torch.backends.mps.is_available():
+        return torch.device("mps")
+    return torch.device("cpu")
+
+
 class SmokeynetTemporalModel(TemporalModel):
     """YOLO companion + tube classifier.
 
@@ -36,18 +50,30 @@ class SmokeynetTemporalModel(TemporalModel):
         yolo_model: Any,
         classifier: Any,
         config: dict[str, Any],
+        device: str | torch.device | None = None,
     ) -> None:
         self._yolo = yolo_model
-        self._classifier = classifier
+        self._device = _select_device(device)
+        self._classifier = classifier.to(self._device).eval()
         self._cfg = config
 
+    @property
+    def device(self) -> torch.device:
+        return self._device
+
     @classmethod
-    def from_package(cls, package_path: Path) -> Self:
+    def from_package(
+        cls,
+        package_path: Path,
+        *,
+        device: str | torch.device | None = None,
+    ) -> Self:
         pkg: ModelPackage = load_model_package(package_path)
         return cls(
             yolo_model=pkg.yolo_model,
             classifier=pkg.classifier,
             config=pkg.config,
+            device=device,
         )
 
     def predict(self, frames: list[Frame]) -> TemporalModelOutput:
@@ -128,8 +154,8 @@ class SmokeynetTemporalModel(TemporalModel):
                 normalization_mean=mi["normalization"]["mean"],
                 normalization_std=mi["normalization"]["std"],
             )
-            patches_per_tube.append(p)
-            masks_per_tube.append(m)
+            patches_per_tube.append(p.to(self._device))
+            masks_per_tube.append(m.to(self._device))
 
         logits = score_tubes(
             self._classifier,

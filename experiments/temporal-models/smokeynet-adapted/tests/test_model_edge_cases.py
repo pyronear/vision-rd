@@ -163,3 +163,62 @@ class TestTruncation:
         out = model.predict(frames=extra)
         assert out.details["num_frames"] == 9
         assert out.details["num_truncated"] == 3
+
+
+class TestDeviceSelection:
+    def test_explicit_cpu_puts_classifier_on_cpu(
+        self, tiny_classifier: TemporalSmokeClassifier
+    ) -> None:
+        yolo = MagicMock()
+        model = SmokeynetTemporalModel(
+            yolo_model=yolo,
+            classifier=tiny_classifier,
+            config=TEST_CONFIG,
+            device="cpu",
+        )
+        assert model.device.type == "cpu"
+        assert next(model._classifier.parameters()).device.type == "cpu"
+
+    def test_predict_on_cpu_runs_end_to_end(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in red_frames]
+        yolo = _fake_yolo_factory(per_frame)
+        model = SmokeynetTemporalModel(
+            yolo_model=yolo,
+            classifier=tiny_classifier,
+            config=TEST_CONFIG,
+            device="cpu",
+        )
+        out = model.predict(frames=red_frames)
+        assert out.details["num_tubes_kept"] == 1
+        assert len(out.details["tube_logits"]) == 1
+
+    @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
+    def test_predict_on_cuda_runs_end_to_end(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in red_frames]
+        yolo = _fake_yolo_factory(per_frame)
+        model = SmokeynetTemporalModel(
+            yolo_model=yolo,
+            classifier=tiny_classifier,
+            config=TEST_CONFIG,
+            device="cuda",
+        )
+        assert model.device.type == "cuda"
+        assert next(model._classifier.parameters()).device.type == "cuda"
+        out = model.predict(frames=red_frames)
+        assert out.details["num_tubes_kept"] == 1
+
+    def test_auto_detect_picks_cuda_when_available(
+        self, tiny_classifier: TemporalSmokeClassifier
+    ) -> None:
+        yolo = MagicMock()
+        model = SmokeynetTemporalModel(
+            yolo_model=yolo, classifier=tiny_classifier, config=TEST_CONFIG
+        )
+        expected = "cuda" if torch.cuda.is_available() else "cpu"
+        if not torch.cuda.is_available() and torch.backends.mps.is_available():
+            expected = "mps"
+        assert model.device.type == expected
