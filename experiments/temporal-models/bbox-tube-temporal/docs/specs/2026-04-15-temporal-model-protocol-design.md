@@ -106,7 +106,7 @@ Batching summary:
 
 New files under `src/bbox_tube_temporal/`:
 
-- `model.py` - `SmokeynetTemporalModel(TemporalModel)` with
+- `model.py` - `BboxTubeTemporalModel(TemporalModel)` with
   `from_package()` factory and `predict()` method.
 - `package.py` - `ModelPackage` dataclass, `build_model_package()`,
   `load_model_package()`. Parallels
@@ -133,7 +133,7 @@ Touched files:
   `data/01_raw/models/best.pt` + val eval predictions; outs:
   `data/06_models/gru_convnext_finetune/model.zip`.
 - `README.md` - document the package artefact and the
-  `SmokeynetTemporalModel` class.
+  `BboxTubeTemporalModel` class.
 
 ## Package format
 
@@ -321,7 +321,7 @@ mocked everywhere except one optional slow smoke test gated behind
    - Run the offline training path (`build_tubes.py` →
      `build_model_input.py` → `TubePatchDataset.__getitem__` →
      `TemporalSmokeClassifier.forward`) → reference logit.
-   - Run `SmokeynetTemporalModel.predict()` on the same sequences
+   - Run `BboxTubeTemporalModel.predict()` on the same sequences
      with YOLO replaced by cached GT labels via dependency injection.
    - Assert logits equal to `1e-5`.
 4. **`tests/test_model_edge_cases.py`** - each row in the edge-case

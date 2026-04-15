@@ -7,7 +7,7 @@ Methodology:
   (expand_bbox / norm_bbox_to_pixel_square / crop_and_resize / to_tensor /
   ImageNet normalization), batched in the same shape.
 - Forward through the classifier -> reference logit.
-- Run SmokeynetTemporalModel.predict() with a fake YOLO that returns the
+- Run BboxTubeTemporalModel.predict() with a fake YOLO that returns the
   same GT detections per frame.
 - Assert predict()'s winning-tube logit == reference logit to 1e-5.
 """
@@ -23,7 +23,7 @@ from pyrocore.types import Frame
 from torchvision.transforms.functional import to_tensor
 
 from bbox_tube_temporal.data import load_frame_detections
-from bbox_tube_temporal.model import SmokeynetTemporalModel
+from bbox_tube_temporal.model import BboxTubeTemporalModel
 from bbox_tube_temporal.model_input import (
     crop_and_resize,
     expand_bbox,
@@ -162,7 +162,7 @@ def test_parity_logit_matches(classifier: TemporalSmokeClassifier) -> None:
         for p in sorted((FIXTURE / "images").glob("*.jpg"))
     ]
     yolo = _fake_yolo_from_gt(FIXTURE)
-    model = SmokeynetTemporalModel(yolo_model=yolo, classifier=classifier, config=CFG)
+    model = BboxTubeTemporalModel(yolo_model=yolo, classifier=classifier, config=CFG)
     out = model.predict(frames=frames)
 
     assert out.details["num_tubes_kept"] >= 1

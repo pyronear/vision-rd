@@ -1,4 +1,4 @@
-"""Tests for SmokeynetTemporalModel packaging."""
+"""Tests for BboxTubeTemporalModel packaging."""
 
 import zipfile
 from pathlib import Path

@@ -88,7 +88,7 @@ Kedro-style data layers under `data/` (`01_raw`, `03_primary`, `05_model_input`,
 
 ## Deployment (TemporalModel)
 
-`SmokeynetTemporalModel` (in `src/bbox_tube_temporal/model.py`) implements
+`BboxTubeTemporalModel` (in `src/bbox_tube_temporal/model.py`) implements
 `pyrocore.TemporalModel`. It ships with a YOLO companion detector inside a
 single archive built by `scripts/package_model.py`.
 
@@ -110,9 +110,9 @@ The packager also calibrates `decision.threshold` on val for
 
 ```python
 from pathlib import Path
-from bbox_tube_temporal.model import SmokeynetTemporalModel
+from bbox_tube_temporal.model import BboxTubeTemporalModel
 
-model = SmokeynetTemporalModel.from_package(
+model = BboxTubeTemporalModel.from_package(
     Path("data/06_models/gru_convnext_finetune/model.zip")
 )
 output = model.predict_sequence(frame_paths)  # list[Path]

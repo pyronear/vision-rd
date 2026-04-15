@@ -1,4 +1,4 @@
-"""Pure-function helpers used by :class:`SmokeynetTemporalModel.predict`.
+"""Pure-function helpers used by :class:`BboxTubeTemporalModel.predict`.
 
 Each helper corresponds to one stage of the six-stage pipeline described in
 ``docs/specs/2026-04-15-temporal-model-protocol-design.md``. Kept separate so

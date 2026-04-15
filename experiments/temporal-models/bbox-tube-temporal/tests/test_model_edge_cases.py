@@ -1,4 +1,4 @@
-"""Edge-case tests for SmokeynetTemporalModel.predict()."""
+"""Edge-case tests for BboxTubeTemporalModel.predict()."""
 
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -9,7 +9,7 @@ import torch
 from PIL import Image
 from pyrocore.types import Frame
 
-from bbox_tube_temporal.model import SmokeynetTemporalModel
+from bbox_tube_temporal.model import BboxTubeTemporalModel
 from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
 
 TEST_CONFIG: dict = {
@@ -107,7 +107,7 @@ def red_frames(tmp_path: Path) -> list[Frame]:
 class TestEmptyFrames:
     def test_returns_negative(self, tiny_classifier: TemporalSmokeClassifier) -> None:
         yolo = MagicMock()
-        model = SmokeynetTemporalModel(
+        model = BboxTubeTemporalModel(
             yolo_model=yolo, classifier=tiny_classifier, config=TEST_CONFIG
         )
         out = model.predict(frames=[])
@@ -122,7 +122,7 @@ class TestZeroDetections:
         self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
     ) -> None:
         yolo = _fake_yolo_factory([[] for _ in red_frames])
-        model = SmokeynetTemporalModel(
+        model = BboxTubeTemporalModel(
             yolo_model=yolo, classifier=tiny_classifier, config=TEST_CONFIG
         )
         out = model.predict(frames=red_frames)
@@ -139,7 +139,7 @@ class TestShortTubeBelowInferFloor:
         # Only frame 0 has a detection — tube length 1, below infer_min_tube_length=2.
         per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)]] + [[] for _ in red_frames[1:]]
         yolo = _fake_yolo_factory(per_frame)
-        model = SmokeynetTemporalModel(
+        model = BboxTubeTemporalModel(
             yolo_model=yolo, classifier=tiny_classifier, config=TEST_CONFIG
         )
         out = model.predict(frames=red_frames)
@@ -157,7 +157,7 @@ class TestTruncation:
         # YOLO will only see the first 6 (truncated).
         per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in range(6)]
         yolo = _fake_yolo_factory(per_frame)
-        model = SmokeynetTemporalModel(
+        model = BboxTubeTemporalModel(
             yolo_model=yolo, classifier=tiny_classifier, config=TEST_CONFIG
         )
         out = model.predict(frames=extra)
@@ -170,7 +170,7 @@ class TestDeviceSelection:
         self, tiny_classifier: TemporalSmokeClassifier
     ) -> None:
         yolo = MagicMock()
-        model = SmokeynetTemporalModel(
+        model = BboxTubeTemporalModel(
             yolo_model=yolo,
             classifier=tiny_classifier,
             config=TEST_CONFIG,
@@ -184,7 +184,7 @@ class TestDeviceSelection:
     ) -> None:
         per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in red_frames]
         yolo = _fake_yolo_factory(per_frame)
-        model = SmokeynetTemporalModel(
+        model = BboxTubeTemporalModel(
             yolo_model=yolo,
             classifier=tiny_classifier,
             config=TEST_CONFIG,
@@ -200,7 +200,7 @@ class TestDeviceSelection:
     ) -> None:
         per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in red_frames]
         yolo = _fake_yolo_factory(per_frame)
-        model = SmokeynetTemporalModel(
+        model = BboxTubeTemporalModel(
             yolo_model=yolo,
             classifier=tiny_classifier,
             config=TEST_CONFIG,
@@ -215,7 +215,7 @@ class TestDeviceSelection:
         self, tiny_classifier: TemporalSmokeClassifier
     ) -> None:
         yolo = MagicMock()
-        model = SmokeynetTemporalModel(
+        model = BboxTubeTemporalModel(
             yolo_model=yolo, classifier=tiny_classifier, config=TEST_CONFIG
         )
         expected = "cuda" if torch.cuda.is_available() else "cpu"

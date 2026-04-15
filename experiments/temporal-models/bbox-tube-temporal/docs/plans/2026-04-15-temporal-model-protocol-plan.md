@@ -4,7 +4,7 @@
 
 **Goal:** Implement `pyrocore.TemporalModel` for `smokeynet-adapted`, packaging the `gru_convnext_finetune` variant together with a YOLO companion detector into a single self-contained archive that the leaderboard can consume end-to-end.
 
-**Architecture:** A thin `SmokeynetTemporalModel` class wiring together five pure inference helpers (YOLO detect → tube build/filter/interpolate → crop patches → classifier forward → decision). A `package.py` module bundles YOLO weights, classifier checkpoint, and config into a `.zip`, mirroring `tracking-fsm-baseline/package.py`. A packager CLI calibrates the sigmoid threshold on val (smallest threshold achieving target recall) and writes it into the bundled config. DVC wires one hard-coded `package` stage for `gru_convnext_finetune`.
+**Architecture:** A thin `BboxTubeTemporalModel` class wiring together five pure inference helpers (YOLO detect → tube build/filter/interpolate → crop patches → classifier forward → decision). A `package.py` module bundles YOLO weights, classifier checkpoint, and config into a `.zip`, mirroring `tracking-fsm-baseline/package.py`. A packager CLI calibrates the sigmoid threshold on val (smallest threshold achieving target recall) and writes it into the bundled config. DVC wires one hard-coded `package` stage for `gru_convnext_finetune`.
 
 **Tech Stack:** Python 3.11+, PyTorch, timm, ultralytics YOLO, Lightning (loading the checkpoint only), PyYAML, pytest.
 
@@ -21,7 +21,7 @@
 - `src/bbox_tube_temporal/inference.py` — pure helpers: `run_yolo_on_frames`, `filter_and_interpolate_tubes`, `crop_tube_patches`, `score_tubes`, `pick_winner_and_trigger`.
 - `src/bbox_tube_temporal/calibration.py` — `calibrate_threshold(probs, labels, target_recall) -> float`.
 - `src/bbox_tube_temporal/val_predict.py` — `collect_val_probabilities(classifier, tubes_dir, patches_dir, cfg) -> tuple[np.ndarray, np.ndarray]`.
-- `src/bbox_tube_temporal/model.py` — `SmokeynetTemporalModel(TemporalModel)` with `from_package()`.
+- `src/bbox_tube_temporal/model.py` — `BboxTubeTemporalModel(TemporalModel)` with `from_package()`.
 
 **New scripts**
 - `scripts/package_model.py` — CLI building the `.zip` archive.
@@ -37,7 +37,7 @@
 - `pyproject.toml` — add `ultralytics` dep.
 - `params.yaml` — add `package:` block.
 - `dvc.yaml` — add `package` stage.
-- `README.md` — document the `model.zip` artefact and `SmokeynetTemporalModel`.
+- `README.md` — document the `model.zip` artefact and `BboxTubeTemporalModel`.
 
 ---
 
@@ -166,7 +166,7 @@ git commit -m "feat(smokeynet-adapted): add package module skeleton"
 Create `tests/test_package.py`:
 
 ```python
-"""Tests for SmokeynetTemporalModel packaging."""
+"""Tests for BboxTubeTemporalModel packaging."""
 
 import zipfile
 from pathlib import Path
@@ -780,7 +780,7 @@ Expected: ImportError.
 Create `src/bbox_tube_temporal/inference.py`:
 
 ```python
-"""Pure-function helpers used by :class:`SmokeynetTemporalModel.predict`.
+"""Pure-function helpers used by :class:`BboxTubeTemporalModel.predict`.
 
 Each helper corresponds to one stage of the six-stage pipeline described in
 ``docs/specs/2026-04-15-temporal-model-protocol-design.md``. Kept separate so
@@ -1364,7 +1364,7 @@ git commit -m "feat(smokeynet-adapted): add pick_winner_and_trigger helper"
 
 ---
 
-## Task 10: `SmokeynetTemporalModel` skeleton + `from_package`
+## Task 10: `BboxTubeTemporalModel` skeleton + `from_package`
 
 **Files:**
 - Create: `src/bbox_tube_temporal/model.py`
@@ -1398,7 +1398,7 @@ from .package import ModelPackage, load_model_package
 from .tubes import build_tubes
 
 
-class SmokeynetTemporalModel(TemporalModel):
+class BboxTubeTemporalModel(TemporalModel):
     """YOLO companion + tube classifier.
 
     See ``docs/specs/2026-04-15-temporal-model-protocol-design.md`` for the
@@ -1431,19 +1431,19 @@ class SmokeynetTemporalModel(TemporalModel):
 
 - [ ] **Step 2: Verify it imports**
 
-Run: `uv run python -c "from bbox_tube_temporal.model import SmokeynetTemporalModel; print(SmokeynetTemporalModel)"`
+Run: `uv run python -c "from bbox_tube_temporal.model import BboxTubeTemporalModel; print(BboxTubeTemporalModel)"`
 Expected: prints the class.
 
 - [ ] **Step 3: Commit**
 
 ```bash
 git add src/bbox_tube_temporal/model.py
-git commit -m "feat(smokeynet-adapted): add SmokeynetTemporalModel skeleton"
+git commit -m "feat(smokeynet-adapted): add BboxTubeTemporalModel skeleton"
 ```
 
 ---
 
-## Task 11: Implement `SmokeynetTemporalModel.predict` + edge-case tests
+## Task 11: Implement `BboxTubeTemporalModel.predict` + edge-case tests
 
 **Files:**
 - Modify: `src/bbox_tube_temporal/model.py`
@@ -1454,7 +1454,7 @@ git commit -m "feat(smokeynet-adapted): add SmokeynetTemporalModel skeleton"
 Create `tests/test_model_edge_cases.py`:
 
 ```python
-"""Edge-case tests for SmokeynetTemporalModel.predict()."""
+"""Edge-case tests for BboxTubeTemporalModel.predict()."""
 
 from datetime import datetime
 from pathlib import Path
@@ -1466,7 +1466,7 @@ import torch
 from PIL import Image
 
 from pyrocore.types import Frame
-from bbox_tube_temporal.model import SmokeynetTemporalModel
+from bbox_tube_temporal.model import BboxTubeTemporalModel
 
 TEST_CONFIG: dict = {
     "infer": {"confidence_threshold": 0.01, "iou_nms": 0.2, "image_size": 1024},
@@ -1560,7 +1560,7 @@ def red_frames(tmp_path: Path) -> list[Frame]:
 class TestEmptyFrames:
     def test_returns_negative(self, tiny_classifier) -> None:
         yolo = MagicMock()
-        model = SmokeynetTemporalModel(
+        model = BboxTubeTemporalModel(
             yolo_model=yolo, classifier=tiny_classifier, config=TEST_CONFIG
         )
         out = model.predict(frames=[])
@@ -1575,7 +1575,7 @@ class TestZeroDetections:
         self, tiny_classifier, red_frames: list[Frame]
     ) -> None:
         yolo = _fake_yolo_factory([[] for _ in red_frames])
-        model = SmokeynetTemporalModel(
+        model = BboxTubeTemporalModel(
             yolo_model=yolo, classifier=tiny_classifier, config=TEST_CONFIG
         )
         out = model.predict(frames=red_frames)
@@ -1592,7 +1592,7 @@ class TestShortTubeBelowInferFloor:
         # Only frame 0 has a detection — tube length 1, below infer_min_tube_length=2.
         per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)]] + [[] for _ in red_frames[1:]]
         yolo = _fake_yolo_factory(per_frame)
-        model = SmokeynetTemporalModel(
+        model = BboxTubeTemporalModel(
             yolo_model=yolo, classifier=tiny_classifier, config=TEST_CONFIG
         )
         out = model.predict(frames=red_frames)
@@ -1609,7 +1609,7 @@ class TestTruncation:
         extra = red_frames + red_frames[:3]
         per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in extra]
         yolo = _fake_yolo_factory(per_frame[:6])  # only first 6 passed to YOLO
-        model = SmokeynetTemporalModel(
+        model = BboxTubeTemporalModel(
             yolo_model=yolo, classifier=tiny_classifier, config=TEST_CONFIG
         )
         out = model.predict(frames=extra)
@@ -1760,7 +1760,7 @@ Expected: all pass.
 
 ```bash
 git add src/bbox_tube_temporal/model.py tests/test_model_edge_cases.py
-git commit -m "feat(smokeynet-adapted): implement SmokeynetTemporalModel.predict with edge-case tests"
+git commit -m "feat(smokeynet-adapted): implement BboxTubeTemporalModel.predict with edge-case tests"
 ```
 
 ---
@@ -1822,7 +1822,7 @@ Methodology:
 - Crop patches via TubePatchDataset's exact preprocessing (saved to temp dir
   via process_tube, then read through TubePatchDataset).
 - Forward through the classifier → reference logit.
-- Run SmokeynetTemporalModel.predict() with a fake YOLO that returns the
+- Run BboxTubeTemporalModel.predict() with a fake YOLO that returns the
   same GT detections per frame.
 - Assert predict()'s winning-tube logit == reference logit to 1e-5.
 """
@@ -1839,7 +1839,7 @@ from torchvision.transforms.functional import to_tensor
 
 from pyrocore.types import Frame
 from bbox_tube_temporal.data import load_frame_detections
-from bbox_tube_temporal.model import SmokeynetTemporalModel
+from bbox_tube_temporal.model import BboxTubeTemporalModel
 from bbox_tube_temporal.model_input import (
     crop_and_resize,
     expand_bbox,
@@ -1978,7 +1978,7 @@ def test_parity_logit_matches(classifier: TemporalSmokeClassifier) -> None:
         for p in sorted((FIXTURE / "images").glob("*.jpg"))
     ]
     yolo = _fake_yolo_from_gt(FIXTURE)
-    model = SmokeynetTemporalModel(yolo_model=yolo, classifier=classifier, config=CFG)
+    model = BboxTubeTemporalModel(yolo_model=yolo, classifier=classifier, config=CFG)
     out = model.predict(frames=frames)
 
     assert out.details["num_tubes_kept"] >= 1
@@ -2490,9 +2490,9 @@ Run:
 ```bash
 uv run python - <<'PY'
 from pathlib import Path
-from bbox_tube_temporal.model import SmokeynetTemporalModel
+from bbox_tube_temporal.model import BboxTubeTemporalModel
 
-model = SmokeynetTemporalModel.from_package(
+model = BboxTubeTemporalModel.from_package(
     Path("data/06_models/gru_convnext_finetune/model.zip")
 )
 print("variant:", model._cfg.get("classifier", {}).get("backbone"))
@@ -2509,10 +2509,10 @@ Pick one sequence path and run predict end-to-end:
 ```bash
 uv run python - <<'PY'
 from pathlib import Path
-from bbox_tube_temporal.model import SmokeynetTemporalModel
+from bbox_tube_temporal.model import BboxTubeTemporalModel
 from bbox_tube_temporal.data import get_sorted_frames, list_sequences
 
-model = SmokeynetTemporalModel.from_package(
+model = BboxTubeTemporalModel.from_package(
     Path("data/06_models/gru_convnext_finetune/model.zip")
 )
 seqs = list_sequences(Path("data/01_raw/datasets_full/val")) or list_sequences(
@@ -2554,7 +2554,7 @@ Append to `README.md`:
 ```markdown
 ## Deployment (TemporalModel)
 
-`SmokeynetTemporalModel` (in `src/bbox_tube_temporal/model.py`) implements
+`BboxTubeTemporalModel` (in `src/bbox_tube_temporal/model.py`) implements
 `pyrocore.TemporalModel`. It ships with a YOLO companion detector inside a
 single archive built by `scripts/package_model.py`.
 
@@ -2576,9 +2576,9 @@ The packager also calibrates `decision.threshold` on val for
 
 ```python
 from pathlib import Path
-from bbox_tube_temporal.model import SmokeynetTemporalModel
+from bbox_tube_temporal.model import BboxTubeTemporalModel
 
-model = SmokeynetTemporalModel.from_package(
+model = BboxTubeTemporalModel.from_package(
     Path("data/06_models/gru_convnext_finetune/model.zip")
 )
 output = model.predict_sequence(frame_paths)  # list[Path]
@@ -2603,7 +2603,7 @@ Expected: no issues.
 
 ```bash
 git add README.md
-git commit -m "docs(smokeynet-adapted): document SmokeynetTemporalModel and packaging"
+git commit -m "docs(smokeynet-adapted): document BboxTubeTemporalModel and packaging"
 ```
 
 ---

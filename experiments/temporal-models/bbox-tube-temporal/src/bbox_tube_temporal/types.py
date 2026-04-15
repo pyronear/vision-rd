@@ -1,4 +1,4 @@
-"""Data types for the adapted SmokeyNet temporal smoke detection model."""
+"""Data types for the bbox-tube temporal smoke detection model."""
 
 from dataclasses import dataclass, field
 from datetime import datetime

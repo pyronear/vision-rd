@@ -37,7 +37,7 @@ def _select_device(device: str | torch.device | None) -> torch.device:
     return torch.device("cpu")
 
 
-class SmokeynetTemporalModel(TemporalModel):
+class BboxTubeTemporalModel(TemporalModel):
     """YOLO companion + tube classifier.
 
     See ``docs/specs/2026-04-15-temporal-model-protocol-design.md`` for the
