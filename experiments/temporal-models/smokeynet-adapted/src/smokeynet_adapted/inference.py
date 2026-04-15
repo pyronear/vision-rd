@@ -7,8 +7,13 @@ Each helper corresponds to one stage of the six-stage pipeline described in
 
 from typing import Any
 
+import numpy as np
+import torch
+from PIL import Image
 from pyrocore.types import Frame
+from torchvision.transforms.functional import to_tensor
 
+from .model_input import crop_and_resize, expand_bbox, norm_bbox_to_pixel_square
 from .tubes import interpolate_gaps as _interpolate_gaps
 from .types import Detection, FrameDetections, Tube
 
@@ -110,3 +115,46 @@ def filter_and_interpolate_tubes(
             _interpolate_gaps(t)
         survivors.append(t)
     return survivors
+
+
+def crop_tube_patches(
+    tube: Tube,
+    frames: list[Frame],
+    *,
+    context_factor: float,
+    patch_size: int,
+    max_frames: int,
+    normalization_mean: list[float],
+    normalization_std: list[float],
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Crop patches for a single tube, padded/truncated to ``max_frames``.
+
+    Matches ``TubePatchDataset.__getitem__`` exactly: PIL→uint8 array,
+    ``expand_bbox → norm_bbox_to_pixel_square → crop_and_resize``, then
+    ``to_tensor`` (CHW, float32, [0,1]), then mean/std normalization.
+    """
+    frame_by_idx = {i: f for i, f in enumerate(frames)}
+
+    n = min(len(tube.entries), max_frames)
+    patches = torch.zeros(max_frames, 3, patch_size, patch_size, dtype=torch.float32)
+    mask = torch.zeros(max_frames, dtype=torch.bool)
+    mean_t = torch.tensor(normalization_mean).view(3, 1, 1)
+    std_t = torch.tensor(normalization_std).view(3, 1, 1)
+
+    for slot, entry in enumerate(tube.entries[:n]):
+        det = entry.detection
+        if det is None:
+            # Shouldn't happen post-interpolation; leave zero-padded + mask=False.
+            continue
+        frame = frame_by_idx[entry.frame_idx]
+        image = np.array(Image.open(frame.image_path).convert("RGB"))
+        img_h, img_w, _ = image.shape
+
+        cx, cy, w, h = expand_bbox(det.cx, det.cy, det.w, det.h, context_factor)
+        box = norm_bbox_to_pixel_square(cx, cy, w, h, img_w, img_h)
+        patch_np = crop_and_resize(image, box, patch_size)
+        patch_t = to_tensor(Image.fromarray(patch_np))  # CHW float32 [0,1]
+        patches[slot] = (patch_t - mean_t) / std_t
+        mask[slot] = True
+
+    return patches, mask

@@ -4,11 +4,17 @@ from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock
 
+import numpy as np
 import pytest
 import torch
+from PIL import Image
 from pyrocore.types import Frame
 
-from smokeynet_adapted.inference import filter_and_interpolate_tubes, run_yolo_on_frames
+from smokeynet_adapted.inference import (
+    crop_tube_patches,
+    filter_and_interpolate_tubes,
+    run_yolo_on_frames,
+)
 from smokeynet_adapted.types import Detection, FrameDetections, Tube, TubeEntry
 
 
@@ -164,3 +170,81 @@ class TestFilterAndInterpolate:
         assert filter_and_interpolate_tubes(
             [], min_tube_length=2, min_detected_entries=1, interpolate_gaps=True
         ) == []
+
+
+@pytest.fixture()
+def red_image_sequence(tmp_path: Path) -> list[Path]:
+    """Three 128x128 solid-red JPGs."""
+    paths = []
+    for i in range(3):
+        img = np.full((128, 128, 3), fill_value=[200, 30, 30], dtype=np.uint8)
+        p = tmp_path / f"frame_{i:02d}.jpg"
+        Image.fromarray(img).save(p, format="JPEG", quality=95)
+        paths.append(p)
+    return paths
+
+
+class TestCropTubePatches:
+    def test_output_shape(self, red_image_sequence: list[Path]) -> None:
+        frames = [
+            Frame(frame_id=p.stem, image_path=p, timestamp=None)
+            for p in red_image_sequence
+        ]
+        tube = _tube(
+            0,
+            [
+                (0, _det(cx=0.5, cy=0.5, w=0.2, h=0.2)),
+                (1, _det(cx=0.5, cy=0.5, w=0.2, h=0.2)),
+                (2, _det(cx=0.5, cy=0.5, w=0.2, h=0.2)),
+            ],
+        )
+        patches, mask = crop_tube_patches(
+            tube,
+            frames,
+            context_factor=1.5,
+            patch_size=224,
+            max_frames=5,
+            normalization_mean=[0.485, 0.456, 0.406],
+            normalization_std=[0.229, 0.224, 0.225],
+        )
+        assert patches.shape == (5, 3, 224, 224)
+        assert patches.dtype == torch.float32
+        assert mask.shape == (5,)
+        assert mask.tolist() == [True, True, True, False, False]
+
+    def test_padding_slots_are_zero(self, red_image_sequence: list[Path]) -> None:
+        frames = [
+            Frame(frame_id=p.stem, image_path=p, timestamp=None)
+            for p in red_image_sequence
+        ]
+        tube = _tube(0, [(0, _det()), (1, _det())])
+        patches, mask = crop_tube_patches(
+            tube,
+            frames,
+            context_factor=1.5,
+            patch_size=224,
+            max_frames=5,
+            normalization_mean=[0.485, 0.456, 0.406],
+            normalization_std=[0.229, 0.224, 0.225],
+        )
+        assert torch.all(patches[2:] == 0.0)
+
+    def test_truncates_tubes_longer_than_max_frames(
+        self, red_image_sequence: list[Path]
+    ) -> None:
+        frames = [
+            Frame(frame_id=p.stem, image_path=p, timestamp=None)
+            for p in red_image_sequence
+        ]
+        tube = _tube(0, [(0, _det()), (1, _det()), (2, _det())])
+        patches, mask = crop_tube_patches(
+            tube,
+            frames,
+            context_factor=1.5,
+            patch_size=224,
+            max_frames=2,
+            normalization_mean=[0.485, 0.456, 0.406],
+            normalization_std=[0.229, 0.224, 0.225],
+        )
+        assert patches.shape == (2, 3, 224, 224)
+        assert mask.tolist() == [True, True]
