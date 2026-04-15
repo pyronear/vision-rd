@@ -94,6 +94,7 @@ stages:
       --params-key train_mean_pool
     deps:
       - scripts/train.py
+      - src/smokeynet_adapted/augment.py
       - src/smokeynet_adapted/dataset.py
       - src/smokeynet_adapted/temporal_classifier.py
       - src/smokeynet_adapted/lit_temporal.py
@@ -101,6 +102,7 @@ stages:
       - data/05_model_input/val
     params:
       - train_mean_pool
+      - augment
     outs:
       - data/06_models/mean_pool/best_checkpoint.pt
     plots:
@@ -117,6 +119,7 @@ stages:
       --params-key train_gru
     deps:
       - scripts/train.py
+      - src/smokeynet_adapted/augment.py
       - src/smokeynet_adapted/dataset.py
       - src/smokeynet_adapted/temporal_classifier.py
       - src/smokeynet_adapted/lit_temporal.py
@@ -124,6 +127,7 @@ stages:
       - data/05_model_input/val
     params:
       - train_gru
+      - augment
     outs:
       - data/06_models/gru/best_checkpoint.pt
     plots:
@@ -214,6 +218,7 @@ stages:
       --params-key train_gru_seed43
     deps:
       - scripts/train.py
+      - src/smokeynet_adapted/augment.py
       - src/smokeynet_adapted/dataset.py
       - src/smokeynet_adapted/temporal_classifier.py
       - src/smokeynet_adapted/lit_temporal.py
@@ -221,6 +226,7 @@ stages:
       - data/05_model_input/val
     params:
       - train_gru_seed43
+      - augment
     outs:
       - data/06_models/gru_seed43/best_checkpoint.pt
     plots:
@@ -237,6 +243,7 @@ stages:
       --params-key train_gru_seed44
     deps:
       - scripts/train.py
+      - src/smokeynet_adapted/augment.py
       - src/smokeynet_adapted/dataset.py
       - src/smokeynet_adapted/temporal_classifier.py
       - src/smokeynet_adapted/lit_temporal.py
@@ -244,6 +251,7 @@ stages:
       - data/05_model_input/val
     params:
       - train_gru_seed44
+      - augment
     outs:
       - data/06_models/gru_seed44/best_checkpoint.pt
     plots:
@@ -260,6 +268,7 @@ stages:
       --params-key train_gru_convnext
     deps:
       - scripts/train.py
+      - src/smokeynet_adapted/augment.py
       - src/smokeynet_adapted/dataset.py
       - src/smokeynet_adapted/temporal_classifier.py
       - src/smokeynet_adapted/lit_temporal.py
@@ -267,6 +276,7 @@ stages:
       - data/05_model_input/val
     params:
       - train_gru_convnext
+      - augment
     outs:
       - data/06_models/gru_convnext/best_checkpoint.pt
     plots:
@@ -283,6 +293,7 @@ stages:
       --params-key train_gru_finetune
     deps:
       - scripts/train.py
+      - src/smokeynet_adapted/augment.py
       - src/smokeynet_adapted/dataset.py
       - src/smokeynet_adapted/temporal_classifier.py
       - src/smokeynet_adapted/lit_temporal.py
@@ -290,6 +301,7 @@ stages:
       - data/05_model_input/val
     params:
       - train_gru_finetune
+      - augment
     outs:
       - data/06_models/gru_finetune/best_checkpoint.pt
     plots:
@@ -306,6 +318,7 @@ stages:
       --params-key train_gru_convnext_finetune
     deps:
       - scripts/train.py
+      - src/smokeynet_adapted/augment.py
       - src/smokeynet_adapted/dataset.py
       - src/smokeynet_adapted/temporal_classifier.py
       - src/smokeynet_adapted/lit_temporal.py
@@ -313,6 +326,7 @@ stages:
       - data/05_model_input/val
     params:
       - train_gru_convnext_finetune
+      - augment
     outs:
       - data/06_models/gru_convnext_finetune/best_checkpoint.pt
     plots:
