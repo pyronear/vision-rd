@@ -209,17 +209,17 @@ def test_timm_backbone_finetune_convnext_tiny_unfreezes_only_last_stage():
 
 
 def test_timm_backbone_finetune_unsupported_family_raises():
+    # efficientnet_b0 has no explicit unfreeze rule; any future unsupported
+    # family should raise the same informative error.
     with pytest.raises(NotImplementedError) as exc:
         TimmBackbone(
-            name="vit_small_patch16_224",
+            name="efficientnet_b0",
             pretrained=False,
             finetune=True,
             finetune_last_n_blocks=1,
         )
     msg = str(exc.value)
-    assert "vit_small_patch16_224" in msg
-    # Error message should mention the backbone's top-level children so the
-    # operator knows which stage names are available.
+    assert "efficientnet_b0" in msg
     assert "children" in msg.lower()
 
 
@@ -254,3 +254,57 @@ def test_classifier_finetune_mode_exposes_backbone_params_as_trainable():
     assert any(n.startswith("head.") for n in trainable)
     # Earlier backbone layers must still be frozen.
     assert not any(".layer1." in n for n in trainable)
+
+
+def test_timm_backbone_vit_token_pool_returns_cls_embedding():
+    bb = TimmBackbone(
+        name="vit_small_patch16_224",
+        pretrained=False,
+        global_pool="token",
+    )
+    x = torch.randn(2, 3, 224, 224)
+    out = bb(x)
+    assert out.shape == (2, bb.feat_dim)
+    assert bb.feat_dim == 384
+
+
+def test_timm_backbone_finetune_vit_s16_unfreezes_only_last_block():
+    bb = TimmBackbone(
+        name="vit_small_patch16_224",
+        pretrained=False,
+        finetune=True,
+        finetune_last_n_blocks=1,
+        global_pool="token",
+    )
+    trainable_names = [n for n, p in bb.named_parameters() if p.requires_grad]
+    assert trainable_names, "expected some trainable params"
+    # timm's ViT wraps blocks under `blocks.<i>.*`; last block is index 11 for ViT-S.
+    assert all(".blocks.11." in n for n in trainable_names), trainable_names
+
+
+def test_timm_backbone_finetune_vit_s16_n2_unfreezes_last_two_blocks():
+    bb = TimmBackbone(
+        name="vit_small_patch16_224",
+        pretrained=False,
+        finetune=True,
+        finetune_last_n_blocks=2,
+        global_pool="token",
+    )
+    trainable_names = [n for n, p in bb.named_parameters() if p.requires_grad]
+    assert trainable_names
+    assert all((".blocks.10." in n) or (".blocks.11." in n) for n in trainable_names), (
+        trainable_names
+    )
+
+
+def test_timm_backbone_vit_s14_dinov2_finetune_unfreezes_last_block():
+    bb = TimmBackbone(
+        name="vit_small_patch14_dinov2.lvd142m",
+        pretrained=False,
+        finetune=True,
+        finetune_last_n_blocks=1,
+        global_pool="token",
+    )
+    trainable_names = [n for n, p in bb.named_parameters() if p.requires_grad]
+    assert trainable_names
+    assert all(".blocks.11." in n for n in trainable_names), trainable_names

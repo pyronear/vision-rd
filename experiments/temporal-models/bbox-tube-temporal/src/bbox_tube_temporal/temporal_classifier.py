@@ -25,10 +25,11 @@ class TimmBackbone(nn.Module):
         pretrained: bool = True,
         finetune: bool = False,
         finetune_last_n_blocks: int = 0,
+        global_pool: str = "avg",
     ) -> None:
         super().__init__()
         self.backbone = timm.create_model(
-            name, pretrained=pretrained, num_classes=0, global_pool="avg"
+            name, pretrained=pretrained, num_classes=0, global_pool=global_pool
         )
         self.feat_dim: int = self.backbone.num_features
         self.finetune = finetune
@@ -54,6 +55,9 @@ class TimmBackbone(nn.Module):
         elif name.startswith("convnext"):
             # timm's convnext exposes a `stages` ModuleList
             stages = list(self.backbone.stages)
+        elif name.startswith("vit_"):
+            # timm's ViT exposes a `blocks` ModuleList of transformer blocks.
+            stages = list(self.backbone.blocks)
         else:
             stage_names = [n_ for n_, _ in self.backbone.named_children()]
             raise NotImplementedError(
