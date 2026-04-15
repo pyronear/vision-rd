@@ -91,7 +91,7 @@ packaged-archive flow are all reused unchanged.
 
 ### Code changes
 
-- `src/smokeynet_adapted/temporal_classifier.py` — add
+- `src/bbox_tube_temporal/temporal_classifier.py` — add
   `ViTTemporalTransformer` module. Factory dispatches on
   `model.backbone.name` / `model.head.name`.
 - `params.yaml` — three new `train_vit_*` sections mirroring the existing
