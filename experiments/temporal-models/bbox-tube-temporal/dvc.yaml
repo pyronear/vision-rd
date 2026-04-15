@@ -320,6 +320,87 @@ stages:
     plots:
       - data/06_models/gru_convnext_base_finetune/plots/training_curves.png
 
+  train_vit_dinov2_frozen:
+    cmd: >-
+      uv run python scripts/train.py
+      --arch transformer
+      --train-dir data/05_model_input/train
+      --val-dir data/05_model_input/val
+      --output-dir data/06_models/vit_dinov2_frozen
+      --params-path params.yaml
+      --params-key train_vit_dinov2_frozen
+    deps:
+      - scripts/train.py
+      - src/bbox_tube_temporal/augment.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
+      - src/bbox_tube_temporal/training_plots.py
+      - data/05_model_input/train
+      - data/05_model_input/val
+    params:
+      - train_vit_dinov2_frozen
+      - augment
+    outs:
+      - data/06_models/vit_dinov2_frozen/best_checkpoint.pt
+      - data/06_models/vit_dinov2_frozen/csv_logs/
+    plots:
+      - data/06_models/vit_dinov2_frozen/plots/training_curves.png
+
+  train_vit_dinov2_finetune:
+    cmd: >-
+      uv run python scripts/train.py
+      --arch transformer
+      --train-dir data/05_model_input/train
+      --val-dir data/05_model_input/val
+      --output-dir data/06_models/vit_dinov2_finetune
+      --params-path params.yaml
+      --params-key train_vit_dinov2_finetune
+    deps:
+      - scripts/train.py
+      - src/bbox_tube_temporal/augment.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
+      - src/bbox_tube_temporal/training_plots.py
+      - data/05_model_input/train
+      - data/05_model_input/val
+    params:
+      - train_vit_dinov2_finetune
+      - augment
+    outs:
+      - data/06_models/vit_dinov2_finetune/best_checkpoint.pt
+      - data/06_models/vit_dinov2_finetune/csv_logs/
+    plots:
+      - data/06_models/vit_dinov2_finetune/plots/training_curves.png
+
+  train_vit_in21k_finetune:
+    cmd: >-
+      uv run python scripts/train.py
+      --arch transformer
+      --train-dir data/05_model_input/train
+      --val-dir data/05_model_input/val
+      --output-dir data/06_models/vit_in21k_finetune
+      --params-path params.yaml
+      --params-key train_vit_in21k_finetune
+    deps:
+      - scripts/train.py
+      - src/bbox_tube_temporal/augment.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
+      - src/bbox_tube_temporal/training_plots.py
+      - data/05_model_input/train
+      - data/05_model_input/val
+    params:
+      - train_vit_in21k_finetune
+      - augment
+    outs:
+      - data/06_models/vit_in21k_finetune/best_checkpoint.pt
+      - data/06_models/vit_in21k_finetune/csv_logs/
+    plots:
+      - data/06_models/vit_in21k_finetune/plots/training_curves.png
+
   evaluate_gru_convnext:
     foreach:
       - train
@@ -468,6 +549,117 @@ stages:
         - data/08_reporting/${item}/gru_convnext_base_finetune/confusion_matrix.png
         - data/08_reporting/${item}/gru_convnext_base_finetune/confusion_matrix_normalized.png
 
+  evaluate_vit_dinov2_frozen:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/evaluate.py
+        --arch transformer
+        --data-dir data/05_model_input/${item}
+        --checkpoint data/06_models/vit_dinov2_frozen/best_checkpoint.pt
+        --output-dir data/08_reporting/${item}/vit_dinov2_frozen
+        --params-path params.yaml
+        --params-key train_vit_dinov2_frozen
+        --render-tubes-dir data/08_reporting/tubes/${item}
+      deps:
+        - scripts/evaluate.py
+        - src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal/lit_temporal.py
+        - src/bbox_tube_temporal/dataset.py
+        - data/06_models/vit_dinov2_frozen/best_checkpoint.pt
+        - data/05_model_input/${item}
+        - data/08_reporting/tubes/${item}
+      params:
+        - train_vit_dinov2_frozen
+      outs:
+        - data/08_reporting/${item}/vit_dinov2_frozen/errors
+        - data/08_reporting/${item}/vit_dinov2_frozen/predictions.json:
+            cache: false
+      metrics:
+        - data/08_reporting/${item}/vit_dinov2_frozen/metrics.json:
+            cache: false
+      plots:
+        - data/08_reporting/${item}/vit_dinov2_frozen/pr_curve.png
+        - data/08_reporting/${item}/vit_dinov2_frozen/roc_curve.png
+        - data/08_reporting/${item}/vit_dinov2_frozen/confusion_matrix.png
+        - data/08_reporting/${item}/vit_dinov2_frozen/confusion_matrix_normalized.png
+
+  evaluate_vit_dinov2_finetune:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/evaluate.py
+        --arch transformer
+        --data-dir data/05_model_input/${item}
+        --checkpoint data/06_models/vit_dinov2_finetune/best_checkpoint.pt
+        --output-dir data/08_reporting/${item}/vit_dinov2_finetune
+        --params-path params.yaml
+        --params-key train_vit_dinov2_finetune
+        --render-tubes-dir data/08_reporting/tubes/${item}
+      deps:
+        - scripts/evaluate.py
+        - src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal/lit_temporal.py
+        - src/bbox_tube_temporal/dataset.py
+        - data/06_models/vit_dinov2_finetune/best_checkpoint.pt
+        - data/05_model_input/${item}
+        - data/08_reporting/tubes/${item}
+      params:
+        - train_vit_dinov2_finetune
+      outs:
+        - data/08_reporting/${item}/vit_dinov2_finetune/errors
+        - data/08_reporting/${item}/vit_dinov2_finetune/predictions.json:
+            cache: false
+      metrics:
+        - data/08_reporting/${item}/vit_dinov2_finetune/metrics.json:
+            cache: false
+      plots:
+        - data/08_reporting/${item}/vit_dinov2_finetune/pr_curve.png
+        - data/08_reporting/${item}/vit_dinov2_finetune/roc_curve.png
+        - data/08_reporting/${item}/vit_dinov2_finetune/confusion_matrix.png
+        - data/08_reporting/${item}/vit_dinov2_finetune/confusion_matrix_normalized.png
+
+  evaluate_vit_in21k_finetune:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/evaluate.py
+        --arch transformer
+        --data-dir data/05_model_input/${item}
+        --checkpoint data/06_models/vit_in21k_finetune/best_checkpoint.pt
+        --output-dir data/08_reporting/${item}/vit_in21k_finetune
+        --params-path params.yaml
+        --params-key train_vit_in21k_finetune
+        --render-tubes-dir data/08_reporting/tubes/${item}
+      deps:
+        - scripts/evaluate.py
+        - src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal/lit_temporal.py
+        - src/bbox_tube_temporal/dataset.py
+        - data/06_models/vit_in21k_finetune/best_checkpoint.pt
+        - data/05_model_input/${item}
+        - data/08_reporting/tubes/${item}
+      params:
+        - train_vit_in21k_finetune
+      outs:
+        - data/08_reporting/${item}/vit_in21k_finetune/errors
+        - data/08_reporting/${item}/vit_in21k_finetune/predictions.json:
+            cache: false
+      metrics:
+        - data/08_reporting/${item}/vit_in21k_finetune/metrics.json:
+            cache: false
+      plots:
+        - data/08_reporting/${item}/vit_in21k_finetune/pr_curve.png
+        - data/08_reporting/${item}/vit_in21k_finetune/roc_curve.png
+        - data/08_reporting/${item}/vit_in21k_finetune/confusion_matrix.png
+        - data/08_reporting/${item}/vit_in21k_finetune/confusion_matrix_normalized.png
+
   package:
     cmd: >-
       uv run python scripts/package_model.py
@@ -498,6 +690,9 @@ stages:
       --variant-dir data/08_reporting/val/gru_finetune
       --variant-dir data/08_reporting/val/gru_convnext_finetune
       --variant-dir data/08_reporting/val/gru_convnext_base_finetune
+      --variant-dir data/08_reporting/val/vit_dinov2_frozen
+      --variant-dir data/08_reporting/val/vit_dinov2_finetune
+      --variant-dir data/08_reporting/val/vit_in21k_finetune
       --output-path data/08_reporting/comparison.md
     deps:
       - scripts/compare_variants.py
@@ -511,6 +706,12 @@ stages:
       - data/08_reporting/val/gru_convnext_finetune/metrics.json
       - data/08_reporting/val/gru_convnext_base_finetune/predictions.json
       - data/08_reporting/val/gru_convnext_base_finetune/metrics.json
+      - data/08_reporting/val/vit_dinov2_frozen/predictions.json
+      - data/08_reporting/val/vit_dinov2_frozen/metrics.json
+      - data/08_reporting/val/vit_dinov2_finetune/predictions.json
+      - data/08_reporting/val/vit_dinov2_finetune/metrics.json
+      - data/08_reporting/val/vit_in21k_finetune/predictions.json
+      - data/08_reporting/val/vit_in21k_finetune/metrics.json
     outs:
       - data/08_reporting/comparison.md:
           cache: false
