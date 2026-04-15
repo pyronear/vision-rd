@@ -28,7 +28,11 @@ def test_render_batch_grid_returns_figure_with_expected_axes():
         # Exactly one axes, no xticks/yticks (axis off).
         axes = fig.get_axes()
         assert len(axes) == 1
-        assert axes[0].get_title() == "x"
+        # Title now carries a (B, T, valid_frames_per_tube) suffix, so
+        # just check the user-supplied prefix is preserved.
+        title = axes[0].get_title()
+        assert title.startswith("x")
+        assert "B=2" in title and "T=4" in title
     finally:
         plt.close(fig)
 
@@ -42,6 +46,37 @@ def test_render_batch_grid_rejects_wrong_rank():
         assert "patches must be" in str(e)
     else:
         raise AssertionError("expected ValueError")
+
+
+def test_render_batch_grid_row_labels_require_matching_length():
+    batch = _fake_batch(b=2, t=4, n_valid=3)
+    try:
+        render_batch_grid(batch["patches"], batch["mask"], title="x", row_labels=["a"])
+    except ValueError as e:
+        assert "row_labels" in str(e)
+    else:
+        raise AssertionError("expected ValueError")
+
+
+def test_render_batch_grid_denormalize_toggle_affects_pixels():
+    """denormalize=True should produce visibly different output than
+    denormalize=False for identical input."""
+    batch = _fake_batch(b=2, t=3, n_valid=3)
+    fig_denorm = render_batch_grid(
+        batch["patches"], batch["mask"], title="a", denormalize=True
+    )
+    fig_raw = render_batch_grid(
+        batch["patches"], batch["mask"], title="b", denormalize=False
+    )
+    try:
+        img_denorm = fig_denorm.axes[0].images[0].get_array()
+        img_raw = fig_raw.axes[0].images[0].get_array()
+        # The inputs are roughly in [0.25, 0.75]; after ImageNet-denorm
+        # they spread further, so the two arrays cannot be identical.
+        assert not torch.allclose(torch.as_tensor(img_denorm), torch.as_tensor(img_raw))
+    finally:
+        plt.close(fig_denorm)
+        plt.close(fig_raw)
 
 
 def test_callback_dumps_n_batches_then_stops(tmp_path: Path):

@@ -20,16 +20,37 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import torch
 import yaml
-from torchvision.utils import make_grid
 
 from smokeynet_adapted.augment import build_tube_augment
+from smokeynet_adapted.batch_samples import render_batch_grid
 from smokeynet_adapted.dataset import TubePatchDataset
 
 
-def _denormalize(x: torch.Tensor) -> torch.Tensor:
-    mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
-    std = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
-    return (x * std + mean).clamp(0.0, 1.0)
+def _pack_rows(rows: list[torch.Tensor]) -> tuple[torch.Tensor, torch.Tensor]:
+    """Pad variable-length tube rows into a [B, T, 3, H, W] tensor + mask.
+
+    Each input row is ``[k_i, 3, H, W]`` (the valid frames of one variant).
+    Shorter rows are right-padded with zeros; the mask tracks valid frames.
+    """
+    max_t = max(r.shape[0] for r in rows)
+    padded = torch.stack(
+        [
+            (
+                torch.cat(
+                    [r, torch.zeros(max_t - r.shape[0], *r.shape[1:], dtype=r.dtype)],
+                    dim=0,
+                )
+                if r.shape[0] < max_t
+                else r
+            )
+            for r in rows
+        ],
+        dim=0,
+    )
+    mask = torch.zeros(len(rows), max_t, dtype=torch.bool)
+    for i, r in enumerate(rows):
+        mask[i, : r.shape[0]] = True
+    return padded, mask
 
 
 def main() -> None:
@@ -41,6 +62,7 @@ def main() -> None:
     parser.add_argument("--num-variants", type=int, default=8)
     parser.add_argument("--max-frames", type=int, default=20)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--dpi", type=int, default=120)
     args = parser.parse_args()
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -61,32 +83,24 @@ def main() -> None:
         seq_id = ds.index[tube_idx]["sequence_id"]
 
         raw = raw_ds[tube_idx]
-        raw_patches = _denormalize(raw["patches"][: int(raw["mask"].sum())])
-
-        rows = [raw_patches]
-        for _ in range(args.num_variants):
+        rows = [raw["patches"][: int(raw["mask"].sum())]]
+        labels = ["raw"]
+        for i in range(args.num_variants):
             aug = ds[tube_idx]
-            patches = _denormalize(aug["patches"][: int(aug["mask"].sum())])
-            rows.append(patches)
+            rows.append(aug["patches"][: int(aug["mask"].sum())])
+            labels.append(f"aug #{i}")
 
-        max_t = max(r.shape[0] for r in rows)
-        padded_rows = [
-            torch.cat(
-                [r, torch.zeros(max_t - r.shape[0], 3, 224, 224, dtype=r.dtype)],
-                dim=0,
-            )
-            if r.shape[0] < max_t
-            else r
-            for r in rows
-        ]
-        grid_tensor = torch.stack(padded_rows).reshape(-1, 3, 224, 224)
-        grid = make_grid(grid_tensor, nrow=max_t, padding=2)
-
-        fig, ax = plt.subplots(figsize=(max_t * 1.5, (len(rows)) * 1.5))
-        ax.imshow(grid.permute(1, 2, 0).cpu().numpy())
-        ax.set_axis_off()
-        ax.set_title(f"{seq_id} — top row: raw, below: {args.num_variants} augmented")
-        fig.savefig(args.output_dir / f"{seq_id}.png", dpi=80, bbox_inches="tight")
+        patches_packed, mask = _pack_rows(rows)
+        fig = render_batch_grid(
+            patches_packed,
+            mask,
+            title=seq_id,
+            denormalize=True,
+            row_labels=labels,
+        )
+        fig.savefig(
+            args.output_dir / f"{seq_id}.png", dpi=args.dpi, bbox_inches="tight"
+        )
         plt.close(fig)
 
     print(f"Wrote {min(args.num_tubes, len(ds))} grids to {args.output_dir}")

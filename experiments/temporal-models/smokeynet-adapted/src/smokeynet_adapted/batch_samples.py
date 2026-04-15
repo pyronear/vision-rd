@@ -34,17 +34,30 @@ def _denormalize(x: Tensor) -> Tensor:
     return (x * std + mean).clamp(0.0, 1.0)
 
 
-def render_batch_grid(patches: Tensor, mask: Tensor, title: str) -> Figure:
+def render_batch_grid(
+    patches: Tensor,
+    mask: Tensor,
+    title: str,
+    *,
+    denormalize: bool = True,
+    row_labels: list[str] | None = None,
+) -> Figure:
     """Render a batch of tube patches as a ``B``-row, ``T``-column grid.
 
     Padded frames are drawn as black cells so the tube length is visible
-    at a glance. Patches are de-normalized from ImageNet stats back to
-    ``[0, 1]`` for display.
+    at a glance. Adds a subtitle with ``(B, T)`` shape and the per-row
+    valid-frame counts, mimicking ultralytics' ``train_batch*.jpg`` layout.
 
     Args:
-        patches: ``[B, T, 3, H, W]`` batched tube patches (ImageNet-normalized).
-        mask:    ``[B, T]`` boolean mask (True = real frame).
-        title:   Figure title.
+        patches:     ``[B, T, 3, H, W]`` batched tube patches.
+        mask:        ``[B, T]`` boolean mask (True = real frame).
+        title:       Figure title.
+        denormalize: If True (default), reverse ImageNet normalization
+            (mean/std) before display — use for patches fresh from the
+            model's input pipeline. Set False when patches are already
+            in ``[0, 1]`` display space.
+        row_labels:  Optional per-row labels drawn to the left of the
+            grid. Must have length ``B`` if provided.
 
     Returns:
         A matplotlib ``Figure``. Caller is responsible for closing it.
@@ -52,17 +65,40 @@ def render_batch_grid(patches: Tensor, mask: Tensor, title: str) -> Figure:
     if patches.ndim != 5:
         raise ValueError(f"patches must be [B, T, 3, H, W], got {patches.shape}")
     b, t = mask.shape
-    denorm = _denormalize(patches.detach().float().cpu())
+    if row_labels is not None and len(row_labels) != b:
+        raise ValueError(
+            f"row_labels length {len(row_labels)} does not match batch size {b}"
+        )
+
+    display = patches.detach().float().cpu()
+    if denormalize:
+        display = _denormalize(display)
     # Zero out padded frames so they show as black in the grid.
     visible = mask.detach().cpu().view(b, t, 1, 1, 1).float()
-    denorm = denorm * visible
-    flat = denorm.reshape(b * t, *denorm.shape[2:])
+    display = display * visible
+    flat = display.reshape(b * t, *display.shape[2:])
     grid = make_grid(flat, nrow=t, padding=2)
+
+    valid_per_row = mask.detach().cpu().sum(dim=1).tolist()
+    full_title = f"{title}  (B={b}, T={t}, valid_frames_per_tube={valid_per_row})"
 
     fig, ax = plt.subplots(figsize=(max(4.0, t * 1.0), max(2.0, b * 1.0)))
     ax.imshow(grid.permute(1, 2, 0).numpy())
     ax.set_axis_off()
-    ax.set_title(title, fontsize=9)
+    ax.set_title(full_title, fontsize=9)
+
+    if row_labels is not None:
+        row_height = grid.shape[1] / b
+        for i, label in enumerate(row_labels):
+            ax.text(
+                -8,
+                (i + 0.5) * row_height,
+                label,
+                ha="right",
+                va="center",
+                fontsize=8,
+            )
+
     return fig
 
 
@@ -83,7 +119,7 @@ class SampleTrainBatchesCallback(Callback):
         self,
         output_dir: Path | str,
         n_batches: int = 3,
-        dpi: int = 80,
+        dpi: int = 120,
     ) -> None:
         self.output_dir = Path(output_dir)
         self.n_batches = n_batches
