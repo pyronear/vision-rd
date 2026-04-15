@@ -13,8 +13,8 @@ raw sequence  ->  truncate  ->  build tubes  ->  224x224 patches  ->  timm backb
 
 - **Tubes**: chains of YOLO detections linked across frames by greedy IoU matching (`src/bbox_tube_temporal/tubes.py`). YOLO bboxes are pre-computed and shipped with the dataset; we do not run YOLO in this experiment.
 - **Patches**: each tube entry is cropped to a context-expanded 224x224 RGB patch (`src/bbox_tube_temporal/model_input.py`).
-- **Backbone**: a `timm` model (`resnet18` or `convnext_tiny`) applied per-frame, either frozen or with the last N blocks fine-tuned.
-- **Temporal head**: `mean_pool` (average per-frame features) or `gru` (single-layer GRU over the tube).
+- **Backbone**: a `timm` model (`resnet18`, `convnext_tiny`, `convnext_base`, or `vit_small_patch{14,16}`) applied per-frame, either frozen or with the last N blocks fine-tuned. ViT variants use DINOv2 or IN21k pretrained weights.
+- **Temporal head**: `mean_pool` (average per-frame features), `gru` (single-layer GRU over the tube), or `transformer` (learnable `[CLS]` + learned positional embeddings + 2-layer pre-norm encoder).
 - **Augmentations**: per-tube-consistent spatial, photometric, and temporal transforms (`src/bbox_tube_temporal/augment.py`).
 
 ## Quick start
@@ -59,6 +59,28 @@ All variants share the `truncate -> build_tubes -> build_model_input` inputs; th
 | `train_gru_convnext` | convnext_tiny | GRU | 42 | no |
 | `train_gru_finetune` | resnet18 | GRU | 42 | last 1 block |
 | `train_gru_convnext_finetune` | convnext_tiny | GRU | 42 | last 1 block |
+| `train_gru_convnext_base_finetune` | convnext_base | GRU | 42 | last 1 block |
+| `train_vit_dinov2_frozen` | ViT-S/14 (DINOv2) | transformer | 42 | no |
+| `train_vit_dinov2_finetune` | ViT-S/14 (DINOv2) | transformer | 42 | last 1 block |
+| `train_vit_in21k_finetune` | ViT-S/16 (IN21k) | transformer | 42 | last 1 block |
+
+## Results (val)
+
+| variant | F1 @ 0.5 | PR-AUC | ROC-AUC | FP @ recall 0.95 | FP @ recall 0.99 |
+|---|---|---|---|---|---|
+| gru | 0.930 | 0.978 | 0.980 | 14 | 26 |
+| gru_convnext | 0.959 | 0.989 | 0.991 | 5 | 16 |
+| gru_convnext_finetune | 0.963 | 0.993 | 0.994 | 4 | 18 |
+| gru_convnext_base_finetune | 0.967 | 0.989 | 0.991 | 5 | 10 |
+| **vit_dinov2_frozen** | 0.960 | 0.993 | 0.994 | 6 | 13 |
+| **vit_dinov2_finetune** | **0.971** | 0.991 | 0.993 | 5 | **6** |
+| **vit_in21k_finetune** | 0.960 | 0.989 | 0.991 | 6 | 10 |
+
+All three ViT variants beat the `gru` baseline. `vit_dinov2_finetune` is
+the new F1 leader and cuts false positives at recall=0.99 from 18
+(prior best CNN) down to 6. `vit_dinov2_frozen` matches the best
+frozen-backbone CNN on F1 with no backbone finetuning. Full comparison
+markdown at `data/08_reporting/comparison.md`.
 
 ## Reproducibility
 
