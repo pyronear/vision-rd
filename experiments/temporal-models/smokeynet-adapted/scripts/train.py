@@ -15,6 +15,7 @@ from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from lightning.pytorch.loggers import CSVLogger, TensorBoardLogger
 from torch.utils.data import DataLoader
 
+from smokeynet_adapted.augment import build_tube_augment
 from smokeynet_adapted.dataset import TubePatchDataset
 from smokeynet_adapted.lit_temporal import LitTemporalClassifier
 
@@ -29,7 +30,9 @@ def main() -> None:
     parser.add_argument("--params-key", required=True, help="Key in params.yaml")
     args = parser.parse_args()
 
-    cfg = yaml.safe_load(args.params_path.read_text())[args.params_key]
+    full_params = yaml.safe_load(args.params_path.read_text())
+    cfg = full_params[args.params_key]
+    augment_cfg = full_params.get("augment", {"enabled": False})
     if cfg["arch"] != args.arch:
         raise ValueError(
             f"--arch={args.arch} mismatches "
@@ -48,8 +51,19 @@ def main() -> None:
     L.seed_everything(cfg["seed"], workers=True)
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    train_ds = TubePatchDataset(args.train_dir, max_frames=cfg["max_frames"])
-    val_ds = TubePatchDataset(args.val_dir, max_frames=cfg["max_frames"])
+    train_transform = build_tube_augment(augment_cfg, train=True)
+    val_transform = build_tube_augment(augment_cfg, train=False)
+
+    train_ds = TubePatchDataset(
+        args.train_dir,
+        max_frames=cfg["max_frames"],
+        transform=train_transform,
+    )
+    val_ds = TubePatchDataset(
+        args.val_dir,
+        max_frames=cfg["max_frames"],
+        transform=val_transform,
+    )
 
     train_loader = DataLoader(
         train_ds,
