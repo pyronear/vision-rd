@@ -8,6 +8,12 @@ frames side by side.
 
 from __future__ import annotations
 
+import os
+
+# Force a headless backend before any matplotlib import, matching
+# scripts/render_tubes.py so this runs on CI / servers without a display.
+os.environ.setdefault("MPLBACKEND", "Agg")
+
 import argparse
 from pathlib import Path
 
@@ -47,13 +53,13 @@ def main() -> None:
     ds = TubePatchDataset(
         args.split_dir, max_frames=args.max_frames, transform=transform
     )
+    raw_ds = TubePatchDataset(
+        args.split_dir, max_frames=args.max_frames, transform=None
+    )
 
     for tube_idx in range(min(args.num_tubes, len(ds))):
         seq_id = ds.index[tube_idx]["sequence_id"]
 
-        raw_ds = TubePatchDataset(
-            args.split_dir, max_frames=args.max_frames, transform=None
-        )
         raw = raw_ds[tube_idx]
         raw_patches = _denormalize(raw["patches"][: int(raw["mask"].sum())])
 
