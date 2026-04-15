@@ -4,3 +4,5 @@ __pycache__/
 .ipynb_checkpoints/
 data/08_reporting/augment_samples/
 data/06_models/*/batch_samples/
+data/06_models/*/best-v*.ckpt
+data/01_raw/models/
