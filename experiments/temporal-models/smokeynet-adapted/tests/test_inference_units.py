@@ -4,11 +4,12 @@ from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock
 
+import pytest
 import torch
 from pyrocore.types import Frame
 
 from smokeynet_adapted.inference import run_yolo_on_frames
-from smokeynet_adapted.types import Detection, FrameDetections
+from smokeynet_adapted.types import FrameDetections
 
 
 def _fake_yolo_result(
@@ -66,14 +67,22 @@ class TestRunYoloOnFrames:
         )
 
         assert len(result) == 2
-        assert result[0] == FrameDetections(
-            frame_idx=0,
-            frame_id="f0",
-            timestamp=ts,
-            detections=[
-                Detection(class_id=0, cx=0.5, cy=0.4, w=0.1, h=0.2, confidence=0.9)
-            ],
-        )
+
+        # Frame 0: one detection, check structural + numeric approximately.
+        fd0 = result[0]
+        assert fd0.frame_idx == 0
+        assert fd0.frame_id == "f0"
+        assert fd0.timestamp == ts
+        assert len(fd0.detections) == 1
+        d0 = fd0.detections[0]
+        assert d0.class_id == 0
+        assert d0.cx == pytest.approx(0.5, rel=1e-6)
+        assert d0.cy == pytest.approx(0.4, rel=1e-6)
+        assert d0.w == pytest.approx(0.1, rel=1e-6)
+        assert d0.h == pytest.approx(0.2, rel=1e-6)
+        assert d0.confidence == pytest.approx(0.9, rel=1e-6)
+
+        # Frame 1: no detections.
         assert result[1] == FrameDetections(
             frame_idx=1, frame_id="f1", timestamp=None, detections=[]
         )

@@ -59,11 +59,11 @@ def run_yolo_on_frames(
                 detections.append(
                     Detection(
                         class_id=int(cls[i].item()),
-                        cx=round(row[0], 6),
-                        cy=round(row[1], 6),
-                        w=round(row[2], 6),
-                        h=round(row[3], 6),
-                        confidence=round(float(confs[i].item()), 6),
+                        cx=row[0],
+                        cy=row[1],
+                        w=row[2],
+                        h=row[3],
+                        confidence=float(confs[i].item()),
                     )
                 )
         out.append(
