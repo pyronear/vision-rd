@@ -1,8 +1,10 @@
+> Renamed 2026-04-15: smokeynet-adapted → bbox-tube-temporal. Old paths in this doc reflect the design-time state.
+
 # Basic Temporal Model — Design
 
 **Date:** 2026-04-14
 **Status:** Implemented and superseded by the live pipeline.
-**Scope:** `experiments/temporal-models/smokeynet-adapted/`
+**Scope:** `experiments/temporal-models/bbox-tube-temporal/`
 
 > **Historical note:** This spec was written while the original SmokeyNetAdapted
 > stack (`backbone.py`, `detector.py`, `heads.py`, `net.py`, `spatial_attention.py`,

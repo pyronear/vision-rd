@@ -1,8 +1,10 @@
+> Renamed 2026-04-15: smokeynet-adapted → bbox-tube-temporal. Old paths in this doc reflect the design-time state.
+
 # Training Augmentation Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add per-tube-consistent spatial, photometric, and temporal augmentation to the training pipeline of `TubePatchDataset` in `smokeynet-adapted`, as specified in `docs/specs/2026-04-14-training-augmentation-design.md`.
+**Goal:** Add per-tube-consistent spatial, photometric, and temporal augmentation to the training pipeline of `TubePatchDataset` in `bbox-tube-temporal`, as specified in `docs/specs/2026-04-14-training-augmentation-design.md`.
 
 **Architecture:** Three independent `Callable` transforms composed by a `build_tube_augment(cfg, train)` builder. Train augmentation runs inside `__getitem__` via DataLoader workers. Val uses a normalize-only transform (matches today's inline normalization). Config lives in a shared top-level `augment:` section of `params.yaml`; `scripts/train.py` reads it alongside the per-arch section and wires train/val transforms into the two `TubePatchDataset` instances. Each training DVC stage adds `augment` to its `params:` list so DVC correctly invalidates on config changes.
 
@@ -21,7 +23,7 @@
 - **Modify** `tests/test_dataset.py` — add tests for the `transform` kwarg (back-compat + pipeline wiring).
 - **Create** `scripts/visualize_augment.py` — smoke test / visual sanity check output.
 
-All `Makefile` targets are invoked from `experiments/temporal-models/smokeynet-adapted/`. Use `uv run` (matches existing convention).
+All `Makefile` targets are invoked from `experiments/temporal-models/bbox-tube-temporal/`. Use `uv run` (matches existing convention).
 
 ---
 
@@ -75,7 +77,7 @@ def test_dataset_transform_applied_when_provided(tmp_path):
 - [ ] **Step 1.2: Run tests and verify they fail**
 
 ```bash
-cd experiments/temporal-models/smokeynet-adapted
+cd experiments/temporal-models/bbox-tube-temporal
 uv run pytest tests/test_dataset.py::test_dataset_transform_none_preserves_legacy_normalization tests/test_dataset.py::test_dataset_transform_applied_when_provided -v
 ```
 
@@ -193,7 +195,7 @@ Expected: all dataset tests PASS (the two new ones plus all pre-existing ones).
 
 ```bash
 git add src/bbox_tube_temporal/dataset.py tests/test_dataset.py
-git commit -m "refactor(smokeynet-adapted): TubePatchDataset accepts optional transform
+git commit -m "refactor(bbox-tube-temporal): TubePatchDataset accepts optional transform
 
 When transform is None, keeps legacy inline ImageNet normalization.
 When provided, dataset emits un-normalized [0,1] patches into the
@@ -407,7 +409,7 @@ Expected: all 4 spatial tests PASS.
 
 ```bash
 git add src/bbox_tube_temporal/augment.py tests/test_augment.py
-git commit -m "feat(smokeynet-adapted): SpatialTubeTransform (flip/affine)
+git commit -m "feat(bbox-tube-temporal): SpatialTubeTransform (flip/affine)
 
 Per-tube-consistent horizontal flip + rotation + scale + translate,
 sampled once per call and applied identically to every frame so
@@ -546,7 +548,7 @@ Expected: all 6 tests (4 spatial + 2 photometric) PASS.
 
 ```bash
 git add src/bbox_tube_temporal/augment.py tests/test_augment.py
-git commit -m "feat(smokeynet-adapted): PhotometricTubeTransform
+git commit -m "feat(bbox-tube-temporal): PhotometricTubeTransform
 
 Per-tube-consistent brightness/contrast/saturation with a single
 factor sampled per call. Operates on [0,1] tensors before
@@ -796,7 +798,7 @@ Expected: all 12 tests PASS.
 
 ```bash
 git add src/bbox_tube_temporal/augment.py tests/test_augment.py
-git commit -m "feat(smokeynet-adapted): TemporalTubeTransform
+git commit -m "feat(bbox-tube-temporal): TemporalTubeTransform
 
 Sub-sequence sampling (p=0.5) + random stride (p=0.25) + per-frame
 drop (p=0.15) composed independently. Re-compacts valid frames to
@@ -1006,7 +1008,7 @@ Expected: all 17 tests PASS.
 
 ```bash
 git add src/bbox_tube_temporal/augment.py tests/test_augment.py
-git commit -m "feat(smokeynet-adapted): build_tube_augment + Normalize + Compose
+git commit -m "feat(bbox-tube-temporal): build_tube_augment + Normalize + Compose
 
 Builder composes spatial -> photometric -> temporal -> normalize for
 train, normalize-only for val (and when augment.enabled=false).
@@ -1089,7 +1091,7 @@ Expected: prints stage statuses (no YAML parse error).
 
 ```bash
 git add params.yaml dvc.yaml
-git commit -m "chore(smokeynet-adapted): wire augment params + deps into train stages
+git commit -m "chore(bbox-tube-temporal): wire augment params + deps into train stages
 
 Top-level augment: section in params.yaml is referenced by every
 train_* DVC stage alongside its per-variant block, so changes to
@@ -1174,7 +1176,7 @@ Expected: all tests PASS (dataset + augment + existing).
 
 ```bash
 git add scripts/train.py
-git commit -m "feat(smokeynet-adapted): train.py builds & passes tube augment transforms
+git commit -m "feat(bbox-tube-temporal): train.py builds & passes tube augment transforms
 
 Loads the top-level augment: section alongside the per-variant block
 and wires train/val transforms into the two TubePatchDataset
@@ -1299,7 +1301,7 @@ Expected: PNGs appear under `data/08_reporting/augment_samples/`. If the data di
 
 ```bash
 git add scripts/visualize_augment.py
-git commit -m "feat(smokeynet-adapted): visualize_augment.py sanity-check grids
+git commit -m "feat(bbox-tube-temporal): visualize_augment.py sanity-check grids
 
 Dumps per-tube side-by-side PNG grids (raw + N augmented variants)
 to data/08_reporting/augment_samples/ for visual inspection of the
@@ -1354,7 +1356,7 @@ grep -q "augment_samples" .gitignore || echo "data/08_reporting/augment_samples/
 
 ```bash
 git add .gitignore 2>/dev/null
-git diff --cached --quiet || git commit -m "chore(smokeynet-adapted): ignore local augment-sample outputs"
+git diff --cached --quiet || git commit -m "chore(bbox-tube-temporal): ignore local augment-sample outputs"
 ```
 
 ---

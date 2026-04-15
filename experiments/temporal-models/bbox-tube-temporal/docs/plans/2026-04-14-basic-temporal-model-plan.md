@@ -1,3 +1,5 @@
+> Renamed 2026-04-15: smokeynet-adapted → bbox-tube-temporal. Old paths in this doc reflect the design-time state.
+
 # Basic Temporal Model Implementation Plan
 
 > **Historical note:** This plan was written when the original SmokeyNetAdapted
@@ -21,7 +23,7 @@ between archs; only the temporal head differs.
 
 **Spec:** `docs/specs/2026-04-14-basic-temporal-model-design.md`
 
-**Working directory for all commands:** `experiments/temporal-models/smokeynet-adapted/`
+**Working directory for all commands:** `experiments/temporal-models/bbox-tube-temporal/`
 
 ---
 
@@ -54,7 +56,7 @@ Expected: prints `512`.
 
 ```bash
 git add pyproject.toml uv.lock
-git commit -m "build(smokeynet-adapted): add timm dependency for pretrained backbones"
+git commit -m "build(bbox-tube-temporal): add timm dependency for pretrained backbones"
 ```
 
 ---
@@ -532,7 +534,7 @@ Expected: clean.
 
 ```bash
 git add src/bbox_tube_temporal/model_input.py tests/test_model_input.py
-git commit -m "feat(smokeynet-adapted): crop logic for model input patches"
+git commit -m "feat(bbox-tube-temporal): crop logic for model input patches"
 ```
 
 ---
@@ -737,7 +739,7 @@ Expected: clean.
 
 ```bash
 git add scripts/build_model_input.py dvc.yaml dvc.lock params.yaml
-git commit -m "feat(smokeynet-adapted): build_model_input dvc stage producing tube patches"
+git commit -m "feat(bbox-tube-temporal): build_model_input dvc stage producing tube patches"
 ```
 
 ---
@@ -956,7 +958,7 @@ Expected: clean.
 
 ```bash
 git add src/bbox_tube_temporal/dataset.py tests/test_dataset.py
-git commit -m "feat(smokeynet-adapted): TubePatchDataset for tube patch sequences"
+git commit -m "feat(bbox-tube-temporal): TubePatchDataset for tube patch sequences"
 ```
 
 ---
@@ -1062,7 +1064,7 @@ Expected: 3 PASS.
 
 ```bash
 git add src/bbox_tube_temporal/temporal_classifier.py tests/test_temporal_classifier.py
-git commit -m "feat(smokeynet-adapted): FrozenTimmBackbone wrapper"
+git commit -m "feat(bbox-tube-temporal): FrozenTimmBackbone wrapper"
 ```
 
 ---
@@ -1145,7 +1147,7 @@ Expected: all PASS.
 
 ```bash
 git add src/bbox_tube_temporal/temporal_classifier.py tests/test_temporal_classifier.py
-git commit -m "feat(smokeynet-adapted): MeanPoolHead for sanity-baseline temporal head"
+git commit -m "feat(bbox-tube-temporal): MeanPoolHead for sanity-baseline temporal head"
 ```
 
 ---
@@ -1263,7 +1265,7 @@ Expected: all PASS.
 
 ```bash
 git add src/bbox_tube_temporal/temporal_classifier.py tests/test_temporal_classifier.py
-git commit -m "feat(smokeynet-adapted): GRUHead with packed sequences for masking"
+git commit -m "feat(bbox-tube-temporal): GRUHead with packed sequences for masking"
 ```
 
 ---
@@ -1409,7 +1411,7 @@ Expected: clean.
 
 ```bash
 git add src/bbox_tube_temporal/temporal_classifier.py tests/test_temporal_classifier.py
-git commit -m "feat(smokeynet-adapted): TemporalSmokeClassifier combining backbone + head"
+git commit -m "feat(bbox-tube-temporal): TemporalSmokeClassifier combining backbone + head"
 ```
 
 ---
@@ -1608,7 +1610,7 @@ Expected: all tests pass (existing tests for other modules untouched).
 
 ```bash
 git add src/bbox_tube_temporal/lit_temporal.py tests/test_lit_temporal.py
-git commit -m "feat(smokeynet-adapted): LitTemporalClassifier lightning module"
+git commit -m "feat(bbox-tube-temporal): LitTemporalClassifier lightning module"
 ```
 
 ---
@@ -1852,7 +1854,7 @@ Expected: clean.
 
 ```bash
 git add scripts/train.py dvc.yaml dvc.lock params.yaml
-git commit -m "feat(smokeynet-adapted): train stages for mean_pool and gru classifiers"
+git commit -m "feat(bbox-tube-temporal): train stages for mean_pool and gru classifiers"
 ```
 
 ---
@@ -2089,7 +2091,7 @@ Expected: clean.
 
 ```bash
 git add scripts/evaluate.py dvc.yaml dvc.lock pyproject.toml uv.lock
-git commit -m "feat(smokeynet-adapted): evaluate stages reporting metrics + PR/ROC plots"
+git commit -m "feat(bbox-tube-temporal): evaluate stages reporting metrics + PR/ROC plots"
 ```
 
 ---
@@ -2136,7 +2138,7 @@ Open one or two `data/05_model_input/val/<seq_id>/` directories in a file browse
 git status
 # If only dvc.lock was updated:
 git add dvc.lock
-git commit -m "chore(smokeynet-adapted): refresh dvc.lock after full repro"
+git commit -m "chore(bbox-tube-temporal): refresh dvc.lock after full repro"
 ```
 
 ---

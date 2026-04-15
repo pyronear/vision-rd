@@ -1,3 +1,5 @@
+> Renamed 2026-04-15: smokeynet-adapted → bbox-tube-temporal. Old paths in this doc reflect the design-time state.
+
 # Per-Run Training Curves Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
@@ -69,7 +71,7 @@ Expected: a version string (e.g. `2.2.x`) prints without error.
 
 ```bash
 git add pyproject.toml uv.lock
-git commit -m "chore(smokeynet-adapted): add pandas dep for training plots"
+git commit -m "chore(bbox-tube-temporal): add pandas dep for training plots"
 ```
 
 ---
@@ -168,7 +170,7 @@ Expected: 3 passed.
 
 ```bash
 git add src/bbox_tube_temporal/training_plots.py tests/test_training_plots.py
-git commit -m "feat(smokeynet-adapted): aggregate_train_loss_per_epoch helper"
+git commit -m "feat(bbox-tube-temporal): aggregate_train_loss_per_epoch helper"
 ```
 
 ---
@@ -268,7 +270,7 @@ Expected: 5 passed.
 
 ```bash
 git add src/bbox_tube_temporal/training_plots.py tests/test_training_plots.py
-git commit -m "feat(smokeynet-adapted): extract_val_metrics_per_epoch helper"
+git commit -m "feat(bbox-tube-temporal): extract_val_metrics_per_epoch helper"
 ```
 
 ---
@@ -408,7 +410,7 @@ Expected: 6 passed.
 
 ```bash
 git add src/bbox_tube_temporal/training_plots.py tests/test_training_plots.py
-git commit -m "feat(smokeynet-adapted): plot_training_curves 2x3 figure builder"
+git commit -m "feat(bbox-tube-temporal): plot_training_curves 2x3 figure builder"
 ```
 
 ---
@@ -504,7 +506,7 @@ Expected: no files would be reformatted. If any would, run `uv run ruff format .
 
 ```bash
 git add scripts/plot_training.py
-git commit -m "feat(smokeynet-adapted): plot_training CLI script"
+git commit -m "feat(bbox-tube-temporal): plot_training CLI script"
 ```
 
 ---
@@ -638,7 +640,7 @@ Expected: six stages succeed, six PNGs written under `data/08_reporting/training
 
 ```bash
 git add dvc.yaml dvc.lock data/08_reporting/training
-git commit -m "feat(smokeynet-adapted): dvc stages for per-run training curves"
+git commit -m "feat(bbox-tube-temporal): dvc stages for per-run training curves"
 ```
 
 ---
@@ -662,4 +664,4 @@ Expected: the seven `plot_training_*` stages appear, each with a single dep arro
 
 - [ ] **Step 4: If anything failed, fix before declaring done**
 
-No commit in this task — the verifications should have nothing to commit. If a lint fix or similar is needed, commit as `chore(smokeynet-adapted): post-plan cleanup`.
+No commit in this task — the verifications should have nothing to commit. If a lint fix or similar is needed, commit as `chore(bbox-tube-temporal): post-plan cleanup`.

@@ -1,4 +1,4 @@
-"""Build a deployable model archive for one smokeynet-adapted variant.
+"""Build a deployable model archive for one bbox-tube-temporal variant.
 
 Usage:
     uv run python scripts/package_model.py \\

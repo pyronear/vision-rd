@@ -1,8 +1,8 @@
-# TemporalModel protocol for smokeynet-adapted — Implementation Plan
+# TemporalModel protocol for bbox-tube-temporal — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Implement `pyrocore.TemporalModel` for `smokeynet-adapted`, packaging the `gru_convnext_finetune` variant together with a YOLO companion detector into a single self-contained archive that the leaderboard can consume end-to-end.
+**Goal:** Implement `pyrocore.TemporalModel` for `bbox-tube-temporal`, packaging the `gru_convnext_finetune` variant together with a YOLO companion detector into a single self-contained archive that the leaderboard can consume end-to-end.
 
 **Architecture:** A thin `BboxTubeTemporalModel` class wiring together five pure inference helpers (YOLO detect → tube build/filter/interpolate → crop patches → classifier forward → decision). A `package.py` module bundles YOLO weights, classifier checkpoint, and config into a `.zip`, mirroring `tracking-fsm-baseline/package.py`. A packager CLI calibrates the sigmoid threshold on val (smallest threshold achieving target recall) and writes it into the bundled config. DVC wires one hard-coded `package` stage for `gru_convnext_finetune`.
 
@@ -10,7 +10,7 @@
 
 **Reference spec:** `docs/specs/2026-04-15-temporal-model-protocol-design.md`.
 
-**Working directory for every task:** `experiments/temporal-models/smokeynet-adapted/`. All paths below are relative to that directory unless absolute.
+**Working directory for every task:** `experiments/temporal-models/bbox-tube-temporal/`. All paths below are relative to that directory unless absolute.
 
 ---
 
@@ -74,7 +74,7 @@ Expected: all pre-existing tests still pass.
 
 ```bash
 git add pyproject.toml uv.lock
-git commit -m "chore(smokeynet-adapted): add ultralytics dependency"
+git commit -m "chore(bbox-tube-temporal): add ultralytics dependency"
 ```
 
 ---
@@ -150,7 +150,7 @@ Expected: `1`
 
 ```bash
 git add src/bbox_tube_temporal/package.py
-git commit -m "feat(smokeynet-adapted): add package module skeleton"
+git commit -m "feat(bbox-tube-temporal): add package module skeleton"
 ```
 
 ---
@@ -406,7 +406,7 @@ Expected: all tests pass.
 
 ```bash
 git add src/bbox_tube_temporal/package.py tests/test_package.py
-git commit -m "feat(smokeynet-adapted): add build_model_package with tests"
+git commit -m "feat(bbox-tube-temporal): add build_model_package with tests"
 ```
 
 ---
@@ -667,7 +667,7 @@ Expected: all pass.
 
 ```bash
 git add src/bbox_tube_temporal/package.py tests/test_package.py
-git commit -m "feat(smokeynet-adapted): add load_model_package with round-trip tests"
+git commit -m "feat(bbox-tube-temporal): add load_model_package with round-trip tests"
 ```
 
 ---
@@ -868,7 +868,7 @@ Expected: all pass.
 
 ```bash
 git add src/bbox_tube_temporal/inference.py tests/test_inference_units.py
-git commit -m "feat(smokeynet-adapted): add run_yolo_on_frames helper"
+git commit -m "feat(bbox-tube-temporal): add run_yolo_on_frames helper"
 ```
 
 ---
@@ -1013,7 +1013,7 @@ Expected: all pass.
 
 ```bash
 git add src/bbox_tube_temporal/inference.py tests/test_inference_units.py
-git commit -m "feat(smokeynet-adapted): add filter_and_interpolate_tubes helper"
+git commit -m "feat(bbox-tube-temporal): add filter_and_interpolate_tubes helper"
 ```
 
 ---
@@ -1183,7 +1183,7 @@ Expected: all pass.
 
 ```bash
 git add src/bbox_tube_temporal/inference.py tests/test_inference_units.py
-git commit -m "feat(smokeynet-adapted): add crop_tube_patches helper"
+git commit -m "feat(bbox-tube-temporal): add crop_tube_patches helper"
 ```
 
 ---
@@ -1267,7 +1267,7 @@ Expected: all pass.
 
 ```bash
 git add src/bbox_tube_temporal/inference.py tests/test_inference_units.py
-git commit -m "feat(smokeynet-adapted): add score_tubes helper"
+git commit -m "feat(bbox-tube-temporal): add score_tubes helper"
 ```
 
 ---
@@ -1359,7 +1359,7 @@ Expected: all pass.
 
 ```bash
 git add src/bbox_tube_temporal/inference.py tests/test_inference_units.py
-git commit -m "feat(smokeynet-adapted): add pick_winner_and_trigger helper"
+git commit -m "feat(bbox-tube-temporal): add pick_winner_and_trigger helper"
 ```
 
 ---
@@ -1374,7 +1374,7 @@ git commit -m "feat(smokeynet-adapted): add pick_winner_and_trigger helper"
 Create `src/bbox_tube_temporal/model.py`:
 
 ```python
-"""TemporalModel implementation for smokeynet-adapted.
+"""TemporalModel implementation for bbox-tube-temporal.
 
 Wires the YOLO companion + tube building + patch cropping + the trained
 temporal classifier into the pyrocore :class:`TemporalModel` contract.
@@ -1438,7 +1438,7 @@ Expected: prints the class.
 
 ```bash
 git add src/bbox_tube_temporal/model.py
-git commit -m "feat(smokeynet-adapted): add BboxTubeTemporalModel skeleton"
+git commit -m "feat(bbox-tube-temporal): add BboxTubeTemporalModel skeleton"
 ```
 
 ---
@@ -1760,7 +1760,7 @@ Expected: all pass.
 
 ```bash
 git add src/bbox_tube_temporal/model.py tests/test_model_edge_cases.py
-git commit -m "feat(smokeynet-adapted): implement BboxTubeTemporalModel.predict with edge-case tests"
+git commit -m "feat(bbox-tube-temporal): implement BboxTubeTemporalModel.predict with edge-case tests"
 ```
 
 ---
@@ -1996,7 +1996,7 @@ Expected: passes. If it fails due to floating-point drift, investigate which sta
 
 ```bash
 git add tests/fixtures/parity tests/test_model_parity.py
-git commit -m "test(smokeynet-adapted): add train/inference parity test"
+git commit -m "test(bbox-tube-temporal): add train/inference parity test"
 ```
 
 ---
@@ -2118,7 +2118,7 @@ Expected: all pass.
 
 ```bash
 git add src/bbox_tube_temporal/calibration.py tests/test_calibration.py
-git commit -m "feat(smokeynet-adapted): add threshold calibration helper"
+git commit -m "feat(bbox-tube-temporal): add threshold calibration helper"
 ```
 
 ---
@@ -2204,7 +2204,7 @@ Expected: prints the function object.
 
 ```bash
 git add src/bbox_tube_temporal/val_predict.py
-git commit -m "feat(smokeynet-adapted): add val_predict helper for threshold calibration"
+git commit -m "feat(bbox-tube-temporal): add val_predict helper for threshold calibration"
 ```
 
 ---
@@ -2219,7 +2219,7 @@ git commit -m "feat(smokeynet-adapted): add val_predict helper for threshold cal
 Create `scripts/package_model.py`:
 
 ```python
-"""Build a deployable model archive for one smokeynet-adapted variant.
+"""Build a deployable model archive for one bbox-tube-temporal variant.
 
 Usage:
     uv run python scripts/package_model.py \
@@ -2378,7 +2378,7 @@ Expected: no issues (fix any ruff complaints inline before continuing).
 
 ```bash
 git add scripts/package_model.py
-git commit -m "feat(smokeynet-adapted): add package_model.py CLI"
+git commit -m "feat(bbox-tube-temporal): add package_model.py CLI"
 ```
 
 ---
@@ -2414,7 +2414,7 @@ Expected: prints the dict you just added.
 
 ```bash
 git add params.yaml
-git commit -m "chore(smokeynet-adapted): add package params block"
+git commit -m "chore(bbox-tube-temporal): add package params block"
 ```
 
 ---
@@ -2467,7 +2467,7 @@ Expected: lists `package` (and all pre-existing stages) with no parse errors.
 
 ```bash
 git add dvc.yaml
-git commit -m "chore(smokeynet-adapted): add dvc package stage for gru_convnext_finetune"
+git commit -m "chore(bbox-tube-temporal): add dvc package stage for gru_convnext_finetune"
 ```
 
 ---
@@ -2535,7 +2535,7 @@ Expected: prints a decision and diagnostic counts, no exceptions.
 
 ```bash
 git add dvc.lock data/06_models/gru_convnext_finetune/.gitignore
-git commit -m "chore(smokeynet-adapted): produce gru_convnext_finetune model.zip via dvc"
+git commit -m "chore(bbox-tube-temporal): produce gru_convnext_finetune model.zip via dvc"
 ```
 
 (If there is no `.gitignore` update, drop that path from the `git add`. The zip itself is DVC-tracked, not git-tracked.)
@@ -2603,7 +2603,7 @@ Expected: no issues.
 
 ```bash
 git add README.md
-git commit -m "docs(smokeynet-adapted): document BboxTubeTemporalModel and packaging"
+git commit -m "docs(bbox-tube-temporal): document BboxTubeTemporalModel and packaging"
 ```
 
 ---

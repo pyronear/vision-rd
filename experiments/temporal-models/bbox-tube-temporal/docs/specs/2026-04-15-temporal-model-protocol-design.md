@@ -1,11 +1,11 @@
-# TemporalModel protocol for smokeynet-adapted
+# TemporalModel protocol for bbox-tube-temporal
 
 Status: design (not yet implemented)
 Date: 2026-04-15
 
 ## Goal
 
-Implement `pyrocore.TemporalModel` for `smokeynet-adapted` so a trained
+Implement `pyrocore.TemporalModel` for `bbox-tube-temporal` so a trained
 variant can be shipped as a single self-contained archive and run
 end-to-end by the temporal-model leaderboard, which hands the model a
 list of raw frame image paths and expects a binary decision.

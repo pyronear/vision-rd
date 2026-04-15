@@ -1,4 +1,4 @@
-"""TemporalModel implementation for smokeynet-adapted.
+"""TemporalModel implementation for bbox-tube-temporal.
 
 Wires the YOLO companion + tube building + patch cropping + the trained
 temporal classifier into the pyrocore :class:`TemporalModel` contract.

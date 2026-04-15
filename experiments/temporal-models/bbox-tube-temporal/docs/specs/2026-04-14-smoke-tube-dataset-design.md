@@ -1,8 +1,10 @@
+> Renamed 2026-04-15: smokeynet-adapted → bbox-tube-temporal. Old paths in this doc reflect the design-time state.
+
 # Smoke Tube Dataset — Design
 
 **Date:** 2026-04-14
 **Status:** Approved, ready for implementation plan
-**Scope:** `experiments/temporal-models/smokeynet-adapted/`
+**Scope:** `experiments/temporal-models/bbox-tube-temporal/`
 
 ## Goal
 
@@ -268,7 +270,7 @@ No end-to-end script test for v1. The notebook is the smoke test.
 
 ## Verification
 
-1. `make lint && make test` pass in `smokeynet-adapted/`.
+1. `make lint && make test` pass in `bbox-tube-temporal/`.
 2. `uv run dvc repro build_tubes@train` and `build_tubes@val` both
    succeed and populate `data/03_primary/tubes/{train,val}/`.
 3. `_summary.json` shows a reasonable dropout rate. Pre-spike

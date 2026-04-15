@@ -1,8 +1,10 @@
+> Renamed 2026-04-15: smokeynet-adapted → bbox-tube-temporal. Old paths in this doc reflect the design-time state.
+
 # Render Tubes — Design
 
 **Date:** 2026-04-14
 **Status:** Approved, ready for implementation plan
-**Scope:** `experiments/temporal-models/smokeynet-adapted/`
+**Scope:** `experiments/temporal-models/bbox-tube-temporal/`
 
 ## Goal
 

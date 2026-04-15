@@ -1,3 +1,5 @@
+> Renamed 2026-04-15: smokeynet-adapted → bbox-tube-temporal. Old paths in this doc reflect the design-time state.
+
 # Performance Improvements Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
@@ -10,7 +12,7 @@
 
 **Spec:** `docs/specs/2026-04-14-performance-improvements-design.md`
 
-**Working directory for all commands:** `experiments/temporal-models/smokeynet-adapted/`
+**Working directory for all commands:** `experiments/temporal-models/bbox-tube-temporal/`
 
 ---
 
@@ -42,7 +44,7 @@ Expected: no matches.
 
 ```bash
 git add src/bbox_tube_temporal/temporal_classifier.py tests/test_temporal_classifier.py
-git commit -m "refactor(smokeynet-adapted): rename FrozenTimmBackbone to TimmBackbone"
+git commit -m "refactor(bbox-tube-temporal): rename FrozenTimmBackbone to TimmBackbone"
 ```
 
 ---
@@ -193,7 +195,7 @@ Expected: PASS (all tests, including the new ones and the original frozen-equiva
 
 ```bash
 git add src/bbox_tube_temporal/temporal_classifier.py tests/test_temporal_classifier.py
-git commit -m "feat(smokeynet-adapted): finetune flag on TimmBackbone for resnet family"
+git commit -m "feat(bbox-tube-temporal): finetune flag on TimmBackbone for resnet family"
 ```
 
 ---
@@ -270,7 +272,7 @@ Expected: all PASS.
 
 ```bash
 git add src/bbox_tube_temporal/temporal_classifier.py tests/test_temporal_classifier.py
-git commit -m "feat(smokeynet-adapted): convnext support in TimmBackbone finetune path"
+git commit -m "feat(bbox-tube-temporal): convnext support in TimmBackbone finetune path"
 ```
 
 ---
@@ -316,7 +318,7 @@ Expected: PASS.
 
 ```bash
 git add tests/test_temporal_classifier.py
-git commit -m "test(smokeynet-adapted): guard NotImplementedError for unsupported backbone families"
+git commit -m "test(bbox-tube-temporal): guard NotImplementedError for unsupported backbone families"
 ```
 
 ---
@@ -357,7 +359,7 @@ Expected: PASS.
 
 ```bash
 git add tests/test_temporal_classifier.py
-git commit -m "test(smokeynet-adapted): frozen TimmBackbone equivalence regression"
+git commit -m "test(bbox-tube-temporal): frozen TimmBackbone equivalence regression"
 ```
 
 ---
@@ -447,7 +449,7 @@ Expected: all PASS, including the new test and every pre-existing one.
 
 ```bash
 git add src/bbox_tube_temporal/temporal_classifier.py tests/test_temporal_classifier.py
-git commit -m "feat(smokeynet-adapted): TemporalSmokeClassifier accepts finetune flag"
+git commit -m "feat(bbox-tube-temporal): TemporalSmokeClassifier accepts finetune flag"
 ```
 
 ---
@@ -592,7 +594,7 @@ Expected: all PASS.
 
 ```bash
 git add src/bbox_tube_temporal/lit_temporal.py tests/test_lit_temporal.py
-git commit -m "feat(smokeynet-adapted): per-group optimizer for finetune mode"
+git commit -m "feat(bbox-tube-temporal): per-group optimizer for finetune mode"
 ```
 
 ---
@@ -638,7 +640,7 @@ Expected: all PASS.
 
 ```bash
 git add scripts/train.py
-git commit -m "feat(smokeynet-adapted): train.py passes finetune params to lit module"
+git commit -m "feat(bbox-tube-temporal): train.py passes finetune params to lit module"
 ```
 
 ---
@@ -881,7 +883,7 @@ Expected: clean.
 
 ```bash
 git add scripts/compare_variants.py tests/test_compare_variants.py
-git commit -m "feat(smokeynet-adapted): compare_variants reporting script"
+git commit -m "feat(bbox-tube-temporal): compare_variants reporting script"
 ```
 
 ---
@@ -988,7 +990,7 @@ Expected: no error.
 
 ```bash
 git add params.yaml
-git commit -m "chore(smokeynet-adapted): add variant params for backbone + finetune experiments"
+git commit -m "chore(bbox-tube-temporal): add variant params for backbone + finetune experiments"
 ```
 
 ---
@@ -1351,7 +1353,7 @@ Expected: prints a DAG listing the new stages; no parse error. (Actual execution
 
 ```bash
 git add dvc.yaml
-git commit -m "feat(smokeynet-adapted): dvc stages for backbone + finetune variants and comparison"
+git commit -m "feat(bbox-tube-temporal): dvc stages for backbone + finetune variants and comparison"
 ```
 
 ---
@@ -1381,7 +1383,7 @@ If any formatter made changes:
 
 ```bash
 git add -u
-git commit -m "chore(smokeynet-adapted): lint fixups after variant wiring"
+git commit -m "chore(bbox-tube-temporal): lint fixups after variant wiring"
 ```
 
 Otherwise skip. The branch is now ready for a human to kick off `uv run dvc repro train_gru_convnext train_gru_seed43 train_gru_seed44 train_gru_finetune`, review `comparison.md`, and conditionally run `train_gru_convnext_finetune` depending on Exp 1 + Exp 2 outcome (the "go/no-go" prose rule in the spec).

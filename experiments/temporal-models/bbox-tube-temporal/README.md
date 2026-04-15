@@ -1,6 +1,6 @@
-# smokeynet-adapted
+# bbox-tube-temporal
 
-Temporal smoke classifier for Pyronear camera sequences. Learns a binary sequence-level label (smoke / no smoke) over short tubes of YOLO-detected regions.
+Bbox-tube temporal smoke classifier for Pyronear camera sequences. Plugs into the `pyrocore.TemporalModel` protocol, learning a binary sequence-level label (smoke / no smoke) over short tubes of YOLO-detected regions.
 
 ## Architecture
 

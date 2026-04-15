@@ -1,8 +1,10 @@
+> Renamed 2026-04-15: smokeynet-adapted → bbox-tube-temporal. Old paths in this doc reflect the design-time state.
+
 # Performance Improvements (Backbone + Fine-tuning) — Design
 
 **Date:** 2026-04-14
 **Status:** Draft, awaiting user review
-**Scope:** `experiments/temporal-models/smokeynet-adapted/`
+**Scope:** `experiments/temporal-models/bbox-tube-temporal/`
 
 ## Goal
 
