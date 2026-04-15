@@ -4,7 +4,7 @@
 
 **Goal:** Produce a static Ultralytics-style PNG per training run from the Lightning `CSVLogger` metrics file, wired into DVC as one stage per existing variant.
 
-**Architecture:** A small pure module in `src/smokeynet_adapted/training_plots.py` holds the two DataFrame helpers and the figure builder. A thin CLI script in `scripts/plot_training.py` wraps it for DVC. Seven new DVC stages (one per existing training variant) output `data/08_reporting/training/<variant>/training_curves.png`.
+**Architecture:** A small pure module in `src/bbox_tube_temporal/training_plots.py` holds the two DataFrame helpers and the figure builder. A thin CLI script in `scripts/plot_training.py` wraps it for DVC. Seven new DVC stages (one per existing training variant) output `data/08_reporting/training/<variant>/training_curves.png`.
 
 **Tech Stack:** Python 3.11, pandas (new dep), matplotlib (existing dep), pytest.
 
@@ -16,7 +16,7 @@
 
 Files created or modified by this plan:
 
-- **Create** `src/smokeynet_adapted/training_plots.py` — pure helpers (`aggregate_train_loss_per_epoch`, `extract_val_metrics_per_epoch`) and the figure builder (`plot_training_curves`).
+- **Create** `src/bbox_tube_temporal/training_plots.py` — pure helpers (`aggregate_train_loss_per_epoch`, `extract_val_metrics_per_epoch`) and the figure builder (`plot_training_curves`).
 - **Create** `scripts/plot_training.py` — CLI wrapper invoked by DVC.
 - **Create** `tests/test_training_plots.py` — unit tests for the two pure helpers.
 - **Modify** `pyproject.toml` — add `pandas>=2.0` to `dependencies`.
@@ -77,7 +77,7 @@ git commit -m "chore(smokeynet-adapted): add pandas dep for training plots"
 ## Task 2: Implement `aggregate_train_loss_per_epoch`
 
 **Files:**
-- Create: `src/smokeynet_adapted/training_plots.py`
+- Create: `src/bbox_tube_temporal/training_plots.py`
 - Test: `tests/test_training_plots.py`
 
 - [ ] **Step 1: Write the failing test**
@@ -87,7 +87,7 @@ Create `tests/test_training_plots.py` with:
 ```python
 import pandas as pd
 
-from smokeynet_adapted.training_plots import aggregate_train_loss_per_epoch
+from bbox_tube_temporal.training_plots import aggregate_train_loss_per_epoch
 
 
 def test_aggregate_train_loss_per_epoch_means_per_epoch():
@@ -140,11 +140,11 @@ def test_aggregate_train_loss_per_epoch_returns_empty_when_no_train_rows():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest tests/test_training_plots.py -v`
-Expected: FAIL with `ModuleNotFoundError: No module named 'smokeynet_adapted.training_plots'`.
+Expected: FAIL with `ModuleNotFoundError: No module named 'bbox_tube_temporal.training_plots'`.
 
 - [ ] **Step 3: Create module with minimal implementation**
 
-Create `src/smokeynet_adapted/training_plots.py`:
+Create `src/bbox_tube_temporal/training_plots.py`:
 
 ```python
 """Per-run training curve plotting from Lightning CSVLogger metrics."""
@@ -167,7 +167,7 @@ Expected: 3 passed.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/training_plots.py tests/test_training_plots.py
+git add src/bbox_tube_temporal/training_plots.py tests/test_training_plots.py
 git commit -m "feat(smokeynet-adapted): aggregate_train_loss_per_epoch helper"
 ```
 
@@ -176,7 +176,7 @@ git commit -m "feat(smokeynet-adapted): aggregate_train_loss_per_epoch helper"
 ## Task 3: Implement `extract_val_metrics_per_epoch`
 
 **Files:**
-- Modify: `src/smokeynet_adapted/training_plots.py`
+- Modify: `src/bbox_tube_temporal/training_plots.py`
 - Modify: `tests/test_training_plots.py`
 
 - [ ] **Step 1: Write the failing tests**
@@ -184,7 +184,7 @@ git commit -m "feat(smokeynet-adapted): aggregate_train_loss_per_epoch helper"
 Append to `tests/test_training_plots.py`:
 
 ```python
-from smokeynet_adapted.training_plots import extract_val_metrics_per_epoch
+from bbox_tube_temporal.training_plots import extract_val_metrics_per_epoch
 
 
 def test_extract_val_metrics_per_epoch_one_row_per_epoch():
@@ -241,7 +241,7 @@ Expected: the two new tests fail with `ImportError: cannot import name 'extract_
 
 - [ ] **Step 3: Add the function**
 
-Append to `src/smokeynet_adapted/training_plots.py`:
+Append to `src/bbox_tube_temporal/training_plots.py`:
 
 ```python
 _VAL_COLUMNS = [
@@ -267,7 +267,7 @@ Expected: 5 passed.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/training_plots.py tests/test_training_plots.py
+git add src/bbox_tube_temporal/training_plots.py tests/test_training_plots.py
 git commit -m "feat(smokeynet-adapted): extract_val_metrics_per_epoch helper"
 ```
 
@@ -276,7 +276,7 @@ git commit -m "feat(smokeynet-adapted): extract_val_metrics_per_epoch helper"
 ## Task 4: Implement `plot_training_curves` figure builder
 
 **Files:**
-- Modify: `src/smokeynet_adapted/training_plots.py`
+- Modify: `src/bbox_tube_temporal/training_plots.py`
 - Modify: `tests/test_training_plots.py`
 
 This task adds the matplotlib rendering. Test is a smoke test that writes a PNG to a `tmp_path` and asserts the file exists and is non-empty.
@@ -288,7 +288,7 @@ Append to `tests/test_training_plots.py`:
 ```python
 import csv
 
-from smokeynet_adapted.training_plots import plot_training_curves
+from bbox_tube_temporal.training_plots import plot_training_curves
 
 
 def _write_fixture_csv(path):
@@ -328,7 +328,7 @@ Expected: FAIL with `ImportError: cannot import name 'plot_training_curves'`.
 
 - [ ] **Step 3: Add the figure builder**
 
-Append to `src/smokeynet_adapted/training_plots.py`. Add the matplotlib import at the top of the file (next to the existing `import pandas as pd` line), and the function at the bottom:
+Append to `src/bbox_tube_temporal/training_plots.py`. Add the matplotlib import at the top of the file (next to the existing `import pandas as pd` line), and the function at the bottom:
 
 ```python
 # Add to imports block at top of file:
@@ -407,7 +407,7 @@ Expected: 6 passed.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/training_plots.py tests/test_training_plots.py
+git add src/bbox_tube_temporal/training_plots.py tests/test_training_plots.py
 git commit -m "feat(smokeynet-adapted): plot_training_curves 2x3 figure builder"
 ```
 
@@ -430,7 +430,7 @@ import re
 import sys
 from pathlib import Path
 
-from smokeynet_adapted.training_plots import plot_training_curves
+from bbox_tube_temporal.training_plots import plot_training_curves
 
 
 def _find_latest_metrics_csv(csv_log_dir: Path) -> Path:
@@ -494,10 +494,10 @@ If any of these are wrong, go back to Task 4 and adjust `plot_training_curves`.
 
 - [ ] **Step 4: Lint**
 
-Run: `uv run ruff check scripts/plot_training.py src/smokeynet_adapted/training_plots.py tests/test_training_plots.py`
+Run: `uv run ruff check scripts/plot_training.py src/bbox_tube_temporal/training_plots.py tests/test_training_plots.py`
 Expected: `All checks passed!`.
 
-Run: `uv run ruff format --check scripts/plot_training.py src/smokeynet_adapted/training_plots.py tests/test_training_plots.py`
+Run: `uv run ruff format --check scripts/plot_training.py src/bbox_tube_temporal/training_plots.py tests/test_training_plots.py`
 Expected: no files would be reformatted. If any would, run `uv run ruff format ...` to apply.
 
 - [ ] **Step 5: Commit**
@@ -531,7 +531,7 @@ Add the block below immediately after the `train_gru_convnext_finetune` stage (w
       --title mean_pool
     deps:
       - scripts/plot_training.py
-      - src/smokeynet_adapted/training_plots.py
+      - src/bbox_tube_temporal/training_plots.py
       - data/06_models/mean_pool/csv_logs
     plots:
       - data/08_reporting/training/mean_pool/training_curves.png
@@ -544,7 +544,7 @@ Add the block below immediately after the `train_gru_convnext_finetune` stage (w
       --title gru
     deps:
       - scripts/plot_training.py
-      - src/smokeynet_adapted/training_plots.py
+      - src/bbox_tube_temporal/training_plots.py
       - data/06_models/gru/csv_logs
     plots:
       - data/08_reporting/training/gru/training_curves.png
@@ -557,7 +557,7 @@ Add the block below immediately after the `train_gru_convnext_finetune` stage (w
       --title gru_seed43
     deps:
       - scripts/plot_training.py
-      - src/smokeynet_adapted/training_plots.py
+      - src/bbox_tube_temporal/training_plots.py
       - data/06_models/gru_seed43/csv_logs
     plots:
       - data/08_reporting/training/gru_seed43/training_curves.png
@@ -570,7 +570,7 @@ Add the block below immediately after the `train_gru_convnext_finetune` stage (w
       --title gru_seed44
     deps:
       - scripts/plot_training.py
-      - src/smokeynet_adapted/training_plots.py
+      - src/bbox_tube_temporal/training_plots.py
       - data/06_models/gru_seed44/csv_logs
     plots:
       - data/08_reporting/training/gru_seed44/training_curves.png
@@ -583,7 +583,7 @@ Add the block below immediately after the `train_gru_convnext_finetune` stage (w
       --title gru_convnext
     deps:
       - scripts/plot_training.py
-      - src/smokeynet_adapted/training_plots.py
+      - src/bbox_tube_temporal/training_plots.py
       - data/06_models/gru_convnext/csv_logs
     plots:
       - data/08_reporting/training/gru_convnext/training_curves.png
@@ -596,7 +596,7 @@ Add the block below immediately after the `train_gru_convnext_finetune` stage (w
       --title gru_finetune
     deps:
       - scripts/plot_training.py
-      - src/smokeynet_adapted/training_plots.py
+      - src/bbox_tube_temporal/training_plots.py
       - data/06_models/gru_finetune/csv_logs
     plots:
       - data/08_reporting/training/gru_finetune/training_curves.png
@@ -609,7 +609,7 @@ Add the block below immediately after the `train_gru_convnext_finetune` stage (w
       --title gru_convnext_finetune
     deps:
       - scripts/plot_training.py
-      - src/smokeynet_adapted/training_plots.py
+      - src/bbox_tube_temporal/training_plots.py
       - data/06_models/gru_convnext_finetune/csv_logs
     plots:
       - data/08_reporting/training/gru_convnext_finetune/training_curves.png

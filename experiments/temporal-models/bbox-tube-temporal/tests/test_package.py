@@ -8,7 +8,7 @@ import pytest
 import torch
 import yaml
 
-from smokeynet_adapted.package import (
+from bbox_tube_temporal.package import (
     CLASSIFIER_CKPT_FILENAME,
     CONFIG_FILENAME,
     FORMAT_VERSION,
@@ -17,7 +17,7 @@ from smokeynet_adapted.package import (
     build_model_package,
     load_model_package,
 )
-from smokeynet_adapted.temporal_classifier import TemporalSmokeClassifier
+from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
 
 SAMPLE_CONFIG: dict = {
     "infer": {"confidence_threshold": 0.01, "iou_nms": 0.2, "image_size": 1024},
@@ -218,7 +218,7 @@ def real_tiny_archive(
 
 
 class TestLoadRoundtrip:
-    @patch("smokeynet_adapted.package._load_yolo")
+    @patch("bbox_tube_temporal.package._load_yolo")
     def test_config_passthrough(
         self,
         mock_yolo: MagicMock,
@@ -230,7 +230,7 @@ class TestLoadRoundtrip:
         pkg = load_model_package(real_tiny_archive, extract_dir=tmp_path / "ext")
         assert pkg.config == real_tiny_config
 
-    @patch("smokeynet_adapted.package._load_yolo")
+    @patch("bbox_tube_temporal.package._load_yolo")
     def test_yolo_returned(
         self, mock_yolo: MagicMock, real_tiny_archive: Path, tmp_path: Path
     ) -> None:
@@ -239,7 +239,7 @@ class TestLoadRoundtrip:
         pkg = load_model_package(real_tiny_archive, extract_dir=tmp_path / "ext")
         assert pkg.yolo_model is sentinel
 
-    @patch("smokeynet_adapted.package._load_yolo")
+    @patch("bbox_tube_temporal.package._load_yolo")
     def test_classifier_forward_runs(
         self,
         mock_yolo: MagicMock,
@@ -257,7 +257,7 @@ class TestLoadRoundtrip:
 
 
 class TestLoadRejectsBadArchive:
-    @patch("smokeynet_adapted.package._load_yolo")
+    @patch("bbox_tube_temporal.package._load_yolo")
     def test_missing_manifest(self, mock_yolo: MagicMock, tmp_path: Path) -> None:
         bad = tmp_path / "bad.zip"
         with zipfile.ZipFile(bad, "w") as zf:
@@ -265,7 +265,7 @@ class TestLoadRejectsBadArchive:
         with pytest.raises(KeyError):
             load_model_package(bad, extract_dir=tmp_path / "ext")
 
-    @patch("smokeynet_adapted.package._load_yolo")
+    @patch("bbox_tube_temporal.package._load_yolo")
     def test_unsupported_format_version(
         self, mock_yolo: MagicMock, tmp_path: Path
     ) -> None:

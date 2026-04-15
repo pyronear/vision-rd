@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from smokeynet_adapted.data import load_detections, load_tube_record
+from bbox_tube_temporal.data import load_detections, load_tube_record
 
 
 def _write_label(tmp_path: Path, frame_id: str, text: str) -> Path:

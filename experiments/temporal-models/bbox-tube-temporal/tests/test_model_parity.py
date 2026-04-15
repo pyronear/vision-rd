@@ -22,15 +22,15 @@ from PIL import Image
 from pyrocore.types import Frame
 from torchvision.transforms.functional import to_tensor
 
-from smokeynet_adapted.data import load_frame_detections
-from smokeynet_adapted.model import SmokeynetTemporalModel
-from smokeynet_adapted.model_input import (
+from bbox_tube_temporal.data import load_frame_detections
+from bbox_tube_temporal.model import SmokeynetTemporalModel
+from bbox_tube_temporal.model_input import (
     crop_and_resize,
     expand_bbox,
     norm_bbox_to_pixel_square,
 )
-from smokeynet_adapted.temporal_classifier import TemporalSmokeClassifier
-from smokeynet_adapted.tubes import (
+from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
+from bbox_tube_temporal.tubes import (
     build_tubes,
     interpolate_gaps,
     select_longest_tube,

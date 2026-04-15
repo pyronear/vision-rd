@@ -32,9 +32,9 @@ stages:
         --min-detected-entries ${build_tubes.min_detected_entries}
       deps:
         - scripts/build_tubes.py
-        - src/smokeynet_adapted/tubes.py
-        - src/smokeynet_adapted/data.py
-        - src/smokeynet_adapted/types.py
+        - src/bbox_tube_temporal/tubes.py
+        - src/bbox_tube_temporal/data.py
+        - src/bbox_tube_temporal/types.py
         - data/01_raw/datasets/${item}
       params:
         - tubes
@@ -56,7 +56,7 @@ stages:
         --patch-size ${model_input.patch_size}
       deps:
         - scripts/build_model_input.py
-        - src/smokeynet_adapted/model_input.py
+        - src/bbox_tube_temporal/model_input.py
         - data/03_primary/tubes/${item}
         - data/01_raw/datasets/${item}
       params:
@@ -76,9 +76,9 @@ stages:
         --output-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/render_tubes.py
-        - src/smokeynet_adapted/tubes.py
-        - src/smokeynet_adapted/tube_viz.py
-        - src/smokeynet_adapted/data.py
+        - src/bbox_tube_temporal/tubes.py
+        - src/bbox_tube_temporal/tube_viz.py
+        - src/bbox_tube_temporal/data.py
         - data/03_primary/tubes/${item}
         - data/01_raw/datasets/${item}
       outs:
@@ -95,11 +95,11 @@ stages:
       --params-key train_mean_pool
     deps:
       - scripts/train.py
-      - src/smokeynet_adapted/augment.py
-      - src/smokeynet_adapted/dataset.py
-      - src/smokeynet_adapted/temporal_classifier.py
-      - src/smokeynet_adapted/lit_temporal.py
-      - src/smokeynet_adapted/training_plots.py
+      - src/bbox_tube_temporal/augment.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
+      - src/bbox_tube_temporal/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -122,11 +122,11 @@ stages:
       --params-key train_gru
     deps:
       - scripts/train.py
-      - src/smokeynet_adapted/augment.py
-      - src/smokeynet_adapted/dataset.py
-      - src/smokeynet_adapted/temporal_classifier.py
-      - src/smokeynet_adapted/lit_temporal.py
-      - src/smokeynet_adapted/training_plots.py
+      - src/bbox_tube_temporal/augment.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
+      - src/bbox_tube_temporal/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -154,9 +154,9 @@ stages:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/smokeynet_adapted/temporal_classifier.py
-        - src/smokeynet_adapted/lit_temporal.py
-        - src/smokeynet_adapted/dataset.py
+        - src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal/lit_temporal.py
+        - src/bbox_tube_temporal/dataset.py
         - data/06_models/mean_pool/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -191,9 +191,9 @@ stages:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/smokeynet_adapted/temporal_classifier.py
-        - src/smokeynet_adapted/lit_temporal.py
-        - src/smokeynet_adapted/dataset.py
+        - src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal/lit_temporal.py
+        - src/bbox_tube_temporal/dataset.py
         - data/06_models/gru/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -223,11 +223,11 @@ stages:
       --params-key train_gru_convnext
     deps:
       - scripts/train.py
-      - src/smokeynet_adapted/augment.py
-      - src/smokeynet_adapted/dataset.py
-      - src/smokeynet_adapted/temporal_classifier.py
-      - src/smokeynet_adapted/lit_temporal.py
-      - src/smokeynet_adapted/training_plots.py
+      - src/bbox_tube_temporal/augment.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
+      - src/bbox_tube_temporal/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -250,11 +250,11 @@ stages:
       --params-key train_gru_finetune
     deps:
       - scripts/train.py
-      - src/smokeynet_adapted/augment.py
-      - src/smokeynet_adapted/dataset.py
-      - src/smokeynet_adapted/temporal_classifier.py
-      - src/smokeynet_adapted/lit_temporal.py
-      - src/smokeynet_adapted/training_plots.py
+      - src/bbox_tube_temporal/augment.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
+      - src/bbox_tube_temporal/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -277,11 +277,11 @@ stages:
       --params-key train_gru_convnext_finetune
     deps:
       - scripts/train.py
-      - src/smokeynet_adapted/augment.py
-      - src/smokeynet_adapted/dataset.py
-      - src/smokeynet_adapted/temporal_classifier.py
-      - src/smokeynet_adapted/lit_temporal.py
-      - src/smokeynet_adapted/training_plots.py
+      - src/bbox_tube_temporal/augment.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
+      - src/bbox_tube_temporal/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -304,11 +304,11 @@ stages:
       --params-key train_gru_convnext_base_finetune
     deps:
       - scripts/train.py
-      - src/smokeynet_adapted/augment.py
-      - src/smokeynet_adapted/dataset.py
-      - src/smokeynet_adapted/temporal_classifier.py
-      - src/smokeynet_adapted/lit_temporal.py
-      - src/smokeynet_adapted/training_plots.py
+      - src/bbox_tube_temporal/augment.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
+      - src/bbox_tube_temporal/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -336,9 +336,9 @@ stages:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/smokeynet_adapted/temporal_classifier.py
-        - src/smokeynet_adapted/lit_temporal.py
-        - src/smokeynet_adapted/dataset.py
+        - src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal/lit_temporal.py
+        - src/bbox_tube_temporal/dataset.py
         - data/06_models/gru_convnext/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -373,9 +373,9 @@ stages:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/smokeynet_adapted/temporal_classifier.py
-        - src/smokeynet_adapted/lit_temporal.py
-        - src/smokeynet_adapted/dataset.py
+        - src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal/lit_temporal.py
+        - src/bbox_tube_temporal/dataset.py
         - data/06_models/gru_finetune/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -410,9 +410,9 @@ stages:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/smokeynet_adapted/temporal_classifier.py
-        - src/smokeynet_adapted/lit_temporal.py
-        - src/smokeynet_adapted/dataset.py
+        - src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal/lit_temporal.py
+        - src/bbox_tube_temporal/dataset.py
         - data/06_models/gru_convnext_finetune/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -447,9 +447,9 @@ stages:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/smokeynet_adapted/temporal_classifier.py
-        - src/smokeynet_adapted/lit_temporal.py
-        - src/smokeynet_adapted/dataset.py
+        - src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal/lit_temporal.py
+        - src/bbox_tube_temporal/dataset.py
         - data/06_models/gru_convnext_base_finetune/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -478,9 +478,9 @@ stages:
       - data/01_raw/models/best.pt
       - data/05_model_input/val
       - scripts/package_model.py
-      - src/smokeynet_adapted/package.py
-      - src/smokeynet_adapted/calibration.py
-      - src/smokeynet_adapted/val_predict.py
+      - src/bbox_tube_temporal/package.py
+      - src/bbox_tube_temporal/calibration.py
+      - src/bbox_tube_temporal/val_predict.py
     params:
       - package
       - tubes

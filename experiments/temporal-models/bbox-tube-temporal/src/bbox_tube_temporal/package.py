@@ -24,7 +24,7 @@ MANIFEST_FILENAME = "manifest.yaml"
 YOLO_WEIGHTS_FILENAME = "yolo_weights.pt"
 CLASSIFIER_CKPT_FILENAME = "classifier.ckpt"
 CONFIG_FILENAME = "config.yaml"
-DEFAULT_EXTRACT_DIR = Path(".cache/smokeynet_model")
+DEFAULT_EXTRACT_DIR = Path(".cache/bbox_tube_temporal_model")
 
 
 @dataclass

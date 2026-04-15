@@ -1,8 +1,8 @@
-"""Tests for smokeynet_adapted.tubes."""
+"""Tests for bbox_tube_temporal.tubes."""
 
 import pytest
 
-from smokeynet_adapted.tubes import (
+from bbox_tube_temporal.tubes import (
     build_tubes,
     compute_iou,
     interpolate_gaps,
@@ -10,7 +10,7 @@ from smokeynet_adapted.tubes import (
     select_longest_tube,
     tube_from_record,
 )
-from smokeynet_adapted.types import Detection, FrameDetections, Tube, TubeEntry
+from bbox_tube_temporal.types import Detection, FrameDetections, Tube, TubeEntry
 
 
 def _det(cx: float, cy: float, w: float = 0.1, h: float = 0.1, conf: float = 0.8):

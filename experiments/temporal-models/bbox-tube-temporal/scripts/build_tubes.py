@@ -18,17 +18,17 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from smokeynet_adapted.data import (
+from bbox_tube_temporal.data import (
     is_wf_sequence,
     list_sequences,
     load_frame_detections,
 )
-from smokeynet_adapted.tubes import (
+from bbox_tube_temporal.tubes import (
     build_tubes,
     interpolate_gaps,
     select_longest_tube,
 )
-from smokeynet_adapted.types import Tube
+from bbox_tube_temporal.types import Tube
 
 
 @dataclass

@@ -3,7 +3,7 @@
 import pytest
 import torch
 
-from smokeynet_adapted.temporal_classifier import (
+from bbox_tube_temporal.temporal_classifier import (
     GRUHead,
     MeanPoolHead,
     TemporalSmokeClassifier,

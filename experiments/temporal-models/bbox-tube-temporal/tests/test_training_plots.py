@@ -2,7 +2,7 @@ import csv
 
 import pandas as pd
 
-from smokeynet_adapted.training_plots import (
+from bbox_tube_temporal.training_plots import (
     aggregate_train_loss_per_epoch,
     extract_val_metrics_per_epoch,
     plot_training_curves,

@@ -94,7 +94,7 @@ train_gru_convnext_finetune:
 
 Four files touched. Minimal and localized.
 
-### 1. `src/smokeynet_adapted/temporal_classifier.py`
+### 1. `src/bbox_tube_temporal/temporal_classifier.py`
 
 Replace `FrozenTimmBackbone` with `TimmBackbone`, respecting a
 `finetune` flag. `FrozenTimmBackbone` is renamed, not kept as an
@@ -129,7 +129,7 @@ Behavior:
     names in the exception message. Silent fall-through to
     "unfreeze everything" is explicitly avoided.
 
-### 2. `src/smokeynet_adapted/training.py`
+### 2. `src/bbox_tube_temporal/training.py`
 
 `LightningModule.configure_optimizers` builds a per-group optimizer
 when `finetune=True`:

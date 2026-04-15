@@ -1,6 +1,6 @@
 """Visualisation helpers for smoke tubes.
 
-Split from :mod:`smokeynet_adapted.tubes` to keep construction logic
+Split from :mod:`bbox_tube_temporal.tubes` to keep construction logic
 free of matplotlib / opencv dependencies.
 """
 

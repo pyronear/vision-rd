@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import torch
 from matplotlib.figure import Figure
 
-from smokeynet_adapted.batch_samples import (
+from bbox_tube_temporal.batch_samples import (
     SampleTrainBatchesCallback,
     render_batch_grid,
 )

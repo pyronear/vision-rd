@@ -62,7 +62,7 @@ git commit -m "build(smokeynet-adapted): add timm dependency for pretrained back
 ## Task 2: Crop logic — `model_input.py` core functions
 
 **Files:**
-- Create: `src/smokeynet_adapted/model_input.py`
+- Create: `src/bbox_tube_temporal/model_input.py`
 - Test: `tests/test_model_input.py`
 
 We build the pure crop math first (no I/O, no parallelism). Five small functions, each with its own TDD cycle.
@@ -83,7 +83,7 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from smokeynet_adapted.model_input import (
+from bbox_tube_temporal.model_input import (
     crop_and_resize,
     expand_bbox,
     norm_bbox_to_pixel_square,
@@ -111,7 +111,7 @@ Expected: FAIL with `ImportError: cannot import name 'expand_bbox'`.
 
 - [ ] **Step 3: Implement `expand_bbox`**
 
-Create `src/smokeynet_adapted/model_input.py`:
+Create `src/bbox_tube_temporal/model_input.py`:
 
 ```python
 """Crop tube bboxes from raw frames and save 224x224 PNG patches.
@@ -179,7 +179,7 @@ Expected: FAIL with `ImportError`.
 
 - [ ] **Step 7: Implement `norm_bbox_to_pixel_square`**
 
-Append to `src/smokeynet_adapted/model_input.py`:
+Append to `src/bbox_tube_temporal/model_input.py`:
 
 ```python
 def norm_bbox_to_pixel_square(
@@ -254,7 +254,7 @@ Expected: FAIL with `ImportError`.
 
 - [ ] **Step 11: Implement `crop_and_resize`**
 
-Append to `src/smokeynet_adapted/model_input.py`:
+Append to `src/bbox_tube_temporal/model_input.py`:
 
 ```python
 def crop_and_resize(
@@ -309,7 +309,7 @@ def test_save_patch_writes_png_at_target_size(tmp_path):
 Run: `uv run pytest tests/test_model_input.py -v -k save_patch`
 Expected: FAIL with `ImportError`.
 
-Append to `src/smokeynet_adapted/model_input.py`:
+Append to `src/bbox_tube_temporal/model_input.py`:
 
 ```python
 def save_patch(patch: np.ndarray, path: Path) -> None:
@@ -429,7 +429,7 @@ Expected: FAIL with `ImportError`.
 
 - [ ] **Step 18: Implement `process_tube`**
 
-Append to `src/smokeynet_adapted/model_input.py`:
+Append to `src/bbox_tube_temporal/model_input.py`:
 
 ```python
 import json
@@ -531,7 +531,7 @@ Expected: clean.
 - [ ] **Step 21: Commit**
 
 ```bash
-git add src/smokeynet_adapted/model_input.py tests/test_model_input.py
+git add src/bbox_tube_temporal/model_input.py tests/test_model_input.py
 git commit -m "feat(smokeynet-adapted): crop logic for model input patches"
 ```
 
@@ -577,7 +577,7 @@ from pathlib import Path
 
 import os
 
-from smokeynet_adapted.model_input import LABEL_TO_INT, process_tube
+from bbox_tube_temporal.model_input import LABEL_TO_INT, process_tube
 
 
 def _process_one(
@@ -699,7 +699,7 @@ Open `dvc.yaml` and add this stage **after** the `build_tubes:` stage (and befor
         --patch-size ${model_input.patch_size}
       deps:
         - scripts/build_model_input.py
-        - src/smokeynet_adapted/model_input.py
+        - src/bbox_tube_temporal/model_input.py
         - data/03_primary/tubes/${item}
         - data/01_raw/datasets/${item}
       params:
@@ -745,7 +745,7 @@ git commit -m "feat(smokeynet-adapted): build_model_input dvc stage producing tu
 ## Task 4: Rewrite `Dataset` for tube patches
 
 **Files:**
-- Modify (full rewrite): `src/smokeynet_adapted/dataset.py`
+- Modify (full rewrite): `src/bbox_tube_temporal/dataset.py`
 - Modify (full rewrite): `tests/test_dataset.py`
 
 - [ ] **Step 1: Replace test file with new tests**
@@ -763,7 +763,7 @@ import pytest
 import torch
 from PIL import Image
 
-from smokeynet_adapted.dataset import TubePatchDataset
+from bbox_tube_temporal.dataset import TubePatchDataset
 
 
 def _make_split(tmp_path: Path, samples: list[tuple[str, int, int]]) -> Path:
@@ -864,7 +864,7 @@ Expected: FAIL with `ImportError: cannot import name 'TubePatchDataset'` (curren
 
 - [ ] **Step 3: Replace `dataset.py`**
 
-Overwrite `src/smokeynet_adapted/dataset.py` with:
+Overwrite `src/bbox_tube_temporal/dataset.py` with:
 
 ```python
 """PyTorch Dataset for the basic temporal smoke classifier.
@@ -955,7 +955,7 @@ Expected: clean.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/smokeynet_adapted/dataset.py tests/test_dataset.py
+git add src/bbox_tube_temporal/dataset.py tests/test_dataset.py
 git commit -m "feat(smokeynet-adapted): TubePatchDataset for tube patch sequences"
 ```
 
@@ -964,7 +964,7 @@ git commit -m "feat(smokeynet-adapted): TubePatchDataset for tube patch sequence
 ## Task 5: Backbone wrapper (timm + frozen)
 
 **Files:**
-- Create: `src/smokeynet_adapted/temporal_classifier.py`  *(new file — leaves `model.py` alone for this task)*
+- Create: `src/bbox_tube_temporal/temporal_classifier.py`  *(new file — leaves `model.py` alone for this task)*
 - Test: `tests/test_temporal_classifier.py`
 
 We isolate the new classifier in its own module so the existing
@@ -981,7 +981,7 @@ Create `tests/test_temporal_classifier.py`:
 import pytest
 import torch
 
-from smokeynet_adapted.temporal_classifier import (
+from bbox_tube_temporal.temporal_classifier import (
     FrozenTimmBackbone,
     TemporalSmokeClassifier,
 )
@@ -1015,7 +1015,7 @@ Expected: FAIL with `ImportError`.
 
 - [ ] **Step 3: Implement the backbone wrapper**
 
-Create `src/smokeynet_adapted/temporal_classifier.py`:
+Create `src/bbox_tube_temporal/temporal_classifier.py`:
 
 ```python
 """Basic temporal smoke classifier: frozen timm backbone + temporal head."""
@@ -1061,7 +1061,7 @@ Expected: 3 PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/temporal_classifier.py tests/test_temporal_classifier.py
+git add src/bbox_tube_temporal/temporal_classifier.py tests/test_temporal_classifier.py
 git commit -m "feat(smokeynet-adapted): FrozenTimmBackbone wrapper"
 ```
 
@@ -1070,7 +1070,7 @@ git commit -m "feat(smokeynet-adapted): FrozenTimmBackbone wrapper"
 ## Task 6: Mean-pool head + masked pooling
 
 **Files:**
-- Modify: `src/smokeynet_adapted/temporal_classifier.py`
+- Modify: `src/bbox_tube_temporal/temporal_classifier.py`
 - Modify: `tests/test_temporal_classifier.py`
 
 - [ ] **Step 1: Add tests**
@@ -1078,7 +1078,7 @@ git commit -m "feat(smokeynet-adapted): FrozenTimmBackbone wrapper"
 Append to `tests/test_temporal_classifier.py`:
 
 ```python
-from smokeynet_adapted.temporal_classifier import MeanPoolHead
+from bbox_tube_temporal.temporal_classifier import MeanPoolHead
 
 
 def test_mean_pool_head_returns_logits_per_batch():
@@ -1113,7 +1113,7 @@ Expected: FAIL with `ImportError`.
 
 - [ ] **Step 3: Implement `MeanPoolHead`**
 
-Append to `src/smokeynet_adapted/temporal_classifier.py`:
+Append to `src/bbox_tube_temporal/temporal_classifier.py`:
 
 ```python
 class MeanPoolHead(nn.Module):
@@ -1144,7 +1144,7 @@ Expected: all PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/temporal_classifier.py tests/test_temporal_classifier.py
+git add src/bbox_tube_temporal/temporal_classifier.py tests/test_temporal_classifier.py
 git commit -m "feat(smokeynet-adapted): MeanPoolHead for sanity-baseline temporal head"
 ```
 
@@ -1153,7 +1153,7 @@ git commit -m "feat(smokeynet-adapted): MeanPoolHead for sanity-baseline tempora
 ## Task 7: GRU head with packed sequences
 
 **Files:**
-- Modify: `src/smokeynet_adapted/temporal_classifier.py`
+- Modify: `src/bbox_tube_temporal/temporal_classifier.py`
 - Modify: `tests/test_temporal_classifier.py`
 
 - [ ] **Step 1: Add tests**
@@ -1161,7 +1161,7 @@ git commit -m "feat(smokeynet-adapted): MeanPoolHead for sanity-baseline tempora
 Append to `tests/test_temporal_classifier.py`:
 
 ```python
-from smokeynet_adapted.temporal_classifier import GRUHead
+from bbox_tube_temporal.temporal_classifier import GRUHead
 
 
 def test_gru_head_returns_logits_per_batch():
@@ -1203,7 +1203,7 @@ Expected: FAIL with `ImportError`.
 
 - [ ] **Step 3: Implement `GRUHead`**
 
-Append to `src/smokeynet_adapted/temporal_classifier.py`:
+Append to `src/bbox_tube_temporal/temporal_classifier.py`:
 
 ```python
 from torch.nn.utils.rnn import pack_padded_sequence
@@ -1262,7 +1262,7 @@ Expected: all PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/temporal_classifier.py tests/test_temporal_classifier.py
+git add src/bbox_tube_temporal/temporal_classifier.py tests/test_temporal_classifier.py
 git commit -m "feat(smokeynet-adapted): GRUHead with packed sequences for masking"
 ```
 
@@ -1271,7 +1271,7 @@ git commit -m "feat(smokeynet-adapted): GRUHead with packed sequences for maskin
 ## Task 8: `TemporalSmokeClassifier` (backbone + head)
 
 **Files:**
-- Modify: `src/smokeynet_adapted/temporal_classifier.py`
+- Modify: `src/bbox_tube_temporal/temporal_classifier.py`
 - Modify: `tests/test_temporal_classifier.py`
 
 - [ ] **Step 1: Add tests**
@@ -1356,7 +1356,7 @@ Expected: 5 FAIL (class doesn't exist yet, since the import at the top of test f
 
 - [ ] **Step 3: Implement `TemporalSmokeClassifier`**
 
-Append to `src/smokeynet_adapted/temporal_classifier.py`:
+Append to `src/bbox_tube_temporal/temporal_classifier.py`:
 
 ```python
 class TemporalSmokeClassifier(nn.Module):
@@ -1408,7 +1408,7 @@ Expected: clean.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/smokeynet_adapted/temporal_classifier.py tests/test_temporal_classifier.py
+git add src/bbox_tube_temporal/temporal_classifier.py tests/test_temporal_classifier.py
 git commit -m "feat(smokeynet-adapted): TemporalSmokeClassifier combining backbone + head"
 ```
 
@@ -1417,7 +1417,7 @@ git commit -m "feat(smokeynet-adapted): TemporalSmokeClassifier combining backbo
 ## Task 9: Lightning module for training
 
 **Files:**
-- Create: `src/smokeynet_adapted/lit_temporal.py`  *(new file — keeps existing `training.py` untouched)*
+- Create: `src/bbox_tube_temporal/lit_temporal.py`  *(new file — keeps existing `training.py` untouched)*
 - Test: `tests/test_lit_temporal.py`
 
 - [ ] **Step 1: Write tests**
@@ -1429,7 +1429,7 @@ Create `tests/test_lit_temporal.py`:
 
 import torch
 
-from smokeynet_adapted.lit_temporal import LitTemporalClassifier
+from bbox_tube_temporal.lit_temporal import LitTemporalClassifier
 
 
 def _batch(b: int = 2, t: int = 5) -> dict:
@@ -1493,7 +1493,7 @@ Expected: FAIL with `ImportError`.
 
 - [ ] **Step 3: Implement Lightning module**
 
-Create `src/smokeynet_adapted/lit_temporal.py`:
+Create `src/bbox_tube_temporal/lit_temporal.py`:
 
 ```python
 """PyTorch Lightning wrapper around TemporalSmokeClassifier."""
@@ -1607,7 +1607,7 @@ Expected: all tests pass (existing tests for other modules untouched).
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/smokeynet_adapted/lit_temporal.py tests/test_lit_temporal.py
+git add src/bbox_tube_temporal/lit_temporal.py tests/test_lit_temporal.py
 git commit -m "feat(smokeynet-adapted): LitTemporalClassifier lightning module"
 ```
 
@@ -1674,8 +1674,8 @@ from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from lightning.pytorch.loggers import CSVLogger, TensorBoardLogger
 from torch.utils.data import DataLoader
 
-from smokeynet_adapted.dataset import TubePatchDataset
-from smokeynet_adapted.lit_temporal import LitTemporalClassifier
+from bbox_tube_temporal.dataset import TubePatchDataset
+from bbox_tube_temporal.lit_temporal import LitTemporalClassifier
 
 
 def main() -> None:
@@ -1780,9 +1780,9 @@ Append to `dvc.yaml` (after `build_model_input`):
       --params-key train_mean_pool
     deps:
       - scripts/train.py
-      - src/smokeynet_adapted/dataset.py
-      - src/smokeynet_adapted/temporal_classifier.py
-      - src/smokeynet_adapted/lit_temporal.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -1803,9 +1803,9 @@ Append to `dvc.yaml` (after `build_model_input`):
       --params-key train_gru
     deps:
       - scripts/train.py
-      - src/smokeynet_adapted/dataset.py
-      - src/smokeynet_adapted/temporal_classifier.py
-      - src/smokeynet_adapted/lit_temporal.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -1893,8 +1893,8 @@ from sklearn.metrics import (
 )
 from torch.utils.data import DataLoader
 
-from smokeynet_adapted.dataset import TubePatchDataset
-from smokeynet_adapted.lit_temporal import LitTemporalClassifier
+from bbox_tube_temporal.dataset import TubePatchDataset
+from bbox_tube_temporal.lit_temporal import LitTemporalClassifier
 
 
 def main() -> None:
@@ -2026,9 +2026,9 @@ Append to `dvc.yaml`:
         --params-key train_mean_pool
       deps:
         - scripts/evaluate.py
-        - src/smokeynet_adapted/temporal_classifier.py
-        - src/smokeynet_adapted/lit_temporal.py
-        - src/smokeynet_adapted/dataset.py
+        - src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal/lit_temporal.py
+        - src/bbox_tube_temporal/dataset.py
         - data/06_models/mean_pool/best_checkpoint.pt
         - data/05_model_input/${item}
       params:
@@ -2055,9 +2055,9 @@ Append to `dvc.yaml`:
         --params-key train_gru
       deps:
         - scripts/evaluate.py
-        - src/smokeynet_adapted/temporal_classifier.py
-        - src/smokeynet_adapted/lit_temporal.py
-        - src/smokeynet_adapted/dataset.py
+        - src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal/lit_temporal.py
+        - src/bbox_tube_temporal/dataset.py
         - data/06_models/gru/best_checkpoint.pt
         - data/05_model_input/${item}
       params:

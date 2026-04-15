@@ -123,7 +123,7 @@ model_input:
 
 ### Code
 
-- `src/smokeynet_adapted/model_input.py` — pure functions for crop +
+- `src/bbox_tube_temporal/model_input.py` — pure functions for crop +
   save logic, importable and unit-testable.
 - `scripts/build_model_input.py` — CLI orchestrator using DVC params.
 
@@ -133,7 +133,7 @@ Two independent DVC stages, one per architecture. Both invoke the same
 `scripts/train.py` with `--arch {mean_pool|gru}` and `--params-key
 {train_mean_pool|train_gru}`.
 
-### Dataset (`src/smokeynet_adapted/dataset.py`, full rewrite)
+### Dataset (`src/bbox_tube_temporal/dataset.py`, full rewrite)
 
 Constructor reads `_index.json`. `__getitem__(i)` returns:
 
@@ -153,7 +153,7 @@ Constructor reads `_index.json`. `__getitem__(i)` returns:
 - No augmentation.
 - `num_workers` controlled by params.
 
-### Model (`src/smokeynet_adapted/model.py`, full rewrite)
+### Model (`src/bbox_tube_temporal/model.py`, full rewrite)
 
 ```
 class TemporalSmokeClassifier(nn.Module):
@@ -174,7 +174,7 @@ Implements `pyrocore.TemporalModel` interface for downstream use.
 
 `timm` is added to `pyproject.toml` dependencies (`timm>=1.0`).
 
-### Lightning Module (`src/smokeynet_adapted/training.py`, full rewrite)
+### Lightning Module (`src/bbox_tube_temporal/training.py`, full rewrite)
 
 - Loss: `BCEWithLogitsLoss` (no `pos_weight`, data is balanced).
 - Optimizer: `AdamW(head_params, lr, weight_decay)`. Backbone params
@@ -282,7 +282,7 @@ build_model_input:
       --patch-size ${model_input.patch_size}
     deps:
       - scripts/build_model_input.py
-      - src/smokeynet_adapted/model_input.py
+      - src/bbox_tube_temporal/model_input.py
       - data/03_primary/tubes/${item}
       - data/01_raw/datasets/${item}
     params: [model_input]
@@ -300,9 +300,9 @@ train_mean_pool:
     --params-key train_mean_pool
   deps:
     - scripts/train.py
-    - src/smokeynet_adapted/dataset.py
-    - src/smokeynet_adapted/model.py
-    - src/smokeynet_adapted/training.py
+    - src/bbox_tube_temporal/dataset.py
+    - src/bbox_tube_temporal/model.py
+    - src/bbox_tube_temporal/training.py
     - data/05_model_input/train
     - data/05_model_input/val
   params: [train_mean_pool]
@@ -322,9 +322,9 @@ train_gru:
     --params-key train_gru
   deps:
     - scripts/train.py
-    - src/smokeynet_adapted/dataset.py
-    - src/smokeynet_adapted/model.py
-    - src/smokeynet_adapted/training.py
+    - src/bbox_tube_temporal/dataset.py
+    - src/bbox_tube_temporal/model.py
+    - src/bbox_tube_temporal/training.py
     - data/05_model_input/train
     - data/05_model_input/val
   params: [train_gru]
@@ -346,8 +346,8 @@ evaluate_mean_pool:
       --params-key train_mean_pool
     deps:
       - scripts/evaluate.py
-      - src/smokeynet_adapted/model.py
-      - src/smokeynet_adapted/dataset.py
+      - src/bbox_tube_temporal/model.py
+      - src/bbox_tube_temporal/dataset.py
       - data/06_models/mean_pool/best_checkpoint.pt
       - data/05_model_input/${item}
     params: [train_mean_pool]
@@ -371,8 +371,8 @@ evaluate_gru:
       --params-key train_gru
     deps:
       - scripts/evaluate.py
-      - src/smokeynet_adapted/model.py
-      - src/smokeynet_adapted/dataset.py
+      - src/bbox_tube_temporal/model.py
+      - src/bbox_tube_temporal/dataset.py
       - data/06_models/gru/best_checkpoint.pt
       - data/05_model_input/${item}
     params: [train_gru]
@@ -392,7 +392,7 @@ scripts/
   train.py               (new)
   evaluate.py            (new)
 
-src/smokeynet_adapted/
+src/bbox_tube_temporal/
   model_input.py         (new — crop/save logic)
   dataset.py             (rewrite)
   model.py               (rewrite)

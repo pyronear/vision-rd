@@ -24,8 +24,8 @@ from sklearn.metrics import (
 )
 from torch.utils.data import DataLoader
 
-from smokeynet_adapted.dataset import TubePatchDataset
-from smokeynet_adapted.lit_temporal import LitTemporalClassifier
+from bbox_tube_temporal.dataset import TubePatchDataset
+from bbox_tube_temporal.lit_temporal import LitTemporalClassifier
 
 
 def plot_confusion_matrix(

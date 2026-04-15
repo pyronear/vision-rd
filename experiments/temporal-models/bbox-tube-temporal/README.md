@@ -11,11 +11,11 @@ raw sequence  ->  truncate  ->  build tubes  ->  224x224 patches  ->  timm backb
                                                                       tuned)
 ```
 
-- **Tubes**: chains of YOLO detections linked across frames by greedy IoU matching (`src/smokeynet_adapted/tubes.py`). YOLO bboxes are pre-computed and shipped with the dataset; we do not run YOLO in this experiment.
-- **Patches**: each tube entry is cropped to a context-expanded 224x224 RGB patch (`src/smokeynet_adapted/model_input.py`).
+- **Tubes**: chains of YOLO detections linked across frames by greedy IoU matching (`src/bbox_tube_temporal/tubes.py`). YOLO bboxes are pre-computed and shipped with the dataset; we do not run YOLO in this experiment.
+- **Patches**: each tube entry is cropped to a context-expanded 224x224 RGB patch (`src/bbox_tube_temporal/model_input.py`).
 - **Backbone**: a `timm` model (`resnet18` or `convnext_tiny`) applied per-frame, either frozen or with the last N blocks fine-tuned.
 - **Temporal head**: `mean_pool` (average per-frame features) or `gru` (single-layer GRU over the tube).
-- **Augmentations**: per-tube-consistent spatial, photometric, and temporal transforms (`src/smokeynet_adapted/augment.py`).
+- **Augmentations**: per-tube-consistent spatial, photometric, and temporal transforms (`src/bbox_tube_temporal/augment.py`).
 
 ## Quick start
 
@@ -84,11 +84,11 @@ See `params.yaml`. Highlights:
 
 ## Layout
 
-Kedro-style data layers under `data/` (`01_raw`, `03_primary`, `05_model_input`, `06_models`, `07_model_output`, `08_reporting`); source under `src/smokeynet_adapted/`; CLI entry points under `scripts/`; design docs under `docs/specs/` and `docs/plans/`.
+Kedro-style data layers under `data/` (`01_raw`, `03_primary`, `05_model_input`, `06_models`, `07_model_output`, `08_reporting`); source under `src/bbox_tube_temporal/`; CLI entry points under `scripts/`; design docs under `docs/specs/` and `docs/plans/`.
 
 ## Deployment (TemporalModel)
 
-`SmokeynetTemporalModel` (in `src/smokeynet_adapted/model.py`) implements
+`SmokeynetTemporalModel` (in `src/bbox_tube_temporal/model.py`) implements
 `pyrocore.TemporalModel`. It ships with a YOLO companion detector inside a
 single archive built by `scripts/package_model.py`.
 
@@ -110,7 +110,7 @@ The packager also calibrates `decision.threshold` on val for
 
 ```python
 from pathlib import Path
-from smokeynet_adapted.model import SmokeynetTemporalModel
+from bbox_tube_temporal.model import SmokeynetTemporalModel
 
 model = SmokeynetTemporalModel.from_package(
     Path("data/06_models/gru_convnext_finetune/model.zip")

@@ -93,12 +93,13 @@ def filter_and_interpolate_tubes(
     """Filter tubes by length / observation count, then optionally interpolate gaps.
 
     Args:
-        tubes: Candidate tubes (output of :func:`~smokeynet_adapted.tubes.build_tubes`).
+        tubes: Candidate tubes (output of
+            :func:`~bbox_tube_temporal.tubes.build_tubes`).
         min_tube_length: Keep tubes where
             ``end_frame - start_frame + 1 >= min_tube_length``.
         min_detected_entries: Keep tubes with at least this many non-gap entries.
         interpolate_gaps: If True, fill gap entries in surviving tubes via
-            :func:`~smokeynet_adapted.tubes.interpolate_gaps`.
+            :func:`~bbox_tube_temporal.tubes.interpolate_gaps`.
 
     Returns:
         Surviving tubes in original order.

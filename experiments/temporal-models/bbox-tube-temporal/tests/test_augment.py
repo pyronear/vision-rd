@@ -2,7 +2,7 @@
 
 import torch
 
-from smokeynet_adapted.augment import (
+from bbox_tube_temporal.augment import (
     PhotometricTubeTransform,
     SpatialTubeTransform,
     TemporalTubeTransform,

@@ -9,8 +9,8 @@ import torch
 from PIL import Image
 from pyrocore.types import Frame
 
-from smokeynet_adapted.model import SmokeynetTemporalModel
-from smokeynet_adapted.temporal_classifier import TemporalSmokeClassifier
+from bbox_tube_temporal.model import SmokeynetTemporalModel
+from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
 
 TEST_CONFIG: dict = {
     "infer": {"confidence_threshold": 0.01, "iou_nms": 0.2, "image_size": 1024},

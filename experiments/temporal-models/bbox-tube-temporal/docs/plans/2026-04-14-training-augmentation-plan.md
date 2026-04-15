@@ -12,11 +12,11 @@
 
 ## File Structure
 
-- **Create** `src/smokeynet_adapted/augment.py` — `SpatialTubeTransform`, `PhotometricTubeTransform`, `TemporalTubeTransform`, `NormalizeTransform`, `ComposeTransform`, `build_tube_augment`.
-- **Modify** `src/smokeynet_adapted/dataset.py` — add `transform: Callable | None = None` kwarg to `TubePatchDataset`; when provided, returns un-normalized `[0,1]` patches through the transform. When `None`, keeps legacy inline ImageNet normalize.
+- **Create** `src/bbox_tube_temporal/augment.py` — `SpatialTubeTransform`, `PhotometricTubeTransform`, `TemporalTubeTransform`, `NormalizeTransform`, `ComposeTransform`, `build_tube_augment`.
+- **Modify** `src/bbox_tube_temporal/dataset.py` — add `transform: Callable | None = None` kwarg to `TubePatchDataset`; when provided, returns un-normalized `[0,1]` patches through the transform. When `None`, keeps legacy inline ImageNet normalize.
 - **Modify** `scripts/train.py` — load `augment` section from `params.yaml`, build train/val transforms, pass to datasets.
 - **Modify** `params.yaml` — add top-level `augment:` section.
-- **Modify** `dvc.yaml` — add `augment` to `params:` of `train_mean_pool`, `train_gru`, and all `train_gru_*` variant stages; add `src/smokeynet_adapted/augment.py` to their `deps:`.
+- **Modify** `dvc.yaml` — add `augment` to `params:` of `train_mean_pool`, `train_gru`, and all `train_gru_*` variant stages; add `src/bbox_tube_temporal/augment.py` to their `deps:`.
 - **Create** `tests/test_augment.py` — unit tests for all transforms and the builder.
 - **Modify** `tests/test_dataset.py` — add tests for the `transform` kwarg (back-compat + pipeline wiring).
 - **Create** `scripts/visualize_augment.py` — smoke test / visual sanity check output.
@@ -28,7 +28,7 @@ All `Makefile` targets are invoked from `experiments/temporal-models/smokeynet-a
 ### Task 1: `TubePatchDataset` accepts an optional `transform` kwarg
 
 **Files:**
-- Modify: `src/smokeynet_adapted/dataset.py`
+- Modify: `src/bbox_tube_temporal/dataset.py`
 - Test: `tests/test_dataset.py`
 
 - [ ] **Step 1.1: Write the failing tests**
@@ -83,7 +83,7 @@ Expected: both FAIL with `TypeError: __init__() got an unexpected keyword argume
 
 - [ ] **Step 1.3: Update `TubePatchDataset` to accept `transform`**
 
-Replace the contents of `src/smokeynet_adapted/dataset.py` with:
+Replace the contents of `src/bbox_tube_temporal/dataset.py` with:
 
 ```python
 """PyTorch Dataset for the basic temporal smoke classifier.
@@ -192,7 +192,7 @@ Expected: all dataset tests PASS (the two new ones plus all pre-existing ones).
 - [ ] **Step 1.5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/dataset.py tests/test_dataset.py
+git add src/bbox_tube_temporal/dataset.py tests/test_dataset.py
 git commit -m "refactor(smokeynet-adapted): TubePatchDataset accepts optional transform
 
 When transform is None, keeps legacy inline ImageNet normalization.
@@ -205,7 +205,7 @@ transform; the transform owns the full preprocessing pipeline."
 ### Task 2: `SpatialTubeTransform` — per-tube-consistent flip / rotation / scale / translate
 
 **Files:**
-- Create: `src/smokeynet_adapted/augment.py`
+- Create: `src/bbox_tube_temporal/augment.py`
 - Test: `tests/test_augment.py`
 
 - [ ] **Step 2.1: Create `tests/test_augment.py` with the failing spatial tests**
@@ -217,7 +217,7 @@ Create `tests/test_augment.py`:
 
 import torch
 
-from smokeynet_adapted.augment import SpatialTubeTransform
+from bbox_tube_temporal.augment import SpatialTubeTransform
 
 
 def _make_item(t: int = 5, n_valid: int | None = None) -> dict:
@@ -324,11 +324,11 @@ def test_spatial_affine_applied_same_per_frame():
 uv run pytest tests/test_augment.py -v
 ```
 
-Expected: all FAIL with `ModuleNotFoundError: No module named 'smokeynet_adapted.augment'`.
+Expected: all FAIL with `ModuleNotFoundError: No module named 'bbox_tube_temporal.augment'`.
 
-- [ ] **Step 2.3: Create `src/smokeynet_adapted/augment.py` with `SpatialTubeTransform`**
+- [ ] **Step 2.3: Create `src/bbox_tube_temporal/augment.py` with `SpatialTubeTransform`**
 
-Create `src/smokeynet_adapted/augment.py`:
+Create `src/bbox_tube_temporal/augment.py`:
 
 ```python
 """Per-tube-consistent augmentation transforms for the temporal classifier.
@@ -406,7 +406,7 @@ Expected: all 4 spatial tests PASS.
 - [ ] **Step 2.5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/augment.py tests/test_augment.py
+git add src/bbox_tube_temporal/augment.py tests/test_augment.py
 git commit -m "feat(smokeynet-adapted): SpatialTubeTransform (flip/affine)
 
 Per-tube-consistent horizontal flip + rotation + scale + translate,
@@ -419,7 +419,7 @@ motion direction is preserved."
 ### Task 3: `PhotometricTubeTransform` — per-tube-consistent brightness / contrast / saturation
 
 **Files:**
-- Modify: `src/smokeynet_adapted/augment.py`
+- Modify: `src/bbox_tube_temporal/augment.py`
 - Test: `tests/test_augment.py`
 
 - [ ] **Step 3.1: Add failing photometric tests**
@@ -427,7 +427,7 @@ motion direction is preserved."
 Append to `tests/test_augment.py`:
 
 ```python
-from smokeynet_adapted.augment import PhotometricTubeTransform
+from bbox_tube_temporal.augment import PhotometricTubeTransform
 
 
 def test_photometric_identity_preserves_input():
@@ -488,7 +488,7 @@ Expected: FAIL with `ImportError: cannot import name 'PhotometricTubeTransform'`
 
 - [ ] **Step 3.3: Add `PhotometricTubeTransform` to `augment.py`**
 
-Append to `src/smokeynet_adapted/augment.py`:
+Append to `src/bbox_tube_temporal/augment.py`:
 
 ```python
 class PhotometricTubeTransform:
@@ -545,7 +545,7 @@ Expected: all 6 tests (4 spatial + 2 photometric) PASS.
 - [ ] **Step 3.5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/augment.py tests/test_augment.py
+git add src/bbox_tube_temporal/augment.py tests/test_augment.py
 git commit -m "feat(smokeynet-adapted): PhotometricTubeTransform
 
 Per-tube-consistent brightness/contrast/saturation with a single
@@ -558,7 +558,7 @@ normalization. Hue shift intentionally omitted (smoke ~= gray)."
 ### Task 4: `TemporalTubeTransform` — sub-sequence / stride / drop with re-compaction
 
 **Files:**
-- Modify: `src/smokeynet_adapted/augment.py`
+- Modify: `src/bbox_tube_temporal/augment.py`
 - Test: `tests/test_augment.py`
 
 - [ ] **Step 4.1: Add failing temporal tests**
@@ -566,7 +566,7 @@ normalization. Hue shift intentionally omitted (smoke ~= gray)."
 Append to `tests/test_augment.py`:
 
 ```python
-from smokeynet_adapted.augment import TemporalTubeTransform
+from bbox_tube_temporal.augment import TemporalTubeTransform
 
 
 def _make_padded_item(t: int, n_valid: int) -> dict:
@@ -712,7 +712,7 @@ Expected: all 6 new temporal tests FAIL with import error.
 
 - [ ] **Step 4.3: Add `TemporalTubeTransform` to `augment.py`**
 
-Append to `src/smokeynet_adapted/augment.py`:
+Append to `src/bbox_tube_temporal/augment.py`:
 
 ```python
 class TemporalTubeTransform:
@@ -795,7 +795,7 @@ Expected: all 12 tests PASS.
 - [ ] **Step 4.5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/augment.py tests/test_augment.py
+git add src/bbox_tube_temporal/augment.py tests/test_augment.py
 git commit -m "feat(smokeynet-adapted): TemporalTubeTransform
 
 Sub-sequence sampling (p=0.5) + random stride (p=0.25) + per-frame
@@ -809,7 +809,7 @@ invariant."
 ### Task 5: `NormalizeTransform`, `ComposeTransform`, `build_tube_augment`
 
 **Files:**
-- Modify: `src/smokeynet_adapted/augment.py`
+- Modify: `src/bbox_tube_temporal/augment.py`
 - Test: `tests/test_augment.py`
 
 - [ ] **Step 5.1: Add failing builder tests**
@@ -817,7 +817,7 @@ invariant."
 Append to `tests/test_augment.py`:
 
 ```python
-from smokeynet_adapted.augment import build_tube_augment
+from bbox_tube_temporal.augment import build_tube_augment
 
 _DEFAULT_CFG = {
     "enabled": True,
@@ -923,7 +923,7 @@ Expected: the 5 new builder tests FAIL with `ImportError: cannot import name 'bu
 
 - [ ] **Step 5.3: Add builder + composer + normalize**
 
-Append to `src/smokeynet_adapted/augment.py`:
+Append to `src/bbox_tube_temporal/augment.py`:
 
 ```python
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
@@ -1005,7 +1005,7 @@ Expected: all 17 tests PASS.
 - [ ] **Step 5.5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/augment.py tests/test_augment.py
+git add src/bbox_tube_temporal/augment.py tests/test_augment.py
 git commit -m "feat(smokeynet-adapted): build_tube_augment + Normalize + Compose
 
 Builder composes spatial -> photometric -> temporal -> normalize for
@@ -1064,15 +1064,15 @@ to:
 
 Do this for **all** `train_*` stages, including the seed variants and the backbone / finetune variants.
 
-Also add `src/smokeynet_adapted/augment.py` to the `deps:` list of every train stage (so DVC invalidates the stage when the augment module changes):
+Also add `src/bbox_tube_temporal/augment.py` to the `deps:` list of every train stage (so DVC invalidates the stage when the augment module changes):
 
 ```yaml
     deps:
       - scripts/train.py
-      - src/smokeynet_adapted/dataset.py
-      - src/smokeynet_adapted/augment.py   # <-- new
-      - src/smokeynet_adapted/temporal_classifier.py
-      - src/smokeynet_adapted/lit_temporal.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/augment.py   # <-- new
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
       - data/05_model_input/train
       - data/05_model_input/val
 ```
@@ -1121,10 +1121,10 @@ with:
 
 - [ ] **Step 7.2: Add the import for `build_tube_augment`**
 
-Near the other `smokeynet_adapted` imports add:
+Near the other `bbox_tube_temporal` imports add:
 
 ```python
-from smokeynet_adapted.augment import build_tube_augment
+from bbox_tube_temporal.augment import build_tube_augment
 ```
 
 - [ ] **Step 7.3: Build transforms and pass them to the datasets**
@@ -1212,8 +1212,8 @@ import torch
 import yaml
 from torchvision.utils import make_grid
 
-from smokeynet_adapted.augment import build_tube_augment
-from smokeynet_adapted.dataset import TubePatchDataset
+from bbox_tube_temporal.augment import build_tube_augment
+from bbox_tube_temporal.dataset import TubePatchDataset
 
 
 def _denormalize(x: torch.Tensor) -> torch.Tensor:

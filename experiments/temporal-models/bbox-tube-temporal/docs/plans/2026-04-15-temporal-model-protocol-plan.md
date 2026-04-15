@@ -17,11 +17,11 @@
 ## File structure (produced end-to-end)
 
 **New source files**
-- `src/smokeynet_adapted/package.py` — `ModelPackage`, `build_model_package`, `load_model_package`, format constants.
-- `src/smokeynet_adapted/inference.py` — pure helpers: `run_yolo_on_frames`, `filter_and_interpolate_tubes`, `crop_tube_patches`, `score_tubes`, `pick_winner_and_trigger`.
-- `src/smokeynet_adapted/calibration.py` — `calibrate_threshold(probs, labels, target_recall) -> float`.
-- `src/smokeynet_adapted/val_predict.py` — `collect_val_probabilities(classifier, tubes_dir, patches_dir, cfg) -> tuple[np.ndarray, np.ndarray]`.
-- `src/smokeynet_adapted/model.py` — `SmokeynetTemporalModel(TemporalModel)` with `from_package()`.
+- `src/bbox_tube_temporal/package.py` — `ModelPackage`, `build_model_package`, `load_model_package`, format constants.
+- `src/bbox_tube_temporal/inference.py` — pure helpers: `run_yolo_on_frames`, `filter_and_interpolate_tubes`, `crop_tube_patches`, `score_tubes`, `pick_winner_and_trigger`.
+- `src/bbox_tube_temporal/calibration.py` — `calibrate_threshold(probs, labels, target_recall) -> float`.
+- `src/bbox_tube_temporal/val_predict.py` — `collect_val_probabilities(classifier, tubes_dir, patches_dir, cfg) -> tuple[np.ndarray, np.ndarray]`.
+- `src/bbox_tube_temporal/model.py` — `SmokeynetTemporalModel(TemporalModel)` with `from_package()`.
 
 **New scripts**
 - `scripts/package_model.py` — CLI building the `.zip` archive.
@@ -82,12 +82,12 @@ git commit -m "chore(smokeynet-adapted): add ultralytics dependency"
 ## Task 2: Create package module skeleton and constants
 
 **Files:**
-- Create: `src/smokeynet_adapted/package.py`
+- Create: `src/bbox_tube_temporal/package.py`
 - Test: (added in Task 3)
 
 - [ ] **Step 1: Write the module with constants and dataclass only**
 
-Create `src/smokeynet_adapted/package.py`:
+Create `src/bbox_tube_temporal/package.py`:
 
 ```python
 """Model packaging: bundle YOLO weights, classifier checkpoint, and config.
@@ -143,13 +143,13 @@ class ModelPackage:
 
 - [ ] **Step 2: Verify it imports cleanly**
 
-Run: `uv run python -c "from smokeynet_adapted.package import ModelPackage, FORMAT_VERSION; print(FORMAT_VERSION)"`
+Run: `uv run python -c "from bbox_tube_temporal.package import ModelPackage, FORMAT_VERSION; print(FORMAT_VERSION)"`
 Expected: `1`
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add src/smokeynet_adapted/package.py
+git add src/bbox_tube_temporal/package.py
 git commit -m "feat(smokeynet-adapted): add package module skeleton"
 ```
 
@@ -158,7 +158,7 @@ git commit -m "feat(smokeynet-adapted): add package module skeleton"
 ## Task 3: `build_model_package` + round-trip tests
 
 **Files:**
-- Modify: `src/smokeynet_adapted/package.py`
+- Modify: `src/bbox_tube_temporal/package.py`
 - Create: `tests/test_package.py`
 
 - [ ] **Step 1: Write failing test for zip creation**
@@ -174,7 +174,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from smokeynet_adapted.package import (
+from bbox_tube_temporal.package import (
     CLASSIFIER_CKPT_FILENAME,
     CONFIG_FILENAME,
     FORMAT_VERSION,
@@ -340,7 +340,7 @@ Expected: ImportError for `build_model_package`.
 
 - [ ] **Step 3: Implement `build_model_package`**
 
-Append to `src/smokeynet_adapted/package.py`:
+Append to `src/bbox_tube_temporal/package.py`:
 
 ```python
 import zipfile
@@ -405,7 +405,7 @@ Expected: all tests pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/package.py tests/test_package.py
+git add src/bbox_tube_temporal/package.py tests/test_package.py
 git commit -m "feat(smokeynet-adapted): add build_model_package with tests"
 ```
 
@@ -414,7 +414,7 @@ git commit -m "feat(smokeynet-adapted): add build_model_package with tests"
 ## Task 4: `load_model_package` + tests
 
 **Files:**
-- Modify: `src/smokeynet_adapted/package.py`
+- Modify: `src/bbox_tube_temporal/package.py`
 - Modify: `tests/test_package.py`
 
 - [ ] **Step 1: Add failing load tests**
@@ -436,7 +436,7 @@ def real_tiny_classifier_ckpt(tmp_path: Path) -> Path:
     Uses backbone=resnet18 for speed in tests, regardless of the production
     variant.
     """
-    from smokeynet_adapted.temporal_classifier import TemporalSmokeClassifier
+    from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
 
     model = TemporalSmokeClassifier(
         backbone="resnet18",
@@ -479,7 +479,7 @@ def real_tiny_archive(
 
 
 class TestLoadRoundtrip:
-    @patch("smokeynet_adapted.package._load_yolo")
+    @patch("bbox_tube_temporal.package._load_yolo")
     def test_config_passthrough(
         self,
         mock_yolo: MagicMock,
@@ -487,31 +487,31 @@ class TestLoadRoundtrip:
         tmp_path: Path,
         real_tiny_config: dict,
     ) -> None:
-        from smokeynet_adapted.package import load_model_package
+        from bbox_tube_temporal.package import load_model_package
 
         mock_yolo.return_value = MagicMock(name="FakeYOLO")
         pkg = load_model_package(real_tiny_archive, extract_dir=tmp_path / "ext")
         assert pkg.config == real_tiny_config
 
-    @patch("smokeynet_adapted.package._load_yolo")
+    @patch("bbox_tube_temporal.package._load_yolo")
     def test_yolo_returned(
         self, mock_yolo: MagicMock, real_tiny_archive: Path, tmp_path: Path
     ) -> None:
-        from smokeynet_adapted.package import load_model_package
+        from bbox_tube_temporal.package import load_model_package
 
         sentinel = MagicMock(name="FakeYOLO")
         mock_yolo.return_value = sentinel
         pkg = load_model_package(real_tiny_archive, extract_dir=tmp_path / "ext")
         assert pkg.yolo_model is sentinel
 
-    @patch("smokeynet_adapted.package._load_yolo")
+    @patch("bbox_tube_temporal.package._load_yolo")
     def test_classifier_forward_runs(
         self,
         mock_yolo: MagicMock,
         real_tiny_archive: Path,
         tmp_path: Path,
     ) -> None:
-        from smokeynet_adapted.package import load_model_package
+        from bbox_tube_temporal.package import load_model_package
 
         mock_yolo.return_value = MagicMock(name="FakeYOLO")
         pkg = load_model_package(real_tiny_archive, extract_dir=tmp_path / "ext")
@@ -524,11 +524,11 @@ class TestLoadRoundtrip:
 
 
 class TestLoadRejectsBadArchive:
-    @patch("smokeynet_adapted.package._load_yolo")
+    @patch("bbox_tube_temporal.package._load_yolo")
     def test_missing_manifest(
         self, mock_yolo: MagicMock, tmp_path: Path
     ) -> None:
-        from smokeynet_adapted.package import load_model_package
+        from bbox_tube_temporal.package import load_model_package
 
         bad = tmp_path / "bad.zip"
         with zipfile.ZipFile(bad, "w") as zf:
@@ -536,11 +536,11 @@ class TestLoadRejectsBadArchive:
         with pytest.raises(KeyError):
             load_model_package(bad, extract_dir=tmp_path / "ext")
 
-    @patch("smokeynet_adapted.package._load_yolo")
+    @patch("bbox_tube_temporal.package._load_yolo")
     def test_unsupported_format_version(
         self, mock_yolo: MagicMock, tmp_path: Path
     ) -> None:
-        from smokeynet_adapted.package import load_model_package
+        from bbox_tube_temporal.package import load_model_package
 
         bad = tmp_path / "bad.zip"
         manifest = {
@@ -566,7 +566,7 @@ Expected: ImportError for `load_model_package`.
 
 - [ ] **Step 3: Implement `load_model_package`**
 
-Append to `src/smokeynet_adapted/package.py`:
+Append to `src/bbox_tube_temporal/package.py`:
 
 ```python
 import torch
@@ -666,7 +666,7 @@ Expected: all pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/package.py tests/test_package.py
+git add src/bbox_tube_temporal/package.py tests/test_package.py
 git commit -m "feat(smokeynet-adapted): add load_model_package with round-trip tests"
 ```
 
@@ -675,7 +675,7 @@ git commit -m "feat(smokeynet-adapted): add load_model_package with round-trip t
 ## Task 5: Inference helper — `run_yolo_on_frames`
 
 **Files:**
-- Create: `src/smokeynet_adapted/inference.py`
+- Create: `src/bbox_tube_temporal/inference.py`
 - Create: `tests/test_inference_units.py`
 
 - [ ] **Step 1: Write failing test**
@@ -693,8 +693,8 @@ import pytest
 import torch
 
 from pyrocore.types import Frame
-from smokeynet_adapted.inference import run_yolo_on_frames
-from smokeynet_adapted.types import Detection, FrameDetections
+from bbox_tube_temporal.inference import run_yolo_on_frames
+from bbox_tube_temporal.types import Detection, FrameDetections
 
 
 def _fake_yolo_result(xywhn: list[tuple[float, float, float, float, float]]) -> MagicMock:
@@ -777,7 +777,7 @@ Expected: ImportError.
 
 - [ ] **Step 3: Implement `run_yolo_on_frames`**
 
-Create `src/smokeynet_adapted/inference.py`:
+Create `src/bbox_tube_temporal/inference.py`:
 
 ```python
 """Pure-function helpers used by :class:`SmokeynetTemporalModel.predict`.
@@ -867,7 +867,7 @@ Expected: all pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/inference.py tests/test_inference_units.py
+git add src/bbox_tube_temporal/inference.py tests/test_inference_units.py
 git commit -m "feat(smokeynet-adapted): add run_yolo_on_frames helper"
 ```
 
@@ -876,7 +876,7 @@ git commit -m "feat(smokeynet-adapted): add run_yolo_on_frames helper"
 ## Task 6: Inference helper — `filter_and_interpolate_tubes`
 
 **Files:**
-- Modify: `src/smokeynet_adapted/inference.py`
+- Modify: `src/bbox_tube_temporal/inference.py`
 - Modify: `tests/test_inference_units.py`
 
 - [ ] **Step 1: Write failing test**
@@ -884,8 +884,8 @@ git commit -m "feat(smokeynet-adapted): add run_yolo_on_frames helper"
 Append to `tests/test_inference_units.py`:
 
 ```python
-from smokeynet_adapted.inference import filter_and_interpolate_tubes
-from smokeynet_adapted.types import Tube, TubeEntry
+from bbox_tube_temporal.inference import filter_and_interpolate_tubes
+from bbox_tube_temporal.types import Tube, TubeEntry
 
 
 def _tube(tid: int, entries: list[tuple[int, Detection | None]]) -> Tube:
@@ -964,7 +964,7 @@ Expected: ImportError.
 
 - [ ] **Step 3: Implement `filter_and_interpolate_tubes`**
 
-Append to `src/smokeynet_adapted/inference.py`:
+Append to `src/bbox_tube_temporal/inference.py`:
 
 ```python
 from .tubes import interpolate_gaps as _interpolate_gaps
@@ -981,11 +981,11 @@ def filter_and_interpolate_tubes(
     """Filter tubes by length / observation count, then optionally interpolate gaps.
 
     Args:
-        tubes: Candidate tubes (output of :func:`~smokeynet_adapted.tubes.build_tubes`).
+        tubes: Candidate tubes (output of :func:`~bbox_tube_temporal.tubes.build_tubes`).
         min_tube_length: Keep tubes with ``end_frame - start_frame + 1 >= min_tube_length``.
         min_detected_entries: Keep tubes with at least this many non-gap entries.
         interpolate_gaps: If True, fill gap entries in surviving tubes via
-            :func:`~smokeynet_adapted.tubes.interpolate_gaps`.
+            :func:`~bbox_tube_temporal.tubes.interpolate_gaps`.
 
     Returns:
         Surviving tubes in original order.
@@ -1012,7 +1012,7 @@ Expected: all pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/inference.py tests/test_inference_units.py
+git add src/bbox_tube_temporal/inference.py tests/test_inference_units.py
 git commit -m "feat(smokeynet-adapted): add filter_and_interpolate_tubes helper"
 ```
 
@@ -1021,7 +1021,7 @@ git commit -m "feat(smokeynet-adapted): add filter_and_interpolate_tubes helper"
 ## Task 7: Inference helper — `crop_tube_patches`
 
 **Files:**
-- Modify: `src/smokeynet_adapted/inference.py`
+- Modify: `src/bbox_tube_temporal/inference.py`
 - Modify: `tests/test_inference_units.py`
 
 - [ ] **Step 1: Write failing test**
@@ -1032,7 +1032,7 @@ Append to `tests/test_inference_units.py`:
 import numpy as np
 from PIL import Image
 
-from smokeynet_adapted.inference import crop_tube_patches
+from bbox_tube_temporal.inference import crop_tube_patches
 
 
 @pytest.fixture()
@@ -1120,7 +1120,7 @@ Expected: ImportError.
 
 - [ ] **Step 3: Implement `crop_tube_patches`**
 
-Append to `src/smokeynet_adapted/inference.py`:
+Append to `src/bbox_tube_temporal/inference.py`:
 
 ```python
 import numpy as np
@@ -1182,7 +1182,7 @@ Expected: all pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/inference.py tests/test_inference_units.py
+git add src/bbox_tube_temporal/inference.py tests/test_inference_units.py
 git commit -m "feat(smokeynet-adapted): add crop_tube_patches helper"
 ```
 
@@ -1191,7 +1191,7 @@ git commit -m "feat(smokeynet-adapted): add crop_tube_patches helper"
 ## Task 8: Inference helper — `score_tubes`
 
 **Files:**
-- Modify: `src/smokeynet_adapted/inference.py`
+- Modify: `src/bbox_tube_temporal/inference.py`
 - Modify: `tests/test_inference_units.py`
 
 - [ ] **Step 1: Write failing test**
@@ -1199,7 +1199,7 @@ git commit -m "feat(smokeynet-adapted): add crop_tube_patches helper"
 Append to `tests/test_inference_units.py`:
 
 ```python
-from smokeynet_adapted.inference import score_tubes
+from bbox_tube_temporal.inference import score_tubes
 
 
 class TestScoreTubes:
@@ -1231,7 +1231,7 @@ Expected: ImportError.
 
 - [ ] **Step 3: Implement `score_tubes`**
 
-Append to `src/smokeynet_adapted/inference.py`:
+Append to `src/bbox_tube_temporal/inference.py`:
 
 ```python
 def score_tubes(
@@ -1266,7 +1266,7 @@ Expected: all pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/inference.py tests/test_inference_units.py
+git add src/bbox_tube_temporal/inference.py tests/test_inference_units.py
 git commit -m "feat(smokeynet-adapted): add score_tubes helper"
 ```
 
@@ -1275,7 +1275,7 @@ git commit -m "feat(smokeynet-adapted): add score_tubes helper"
 ## Task 9: Inference helper — `pick_winner_and_trigger`
 
 **Files:**
-- Modify: `src/smokeynet_adapted/inference.py`
+- Modify: `src/bbox_tube_temporal/inference.py`
 - Modify: `tests/test_inference_units.py`
 
 - [ ] **Step 1: Write failing test**
@@ -1283,7 +1283,7 @@ git commit -m "feat(smokeynet-adapted): add score_tubes helper"
 Append to `tests/test_inference_units.py`:
 
 ```python
-from smokeynet_adapted.inference import pick_winner_and_trigger
+from bbox_tube_temporal.inference import pick_winner_and_trigger
 
 
 class TestPickWinnerAndTrigger:
@@ -1321,7 +1321,7 @@ Expected: ImportError.
 
 - [ ] **Step 3: Implement `pick_winner_and_trigger`**
 
-Append to `src/smokeynet_adapted/inference.py`:
+Append to `src/bbox_tube_temporal/inference.py`:
 
 ```python
 def pick_winner_and_trigger(
@@ -1358,7 +1358,7 @@ Expected: all pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/inference.py tests/test_inference_units.py
+git add src/bbox_tube_temporal/inference.py tests/test_inference_units.py
 git commit -m "feat(smokeynet-adapted): add pick_winner_and_trigger helper"
 ```
 
@@ -1367,11 +1367,11 @@ git commit -m "feat(smokeynet-adapted): add pick_winner_and_trigger helper"
 ## Task 10: `SmokeynetTemporalModel` skeleton + `from_package`
 
 **Files:**
-- Create: `src/smokeynet_adapted/model.py`
+- Create: `src/bbox_tube_temporal/model.py`
 
 - [ ] **Step 1: Create the class with constructor + factory**
 
-Create `src/smokeynet_adapted/model.py`:
+Create `src/bbox_tube_temporal/model.py`:
 
 ```python
 """TemporalModel implementation for smokeynet-adapted.
@@ -1431,13 +1431,13 @@ class SmokeynetTemporalModel(TemporalModel):
 
 - [ ] **Step 2: Verify it imports**
 
-Run: `uv run python -c "from smokeynet_adapted.model import SmokeynetTemporalModel; print(SmokeynetTemporalModel)"`
+Run: `uv run python -c "from bbox_tube_temporal.model import SmokeynetTemporalModel; print(SmokeynetTemporalModel)"`
 Expected: prints the class.
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add src/smokeynet_adapted/model.py
+git add src/bbox_tube_temporal/model.py
 git commit -m "feat(smokeynet-adapted): add SmokeynetTemporalModel skeleton"
 ```
 
@@ -1446,7 +1446,7 @@ git commit -m "feat(smokeynet-adapted): add SmokeynetTemporalModel skeleton"
 ## Task 11: Implement `SmokeynetTemporalModel.predict` + edge-case tests
 
 **Files:**
-- Modify: `src/smokeynet_adapted/model.py`
+- Modify: `src/bbox_tube_temporal/model.py`
 - Create: `tests/test_model_edge_cases.py`
 
 - [ ] **Step 1: Write failing edge-case tests**
@@ -1466,7 +1466,7 @@ import torch
 from PIL import Image
 
 from pyrocore.types import Frame
-from smokeynet_adapted.model import SmokeynetTemporalModel
+from bbox_tube_temporal.model import SmokeynetTemporalModel
 
 TEST_CONFIG: dict = {
     "infer": {"confidence_threshold": 0.01, "iou_nms": 0.2, "image_size": 1024},
@@ -1534,7 +1534,7 @@ def _fake_yolo_factory(per_frame_xywhn: list[list[tuple[float, float, float, flo
 
 @pytest.fixture()
 def tiny_classifier():
-    from smokeynet_adapted.temporal_classifier import TemporalSmokeClassifier
+    from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
 
     model = TemporalSmokeClassifier(
         backbone="resnet18",
@@ -1624,7 +1624,7 @@ Expected: fails with `NotImplementedError`.
 
 - [ ] **Step 3: Implement `predict`**
 
-Replace the `raise NotImplementedError` line in `src/smokeynet_adapted/model.py` with:
+Replace the `raise NotImplementedError` line in `src/bbox_tube_temporal/model.py` with:
 
 ```python
     def predict(self, frames: list[Frame]) -> TemporalModelOutput:
@@ -1759,7 +1759,7 @@ Expected: all pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/model.py tests/test_model_edge_cases.py
+git add src/bbox_tube_temporal/model.py tests/test_model_edge_cases.py
 git commit -m "feat(smokeynet-adapted): implement SmokeynetTemporalModel.predict with edge-case tests"
 ```
 
@@ -1838,15 +1838,15 @@ from PIL import Image
 from torchvision.transforms.functional import to_tensor
 
 from pyrocore.types import Frame
-from smokeynet_adapted.data import load_frame_detections
-from smokeynet_adapted.model import SmokeynetTemporalModel
-from smokeynet_adapted.model_input import (
+from bbox_tube_temporal.data import load_frame_detections
+from bbox_tube_temporal.model import SmokeynetTemporalModel
+from bbox_tube_temporal.model_input import (
     crop_and_resize,
     expand_bbox,
     norm_bbox_to_pixel_square,
 )
-from smokeynet_adapted.temporal_classifier import TemporalSmokeClassifier
-from smokeynet_adapted.tubes import (
+from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
+from bbox_tube_temporal.tubes import (
     build_tubes,
     interpolate_gaps,
     select_longest_tube,
@@ -2004,7 +2004,7 @@ git commit -m "test(smokeynet-adapted): add train/inference parity test"
 ## Task 13: Threshold calibration helper
 
 **Files:**
-- Create: `src/smokeynet_adapted/calibration.py`
+- Create: `src/bbox_tube_temporal/calibration.py`
 - Create: `tests/test_calibration.py`
 
 - [ ] **Step 1: Write failing test**
@@ -2017,7 +2017,7 @@ Create `tests/test_calibration.py`:
 import numpy as np
 import pytest
 
-from smokeynet_adapted.calibration import calibrate_threshold
+from bbox_tube_temporal.calibration import calibrate_threshold
 
 
 class TestCalibrateThreshold:
@@ -2056,7 +2056,7 @@ Expected: ImportError.
 
 - [ ] **Step 3: Implement `calibrate_threshold`**
 
-Create `src/smokeynet_adapted/calibration.py`:
+Create `src/bbox_tube_temporal/calibration.py`:
 
 ```python
 """Decision threshold calibration from val predictions.
@@ -2117,7 +2117,7 @@ Expected: all pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/calibration.py tests/test_calibration.py
+git add src/bbox_tube_temporal/calibration.py tests/test_calibration.py
 git commit -m "feat(smokeynet-adapted): add threshold calibration helper"
 ```
 
@@ -2126,13 +2126,13 @@ git commit -m "feat(smokeynet-adapted): add threshold calibration helper"
 ## Task 14: Val-prediction collector
 
 **Files:**
-- Create: `src/smokeynet_adapted/val_predict.py`
+- Create: `src/bbox_tube_temporal/val_predict.py`
 
 This helper runs the classifier over the val `05_model_input/<split>/` directory (patch PNGs) and returns `(probs, labels)`. No new tests — it's a thin composition of existing primitives (`TubePatchDataset`, `LitTemporalClassifier`) and will be exercised end-to-end by Task 15's integration check.
 
 - [ ] **Step 1: Create the helper**
 
-Create `src/smokeynet_adapted/val_predict.py`:
+Create `src/bbox_tube_temporal/val_predict.py`:
 
 ```python
 """Run a trained classifier over val patches and collect per-sample probabilities.
@@ -2197,13 +2197,13 @@ def collect_val_probabilities(
 
 - [ ] **Step 2: Import smoke check**
 
-Run: `uv run python -c "from smokeynet_adapted.val_predict import collect_val_probabilities; print(collect_val_probabilities)"`
+Run: `uv run python -c "from bbox_tube_temporal.val_predict import collect_val_probabilities; print(collect_val_probabilities)"`
 Expected: prints the function object.
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add src/smokeynet_adapted/val_predict.py
+git add src/bbox_tube_temporal/val_predict.py
 git commit -m "feat(smokeynet-adapted): add val_predict helper for threshold calibration"
 ```
 
@@ -2232,10 +2232,10 @@ from pathlib import Path
 
 import yaml
 
-from smokeynet_adapted.calibration import calibrate_threshold
-from smokeynet_adapted.package import build_model_package
-from smokeynet_adapted.temporal_classifier import TemporalSmokeClassifier
-from smokeynet_adapted.val_predict import collect_val_probabilities
+from bbox_tube_temporal.calibration import calibrate_threshold
+from bbox_tube_temporal.package import build_model_package
+from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
+from bbox_tube_temporal.val_predict import collect_val_probabilities
 
 
 def _load_classifier_from_ckpt(
@@ -2371,7 +2371,7 @@ if __name__ == "__main__":
 
 - [ ] **Step 2: `ruff check` pass**
 
-Run: `uv run ruff check scripts/package_model.py src/smokeynet_adapted/`
+Run: `uv run ruff check scripts/package_model.py src/bbox_tube_temporal/`
 Expected: no issues (fix any ruff complaints inline before continuing).
 
 - [ ] **Step 3: Commit**
@@ -2445,9 +2445,9 @@ Add to `dvc.yaml` under `stages:`:
       - data/01_raw/models/best.pt
       - data/05_model_input/val
       - scripts/package_model.py
-      - src/smokeynet_adapted/package.py
-      - src/smokeynet_adapted/calibration.py
-      - src/smokeynet_adapted/val_predict.py
+      - src/bbox_tube_temporal/package.py
+      - src/bbox_tube_temporal/calibration.py
+      - src/bbox_tube_temporal/val_predict.py
     params:
       - package
       - tubes
@@ -2490,7 +2490,7 @@ Run:
 ```bash
 uv run python - <<'PY'
 from pathlib import Path
-from smokeynet_adapted.model import SmokeynetTemporalModel
+from bbox_tube_temporal.model import SmokeynetTemporalModel
 
 model = SmokeynetTemporalModel.from_package(
     Path("data/06_models/gru_convnext_finetune/model.zip")
@@ -2509,8 +2509,8 @@ Pick one sequence path and run predict end-to-end:
 ```bash
 uv run python - <<'PY'
 from pathlib import Path
-from smokeynet_adapted.model import SmokeynetTemporalModel
-from smokeynet_adapted.data import get_sorted_frames, list_sequences
+from bbox_tube_temporal.model import SmokeynetTemporalModel
+from bbox_tube_temporal.data import get_sorted_frames, list_sequences
 
 model = SmokeynetTemporalModel.from_package(
     Path("data/06_models/gru_convnext_finetune/model.zip")
@@ -2554,7 +2554,7 @@ Append to `README.md`:
 ```markdown
 ## Deployment (TemporalModel)
 
-`SmokeynetTemporalModel` (in `src/smokeynet_adapted/model.py`) implements
+`SmokeynetTemporalModel` (in `src/bbox_tube_temporal/model.py`) implements
 `pyrocore.TemporalModel`. It ships with a YOLO companion detector inside a
 single archive built by `scripts/package_model.py`.
 
@@ -2576,7 +2576,7 @@ The packager also calibrates `decision.threshold` on val for
 
 ```python
 from pathlib import Path
-from smokeynet_adapted.model import SmokeynetTemporalModel
+from bbox_tube_temporal.model import SmokeynetTemporalModel
 
 model = SmokeynetTemporalModel.from_package(
     Path("data/06_models/gru_convnext_finetune/model.zip")

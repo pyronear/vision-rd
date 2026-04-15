@@ -27,13 +27,13 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 
-from smokeynet_adapted.data import (
+from bbox_tube_temporal.data import (
     find_sequence_dir,
     get_sorted_frames,
     load_tube_record,
 )
-from smokeynet_adapted.tube_viz import plot_tube_summary
-from smokeynet_adapted.tubes import tube_from_record
+from bbox_tube_temporal.tube_viz import plot_tube_summary
+from bbox_tube_temporal.tubes import tube_from_record
 
 
 def _render_one(

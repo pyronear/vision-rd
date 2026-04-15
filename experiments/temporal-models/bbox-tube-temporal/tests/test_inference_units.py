@@ -10,14 +10,14 @@ import torch
 from PIL import Image
 from pyrocore.types import Frame
 
-from smokeynet_adapted.inference import (
+from bbox_tube_temporal.inference import (
     crop_tube_patches,
     filter_and_interpolate_tubes,
     pick_winner_and_trigger,
     run_yolo_on_frames,
     score_tubes,
 )
-from smokeynet_adapted.types import Detection, FrameDetections, Tube, TubeEntry
+from bbox_tube_temporal.types import Detection, FrameDetections, Tube, TubeEntry
 
 
 def _fake_yolo_result(

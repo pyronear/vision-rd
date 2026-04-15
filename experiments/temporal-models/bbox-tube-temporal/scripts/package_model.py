@@ -12,10 +12,10 @@ from pathlib import Path
 import torch
 import yaml
 
-from smokeynet_adapted.calibration import calibrate_threshold
-from smokeynet_adapted.package import build_model_package
-from smokeynet_adapted.temporal_classifier import TemporalSmokeClassifier
-from smokeynet_adapted.val_predict import collect_val_probabilities
+from bbox_tube_temporal.calibration import calibrate_threshold
+from bbox_tube_temporal.package import build_model_package
+from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
+from bbox_tube_temporal.val_predict import collect_val_probabilities
 
 
 def _load_classifier_from_ckpt(

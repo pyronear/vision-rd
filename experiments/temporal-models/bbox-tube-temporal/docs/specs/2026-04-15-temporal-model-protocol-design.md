@@ -104,7 +104,7 @@ Batching summary:
 
 ## Components
 
-New files under `src/smokeynet_adapted/`:
+New files under `src/bbox_tube_temporal/`:
 
 - `model.py` - `SmokeynetTemporalModel(TemporalModel)` with
   `from_package()` factory and `predict()` method.

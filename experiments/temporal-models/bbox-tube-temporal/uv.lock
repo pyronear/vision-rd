@@ -382,6 +382,65 @@ wheels = [
 ]
 
 [[package]]
+name = "bbox-tube-temporal"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "lightning" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "opencv-python-headless" },
+    { name = "pandas" },
+    { name = "pyrocore" },
+    { name = "pyyaml" },
+    { name = "scikit-learn" },
+    { name = "tensorboard" },
+    { name = "timm" },
+    { name = "torch" },
+    { name = "torchvision" },
+    { name = "tqdm" },
+    { name = "ultralytics" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "dvc", extra = ["s3"] },
+    { name = "jupyterlab" },
+    { name = "nbqa" },
+    { name = "nbstripout" },
+    { name = "pytest" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "lightning", specifier = ">=2.2" },
+    { name = "matplotlib", specifier = ">=3.8" },
+    { name = "numpy", specifier = ">=1.26,<2" },
+    { name = "opencv-python-headless", specifier = ">=4.8" },
+    { name = "pandas", specifier = ">=2.0" },
+    { name = "pyrocore", directory = "../../../lib/pyrocore" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "scikit-learn", specifier = ">=1.4" },
+    { name = "tensorboard", specifier = ">=2.16" },
+    { name = "timm", specifier = ">=1.0" },
+    { name = "torch", specifier = ">=2.2" },
+    { name = "torchvision", specifier = ">=0.17" },
+    { name = "tqdm", specifier = ">=4.66" },
+    { name = "ultralytics", specifier = ">=8.3" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "dvc", extras = ["s3"], specifier = ">=3.56" },
+    { name = "jupyterlab", specifier = ">=4.0" },
+    { name = "nbqa", specifier = ">=1.9" },
+    { name = "nbstripout", specifier = ">=0.8" },
+    { name = "pytest", specifier = ">=8.0" },
+    { name = "ruff", specifier = ">=0.9" },
+]
+
+[[package]]
 name = "beautifulsoup4"
 version = "4.14.3"
 source = { registry = "https://pypi.org/simple" }
@@ -4314,65 +4373,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/1f/ea/49c993d6dfdd7338c9b1000a0f36817ed7ec84577ae2e52f890d1a4ff909/smmap-5.0.3.tar.gz", hash = "sha256:4d9debb8b99007ae47165abc08670bd74cb74b5227dda7f643eccc4e9eb5642c", size = 22506 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c1/d4/59e74daffcb57a07668852eeeb6035af9f32cbfd7a1d2511f17d2fe6a738/smmap-5.0.3-py3-none-any.whl", hash = "sha256:c106e05d5a61449cf6ba9a1e650227ecfb141590d2a98412103ff35d89fc7b2f", size = 24390 },
-]
-
-[[package]]
-name = "smokeynet-adapted"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "lightning" },
-    { name = "matplotlib" },
-    { name = "numpy" },
-    { name = "opencv-python-headless" },
-    { name = "pandas" },
-    { name = "pyrocore" },
-    { name = "pyyaml" },
-    { name = "scikit-learn" },
-    { name = "tensorboard" },
-    { name = "timm" },
-    { name = "torch" },
-    { name = "torchvision" },
-    { name = "tqdm" },
-    { name = "ultralytics" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "dvc", extra = ["s3"] },
-    { name = "jupyterlab" },
-    { name = "nbqa" },
-    { name = "nbstripout" },
-    { name = "pytest" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "lightning", specifier = ">=2.2" },
-    { name = "matplotlib", specifier = ">=3.8" },
-    { name = "numpy", specifier = ">=1.26,<2" },
-    { name = "opencv-python-headless", specifier = ">=4.8" },
-    { name = "pandas", specifier = ">=2.0" },
-    { name = "pyrocore", directory = "../../../lib/pyrocore" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "scikit-learn", specifier = ">=1.4" },
-    { name = "tensorboard", specifier = ">=2.16" },
-    { name = "timm", specifier = ">=1.0" },
-    { name = "torch", specifier = ">=2.2" },
-    { name = "torchvision", specifier = ">=0.17" },
-    { name = "tqdm", specifier = ">=4.66" },
-    { name = "ultralytics", specifier = ">=8.3" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "dvc", extras = ["s3"], specifier = ">=3.56" },
-    { name = "jupyterlab", specifier = ">=4.0" },
-    { name = "nbqa", specifier = ">=1.9" },
-    { name = "nbstripout", specifier = ">=0.8" },
-    { name = "pytest", specifier = ">=8.0" },
-    { name = "ruff", specifier = ">=0.9" },
 ]
 
 [[package]]

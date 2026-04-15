@@ -141,7 +141,7 @@ can loosen thresholds after seeing the dropout rate.
 
 ## Code changes
 
-### `src/smokeynet_adapted/types.py`
+### `src/bbox_tube_temporal/types.py`
 
 Extend `TubeEntry`:
 
@@ -156,7 +156,7 @@ class TubeEntry:
 Pre-interpolation gaps have `detection=None, is_gap=True`; post-interpolation
 gaps have a lerped `Detection` and `is_gap=True`.
 
-### `src/smokeynet_adapted/data.py`
+### `src/bbox_tube_temporal/data.py`
 
 Add:
 
@@ -166,7 +166,7 @@ Add:
 - `load_frame_detections(sequence_dir) -> list[FrameDetections]` — loops
   over all frames in the sequence, builds ordered `FrameDetections`.
 
-### `src/smokeynet_adapted/tubes.py`
+### `src/bbox_tube_temporal/tubes.py`
 
 Add:
 
@@ -220,9 +220,9 @@ build_tubes:
       --output-dir data/03_primary/tubes/${item}
     deps:
       - scripts/build_tubes.py
-      - src/smokeynet_adapted/tubes.py
-      - src/smokeynet_adapted/data.py
-      - src/smokeynet_adapted/types.py
+      - src/bbox_tube_temporal/tubes.py
+      - src/bbox_tube_temporal/data.py
+      - src/bbox_tube_temporal/types.py
       - data/01_raw/datasets/${item}
     params:
       - tubes

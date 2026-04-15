@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from smokeynet_adapted.model_input import (
+from bbox_tube_temporal.model_input import (
     crop_and_resize,
     expand_bbox,
     norm_bbox_to_pixel_square,

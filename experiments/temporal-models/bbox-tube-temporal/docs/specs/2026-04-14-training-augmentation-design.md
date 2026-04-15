@@ -11,7 +11,7 @@
 
 ## Context
 
-The temporal smoke classifier (`TemporalSmokeClassifier` with frozen ResNet18 backbone + `mean_pool` or `gru` head, implemented in `src/smokeynet_adapted/temporal_classifier.py` and wrapped by `LitTemporalClassifier` in `lit_temporal.py`) currently trains on `TubePatchDataset` without any data augmentation. Motivators:
+The temporal smoke classifier (`TemporalSmokeClassifier` with frozen ResNet18 backbone + `mean_pool` or `gru` head, implemented in `src/bbox_tube_temporal/temporal_classifier.py` and wrapped by `LitTemporalClassifier` in `lit_temporal.py`) currently trains on `TubePatchDataset` without any data augmentation. Motivators:
 
 1. **Small dataset.** 2841 train tubes, 284 val tubes — augmentation as a data multiplier is a primary goal across all variants.
 2. **Identified failure modes from the FP/FN bucket analysis:**
@@ -57,7 +57,7 @@ Observed on `gru_convnext` (14 epochs logged): train loss collapses by epoch 4 t
 
 ## Architecture
 
-A new module `src/smokeynet_adapted/augment.py` exposing three composable transforms and a builder:
+A new module `src/bbox_tube_temporal/augment.py` exposing three composable transforms and a builder:
 
 ```python
 class SpatialTubeTransform:
@@ -92,7 +92,7 @@ def build_tube_augment(config: dict, train: bool) -> Callable[[dict], dict]:
 - Constructor gains `transform: Callable[[dict], dict] | None = None`.
 - ImageNet normalization **moves out** of `__getitem__` into the transform. Raw loading produces `[0, 1]` tensors.
 - `__getitem__` applies `self.transform(item)` if provided, else returns raw (preserving back-compat for any caller that builds a dataset without augmentation).
-- `scripts/train.py` (the DVC stage entrypoint — not `src/smokeynet_adapted/data.py`, which is I/O utilities) wires `transform=build_tube_augment(augment_cfg, train=True)` for the train `TubePatchDataset` and `transform=build_tube_augment(augment_cfg, train=False)` for val. Val transform does normalization only.
+- `scripts/train.py` (the DVC stage entrypoint — not `src/bbox_tube_temporal/data.py`, which is I/O utilities) wires `transform=build_tube_augment(augment_cfg, train=True)` for the train `TubePatchDataset` and `transform=build_tube_augment(augment_cfg, train=False)` for val. Val transform does normalization only.
 - Randomness: a `torch.Generator` seeded per worker via `worker_init_fn` in the DataLoader — ensures reproducibility at `num_workers > 0` and that workers don't all produce identical augmentations.
 
 ### Why `__getitem__` and not `collate_fn`
@@ -258,12 +258,12 @@ All changes are additive / behind `augment.enabled`. Default can ship as `enable
 
 ## Critical files
 
-- `src/smokeynet_adapted/augment.py` — **new** (the three transforms + `build_tube_augment`).
-- `src/smokeynet_adapted/dataset.py` — add `transform` kwarg to `TubePatchDataset`, move ImageNet normalization out of `__getitem__`.
+- `src/bbox_tube_temporal/augment.py` — **new** (the three transforms + `build_tube_augment`).
+- `src/bbox_tube_temporal/dataset.py` — add `transform` kwarg to `TubePatchDataset`, move ImageNet normalization out of `__getitem__`.
 - `scripts/train.py` — load top-level `augment` section alongside the per-arch section, build train/val transforms, pass them into `TubePatchDataset`, wire `worker_init_fn` for per-worker seeding.
 - `scripts/visualize_augment.py` — **new** (sanity-check image grids).
 - `params.yaml` — add top-level `augment:` block.
-- `dvc.yaml` — add `augment` to the `params:` list of `train_mean_pool` and `train_gru`; add `src/smokeynet_adapted/augment.py` to `deps:`.
+- `dvc.yaml` — add `augment` to the `params:` list of `train_mean_pool` and `train_gru`; add `src/bbox_tube_temporal/augment.py` to `deps:`.
 - `tests/test_augment.py` — **new**.
 - `tests/test_dataset.py` — add tests for the transform wiring and the normalization refactor.
 

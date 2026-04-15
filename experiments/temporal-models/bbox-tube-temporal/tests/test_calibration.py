@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from smokeynet_adapted.calibration import calibrate_threshold
+from bbox_tube_temporal.calibration import calibrate_threshold
 
 
 class TestCalibrateThreshold:

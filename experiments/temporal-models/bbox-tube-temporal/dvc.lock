@@ -61,15 +61,15 @@ stages:
       hash: md5
       md5: 8b8262362c680431f45c8280a775d4d7
       size: 5695
-    - path: src/smokeynet_adapted/data.py
+    - path: src/bbox_tube_temporal/data.py
       hash: md5
       md5: b907e5a0baedb93775446678c2cce034
       size: 5078
-    - path: src/smokeynet_adapted/tubes.py
+    - path: src/bbox_tube_temporal/tubes.py
       hash: md5
       md5: 2f6f8e5e9ff7342a45ddaec8d0bedc1f
       size: 11706
-    - path: src/smokeynet_adapted/types.py
+    - path: src/bbox_tube_temporal/types.py
       hash: md5
       md5: 5b39fdd49419f3591a606ff8d3718ec9
       size: 1701
@@ -102,15 +102,15 @@ stages:
       hash: md5
       md5: 8b8262362c680431f45c8280a775d4d7
       size: 5695
-    - path: src/smokeynet_adapted/data.py
+    - path: src/bbox_tube_temporal/data.py
       hash: md5
       md5: b907e5a0baedb93775446678c2cce034
       size: 5078
-    - path: src/smokeynet_adapted/tubes.py
+    - path: src/bbox_tube_temporal/tubes.py
       hash: md5
       md5: 2f6f8e5e9ff7342a45ddaec8d0bedc1f
       size: 11706
-    - path: src/smokeynet_adapted/types.py
+    - path: src/bbox_tube_temporal/types.py
       hash: md5
       md5: 5b39fdd49419f3591a606ff8d3718ec9
       size: 1701
@@ -147,15 +147,15 @@ stages:
       hash: md5
       md5: bc6cc957c98f91d17e2dbe03125f530b
       size: 4294
-    - path: src/smokeynet_adapted/data.py
+    - path: src/bbox_tube_temporal/data.py
       hash: md5
       md5: b907e5a0baedb93775446678c2cce034
       size: 5078
-    - path: src/smokeynet_adapted/tube_viz.py
+    - path: src/bbox_tube_temporal/tube_viz.py
       hash: md5
       md5: 5731f01efc62af29601cfc83212f1594
       size: 19898
-    - path: src/smokeynet_adapted/tubes.py
+    - path: src/bbox_tube_temporal/tubes.py
       hash: md5
       md5: 2f6f8e5e9ff7342a45ddaec8d0bedc1f
       size: 11706
@@ -184,15 +184,15 @@ stages:
       hash: md5
       md5: bc6cc957c98f91d17e2dbe03125f530b
       size: 4294
-    - path: src/smokeynet_adapted/data.py
+    - path: src/bbox_tube_temporal/data.py
       hash: md5
       md5: b907e5a0baedb93775446678c2cce034
       size: 5078
-    - path: src/smokeynet_adapted/tube_viz.py
+    - path: src/bbox_tube_temporal/tube_viz.py
       hash: md5
       md5: 5731f01efc62af29601cfc83212f1594
       size: 19898
-    - path: src/smokeynet_adapted/tubes.py
+    - path: src/bbox_tube_temporal/tubes.py
       hash: md5
       md5: 2f6f8e5e9ff7342a45ddaec8d0bedc1f
       size: 11706
@@ -221,7 +221,7 @@ stages:
       hash: md5
       md5: 2f1f24ff73973afad767806e84aafe15
       size: 3710
-    - path: src/smokeynet_adapted/model_input.py
+    - path: src/bbox_tube_temporal/model_input.py
       hash: md5
       md5: fa9e8bd01b4a5228feeeb8d689405f88
       size: 3612
@@ -256,7 +256,7 @@ stages:
       hash: md5
       md5: 2f1f24ff73973afad767806e84aafe15
       size: 3710
-    - path: src/smokeynet_adapted/model_input.py
+    - path: src/bbox_tube_temporal/model_input.py
       hash: md5
       md5: fa9e8bd01b4a5228feeeb8d689405f88
       size: 3612
@@ -291,23 +291,23 @@ stages:
       hash: md5
       md5: 29abc7433be9df4510f8588252987293
       size: 5401
-    - path: src/smokeynet_adapted/augment.py
+    - path: src/bbox_tube_temporal/augment.py
       hash: md5
       md5: f52a42f92caa2fac859bf3a81a18971d
       size: 9489
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
-    - path: src/smokeynet_adapted/training_plots.py
+    - path: src/bbox_tube_temporal/training_plots.py
       hash: md5
       md5: 48015bd154587ba3ba493ed5c337e27a
       size: 3290
@@ -383,23 +383,23 @@ stages:
       hash: md5
       md5: 29abc7433be9df4510f8588252987293
       size: 5401
-    - path: src/smokeynet_adapted/augment.py
+    - path: src/bbox_tube_temporal/augment.py
       hash: md5
       md5: f52a42f92caa2fac859bf3a81a18971d
       size: 9489
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
-    - path: src/smokeynet_adapted/training_plots.py
+    - path: src/bbox_tube_temporal/training_plots.py
       hash: md5
       md5: 48015bd154587ba3ba493ed5c337e27a
       size: 3290
@@ -483,15 +483,15 @@ stages:
       hash: md5
       md5: 4172cdb32d15ab90041a2f9b6fd9a29e
       size: 8483
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
@@ -564,15 +564,15 @@ stages:
       hash: md5
       md5: 4172cdb32d15ab90041a2f9b6fd9a29e
       size: 8483
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
@@ -645,15 +645,15 @@ stages:
       hash: md5
       md5: 4172cdb32d15ab90041a2f9b6fd9a29e
       size: 8483
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
@@ -727,15 +727,15 @@ stages:
       hash: md5
       md5: 4172cdb32d15ab90041a2f9b6fd9a29e
       size: 8483
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
@@ -805,23 +805,23 @@ stages:
       hash: md5
       md5: 29abc7433be9df4510f8588252987293
       size: 5401
-    - path: src/smokeynet_adapted/augment.py
+    - path: src/bbox_tube_temporal/augment.py
       hash: md5
       md5: f52a42f92caa2fac859bf3a81a18971d
       size: 9489
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
-    - path: src/smokeynet_adapted/training_plots.py
+    - path: src/bbox_tube_temporal/training_plots.py
       hash: md5
       md5: 48015bd154587ba3ba493ed5c337e27a
       size: 3290
@@ -900,23 +900,23 @@ stages:
       hash: md5
       md5: 29abc7433be9df4510f8588252987293
       size: 5401
-    - path: src/smokeynet_adapted/augment.py
+    - path: src/bbox_tube_temporal/augment.py
       hash: md5
       md5: f52a42f92caa2fac859bf3a81a18971d
       size: 9489
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
-    - path: src/smokeynet_adapted/training_plots.py
+    - path: src/bbox_tube_temporal/training_plots.py
       hash: md5
       md5: 48015bd154587ba3ba493ed5c337e27a
       size: 3290
@@ -995,23 +995,23 @@ stages:
       hash: md5
       md5: 29abc7433be9df4510f8588252987293
       size: 5401
-    - path: src/smokeynet_adapted/augment.py
+    - path: src/bbox_tube_temporal/augment.py
       hash: md5
       md5: f52a42f92caa2fac859bf3a81a18971d
       size: 9489
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
-    - path: src/smokeynet_adapted/training_plots.py
+    - path: src/bbox_tube_temporal/training_plots.py
       hash: md5
       md5: 48015bd154587ba3ba493ed5c337e27a
       size: 3290
@@ -1091,23 +1091,23 @@ stages:
       hash: md5
       md5: 29abc7433be9df4510f8588252987293
       size: 5401
-    - path: src/smokeynet_adapted/augment.py
+    - path: src/bbox_tube_temporal/augment.py
       hash: md5
       md5: f52a42f92caa2fac859bf3a81a18971d
       size: 9489
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
-    - path: src/smokeynet_adapted/training_plots.py
+    - path: src/bbox_tube_temporal/training_plots.py
       hash: md5
       md5: 48015bd154587ba3ba493ed5c337e27a
       size: 3290
@@ -1189,23 +1189,23 @@ stages:
       hash: md5
       md5: 29abc7433be9df4510f8588252987293
       size: 5401
-    - path: src/smokeynet_adapted/augment.py
+    - path: src/bbox_tube_temporal/augment.py
       hash: md5
       md5: f52a42f92caa2fac859bf3a81a18971d
       size: 9489
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
-    - path: src/smokeynet_adapted/training_plots.py
+    - path: src/bbox_tube_temporal/training_plots.py
       hash: md5
       md5: 48015bd154587ba3ba493ed5c337e27a
       size: 3290
@@ -1292,15 +1292,15 @@ stages:
       hash: md5
       md5: 4172cdb32d15ab90041a2f9b6fd9a29e
       size: 8483
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 9f8c8b88ff8a1f9c6b20ba0878aef765
       size: 2467
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: 6c76492788dd6dbc3d0425f56e76b470
       size: 6742
@@ -1375,15 +1375,15 @@ stages:
       hash: md5
       md5: 4172cdb32d15ab90041a2f9b6fd9a29e
       size: 8483
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
@@ -1458,15 +1458,15 @@ stages:
       hash: md5
       md5: 4172cdb32d15ab90041a2f9b6fd9a29e
       size: 8483
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 9f8c8b88ff8a1f9c6b20ba0878aef765
       size: 2467
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: 6c76492788dd6dbc3d0425f56e76b470
       size: 6742
@@ -1541,15 +1541,15 @@ stages:
       hash: md5
       md5: 4172cdb32d15ab90041a2f9b6fd9a29e
       size: 8483
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
@@ -1625,15 +1625,15 @@ stages:
       hash: md5
       md5: 4172cdb32d15ab90041a2f9b6fd9a29e
       size: 8483
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
@@ -1709,15 +1709,15 @@ stages:
       hash: md5
       md5: 4172cdb32d15ab90041a2f9b6fd9a29e
       size: 8483
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
@@ -1794,15 +1794,15 @@ stages:
       hash: md5
       md5: 4172cdb32d15ab90041a2f9b6fd9a29e
       size: 8483
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
@@ -1880,15 +1880,15 @@ stages:
       hash: md5
       md5: 4172cdb32d15ab90041a2f9b6fd9a29e
       size: 8483
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
@@ -1967,15 +1967,15 @@ stages:
       hash: md5
       md5: 4172cdb32d15ab90041a2f9b6fd9a29e
       size: 8483
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
@@ -2055,15 +2055,15 @@ stages:
       hash: md5
       md5: 4172cdb32d15ab90041a2f9b6fd9a29e
       size: 8483
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
@@ -2188,7 +2188,7 @@ stages:
       hash: md5
       md5: 322a393eb0b4ce9817e1af02c36ddf86
       size: 1604
-    - path: src/smokeynet_adapted/training_plots.py
+    - path: src/bbox_tube_temporal/training_plots.py
       hash: md5
       md5: ed6f2335921666b7c7f33990a655ec2b
       size: 2621
@@ -2212,7 +2212,7 @@ stages:
       hash: md5
       md5: 322a393eb0b4ce9817e1af02c36ddf86
       size: 1604
-    - path: src/smokeynet_adapted/training_plots.py
+    - path: src/bbox_tube_temporal/training_plots.py
       hash: md5
       md5: ed6f2335921666b7c7f33990a655ec2b
       size: 2621
@@ -2236,7 +2236,7 @@ stages:
       hash: md5
       md5: 322a393eb0b4ce9817e1af02c36ddf86
       size: 1604
-    - path: src/smokeynet_adapted/training_plots.py
+    - path: src/bbox_tube_temporal/training_plots.py
       hash: md5
       md5: ed6f2335921666b7c7f33990a655ec2b
       size: 2621
@@ -2260,7 +2260,7 @@ stages:
       hash: md5
       md5: 322a393eb0b4ce9817e1af02c36ddf86
       size: 1604
-    - path: src/smokeynet_adapted/training_plots.py
+    - path: src/bbox_tube_temporal/training_plots.py
       hash: md5
       md5: ed6f2335921666b7c7f33990a655ec2b
       size: 2621
@@ -2284,7 +2284,7 @@ stages:
       hash: md5
       md5: 322a393eb0b4ce9817e1af02c36ddf86
       size: 1604
-    - path: src/smokeynet_adapted/training_plots.py
+    - path: src/bbox_tube_temporal/training_plots.py
       hash: md5
       md5: ed6f2335921666b7c7f33990a655ec2b
       size: 2621
@@ -2308,7 +2308,7 @@ stages:
       hash: md5
       md5: 322a393eb0b4ce9817e1af02c36ddf86
       size: 1604
-    - path: src/smokeynet_adapted/training_plots.py
+    - path: src/bbox_tube_temporal/training_plots.py
       hash: md5
       md5: ed6f2335921666b7c7f33990a655ec2b
       size: 2621
@@ -2337,23 +2337,23 @@ stages:
       hash: md5
       md5: 29abc7433be9df4510f8588252987293
       size: 5401
-    - path: src/smokeynet_adapted/augment.py
+    - path: src/bbox_tube_temporal/augment.py
       hash: md5
       md5: f52a42f92caa2fac859bf3a81a18971d
       size: 9489
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
-    - path: src/smokeynet_adapted/training_plots.py
+    - path: src/bbox_tube_temporal/training_plots.py
       hash: md5
       md5: 48015bd154587ba3ba493ed5c337e27a
       size: 3290
@@ -2441,15 +2441,15 @@ stages:
       hash: md5
       md5: 4172cdb32d15ab90041a2f9b6fd9a29e
       size: 8483
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
@@ -2530,15 +2530,15 @@ stages:
       hash: md5
       md5: 4172cdb32d15ab90041a2f9b6fd9a29e
       size: 8483
-    - path: src/smokeynet_adapted/dataset.py
+    - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
       size: 3177
-    - path: src/smokeynet_adapted/lit_temporal.py
+    - path: src/bbox_tube_temporal/lit_temporal.py
       hash: md5
       md5: e92af1e071a4246beb0a9ed2d0f2c711
       size: 4827
-    - path: src/smokeynet_adapted/temporal_classifier.py
+    - path: src/bbox_tube_temporal/temporal_classifier.py
       hash: md5
       md5: ab1d72d4f03f1aa2e14f9f343fdee883
       size: 6682
@@ -2614,15 +2614,15 @@ stages:
       hash: md5
       md5: 6047b0d8b1b135dd9399b26d0c1901eb
       size: 5246
-    - path: src/smokeynet_adapted/calibration.py
+    - path: src/bbox_tube_temporal/calibration.py
       hash: md5
       md5: 2303307ff3b86f1186582f9db6982163
       size: 1811
-    - path: src/smokeynet_adapted/package.py
+    - path: src/bbox_tube_temporal/package.py
       hash: md5
       md5: 6ca1a542949546a4017c029363be674d
       size: 6695
-    - path: src/smokeynet_adapted/val_predict.py
+    - path: src/bbox_tube_temporal/val_predict.py
       hash: md5
       md5: 30716090646cf21c42dff4fd6f501a08
       size: 1974

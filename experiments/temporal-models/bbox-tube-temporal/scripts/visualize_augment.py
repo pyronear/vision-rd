@@ -21,9 +21,9 @@ import matplotlib.pyplot as plt
 import torch
 import yaml
 
-from smokeynet_adapted.augment import build_tube_augment
-from smokeynet_adapted.batch_samples import render_batch_grid
-from smokeynet_adapted.dataset import TubePatchDataset
+from bbox_tube_temporal.augment import build_tube_augment
+from bbox_tube_temporal.batch_samples import render_batch_grid
+from bbox_tube_temporal.dataset import TubePatchDataset
 
 
 def _pack_rows(rows: list[torch.Tensor]) -> tuple[torch.Tensor, torch.Tensor]:

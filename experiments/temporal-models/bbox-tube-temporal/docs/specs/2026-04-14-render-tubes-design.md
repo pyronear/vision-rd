@@ -56,7 +56,7 @@ For each *.json (excluding _summary.json) in data/03_primary/tubes/<split>/:
 
 ## Code changes
 
-### `src/smokeynet_adapted/data.py`
+### `src/bbox_tube_temporal/data.py`
 
 Add:
 
@@ -65,7 +65,7 @@ Add:
   module a clear API for tube I/O alongside the existing
   `load_detections`.
 
-### `src/smokeynet_adapted/tubes.py`
+### `src/bbox_tube_temporal/tubes.py`
 
 Add:
 
@@ -106,8 +106,8 @@ render_tubes:
       --output-dir data/08_reporting/tubes/${item}
     deps:
       - scripts/render_tubes.py
-      - src/smokeynet_adapted/tubes.py
-      - src/smokeynet_adapted/data.py
+      - src/bbox_tube_temporal/tubes.py
+      - src/bbox_tube_temporal/data.py
       - data/03_primary/tubes/${item}
       - data/01_raw/datasets/${item}
     outs:

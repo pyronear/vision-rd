@@ -15,7 +15,7 @@ import shutil
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-from smokeynet_adapted.model_input import LABEL_TO_INT, process_tube
+from bbox_tube_temporal.model_input import LABEL_TO_INT, process_tube
 
 
 def _process_one(

@@ -17,12 +17,12 @@
 ## Task 1: Rename `FrozenTimmBackbone` to `TimmBackbone` (no behavior change yet)
 
 **Files:**
-- Modify: `src/smokeynet_adapted/temporal_classifier.py`
+- Modify: `src/bbox_tube_temporal/temporal_classifier.py`
 - Modify: `tests/test_temporal_classifier.py`
 
 - [ ] **Step 1: Rename the class and export**
 
-In `src/smokeynet_adapted/temporal_classifier.py`, rename `class FrozenTimmBackbone(nn.Module):` to `class TimmBackbone(nn.Module):`. Update the single reference inside `TemporalSmokeClassifier.__init__` from `FrozenTimmBackbone(...)` to `TimmBackbone(...)`.
+In `src/bbox_tube_temporal/temporal_classifier.py`, rename `class FrozenTimmBackbone(nn.Module):` to `class TimmBackbone(nn.Module):`. Update the single reference inside `TemporalSmokeClassifier.__init__` from `FrozenTimmBackbone(...)` to `TimmBackbone(...)`.
 
 - [ ] **Step 2: Update existing tests to use the new name**
 
@@ -41,7 +41,7 @@ Expected: no matches.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/temporal_classifier.py tests/test_temporal_classifier.py
+git add src/bbox_tube_temporal/temporal_classifier.py tests/test_temporal_classifier.py
 git commit -m "refactor(smokeynet-adapted): rename FrozenTimmBackbone to TimmBackbone"
 ```
 
@@ -50,7 +50,7 @@ git commit -m "refactor(smokeynet-adapted): rename FrozenTimmBackbone to TimmBac
 ## Task 2: Add `finetune` + `finetune_last_n_blocks` flags to `TimmBackbone` (resnet family)
 
 **Files:**
-- Modify: `src/smokeynet_adapted/temporal_classifier.py`
+- Modify: `src/bbox_tube_temporal/temporal_classifier.py`
 - Modify: `tests/test_temporal_classifier.py`
 
 - [ ] **Step 1: Write failing tests for the new flags (resnet18)**
@@ -106,7 +106,7 @@ Expected: FAIL — `TimmBackbone.__init__()` does not accept `finetune` / `finet
 
 - [ ] **Step 3: Implement the new signature and resnet unfreezing logic**
 
-Replace the `TimmBackbone` class body in `src/smokeynet_adapted/temporal_classifier.py` with:
+Replace the `TimmBackbone` class body in `src/bbox_tube_temporal/temporal_classifier.py` with:
 
 ```python
 class TimmBackbone(nn.Module):
@@ -192,7 +192,7 @@ Expected: PASS (all tests, including the new ones and the original frozen-equiva
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/temporal_classifier.py tests/test_temporal_classifier.py
+git add src/bbox_tube_temporal/temporal_classifier.py tests/test_temporal_classifier.py
 git commit -m "feat(smokeynet-adapted): finetune flag on TimmBackbone for resnet family"
 ```
 
@@ -201,7 +201,7 @@ git commit -m "feat(smokeynet-adapted): finetune flag on TimmBackbone for resnet
 ## Task 3: Add convnext support to `TimmBackbone`
 
 **Files:**
-- Modify: `src/smokeynet_adapted/temporal_classifier.py`
+- Modify: `src/bbox_tube_temporal/temporal_classifier.py`
 - Modify: `tests/test_temporal_classifier.py`
 
 - [ ] **Step 1: Write failing test for convnext_tiny**
@@ -269,7 +269,7 @@ Expected: all PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/temporal_classifier.py tests/test_temporal_classifier.py
+git add src/bbox_tube_temporal/temporal_classifier.py tests/test_temporal_classifier.py
 git commit -m "feat(smokeynet-adapted): convnext support in TimmBackbone finetune path"
 ```
 
@@ -365,7 +365,7 @@ git commit -m "test(smokeynet-adapted): frozen TimmBackbone equivalence regressi
 ## Task 6: Thread `finetune` through `TemporalSmokeClassifier`
 
 **Files:**
-- Modify: `src/smokeynet_adapted/temporal_classifier.py`
+- Modify: `src/bbox_tube_temporal/temporal_classifier.py`
 - Modify: `tests/test_temporal_classifier.py`
 
 - [ ] **Step 1: Write failing test**
@@ -398,7 +398,7 @@ Expected: FAIL — `TemporalSmokeClassifier.__init__` does not accept `finetune`
 
 - [ ] **Step 3: Update `TemporalSmokeClassifier` signature**
 
-Modify the `TemporalSmokeClassifier.__init__` in `src/smokeynet_adapted/temporal_classifier.py`:
+Modify the `TemporalSmokeClassifier.__init__` in `src/bbox_tube_temporal/temporal_classifier.py`:
 
 ```python
     def __init__(
@@ -446,7 +446,7 @@ Expected: all PASS, including the new test and every pre-existing one.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/temporal_classifier.py tests/test_temporal_classifier.py
+git add src/bbox_tube_temporal/temporal_classifier.py tests/test_temporal_classifier.py
 git commit -m "feat(smokeynet-adapted): TemporalSmokeClassifier accepts finetune flag"
 ```
 
@@ -455,7 +455,7 @@ git commit -m "feat(smokeynet-adapted): TemporalSmokeClassifier accepts finetune
 ## Task 7: Per-group optimizer in `LitTemporalClassifier`
 
 **Files:**
-- Modify: `src/smokeynet_adapted/lit_temporal.py`
+- Modify: `src/bbox_tube_temporal/lit_temporal.py`
 - Modify: `tests/test_lit_temporal.py`
 
 - [ ] **Step 1: Write failing test for two-group optimizer**
@@ -516,7 +516,7 @@ Expected: FAIL on the two-groups test (`LitTemporalClassifier.__init__` does not
 
 - [ ] **Step 3: Update `LitTemporalClassifier`**
 
-Replace the `LitTemporalClassifier.__init__` and `configure_optimizers` in `src/smokeynet_adapted/lit_temporal.py` with:
+Replace the `LitTemporalClassifier.__init__` and `configure_optimizers` in `src/bbox_tube_temporal/lit_temporal.py` with:
 
 ```python
     def __init__(
@@ -591,7 +591,7 @@ Expected: all PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/smokeynet_adapted/lit_temporal.py tests/test_lit_temporal.py
+git add src/bbox_tube_temporal/lit_temporal.py tests/test_lit_temporal.py
 git commit -m "feat(smokeynet-adapted): per-group optimizer for finetune mode"
 ```
 
@@ -1014,9 +1014,9 @@ Append to `dvc.yaml` (after the existing `evaluate_gru:` foreach block and befor
       --params-key train_gru_seed43
     deps:
       - scripts/train.py
-      - src/smokeynet_adapted/dataset.py
-      - src/smokeynet_adapted/temporal_classifier.py
-      - src/smokeynet_adapted/lit_temporal.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -1037,9 +1037,9 @@ Append to `dvc.yaml` (after the existing `evaluate_gru:` foreach block and befor
       --params-key train_gru_seed44
     deps:
       - scripts/train.py
-      - src/smokeynet_adapted/dataset.py
-      - src/smokeynet_adapted/temporal_classifier.py
-      - src/smokeynet_adapted/lit_temporal.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -1060,9 +1060,9 @@ Append to `dvc.yaml` (after the existing `evaluate_gru:` foreach block and befor
       --params-key train_gru_convnext
     deps:
       - scripts/train.py
-      - src/smokeynet_adapted/dataset.py
-      - src/smokeynet_adapted/temporal_classifier.py
-      - src/smokeynet_adapted/lit_temporal.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -1083,9 +1083,9 @@ Append to `dvc.yaml` (after the existing `evaluate_gru:` foreach block and befor
       --params-key train_gru_finetune
     deps:
       - scripts/train.py
-      - src/smokeynet_adapted/dataset.py
-      - src/smokeynet_adapted/temporal_classifier.py
-      - src/smokeynet_adapted/lit_temporal.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -1106,9 +1106,9 @@ Append to `dvc.yaml` (after the existing `evaluate_gru:` foreach block and befor
       --params-key train_gru_convnext_finetune
     deps:
       - scripts/train.py
-      - src/smokeynet_adapted/dataset.py
-      - src/smokeynet_adapted/temporal_classifier.py
-      - src/smokeynet_adapted/lit_temporal.py
+      - src/bbox_tube_temporal/dataset.py
+      - src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal/lit_temporal.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -1140,9 +1140,9 @@ Append immediately after the train stages above:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/smokeynet_adapted/temporal_classifier.py
-        - src/smokeynet_adapted/lit_temporal.py
-        - src/smokeynet_adapted/dataset.py
+        - src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal/lit_temporal.py
+        - src/bbox_tube_temporal/dataset.py
         - data/06_models/gru_seed43/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -1177,9 +1177,9 @@ Append immediately after the train stages above:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/smokeynet_adapted/temporal_classifier.py
-        - src/smokeynet_adapted/lit_temporal.py
-        - src/smokeynet_adapted/dataset.py
+        - src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal/lit_temporal.py
+        - src/bbox_tube_temporal/dataset.py
         - data/06_models/gru_seed44/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -1214,9 +1214,9 @@ Append immediately after the train stages above:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/smokeynet_adapted/temporal_classifier.py
-        - src/smokeynet_adapted/lit_temporal.py
-        - src/smokeynet_adapted/dataset.py
+        - src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal/lit_temporal.py
+        - src/bbox_tube_temporal/dataset.py
         - data/06_models/gru_convnext/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -1251,9 +1251,9 @@ Append immediately after the train stages above:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/smokeynet_adapted/temporal_classifier.py
-        - src/smokeynet_adapted/lit_temporal.py
-        - src/smokeynet_adapted/dataset.py
+        - src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal/lit_temporal.py
+        - src/bbox_tube_temporal/dataset.py
         - data/06_models/gru_finetune/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -1288,9 +1288,9 @@ Append immediately after the train stages above:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/smokeynet_adapted/temporal_classifier.py
-        - src/smokeynet_adapted/lit_temporal.py
-        - src/smokeynet_adapted/dataset.py
+        - src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal/lit_temporal.py
+        - src/bbox_tube_temporal/dataset.py
         - data/06_models/gru_convnext_finetune/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}

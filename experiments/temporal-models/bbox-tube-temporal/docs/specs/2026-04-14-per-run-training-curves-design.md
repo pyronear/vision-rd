@@ -73,7 +73,7 @@ columns empty; val rows are the inverse, logged once per epoch at epoch end.
 
 ## Module & script layout
 
-New file `src/smokeynet_adapted/training_plots.py` exposes three functions:
+New file `src/bbox_tube_temporal/training_plots.py` exposes three functions:
 
 - `aggregate_train_loss_per_epoch(df: pd.DataFrame) -> pd.Series` — pure, no
   matplotlib.
@@ -105,7 +105,7 @@ plot_training_gru:
     --title gru
   deps:
     - scripts/plot_training.py
-    - src/smokeynet_adapted/training_plots.py
+    - src/bbox_tube_temporal/training_plots.py
     - data/06_models/gru/csv_logs
   plots:
     - data/08_reporting/training/gru/training_curves.png

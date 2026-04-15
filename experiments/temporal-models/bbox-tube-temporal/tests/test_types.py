@@ -1,8 +1,8 @@
-"""Tests for smokeynet_adapted.types."""
+"""Tests for bbox_tube_temporal.types."""
 
 from datetime import datetime
 
-from smokeynet_adapted.types import (
+from bbox_tube_temporal.types import (
     Detection,
     FrameDetections,
     Tube,
