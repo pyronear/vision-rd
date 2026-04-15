@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 packages = ["src/smokeynet_adapted"]
 
 [project]
-name = "smokeynet-adapted"
+name = "bbox-tube-temporal"
 version = "0.1.0"
 description = "Temporal smoke classifier over YOLO-detected tube patches (timm backbone + mean-pool/GRU head)"
 requires-python = ">=3.11"
