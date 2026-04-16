@@ -95,7 +95,10 @@ def main() -> None:
     (args.output_dir / "dropped.json").write_text(json.dumps(dropped, indent=2))
     predictions = sorted(
         (_record_to_json(r) for r in records),
-        key=lambda p: (p["score"] is None, -(p["score"] or 0.0)),
+        key=lambda p: (
+            p["score"] is None,
+            -(p["score"] if p["score"] is not None else 0.0),
+        ),
     )
     (args.output_dir / "predictions.json").write_text(json.dumps(predictions, indent=2))
 
