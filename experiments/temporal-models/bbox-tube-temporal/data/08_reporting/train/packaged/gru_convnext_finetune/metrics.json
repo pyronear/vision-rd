@@ -1,16 +1,16 @@
 {
   "model_name": "gru_convnext_finetune-train",
   "num_sequences": 3104,
-  "tp": 1492,
-  "fp": 238,
-  "fn": 60,
-  "tn": 1314,
-  "precision": 0.8624,
-  "recall": 0.9613,
-  "f1": 0.9092,
-  "fpr": 0.1534,
-  "mean_ttd_seconds": 615.1,
-  "median_ttd_seconds": 470.5,
-  "pr_auc": 0.971,
-  "roc_auc": 0.97
+  "tp": 1508,
+  "fp": 122,
+  "fn": 44,
+  "tn": 1430,
+  "precision": 0.9252,
+  "recall": 0.9716,
+  "f1": 0.9478,
+  "fpr": 0.0786,
+  "mean_ttd_seconds": 835.2,
+  "median_ttd_seconds": 720.0,
+  "pr_auc": 0.9825,
+  "roc_auc": 0.9853
 }
