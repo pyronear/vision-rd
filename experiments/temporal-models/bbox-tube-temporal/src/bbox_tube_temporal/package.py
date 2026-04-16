@@ -117,6 +117,38 @@ def _load_yolo(weights_path: Path) -> Any:
     return YOLO(str(weights_path))
 
 
+def _build_classifier(classifier_cfg: dict[str, Any]) -> TemporalSmokeClassifier:
+    """Instantiate a ``TemporalSmokeClassifier`` from a packaged config block.
+
+    Mirrors the classifier kwargs written by ``scripts/package_model.py`` —
+    the packaged ``config["classifier"]`` dict carries every kwarg needed to
+    reconstruct the exact training-time architecture (including ViT-specific
+    ``global_pool``/``img_size`` and transformer-head hyperparameters).
+    """
+    kwargs: dict[str, Any] = {
+        "backbone": classifier_cfg["backbone"],
+        "arch": classifier_cfg["arch"],
+        "hidden_dim": classifier_cfg["hidden_dim"],
+        "pretrained": classifier_cfg.get("pretrained", False),
+        "num_layers": classifier_cfg.get("num_layers", 1),
+        "bidirectional": classifier_cfg.get("bidirectional", False),
+        "finetune": classifier_cfg.get("finetune", False),
+        "finetune_last_n_blocks": classifier_cfg.get("finetune_last_n_blocks", 0),
+        "max_frames": classifier_cfg.get("max_frames", 20),
+        "global_pool": classifier_cfg.get("global_pool", "avg"),
+    }
+    for k in (
+        "transformer_num_layers",
+        "transformer_num_heads",
+        "transformer_ffn_dim",
+        "transformer_dropout",
+        "img_size",
+    ):
+        if k in classifier_cfg:
+            kwargs[k] = classifier_cfg[k]
+    return TemporalSmokeClassifier(**kwargs)
+
+
 def _load_classifier(
     ckpt_path: Path, classifier_cfg: dict[str, Any]
 ) -> TemporalSmokeClassifier:
@@ -125,14 +157,7 @@ def _load_classifier(
     Accepts both Lightning-style ckpts (``{"state_dict": {"model.xxx": ...}}``)
     and plain state_dicts (``{"xxx": ...}``).
     """
-    model = TemporalSmokeClassifier(
-        backbone=classifier_cfg["backbone"],
-        arch=classifier_cfg["arch"],
-        hidden_dim=classifier_cfg["hidden_dim"],
-        pretrained=classifier_cfg.get("pretrained", False),
-        num_layers=classifier_cfg.get("num_layers", 1),
-        bidirectional=classifier_cfg.get("bidirectional", False),
-    )
+    model = _build_classifier(classifier_cfg)
     blob = torch.load(ckpt_path, map_location="cpu", weights_only=False)
     if isinstance(blob, dict) and "state_dict" in blob:
         raw = blob["state_dict"]

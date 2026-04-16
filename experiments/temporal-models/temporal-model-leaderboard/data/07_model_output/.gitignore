@@ -1,3 +1,5 @@
 /fsm-tracking-baseline
 /mtb-change-detection
 /pyro-detector-baseline
+/bbox-tube-temporal-vit-dinov2-finetune
+/bbox-tube-temporal-gru-convnext-finetune

@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 from pyrocore import Frame, TemporalModel
+from tqdm import tqdm
 
 from .dataset import get_sorted_frames, list_sequences
 from .types import SequenceResult
@@ -39,7 +40,7 @@ def evaluate_model(
 
     results: list[SequenceResult] = []
 
-    for seq_path, ground_truth in sequences:
+    for seq_path, ground_truth in tqdm(sequences, desc="eval", unit="seq"):
         frame_paths = get_sorted_frames(seq_path)
         if not frame_paths:
             logger.warning("Skipping %s: no images found", seq_path.name)

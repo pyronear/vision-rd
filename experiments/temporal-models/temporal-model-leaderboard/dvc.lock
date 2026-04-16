@@ -18,12 +18,12 @@ stages:
       nfiles: 32640
     - path: scripts/evaluate.py
       hash: md5
-      md5: b0f7e0612d85e1691ef78aed9bd2c118
-      size: 3979
+      md5: 0024e38167d489e943e6e80735f9fd56
+      size: 4083
     - path: src/temporal_model_leaderboard
       hash: md5
-      md5: 423d337f89bfe4e71fb126ec3c665aae.dir
-      size: 32284
+      md5: ef7bc4a51ca678e695ff664b3b3e9192.dir
+      size: 32457
       nfiles: 12
     outs:
     - path: data/07_model_output/fsm-tracking-baseline
@@ -37,27 +37,27 @@ stages:
     deps:
     - path: data/07_model_output
       hash: md5
-      md5: 8679635cba572131844bd723271f57d5.dir
-      size: 139733
-      nfiles: 8
+      md5: bb2cc12480462e146dcf9cad936f3b08.dir
+      size: 233269
+      nfiles: 12
     - path: scripts/leaderboard.py
       hash: md5
       md5: 81dec9584c04f465c99ced1b8c733a08
       size: 2507
     - path: src/temporal_model_leaderboard
       hash: md5
-      md5: 423d337f89bfe4e71fb126ec3c665aae.dir
-      size: 32284
+      md5: ef7bc4a51ca678e695ff664b3b3e9192.dir
+      size: 32457
       nfiles: 12
     outs:
     - path: data/08_reporting/leaderboard.json
       hash: md5
-      md5: a0333c0f68c720abf9000938e20ad851
-      size: 842
+      md5: 4e990f1343fb88b983963d95c6eda92b
+      size: 1442
     - path: data/08_reporting/leaderboard.txt
       hash: md5
-      md5: 49c9c9ac97a732437dfee797ee73c523
-      size: 470
+      md5: 963583362fa5ee75cb7cd56f6e67abb6
+      size: 784
   evaluate_mtb_change_detection:
     cmd: uv run python scripts/evaluate.py --model-name mtb-change-detection 
       --model-type mtb-change-detection --model-package 
@@ -76,12 +76,12 @@ stages:
       nfiles: 32640
     - path: scripts/evaluate.py
       hash: md5
-      md5: b0f7e0612d85e1691ef78aed9bd2c118
-      size: 3979
+      md5: 0024e38167d489e943e6e80735f9fd56
+      size: 4083
     - path: src/temporal_model_leaderboard
       hash: md5
-      md5: 423d337f89bfe4e71fb126ec3c665aae.dir
-      size: 32284
+      md5: ef7bc4a51ca678e695ff664b3b3e9192.dir
+      size: 32457
       nfiles: 12
     outs:
     - path: data/07_model_output/mtb-change-detection
@@ -107,16 +107,111 @@ stages:
       nfiles: 32640
     - path: scripts/evaluate.py
       hash: md5
-      md5: b0f7e0612d85e1691ef78aed9bd2c118
-      size: 3979
+      md5: 0024e38167d489e943e6e80735f9fd56
+      size: 4083
     - path: src/temporal_model_leaderboard
       hash: md5
-      md5: 423d337f89bfe4e71fb126ec3c665aae.dir
-      size: 32284
+      md5: ef7bc4a51ca678e695ff664b3b3e9192.dir
+      size: 32457
       nfiles: 12
     outs:
     - path: data/07_model_output/pyro-detector-baseline
       hash: md5
       md5: 0ff18e7a674f5a7c8b0452f3ce20cc4a.dir
       size: 46514
+      nfiles: 2
+  evaluate_bbox_tube_temporal:
+    cmd: uv run python scripts/evaluate.py --model-name bbox-tube-temporal 
+      --model-type bbox-tube-temporal --model-package 
+      data/01_raw/models/bbox-tube-temporal.zip --test-dir 
+      data/01_raw/sequential_test/test --output-dir 
+      data/07_model_output/bbox-tube-temporal
+    deps:
+    - path: data/01_raw/models/bbox-tube-temporal.zip
+      hash: md5
+      md5: f6a972c7d14d0bdf1afc527e7d106a02
+      size: 162764055
+    - path: data/01_raw/sequential_test
+      hash: md5
+      md5: 828edb7fb8f0909f0d6115d67ffbddc9.dir
+      size: 1594484536
+      nfiles: 32640
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 0024e38167d489e943e6e80735f9fd56
+      size: 4083
+    - path: src/temporal_model_leaderboard
+      hash: md5
+      md5: ef7bc4a51ca678e695ff664b3b3e9192.dir
+      size: 32457
+      nfiles: 12
+    outs:
+    - path: data/07_model_output/bbox-tube-temporal
+      hash: md5
+      md5: a57effcfafbca3c9420f511f37dea8d6.dir
+      size: 46703
+      nfiles: 2
+  evaluate_bbox_tube_vit_dinov2_finetune:
+    cmd: uv run python scripts/evaluate.py --model-name 
+      bbox-tube-temporal-vit-dinov2-finetune --model-type bbox-tube-temporal 
+      --model-package 
+      data/01_raw/models/bbox-tube-temporal-vit-dinov2-finetune.zip --test-dir 
+      data/01_raw/sequential_test/test --output-dir 
+      data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune
+    deps:
+    - path: data/01_raw/models/bbox-tube-temporal-vit-dinov2-finetune.zip
+      hash: md5
+      md5: f6a972c7d14d0bdf1afc527e7d106a02
+      size: 162764055
+    - path: data/01_raw/sequential_test
+      hash: md5
+      md5: 828edb7fb8f0909f0d6115d67ffbddc9.dir
+      size: 1594484536
+      nfiles: 32640
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 0024e38167d489e943e6e80735f9fd56
+      size: 4083
+    - path: src/temporal_model_leaderboard
+      hash: md5
+      md5: ef7bc4a51ca678e695ff664b3b3e9192.dir
+      size: 32457
+      nfiles: 12
+    outs:
+    - path: data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune
+      hash: md5
+      md5: f94e53492fba19e043f45e671d44d2e9.dir
+      size: 46723
+      nfiles: 2
+  evaluate_bbox_tube_gru_convnext_finetune:
+    cmd: uv run python scripts/evaluate.py --model-name 
+      bbox-tube-temporal-gru-convnext-finetune --model-type bbox-tube-temporal 
+      --model-package 
+      data/01_raw/models/bbox-tube-temporal-gru-convnext-finetune.zip --test-dir
+      data/01_raw/sequential_test/test --output-dir 
+      data/07_model_output/bbox-tube-temporal-gru-convnext-finetune
+    deps:
+    - path: data/01_raw/models/bbox-tube-temporal-gru-convnext-finetune.zip
+      hash: md5
+      md5: e651122c7807c7f9fd113423e5ea8f4e
+      size: 258728626
+    - path: data/01_raw/sequential_test
+      hash: md5
+      md5: 828edb7fb8f0909f0d6115d67ffbddc9.dir
+      size: 1594484536
+      nfiles: 32640
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 0024e38167d489e943e6e80735f9fd56
+      size: 4083
+    - path: src/temporal_model_leaderboard
+      hash: md5
+      md5: ef7bc4a51ca678e695ff664b3b3e9192.dir
+      size: 32457
+      nfiles: 12
+    outs:
+    - path: data/07_model_output/bbox-tube-temporal-gru-convnext-finetune
+      hash: md5
+      md5: 9b29b819a25513cee29fef08948f0f75.dir
+      size: 46747
       nfiles: 2

@@ -8,6 +8,8 @@ dependencies = [
     "tracking-fsm-baseline",
     "mtb-change-detection",
     "pyro-detector-baseline",
+    "bbox-tube-temporal",
+    "tqdm>=4.67.3",
 ]
 
 [tool.uv.sources]
@@ -15,6 +17,7 @@ pyrocore = { path = "../../../lib/pyrocore" }
 tracking-fsm-baseline = { path = "../tracking-fsm-baseline" }
 mtb-change-detection = { path = "../mtb-change-detection" }
 pyro-detector-baseline = { path = "../pyro-detector-baseline" }
+bbox-tube-temporal = { path = "../bbox-tube-temporal" }
 
 [dependency-groups]
 dev = [

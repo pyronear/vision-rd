@@ -25,6 +25,7 @@ def run_yolo_on_frames(
     confidence_threshold: float,
     iou_nms: float,
     image_size: int,
+    device: str | torch.device | None = None,
 ) -> list[FrameDetections]:
     """Run YOLO once over all frames in a single batched call.
 
@@ -35,6 +36,8 @@ def run_yolo_on_frames(
         confidence_threshold: Minimum detection confidence.
         iou_nms: IoU threshold for YOLO's internal NMS.
         image_size: Inference resolution passed to YOLO.
+        device: Torch device for YOLO inference. ``None`` lets ultralytics
+            auto-pick (defaults to CPU).
 
     Returns:
         One :class:`FrameDetections` per input frame (possibly with zero
@@ -44,13 +47,15 @@ def run_yolo_on_frames(
         return []
 
     paths = [str(f.image_path) for f in frames]
-    results = yolo_model.predict(
-        paths,
+    predict_kwargs: dict[str, Any] = dict(
         conf=confidence_threshold,
         iou=iou_nms,
         imgsz=image_size,
         verbose=False,
     )
+    if device is not None:
+        predict_kwargs["device"] = str(device)
+    results = yolo_model.predict(paths, **predict_kwargs)
 
     out: list[FrameDetections] = []
     for idx, (frame, pred) in enumerate(zip(frames, results, strict=True)):

@@ -28,6 +28,34 @@
     "median_ttd_seconds": 7.0
   },
   {
+    "model_name": "bbox-tube-temporal-gru-convnext-finetune",
+    "num_sequences": 298,
+    "tp": 140,
+    "fp": 21,
+    "fn": 9,
+    "tn": 128,
+    "precision": 0.8696,
+    "recall": 0.9396,
+    "f1": 0.9032,
+    "fpr": 0.1409,
+    "mean_ttd_seconds": 537.4,
+    "median_ttd_seconds": 352.0
+  },
+  {
+    "model_name": "bbox-tube-temporal-vit-dinov2-finetune",
+    "num_sequences": 298,
+    "tp": 144,
+    "fp": 33,
+    "fn": 5,
+    "tn": 116,
+    "precision": 0.8136,
+    "recall": 0.9664,
+    "f1": 0.8834,
+    "fpr": 0.2215,
+    "mean_ttd_seconds": 503.1,
+    "median_ttd_seconds": 328.5
+  },
+  {
     "model_name": "mtb-change-detection",
     "num_sequences": 298,
     "tp": 139,

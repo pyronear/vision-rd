@@ -110,6 +110,7 @@ class BboxTubeTemporalModel(TemporalModel):
             confidence_threshold=infer["confidence_threshold"],
             iou_nms=infer["iou_nms"],
             image_size=infer["image_size"],
+            device=self._device,
         )
         num_dets_per_frame = [len(fd.detections) for fd in frame_dets]
 

@@ -661,26 +661,30 @@ stages:
         - data/08_reporting/${item}/vit_in21k_finetune/confusion_matrix_normalized.png
 
   package:
-    cmd: >-
-      uv run python scripts/package_model.py
-      --variant gru_convnext_finetune
-      --output data/06_models/gru_convnext_finetune/model.zip
-    deps:
-      - data/06_models/gru_convnext_finetune/best_checkpoint.pt
-      - data/01_raw/models/best.pt
-      - data/05_model_input/val
-      - scripts/package_model.py
-      - src/bbox_tube_temporal/package.py
-      - src/bbox_tube_temporal/calibration.py
-      - src/bbox_tube_temporal/val_predict.py
-    params:
-      - package
-      - tubes
-      - build_tubes
-      - model_input
-      - train_gru_convnext_finetune
-    outs:
-      - data/06_models/gru_convnext_finetune/model.zip
+    foreach:
+      - gru_convnext_finetune
+      - vit_dinov2_finetune
+    do:
+      cmd: >-
+        uv run python scripts/package_model.py
+        --variant ${item}
+        --output data/06_models/${item}/model.zip
+      deps:
+        - data/06_models/${item}/best_checkpoint.pt
+        - data/01_raw/models/best.pt
+        - data/05_model_input/val
+        - scripts/package_model.py
+        - src/bbox_tube_temporal/package.py
+        - src/bbox_tube_temporal/calibration.py
+        - src/bbox_tube_temporal/val_predict.py
+      params:
+        - package
+        - tubes
+        - build_tubes
+        - model_input
+        - train_${item}
+      outs:
+        - data/06_models/${item}/model.zip
 
   compare_variants:
     cmd: >-
