@@ -114,3 +114,39 @@ def metrics_at_threshold(
         "f1": f1,
         "fpr": fpr,
     }
+
+
+def build_scores_and_labels(
+    records: list[dict[str, Any]],
+    *,
+    rule: str,
+    k: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Apply ``aggregate_score`` across records; return (y_true, scores)."""
+    y = np.array([1 if r["label"] == "smoke" else 0 for r in records], dtype=int)
+    s = np.array(
+        [aggregate_score(r["tube_logits"], rule=rule, k=k) for r in records],
+        dtype=float,
+    )
+    return y, s
+
+
+def summarize_rule(
+    records: list[dict[str, Any]],
+    *,
+    rule: str,
+    k: int,
+    target_recall: float,
+) -> dict[str, Any]:
+    """Run one aggregation rule at one target recall; return a flat row."""
+    y, s = build_scores_and_labels(records, rule=rule, k=k)
+    threshold = find_threshold_for_recall(y, s, target_recall=target_recall)
+    metrics = metrics_at_threshold(y, s, threshold=threshold)
+    return {
+        "rule": rule,
+        "k": k,
+        "target_recall": target_recall,
+        "n_sequences": int(y.size),
+        "n_positive": int(y.sum()),
+        **metrics,
+    }

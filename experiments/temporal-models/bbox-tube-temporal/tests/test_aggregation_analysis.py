@@ -7,9 +7,11 @@ import pytest
 
 from bbox_tube_temporal.aggregation_analysis import (
     aggregate_score,
+    build_scores_and_labels,
     find_threshold_for_recall,
     load_predictions,
     metrics_at_threshold,
+    summarize_rule,
 )
 
 
@@ -210,3 +212,65 @@ def test_metrics_at_threshold_no_positives_no_negatives_safe():
     assert m["recall"] == 0.0
     assert m["f1"] == 0.0
     assert m["fpr"] == 0.0
+
+
+def _record(sid: str, label: str, logits: list[float]) -> dict:
+    return {
+        "sequence_id": sid,
+        "label": label,
+        "tube_logits": logits,
+        "num_tubes_kept": len(logits),
+        "is_positive": False,
+        "score": max(logits) if logits else -float("inf"),
+    }
+
+
+def test_build_scores_and_labels_max_rule():
+    records = [
+        _record("a", "smoke", [1.0, 3.0]),
+        _record("b", "fp", [0.5]),
+        _record("c", "smoke", []),
+    ]
+
+    y, s = build_scores_and_labels(records, rule="max", k=1)
+
+    assert y.tolist() == [1, 0, 1]
+    assert s[0] == 3.0
+    assert s[1] == 0.5
+    assert s[2] == -np.inf
+
+
+def test_build_scores_and_labels_top_k_mean():
+    records = [
+        _record("a", "smoke", [1.0, 3.0, 5.0]),  # top-2 mean = 4
+        _record("b", "fp", [2.0]),  # too few tubes → -inf
+    ]
+
+    y, s = build_scores_and_labels(records, rule="top_k_mean", k=2)
+
+    assert y.tolist() == [1, 0]
+    assert s[0] == 4.0
+    assert s[1] == -np.inf
+
+
+def test_summarize_rule_returns_threshold_and_metrics():
+    records = [
+        _record("p1", "smoke", [3.0]),
+        _record("p2", "smoke", [5.0]),
+        _record("n1", "fp", [1.0]),
+        _record("n2", "fp", [4.0]),
+    ]
+
+    result = summarize_rule(records, rule="max", k=1, target_recall=1.0)
+
+    # Threshold = 3.0 catches both positives
+    assert result["rule"] == "max"
+    assert result["k"] == 1
+    assert result["target_recall"] == 1.0
+    assert result["threshold"] == 3.0
+    assert result["tp"] == 2
+    assert result["fp"] == 1  # n2 at score 4.0 >= 3.0
+    assert result["fn"] == 0
+    assert result["tn"] == 1
+    assert result["precision"] == pytest.approx(2 / 3)
+    assert result["recall"] == 1.0
