@@ -194,6 +194,40 @@ class TestDeviceSelection:
         assert out.details["num_tubes_kept"] == 1
         assert len(out.details["tube_logits"]) == 1
 
+    def test_predict_details_include_per_tube_entries(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        """``details['kept_tubes']`` exposes every kept tube's full entries
+        alongside its logit and is_winner flag, so downstream diagnostics can
+        render any tube — not just the winner."""
+        per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in red_frames]
+        yolo = _fake_yolo_factory(per_frame)
+        model = BboxTubeTemporalModel(
+            yolo_model=yolo,
+            classifier=tiny_classifier,
+            config=TEST_CONFIG,
+            device="cpu",
+        )
+        out = model.predict(frames=red_frames)
+
+        kept = out.details["kept_tubes"]
+        assert isinstance(kept, list)
+        assert len(kept) == out.details["num_tubes_kept"]
+        tube = kept[0]
+        assert set(tube.keys()) == {
+            "tube_id",
+            "start_frame",
+            "end_frame",
+            "logit",
+            "is_winner",
+            "entries",
+        }
+        assert tube["is_winner"] is True  # single-tube case
+        assert tube["logit"] == out.details["tube_logits"][0]
+        assert isinstance(tube["entries"], list)
+        entry = tube["entries"][0]
+        assert set(entry.keys()) == {"frame_idx", "bbox", "is_gap", "confidence"}
+
     @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
     def test_predict_on_cuda_runs_end_to_end(
         self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]

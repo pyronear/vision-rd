@@ -112,6 +112,7 @@ class BboxTubeTemporalModel(TemporalModel):
                     "tube_logits": [],
                     "winner_tube_id": None,
                     "winner_tube_entries": [],
+                    "kept_tubes": [],
                     "threshold": float(dec["threshold"]),
                 },
             )
@@ -154,6 +155,7 @@ class BboxTubeTemporalModel(TemporalModel):
                     "tube_logits": [],
                     "winner_tube_id": None,
                     "winner_tube_entries": [],
+                    "kept_tubes": [],
                     "threshold": float(dec["threshold"]),
                 },
             )
@@ -183,19 +185,40 @@ class BboxTubeTemporalModel(TemporalModel):
             tubes=kept, logits=logits, threshold=float(dec["threshold"])
         )
 
-        winner_entries: list[dict] = []
-        if winner_id is not None:
-            winner = next(t for t in kept if t.tube_id == winner_id)
-            for e in winner.entries:
-                d = e.detection
-                winner_entries.append(
-                    {
-                        "frame_idx": e.frame_idx,
-                        "bbox": [d.cx, d.cy, d.w, d.h] if d is not None else None,
-                        "is_gap": e.is_gap,
-                        "confidence": d.confidence if d is not None else None,
-                    }
-                )
+        logits_list: list[float] = logits.tolist()
+        kept_tubes: list[dict] = []
+        for tube_idx, tube in enumerate(kept):
+            entries = [
+                {
+                    "frame_idx": e.frame_idx,
+                    "bbox": (
+                        [e.detection.cx, e.detection.cy, e.detection.w, e.detection.h]
+                        if e.detection is not None
+                        else None
+                    ),
+                    "is_gap": e.is_gap,
+                    "confidence": (
+                        e.detection.confidence if e.detection is not None else None
+                    ),
+                }
+                for e in tube.entries
+            ]
+            kept_tubes.append(
+                {
+                    "tube_id": tube.tube_id,
+                    "start_frame": tube.start_frame,
+                    "end_frame": tube.end_frame,
+                    "logit": logits_list[tube_idx],
+                    "is_winner": tube.tube_id == winner_id,
+                    "entries": entries,
+                }
+            )
+
+        winner_entries: list[dict] = (
+            next(t["entries"] for t in kept_tubes if t["is_winner"])
+            if winner_id is not None
+            else []
+        )
 
         return TemporalModelOutput(
             is_positive=is_positive,
@@ -206,9 +229,10 @@ class BboxTubeTemporalModel(TemporalModel):
                 "num_detections_per_frame": num_dets_per_frame,
                 "num_tubes_total": len(candidate_tubes),
                 "num_tubes_kept": len(kept),
-                "tube_logits": logits.tolist(),
+                "tube_logits": logits_list,
                 "winner_tube_id": winner_id,
                 "winner_tube_entries": winner_entries,
+                "kept_tubes": kept_tubes,
                 "threshold": float(dec["threshold"]),
             },
         )
