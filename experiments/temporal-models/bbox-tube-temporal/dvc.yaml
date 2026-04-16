@@ -699,7 +699,6 @@ stages:
         - data/06_models/${item.variant}/model.zip
         - data/01_raw/datasets/${item.split}
       outs:
-        - data/08_reporting/${item.split}/packaged/${item.variant}/errors
         - data/08_reporting/${item.split}/packaged/${item.variant}/predictions.json:
             cache: false
         - data/08_reporting/${item.split}/packaged/${item.variant}/dropped.json:

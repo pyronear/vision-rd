@@ -75,7 +75,6 @@ def _record_to_json(rec: SequenceRecord) -> dict:
 def main() -> None:
     args = _parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    (args.output_dir / "errors").mkdir(exist_ok=True)
 
     model = BboxTubeTemporalModel.from_archive(args.model_zip, device=args.device)
 

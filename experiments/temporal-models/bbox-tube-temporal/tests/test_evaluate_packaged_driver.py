@@ -113,7 +113,6 @@ def test_evaluate_packaged_writes_expected_outputs(tmp_path, monkeypatch):
     assert (output_dir / "confusion_matrix_normalized.png").is_file()
     assert (output_dir / "pr_curve.png").is_file()
     assert (output_dir / "roc_curve.png").is_file()
-    assert (output_dir / "errors").is_dir()
 
     metrics = json.loads((output_dir / "metrics.json").read_text())
     assert metrics["model_name"] == "fake-variant-fake-split"
