@@ -316,3 +316,4 @@ package:
     iou_nms: 0.2
     image_size: 1024
     pad_to_min_frames: 0
+    pad_strategy: symmetric

@@ -18,6 +18,7 @@ TEST_CONFIG: dict = {
         "iou_nms": 0.2,
         "image_size": 1024,
         "pad_to_min_frames": 0,
+        "pad_strategy": "symmetric",
     },
     "tubes": {
         "iou_threshold": 0.2,
@@ -230,6 +231,52 @@ class TestShortSequencePadding:
         out = model.predict(frames=red_frames)
         assert len(out.details["num_detections_per_frame"]) == 6
         assert out.details["num_padded"] == 0
+
+    def test_pad_strategy_uniform_spreads_duplicates(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        """``pad_strategy='uniform'`` uses nearest-neighbor upsampling so the
+        real frames are spread evenly across the padded sequence rather than
+        clustered at the boundaries (cf. symmetric)."""
+        cfg = {
+            **TEST_CONFIG,
+            "infer": {
+                **TEST_CONFIG["infer"],
+                "pad_to_min_frames": 6,
+                "pad_strategy": "uniform",
+            },
+        }
+        short = red_frames[:2]  # N=2 real frames, pad to M=6
+        # Uniform nearest-neighbor map: i*2//6 for i in 0..5 = [0,0,0,1,1,1]
+        # so the first 3 slots sample frame 0 and the last 3 sample frame 1.
+        per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in range(6)]
+        yolo = _fake_yolo_factory(per_frame)
+        model = BboxTubeTemporalModel(
+            yolo_model=yolo, classifier=tiny_classifier, config=cfg
+        )
+        out = model.predict(frames=short)
+        assert len(out.details["num_detections_per_frame"]) == 6
+        assert out.details["num_padded"] == 4
+        assert out.details["num_frames"] == 2
+
+    def test_pad_strategy_unknown_raises(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        cfg = {
+            **TEST_CONFIG,
+            "infer": {
+                **TEST_CONFIG["infer"],
+                "pad_to_min_frames": 5,
+                "pad_strategy": "bogus",
+            },
+        }
+        short = red_frames[:2]
+        yolo = MagicMock()
+        model = BboxTubeTemporalModel(
+            yolo_model=yolo, classifier=tiny_classifier, config=cfg
+        )
+        with pytest.raises(ValueError, match="unknown pad_strategy"):
+            model.predict(frames=short)
 
 
 class TestDeviceSelection:

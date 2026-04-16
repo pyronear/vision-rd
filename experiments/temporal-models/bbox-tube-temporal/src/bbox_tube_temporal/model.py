@@ -16,12 +16,18 @@ from .inference import (
     crop_tube_patches,
     filter_and_interpolate_tubes,
     pad_frames_symmetrically,
+    pad_frames_uniform,
     pick_winner_and_trigger,
     run_yolo_on_frames,
     score_tubes,
 )
 from .package import ModelPackage, load_model_package
 from .tubes import build_tubes
+
+_PAD_STRATEGIES = {
+    "symmetric": pad_frames_symmetrically,
+    "uniform": pad_frames_uniform,
+}
 
 
 def _select_device(device: str | torch.device | None) -> torch.device:
@@ -124,7 +130,15 @@ class BboxTubeTemporalModel(TemporalModel):
 
         pad_min = int(infer.get("pad_to_min_frames", 0))
         if pad_min > 0 and len(truncated) < pad_min:
-            truncated = pad_frames_symmetrically(truncated, min_length=pad_min)
+            strategy = infer.get("pad_strategy", "symmetric")
+            try:
+                pad_fn = _PAD_STRATEGIES[strategy]
+            except KeyError as e:
+                raise ValueError(
+                    f"unknown pad_strategy {strategy!r}; "
+                    f"expected one of {sorted(_PAD_STRATEGIES)}"
+                ) from e
+            truncated = pad_fn(truncated, min_length=pad_min)
         n_padded = len(truncated) - (original_len - n_truncated)
 
         frame_dets = run_yolo_on_frames(

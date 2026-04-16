@@ -44,6 +44,28 @@ def pad_frames_symmetrically(
     return result
 
 
+def pad_frames_uniform(
+    frames: list[Frame],
+    *,
+    min_length: int,
+) -> list[Frame]:
+    """Pad ``frames`` up to ``min_length`` by uniform nearest-neighbor upsampling.
+
+    Each of ``min_length`` output slots picks the real frame whose position
+    is closest under floor mapping ``i * N // M``. Real frames are repeated
+    in-place, spread evenly across the padded sequence rather than clustered
+    at the boundaries. Useful as an alternative to
+    :func:`pad_frames_symmetrically` when the classifier is sensitive to the
+    temporal distribution of duplicates (e.g. transformer attention). Empty
+    inputs and inputs already at or above ``min_length`` pass through
+    unchanged.
+    """
+    if not frames or len(frames) >= min_length:
+        return list(frames)
+    n = len(frames)
+    return [frames[i * n // min_length] for i in range(min_length)]
+
+
 def run_yolo_on_frames(
     yolo_model: Any,
     frames: list[Frame],
