@@ -3721,3 +3721,342 @@ stages:
       hash: md5
       md5: f6a972c7d14d0bdf1afc527e7d106a02
       size: 162764055
+  evaluate_packaged@1:
+    cmd: uv run python scripts/evaluate_packaged.py --model-zip 
+      data/06_models/vit_dinov2_finetune/model.zip --sequences-dir 
+      data/01_raw/datasets/val --output-dir 
+      data/08_reporting/val/packaged/vit_dinov2_finetune --model-name 
+      vit_dinov2_finetune-val
+    deps:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: 409ed7d0573adcb3be98f7ceab63cf25.dir
+      size: 444161180
+      nfiles: 8752
+    - path: data/06_models/vit_dinov2_finetune/model.zip
+      hash: md5
+      md5: f6a972c7d14d0bdf1afc527e7d106a02
+      size: 162764055
+    - path: scripts/evaluate_packaged.py
+      hash: md5
+      md5: 59a7c7682a7b0a87246c652b38d9c856
+      size: 5165
+    - path: src/bbox_tube_temporal/data.py
+      hash: md5
+      md5: b907e5a0baedb93775446678c2cce034
+      size: 5078
+    - path: src/bbox_tube_temporal/eval_plots.py
+      hash: md5
+      md5: 20b2ef6beaafec50e50dea06b24d4c1f
+      size: 2851
+    - path: src/bbox_tube_temporal/inference.py
+      hash: md5
+      md5: 1430a3e47e76d00c75f8ed7e428d3c2d
+      size: 7468
+    - path: src/bbox_tube_temporal/model.py
+      hash: md5
+      md5: a1220298c6885a0d892e8cd02a63cca9
+      size: 7113
+    - path: src/bbox_tube_temporal/model_input.py
+      hash: md5
+      md5: fa9e8bd01b4a5228feeeb8d689405f88
+      size: 3612
+    - path: src/bbox_tube_temporal/protocol_eval.py
+      hash: md5
+      md5: 5eb17aed6a6110abe2257791da3c0d65
+      size: 5796
+    - path: src/bbox_tube_temporal/tubes.py
+      hash: md5
+      md5: 2f6f8e5e9ff7342a45ddaec8d0bedc1f
+      size: 11706
+    outs:
+    - path: 
+        data/08_reporting/val/packaged/vit_dinov2_finetune/confusion_matrix.png
+      hash: md5
+      md5: 1bb33a3209ede3edf8fe2df8591a963c
+      size: 22902
+    - path: 
+        data/08_reporting/val/packaged/vit_dinov2_finetune/confusion_matrix_normalized.png
+      hash: md5
+      md5: 2aef10c78763e39e4687e09d44d1144f
+      size: 25216
+    - path: data/08_reporting/val/packaged/vit_dinov2_finetune/dropped.json
+      hash: md5
+      md5: d751713988987e9331980363e24189ce
+      size: 2
+    - path: data/08_reporting/val/packaged/vit_dinov2_finetune/errors
+      hash: md5
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
+    - path: data/08_reporting/val/packaged/vit_dinov2_finetune/metrics.json
+      hash: md5
+      md5: 48fe8c9dd41616f358f658b5ce638458
+      size: 294
+    - path: data/08_reporting/val/packaged/vit_dinov2_finetune/pr_curve.png
+      hash: md5
+      md5: 5685f8d4cbf09127e1189259b28d3382
+      size: 21957
+    - path: data/08_reporting/val/packaged/vit_dinov2_finetune/predictions.json
+      hash: md5
+      md5: 5e1bc614f5523f317ab0553369ac7c9e
+      size: 101153
+    - path: data/08_reporting/val/packaged/vit_dinov2_finetune/roc_curve.png
+      hash: md5
+      md5: 6483c2a4354de38e8470d86e6ec69582
+      size: 30821
+  evaluate_packaged@2:
+    cmd: uv run python scripts/evaluate_packaged.py --model-zip 
+      data/06_models/gru_convnext_finetune/model.zip --sequences-dir 
+      data/01_raw/datasets/train --output-dir 
+      data/08_reporting/train/packaged/gru_convnext_finetune --model-name 
+      gru_convnext_finetune-train
+    deps:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: caf37d4bf513efd49b9617378fff1ffa.dir
+      size: 4776619781
+      nfiles: 89870
+    - path: data/06_models/gru_convnext_finetune/model.zip
+      hash: md5
+      md5: e651122c7807c7f9fd113423e5ea8f4e
+      size: 258728626
+    - path: scripts/evaluate_packaged.py
+      hash: md5
+      md5: 59a7c7682a7b0a87246c652b38d9c856
+      size: 5165
+    - path: src/bbox_tube_temporal/data.py
+      hash: md5
+      md5: b907e5a0baedb93775446678c2cce034
+      size: 5078
+    - path: src/bbox_tube_temporal/eval_plots.py
+      hash: md5
+      md5: 20b2ef6beaafec50e50dea06b24d4c1f
+      size: 2851
+    - path: src/bbox_tube_temporal/inference.py
+      hash: md5
+      md5: 1430a3e47e76d00c75f8ed7e428d3c2d
+      size: 7468
+    - path: src/bbox_tube_temporal/model.py
+      hash: md5
+      md5: a1220298c6885a0d892e8cd02a63cca9
+      size: 7113
+    - path: src/bbox_tube_temporal/model_input.py
+      hash: md5
+      md5: fa9e8bd01b4a5228feeeb8d689405f88
+      size: 3612
+    - path: src/bbox_tube_temporal/protocol_eval.py
+      hash: md5
+      md5: 5eb17aed6a6110abe2257791da3c0d65
+      size: 5796
+    - path: src/bbox_tube_temporal/tubes.py
+      hash: md5
+      md5: 2f6f8e5e9ff7342a45ddaec8d0bedc1f
+      size: 11706
+    outs:
+    - path: 
+        data/08_reporting/train/packaged/gru_convnext_finetune/confusion_matrix.png
+      hash: md5
+      md5: c8dba7eeddb33b1ea8a9fabe9c9d2225
+      size: 25708
+    - path: 
+        data/08_reporting/train/packaged/gru_convnext_finetune/confusion_matrix_normalized.png
+      hash: md5
+      md5: 4b69c3218188ae1a4cf8cbc50e6f402c
+      size: 25145
+    - path: data/08_reporting/train/packaged/gru_convnext_finetune/dropped.json
+      hash: md5
+      md5: d751713988987e9331980363e24189ce
+      size: 2
+    - path: data/08_reporting/train/packaged/gru_convnext_finetune/errors
+      hash: md5
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
+    - path: data/08_reporting/train/packaged/gru_convnext_finetune/metrics.json
+      hash: md5
+      md5: d048fb79e794ad75f91ec8662a6571ea
+      size: 301
+    - path: data/08_reporting/train/packaged/gru_convnext_finetune/pr_curve.png
+      hash: md5
+      md5: b4f6ad8dc971dabf5edd650d824948eb
+      size: 23183
+    - path: 
+        data/08_reporting/train/packaged/gru_convnext_finetune/predictions.json
+      hash: md5
+      md5: de8ecacc6c9c4b8ca25acef145fe774a
+      size: 990585
+    - path: data/08_reporting/train/packaged/gru_convnext_finetune/roc_curve.png
+      hash: md5
+      md5: ed0283eb114a45d45f2c37ae539c08f4
+      size: 32935
+  evaluate_packaged@0:
+    cmd: uv run python scripts/evaluate_packaged.py --model-zip 
+      data/06_models/vit_dinov2_finetune/model.zip --sequences-dir 
+      data/01_raw/datasets/train --output-dir 
+      data/08_reporting/train/packaged/vit_dinov2_finetune --model-name 
+      vit_dinov2_finetune-train
+    deps:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: caf37d4bf513efd49b9617378fff1ffa.dir
+      size: 4776619781
+      nfiles: 89870
+    - path: data/06_models/vit_dinov2_finetune/model.zip
+      hash: md5
+      md5: f6a972c7d14d0bdf1afc527e7d106a02
+      size: 162764055
+    - path: scripts/evaluate_packaged.py
+      hash: md5
+      md5: 59a7c7682a7b0a87246c652b38d9c856
+      size: 5165
+    - path: src/bbox_tube_temporal/data.py
+      hash: md5
+      md5: b907e5a0baedb93775446678c2cce034
+      size: 5078
+    - path: src/bbox_tube_temporal/eval_plots.py
+      hash: md5
+      md5: 20b2ef6beaafec50e50dea06b24d4c1f
+      size: 2851
+    - path: src/bbox_tube_temporal/inference.py
+      hash: md5
+      md5: 1430a3e47e76d00c75f8ed7e428d3c2d
+      size: 7468
+    - path: src/bbox_tube_temporal/model.py
+      hash: md5
+      md5: a1220298c6885a0d892e8cd02a63cca9
+      size: 7113
+    - path: src/bbox_tube_temporal/model_input.py
+      hash: md5
+      md5: fa9e8bd01b4a5228feeeb8d689405f88
+      size: 3612
+    - path: src/bbox_tube_temporal/protocol_eval.py
+      hash: md5
+      md5: 5eb17aed6a6110abe2257791da3c0d65
+      size: 5796
+    - path: src/bbox_tube_temporal/tubes.py
+      hash: md5
+      md5: 2f6f8e5e9ff7342a45ddaec8d0bedc1f
+      size: 11706
+    outs:
+    - path: 
+        data/08_reporting/train/packaged/vit_dinov2_finetune/confusion_matrix.png
+      hash: md5
+      md5: 29af5f32a0f9a3cb308e7ceb6fce552b
+      size: 25071
+    - path: 
+        data/08_reporting/train/packaged/vit_dinov2_finetune/confusion_matrix_normalized.png
+      hash: md5
+      md5: ddee4d1dc3317115994c7ce855cd2ff9
+      size: 24807
+    - path: data/08_reporting/train/packaged/vit_dinov2_finetune/dropped.json
+      hash: md5
+      md5: d751713988987e9331980363e24189ce
+      size: 2
+    - path: data/08_reporting/train/packaged/vit_dinov2_finetune/errors
+      hash: md5
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
+    - path: data/08_reporting/train/packaged/vit_dinov2_finetune/metrics.json
+      hash: md5
+      md5: b959cadeb10ea471750b280687690d39
+      size: 302
+    - path: data/08_reporting/train/packaged/vit_dinov2_finetune/pr_curve.png
+      hash: md5
+      md5: 20958bc0cb94257413b3360e2ccdc890
+      size: 23564
+    - path: 
+        data/08_reporting/train/packaged/vit_dinov2_finetune/predictions.json
+      hash: md5
+      md5: 7ffdb8a923940de9222a8729442c14d5
+      size: 989258
+    - path: data/08_reporting/train/packaged/vit_dinov2_finetune/roc_curve.png
+      hash: md5
+      md5: b6e111a80edf91d7153127c0a186a118
+      size: 32987
+  evaluate_packaged@3:
+    cmd: uv run python scripts/evaluate_packaged.py --model-zip 
+      data/06_models/gru_convnext_finetune/model.zip --sequences-dir 
+      data/01_raw/datasets/val --output-dir 
+      data/08_reporting/val/packaged/gru_convnext_finetune --model-name 
+      gru_convnext_finetune-val
+    deps:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: 409ed7d0573adcb3be98f7ceab63cf25.dir
+      size: 444161180
+      nfiles: 8752
+    - path: data/06_models/gru_convnext_finetune/model.zip
+      hash: md5
+      md5: e651122c7807c7f9fd113423e5ea8f4e
+      size: 258728626
+    - path: scripts/evaluate_packaged.py
+      hash: md5
+      md5: 59a7c7682a7b0a87246c652b38d9c856
+      size: 5165
+    - path: src/bbox_tube_temporal/data.py
+      hash: md5
+      md5: b907e5a0baedb93775446678c2cce034
+      size: 5078
+    - path: src/bbox_tube_temporal/eval_plots.py
+      hash: md5
+      md5: 20b2ef6beaafec50e50dea06b24d4c1f
+      size: 2851
+    - path: src/bbox_tube_temporal/inference.py
+      hash: md5
+      md5: 1430a3e47e76d00c75f8ed7e428d3c2d
+      size: 7468
+    - path: src/bbox_tube_temporal/model.py
+      hash: md5
+      md5: a1220298c6885a0d892e8cd02a63cca9
+      size: 7113
+    - path: src/bbox_tube_temporal/model_input.py
+      hash: md5
+      md5: fa9e8bd01b4a5228feeeb8d689405f88
+      size: 3612
+    - path: src/bbox_tube_temporal/protocol_eval.py
+      hash: md5
+      md5: 5eb17aed6a6110abe2257791da3c0d65
+      size: 5796
+    - path: src/bbox_tube_temporal/tubes.py
+      hash: md5
+      md5: 2f6f8e5e9ff7342a45ddaec8d0bedc1f
+      size: 11706
+    outs:
+    - path: 
+        data/08_reporting/val/packaged/gru_convnext_finetune/confusion_matrix.png
+      hash: md5
+      md5: cfa2db42c4504906d3139d86d31aad9c
+      size: 23042
+    - path: 
+        data/08_reporting/val/packaged/gru_convnext_finetune/confusion_matrix_normalized.png
+      hash: md5
+      md5: 6379f641d96a34216d8c81332ad5b586
+      size: 28165
+    - path: data/08_reporting/val/packaged/gru_convnext_finetune/dropped.json
+      hash: md5
+      md5: d751713988987e9331980363e24189ce
+      size: 2
+    - path: data/08_reporting/val/packaged/gru_convnext_finetune/errors
+      hash: md5
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
+    - path: data/08_reporting/val/packaged/gru_convnext_finetune/metrics.json
+      hash: md5
+      md5: 1a8e466e64d281738a5e4eedc252b5e4
+      size: 296
+    - path: data/08_reporting/val/packaged/gru_convnext_finetune/pr_curve.png
+      hash: md5
+      md5: d3f71898ab42f7cadc68500c2aa8e6fb
+      size: 22446
+    - path: 
+        data/08_reporting/val/packaged/gru_convnext_finetune/predictions.json
+      hash: md5
+      md5: 84072685f9c0c9a7a6476ef44e3831c2
+      size: 101307
+    - path: data/08_reporting/val/packaged/gru_convnext_finetune/roc_curve.png
+      hash: md5
+      md5: 1f99204feebddd1cb65e74c362aa1673
+      size: 31388

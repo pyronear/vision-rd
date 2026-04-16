@@ -1,0 +1,4097 @@
+[
+  {
+    "sequence_id": "hpwren-figlib_piwmoboc_999_2020-09-05T23-28-09",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 9.284015655517578,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      7.03593635559082,
+      3.761763095855713,
+      9.24189281463623,
+      9.284015655517578
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_lpemoboc_999_2020-08-22T21-56-03",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 9.100156784057617,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      6.229763984680176,
+      8.2942476272583,
+      9.100156784057617,
+      7.064905643463135
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "awf-axis_winters1_999_2023-06-01T13-26-50",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 2,
+    "score": 9.06873893737793,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      9.06873893737793
+    ],
+    "ttd_seconds": 120.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_rmnmoboc_999_2018-05-04T23-49-00",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 7,
+    "score": 9.021257400512695,
+    "num_tubes_kept": 5,
+    "tube_logits": [
+      9.021257400512695,
+      -2.9361038208007812,
+      8.864370346069336,
+      8.395456314086914,
+      7.720792293548584
+    ],
+    "ttd_seconds": 420.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_blsmoboc_999_2019-07-16T21-45-53",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 9.007466316223145,
+    "num_tubes_kept": 5,
+    "tube_logits": [
+      8.565049171447754,
+      2.6280200481414795,
+      9.007466316223145,
+      6.537500381469727,
+      7.386699676513672
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_hpnmoboc_999_2017-06-13T21-01-25",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 8.937161445617676,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      8.937161445617676,
+      7.303003311157227,
+      4.821213722229004,
+      8.883764266967773
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_wcnmoboc_999_2018-07-27T22-37-18",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 8.898958206176758,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      8.34389877319336,
+      8.898958206176758,
+      8.186067581176758
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-02-27T13-35-30",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 18,
+    "score": 8.62714958190918,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      8.603592872619629,
+      8.62714958190918,
+      8.490781784057617,
+      5.533065319061279
+    ],
+    "ttd_seconds": 419.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-03-14T14-48-14",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 6,
+    "score": 8.495634078979492,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      8.495634078979492,
+      -2.5573439598083496
+    ],
+    "ttd_seconds": 166.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_20_2024-01-02T14-34-40",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 8.480818748474121,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      6.767447471618652,
+      7.027137756347656,
+      8.480818748474121,
+      7.939850807189941
+    ],
+    "ttd_seconds": 1200.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_rmwmoboc_999_2018-07-29T00-08-06",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 8.464483261108398,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      5.594150543212891,
+      8.464483261108398,
+      8.414445877075195,
+      6.670459747314453
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2024-03-19T13-37-18",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 7,
+    "score": 8.401812553405762,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      8.401812553405762
+    ],
+    "ttd_seconds": 119.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_142_2024-02-25T09-47-14",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 8.343375205993652,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      6.924691677093506,
+      8.343375205993652,
+      3.0888562202453613,
+      7.394115924835205
+    ],
+    "ttd_seconds": 779.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_142_2024-01-08T11-52-23",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 8.188130378723145,
+    "num_tubes_kept": 8,
+    "tube_logits": [
+      7.562112331390381,
+      8.188130378723145,
+      1.5650383234024048,
+      -3.1388440132141113,
+      3.010819435119629,
+      3.7160024642944336,
+      6.504495143890381,
+      5.185452461242676
+    ],
+    "ttd_seconds": 390.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_losmoboc_999_2019-07-16T00-12-23",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 13,
+    "score": 8.135364532470703,
+    "num_tubes_kept": 9,
+    "tube_logits": [
+      4.377729892730713,
+      3.2041399478912354,
+      1.7156987190246582,
+      3.1584739685058594,
+      2.3526463508605957,
+      3.059737205505371,
+      8.135364532470703,
+      4.395389556884766,
+      4.0641889572143555
+    ],
+    "ttd_seconds": 780.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2024-02-24T13-14-16",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 15,
+    "score": 8.133051872253418,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      8.133051872253418,
+      3.8544178009033203,
+      3.6353414058685303
+    ],
+    "ttd_seconds": 570.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_265_2024-07-24T15-22-11",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 8,
+    "score": 8.118632316589355,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      8.118632316589355,
+      2.4325735569000244
+    ],
+    "ttd_seconds": 449.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_161_2024-08-19T07-58-07",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 7.948892593383789,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      7.948892593383789,
+      -0.047006942331790924,
+      1.0873252153396606,
+      0.07699179649353027
+    ],
+    "ttd_seconds": 606.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_piemoboc_999_2020-08-23T23-12-05",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 18,
+    "score": 7.945999622344971,
+    "num_tubes_kept": 11,
+    "tube_logits": [
+      7.714416027069092,
+      1.5082226991653442,
+      3.892759323120117,
+      -0.11428698897361755,
+      4.357654571533203,
+      1.5932706594467163,
+      -0.08484828472137451,
+      7.945999622344971,
+      2.296929359436035,
+      2.919079065322876,
+      3.2493488788604736
+    ],
+    "ttd_seconds": 1080.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_067_2024-02-16T10-12-36",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 11,
+    "score": 7.937394142150879,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      7.937394142150879
+    ],
+    "ttd_seconds": 571.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_127_2023-03-01T19-58-13",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 17,
+    "score": 7.9094929695129395,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      7.9094929695129395,
+      3.077899217605591,
+      6.905640125274658
+    ],
+    "ttd_seconds": 510.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2024-02-27T13-22-55",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 7.886800289154053,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      6.021114349365234,
+      7.886800289154053,
+      -8.022860527038574,
+      5.605839729309082
+    ],
+    "ttd_seconds": 510.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_wcemoboc_999_2021-07-11T19-59-54",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 18,
+    "score": 7.7928032875061035,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      7.7928032875061035,
+      5.902943134307861,
+      5.2873945236206055
+    ],
+    "ttd_seconds": 1080.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-02-23T10-22-27",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 9,
+    "score": 7.770370960235596,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      7.770370960235596
+    ],
+    "ttd_seconds": 173.0
+  },
+  {
+    "sequence_id": "awf-axis_prarieridge_999_2023-06-04T16-07-55",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 2,
+    "score": 7.764063358306885,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      7.764063358306885
+    ],
+    "ttd_seconds": 1440.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_212_2024-02-23T12-08-17",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 7,
+    "score": 7.539792060852051,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      7.539792060852051
+    ],
+    "ttd_seconds": 120.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-03-08T09-20-28",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 7.513672828674316,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      7.513672828674316,
+      4.553327560424805,
+      6.3320159912109375
+    ],
+    "ttd_seconds": 480.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-03-17T11-15-46",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 7.468586444854736,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      7.468586444854736
+    ],
+    "ttd_seconds": 453.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_smertcs8moboc_999_2017-07-13T23-23-55",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 7.446110725402832,
+    "num_tubes_kept": 5,
+    "tube_logits": [
+      7.0527663230896,
+      -3.4365625381469727,
+      7.446110725402832,
+      0.4864812195301056,
+      1.581073522567749
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_029_2024-02-19T09-19-50",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 8,
+    "score": 7.439642429351807,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      7.439642429351807,
+      3.458981990814209
+    ],
+    "ttd_seconds": 188.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2024-02-12T13-55-28",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 7.433745384216309,
+    "num_tubes_kept": 5,
+    "tube_logits": [
+      6.39430046081543,
+      3.3653855323791504,
+      6.549192905426025,
+      4.947582244873047,
+      7.433745384216309
+    ],
+    "ttd_seconds": 1108.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_59_2024-07-07T21-53-42",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 7.4267659187316895,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      7.4267659187316895
+    ],
+    "ttd_seconds": 557.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2024-04-09T14-37-29",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 3,
+    "score": 7.401953220367432,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      7.401953220367432,
+      6.478869915008545
+    ],
+    "ttd_seconds": 24.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_059_2024-09-14T16-02-50",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 6,
+    "score": 7.369185447692871,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      7.369185447692871
+    ],
+    "ttd_seconds": 95.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_059_2024-07-10T11-06-02",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 9,
+    "score": 7.340369701385498,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      4.431020736694336,
+      7.340369701385498,
+      2.606532573699951
+    ],
+    "ttd_seconds": 315.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-02-13T13-31-45",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 7,
+    "score": 7.338714599609375,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      7.338714599609375,
+      5.689883708953857,
+      5.203642845153809
+    ],
+    "ttd_seconds": 121.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2024-02-24T08-30-54",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 6,
+    "score": 7.260763645172119,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      6.370194435119629,
+      7.260763645172119,
+      2.7447681427001953
+    ],
+    "ttd_seconds": 90.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-06-07T11-03-47",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 8,
+    "score": 7.236026763916016,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      7.236026763916016
+    ],
+    "ttd_seconds": 111.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_029_2024-03-18T09-18-12",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 5,
+    "score": 7.231504440307617,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      7.231504440307617,
+      1.2894750833511353
+    ],
+    "ttd_seconds": 61.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_311_2023-10-05T16-05-13",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 7,
+    "score": 7.219458103179932,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      7.219458103179932
+    ],
+    "ttd_seconds": 517.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_008_2024-07-15T15-47-06",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 3,
+    "score": 7.149149417877197,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      7.149149417877197
+    ],
+    "ttd_seconds": 12.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_mlosmoboc_999_2020-08-29T19-55-23",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 6.994668960571289,
+    "num_tubes_kept": 6,
+    "tube_logits": [
+      5.436252593994141,
+      4.940613269805908,
+      5.394588470458984,
+      6.988459587097168,
+      2.6892900466918945,
+      6.994668960571289
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_349_2023-11-04T11-38-32",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 2,
+    "score": 6.968657493591309,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      5.850013256072998,
+      6.968657493591309
+    ],
+    "ttd_seconds": 2.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_138_2024-01-15T10-19-43",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 13,
+    "score": 6.966104507446289,
+    "num_tubes_kept": 5,
+    "tube_logits": [
+      6.966104507446289,
+      -3.329617738723755,
+      4.170625686645508,
+      -1.7852985858917236,
+      4.8422465324401855
+    ],
+    "ttd_seconds": 302.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_videlles-02_80_2025-08-24T16-42-08",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 7,
+    "score": 6.914833068847656,
+    "num_tubes_kept": 8,
+    "tube_logits": [
+      3.8554203510284424,
+      2.2029831409454346,
+      5.808218002319336,
+      2.202017307281494,
+      6.914833068847656,
+      4.3552937507629395,
+      5.267831325531006,
+      4.490711212158203
+    ],
+    "ttd_seconds": 60.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_020_2024-02-24T15-00-16",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 11,
+    "score": 6.89555549621582,
+    "num_tubes_kept": 6,
+    "tube_logits": [
+      6.655581951141357,
+      2.8768138885498047,
+      4.405972480773926,
+      5.359612941741943,
+      6.89555549621582,
+      5.06723690032959
+    ],
+    "ttd_seconds": 337.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_185_2024-02-23T14-03-21",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 5,
+    "score": 6.855796813964844,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      6.855796813964844
+    ],
+    "ttd_seconds": 45.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_omsmoboc_999_2019-10-06T19-10-39",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 1,
+    "score": 6.840452194213867,
+    "num_tubes_kept": 5,
+    "tube_logits": [
+      2.1245925426483154,
+      3.9232177734375,
+      6.840452194213867,
+      3.7338309288024902,
+      3.16795015335083
+    ],
+    "ttd_seconds": 60.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-02-23T12-38-40",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 6.807666778564453,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      5.658542633056641,
+      1.6063395738601685,
+      6.807666778564453,
+      3.104525327682495
+    ],
+    "ttd_seconds": 449.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_courmettes_275_2023-10-29T08-23-21",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 6.8069233894348145,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      6.8069233894348145,
+      5.293164253234863
+    ],
+    "ttd_seconds": 510.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-02-23T10-57-19",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 14,
+    "score": 6.800082206726074,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      6.800082206726074,
+      4.735792636871338,
+      5.309869766235352,
+      4.876911640167236
+    ],
+    "ttd_seconds": 364.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_080_2024-01-26T14-58-34",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 5,
+    "score": 6.762163162231445,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      6.762163162231445
+    ],
+    "ttd_seconds": 60.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-02-23T11-07-07",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 17,
+    "score": 6.753018856048584,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      6.753018856048584,
+      4.5087175369262695,
+      2.252229690551758,
+      6.115617752075195
+    ],
+    "ttd_seconds": 1711.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_327_2024-02-18T10-22-35",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 5,
+    "score": 6.736453056335449,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      6.736453056335449
+    ],
+    "ttd_seconds": 60.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_110_2024-07-22T12-13-32",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 7,
+    "score": 6.711795806884766,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      6.711795806884766,
+      2.1224365234375
+    ],
+    "ttd_seconds": 150.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-10T10-02-45",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 4,
+    "score": 6.6888532638549805,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      6.6888532638549805,
+      5.631894111633301,
+      5.039459705352783,
+      -3.0538816452026367
+    ],
+    "ttd_seconds": 97.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_bhnmoboc_999_2018-05-04T23-50-10",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 17,
+    "score": 6.591645240783691,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      5.644362926483154,
+      5.389570713043213,
+      6.591645240783691
+    ],
+    "ttd_seconds": 1020.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-09-05T11-05-34",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 6.5600266456604,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      4.673835277557373,
+      6.5600266456604
+    ],
+    "ttd_seconds": 1394.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-12_pouncho-agast_337_2024-09-03T13-07-45",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 13,
+    "score": 6.536498546600342,
+    "num_tubes_kept": 15,
+    "tube_logits": [
+      0.357355535030365,
+      -4.407203674316406,
+      -2.4433975219726562,
+      4.656617164611816,
+      -1.148938536643982,
+      4.9330735206604,
+      5.053203105926514,
+      6.536498546600342,
+      4.649960994720459,
+      3.1539316177368164,
+      2.372805118560791,
+      1.7290815114974976,
+      3.3698232173919678,
+      -0.8863582611083984,
+      -3.928075075149536
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas-01_60_2025-08-27T10-44-06",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 11,
+    "score": 6.523739814758301,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      6.523739814758301,
+      4.847640037536621,
+      5.904472351074219
+    ],
+    "ttd_seconds": 179.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_349_2024-04-20T19-02-34",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 6,
+    "score": 6.449392318725586,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      6.449392318725586,
+      3.0349442958831787,
+      5.4383649826049805
+    ],
+    "ttd_seconds": 64.0
+  },
+  {
+    "sequence_id": "pyronear-sis-67_haguenau-02_220_2025-08-31T07-28-30",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 6.4230427742004395,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      6.4230427742004395
+    ],
+    "ttd_seconds": 450.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-09-14T17-14-35",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 3,
+    "score": 6.422276496887207,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      6.422276496887207,
+      6.397831439971924
+    ],
+    "ttd_seconds": 56.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_lpnmoboc_999_2018-07-06T20-32-01",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 6.354100704193115,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      6.354100704193115,
+      5.567583084106445,
+      4.40508508682251
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_020_2024-01-18T10-26-11",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 9,
+    "score": 6.3539910316467285,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      6.3539910316467285,
+      -1.2831976413726807
+    ],
+    "ttd_seconds": 204.0
+  },
+  {
+    "sequence_id": "awf_anderson_999_2023-06-04T15-34-44",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 2,
+    "score": 6.2915120124816895,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      6.2915120124816895,
+      2.6262240409851074,
+      3.1415812969207764
+    ],
+    "ttd_seconds": 120.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_020_2024-03-21T08-46-45",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 10,
+    "score": 6.260255336761475,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      6.260255336761475,
+      4.941111087799072
+    ],
+    "ttd_seconds": 510.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_142_2024-02-12T11-13-17",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 9,
+    "score": 6.230940818786621,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      6.230940818786621
+    ],
+    "ttd_seconds": 207.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_185_2023-09-19T08-59-22",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 18,
+    "score": 6.215991020202637,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      6.215991020202637
+    ],
+    "ttd_seconds": 1110.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas-01_327_2025-08-03T12-26-52",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 6.197617053985596,
+    "num_tubes_kept": 9,
+    "tube_logits": [
+      6.197617053985596,
+      2.4120922088623047,
+      6.136401176452637,
+      4.333009719848633,
+      5.173984050750732,
+      5.348463535308838,
+      -0.4900340139865875,
+      3.95943021774292,
+      5.095483779907227
+    ],
+    "ttd_seconds": 1499.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-02-12T10-30-12",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 4,
+    "score": 6.188483715057373,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      2.7774062156677246,
+      0.7119320631027222,
+      6.188483715057373
+    ],
+    "ttd_seconds": 59.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_212_2024-01-25T11-56-08",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 9,
+    "score": 6.170703887939453,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      2.7813544273376465,
+      6.170703887939453,
+      2.9449610710144043,
+      6.063906669616699
+    ],
+    "ttd_seconds": 180.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_080_2024-09-07T11-41-38",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 5,
+    "score": 6.115139961242676,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      6.115139961242676
+    ],
+    "ttd_seconds": 116.0
+  },
+  {
+    "sequence_id": "pyronear-ohiggins_mostazal_001_2025-06-10T20-39-55",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 1,
+    "score": 6.114944934844971,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      6.114944934844971,
+      2.4827375411987305
+    ],
+    "ttd_seconds": 30.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-31T16-38-38",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 12,
+    "score": 6.097139835357666,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      6.097139835357666,
+      2.6810946464538574
+    ],
+    "ttd_seconds": 266.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_029_2024-01-27T11-13-13",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 11,
+    "score": 6.091500282287598,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      6.091500282287598
+    ],
+    "ttd_seconds": 923.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-23T15-55-10",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 9,
+    "score": 6.087597370147705,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      6.087597370147705,
+      5.525059700012207,
+      2.87819242477417
+    ],
+    "ttd_seconds": 180.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_nemours-01_52_2025-08-07T09-39-01",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 10,
+    "score": 6.030614852905273,
+    "num_tubes_kept": 7,
+    "tube_logits": [
+      2.547091007232666,
+      -0.31119129061698914,
+      3.6063754558563232,
+      6.030614852905273,
+      4.50224494934082,
+      -0.6742614507675171,
+      -1.7492048740386963
+    ],
+    "ttd_seconds": 150.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2024-01-27T12-17-07",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 9,
+    "score": 6.021237373352051,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      6.021237373352051
+    ],
+    "ttd_seconds": 179.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-04-06T12-35-34",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 3,
+    "score": 5.972740173339844,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      5.972740173339844
+    ],
+    "ttd_seconds": 48.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-01-03T10-39-33",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 1,
+    "score": 5.9544878005981445,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      5.9544878005981445
+    ],
+    "ttd_seconds": 41.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_142_2023-10-26T08-33-36",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 5.950934410095215,
+    "num_tubes_kept": 16,
+    "tube_logits": [
+      4.891119003295898,
+      3.2315125465393066,
+      0.05019594728946686,
+      1.5843383073806763,
+      4.411811828613281,
+      5.950934410095215,
+      3.0930216312408447,
+      1.8229140043258667,
+      0.5101262331008911,
+      3.3125269412994385,
+      5.329555511474609,
+      3.7471323013305664,
+      -0.14796942472457886,
+      3.3038101196289062,
+      3.170884370803833,
+      1.0035200119018555
+    ],
+    "ttd_seconds": 724.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas-02_100_2025-08-24T07-00-15",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 5.889834403991699,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      0.07277390360832214,
+      5.432737350463867,
+      2.864337682723999,
+      5.889834403991699
+    ],
+    "ttd_seconds": 1225.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_smertcs9moboc_999_2018-06-13T00-08-57",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 18,
+    "score": 5.8808794021606445,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      5.786467552185059,
+      3.4886934757232666,
+      5.8808794021606445,
+      4.903428077697754
+    ],
+    "ttd_seconds": 1080.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_350_2024-08-26T14-07-47",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 5.877119064331055,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      5.877119064331055
+    ],
+    "ttd_seconds": 1215.0
+  },
+  {
+    "sequence_id": "awf-axis_satuspeak_999_2023-06-04T12-48-15",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 1,
+    "score": 5.847755432128906,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      5.027854919433594,
+      5.847755432128906,
+      4.060670852661133
+    ],
+    "ttd_seconds": 120.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_pismoboc_999_2019-10-06T20-16-09",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 5.814567565917969,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      5.814567565917969,
+      3.659346103668213
+    ],
+    "ttd_seconds": 1378.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2024-03-13T16-25-38",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 18,
+    "score": 5.755069255828857,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      4.58418083190918,
+      5.755069255828857
+    ],
+    "ttd_seconds": 809.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-01-26T14-01-12",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 5.743901252746582,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      5.623860836029053,
+      4.3630876541137695,
+      5.743901252746582,
+      3.582343578338623
+    ],
+    "ttd_seconds": 713.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_bhwmoboc_999_2019-10-01T22-40-16",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 5.741546630859375,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      5.741546630859375,
+      3.945040225982666,
+      3.989682197570801,
+      5.0131611824035645
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "pyronear-sis-67_haguenau-02_267_2025-08-14T06-58-35",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 18,
+    "score": 5.725190162658691,
+    "num_tubes_kept": 5,
+    "tube_logits": [
+      4.887577056884766,
+      3.6329286098480225,
+      3.038910150527954,
+      -1.2633780241012573,
+      5.725190162658691
+    ],
+    "ttd_seconds": 1814.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_courmettes_80_2023-11-04T11-56-11",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 14,
+    "score": 5.70072603225708,
+    "num_tubes_kept": 5,
+    "tube_logits": [
+      5.70072603225708,
+      3.115082263946533,
+      4.231130599975586,
+      3.1773295402526855,
+      2.4014317989349365
+    ],
+    "ttd_seconds": 359.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2024-02-24T16-34-58",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 7,
+    "score": 5.697160720825195,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      5.697160720825195
+    ],
+    "ttd_seconds": 90.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_138_2024-01-06T11-28-03",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 7,
+    "score": 5.645630836486816,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      5.645630836486816
+    ],
+    "ttd_seconds": 1101.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_rmemoboc_999_2020-02-26T19-46-02",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 5.634004592895508,
+    "num_tubes_kept": 8,
+    "tube_logits": [
+      4.682482719421387,
+      0.929036021232605,
+      0.3073764145374298,
+      5.634004592895508,
+      -0.4425989091396332,
+      -0.14751139283180237,
+      -1.2620846033096313,
+      4.681691646575928
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_lpsmoboc_999_2020-08-06T18-00-05",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 5.621305465698242,
+    "num_tubes_kept": 5,
+    "tube_logits": [
+      4.269715309143066,
+      3.4840850830078125,
+      4.3037028312683105,
+      5.2004547119140625,
+      5.621305465698242
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-11-03T10-15-24",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 8,
+    "score": 5.573331832885742,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      5.573331832885742
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "hpwren-figlib_mlwmoboc_999_2019-09-22T22-29-17",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 5.481149196624756,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      5.481149196624756,
+      -0.378908634185791
+    ],
+    "ttd_seconds": 1200.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_142_2024-01-09T10-08-39",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 13,
+    "score": 5.477787971496582,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      5.477787971496582,
+      5.3079400062561035
+    ],
+    "ttd_seconds": 571.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-03-27T15-58-18",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 15,
+    "score": 5.405612945556641,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      3.543886661529541,
+      -2.2640795707702637,
+      5.405612945556641,
+      4.709743022918701
+    ],
+    "ttd_seconds": 360.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_349_2023-11-01T11-27-15",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 4,
+    "score": 5.4007086753845215,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      5.4007086753845215,
+      4.969036102294922
+    ],
+    "ttd_seconds": 30.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-02-21T08-07-40",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 5.328658103942871,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      4.7065300941467285,
+      5.328658103942871
+    ],
+    "ttd_seconds": 689.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2024-02-07T15-44-11",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 4,
+    "score": 5.328039169311523,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      5.328039169311523,
+      5.072981834411621,
+      4.337508678436279,
+      1.893275499343872
+    ],
+    "ttd_seconds": 31.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_311_2023-10-14T09-18-50",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 16,
+    "score": 5.325475692749023,
+    "num_tubes_kept": 5,
+    "tube_logits": [
+      4.278653621673584,
+      0.7752672433853149,
+      4.2112135887146,
+      2.539947986602783,
+      5.325475692749023
+    ],
+    "ttd_seconds": 390.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_327_2024-04-03T08-00-52",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 12,
+    "score": 5.194245338439941,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      4.568658828735352,
+      5.194245338439941,
+      4.372438430786133
+    ],
+    "ttd_seconds": 1718.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_rmwmoboc_999_2019-08-26T21-45-06",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 5.040034294128418,
+    "num_tubes_kept": 7,
+    "tube_logits": [
+      5.040034294128418,
+      0.873931348323822,
+      3.588944911956787,
+      4.920049667358398,
+      4.985828399658203,
+      2.96492862701416,
+      0.39605051279067993
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2024-02-16T12-11-03",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 6,
+    "score": 5.029138565063477,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      5.029138565063477
+    ],
+    "ttd_seconds": 89.0
+  },
+  {
+    "sequence_id": "awf-axis_baldca_999_2023-06-04T07-35-26",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 1,
+    "score": 5.028340816497803,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      5.028340816497803
+    ],
+    "ttd_seconds": 60.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_142_2023-11-04T07-48-54",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 5.009427070617676,
+    "num_tubes_kept": 6,
+    "tube_logits": [
+      4.010573387145996,
+      5.009427070617676,
+      1.3746968507766724,
+      2.3671178817749023,
+      2.8583943843841553,
+      1.692564845085144
+    ],
+    "ttd_seconds": 2130.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_327_2024-04-04T19-22-21",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 16,
+    "score": 5.009349346160889,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      5.009349346160889,
+      3.3521676063537598
+    ],
+    "ttd_seconds": 571.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_mlsmoboc_999_2018-06-06T19-50-15",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 9,
+    "score": 4.937623500823975,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      2.765249252319336,
+      4.937623500823975,
+      3.701864004135132
+    ],
+    "ttd_seconds": 540.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_059_2024-09-22T12-30-49",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 4,
+    "score": 4.927659034729004,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      4.927659034729004
+    ],
+    "ttd_seconds": 46.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_39_2023-05-22T07-38-33",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 7,
+    "score": 4.889398574829102,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      4.071619987487793,
+      2.3352506160736084,
+      4.889398574829102,
+      3.4786012172698975
+    ],
+    "ttd_seconds": 270.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-01-09T15-58-27",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 8,
+    "score": 4.868479251861572,
+    "num_tubes_kept": 6,
+    "tube_logits": [
+      4.868479251861572,
+      3.05903959274292,
+      2.7155346870422363,
+      3.106876850128174,
+      4.211550235748291,
+      4.3223724365234375
+    ],
+    "ttd_seconds": 268.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_138_2024-01-12T11-45-43",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 4.864969253540039,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      4.864969253540039
+    ],
+    "ttd_seconds": 930.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_212_2024-08-20T09-17-14",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 2,
+    "score": 4.822502136230469,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      4.822502136230469
+    ],
+    "ttd_seconds": 15.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-01-14T15-52-45",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 7,
+    "score": 4.804079055786133,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      4.804079055786133
+    ],
+    "ttd_seconds": 146.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_311_2023-09-17T10-05-58",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 5,
+    "score": 4.801591396331787,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      4.801591396331787,
+      0.06584139168262482
+    ],
+    "ttd_seconds": 67.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_287_2023-11-01T11-51-09",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 11,
+    "score": 4.76325798034668,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      4.76325798034668
+    ],
+    "ttd_seconds": 269.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2024-07-06T14-17-15",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 4,
+    "score": 4.7111334800720215,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      4.7111334800720215
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_39_2023-10-16T09-00-30",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 6,
+    "score": 4.65329122543335,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      4.65329122543335,
+      -1.6967618465423584,
+      0.4187774956226349,
+      2.373866558074951
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_020_2024-01-30T17-50-05",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 5,
+    "score": 4.631524562835693,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      4.631524562835693
+    ],
+    "ttd_seconds": 99.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-01-26T11-40-42",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 3,
+    "score": 4.622143268585205,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      4.622143268585205
+    ],
+    "ttd_seconds": 28.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_8_2024-07-21T09-59-26",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 11,
+    "score": 4.606373310089111,
+    "num_tubes_kept": 5,
+    "tube_logits": [
+      -0.8997811675071716,
+      4.606373310089111,
+      -4.243190288543701,
+      -3.7837023735046387,
+      -0.7439237833023071
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_282_2024-03-20T15-57-21",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 2,
+    "score": 4.599075794219971,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      2.813901901245117,
+      4.599075794219971
+    ],
+    "ttd_seconds": 14.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_212_2024-04-03T10-07-21",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 5,
+    "score": 4.519853591918945,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      2.908081531524658,
+      -0.8879952430725098,
+      2.478358745574951,
+      4.519853591918945
+    ],
+    "ttd_seconds": 119.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-04-10T18-08-18",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 3,
+    "score": 4.458506107330322,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      3.306471824645996,
+      4.458506107330322,
+      1.2172069549560547
+    ],
+    "ttd_seconds": 13.0
+  },
+  {
+    "sequence_id": "pyronear-ohiggins_mostazal_090_2025-05-30T18-12-11",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 1,
+    "score": 4.416128158569336,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      4.363227844238281,
+      4.416128158569336,
+      3.3123538494110107,
+      -2.419360637664795
+    ],
+    "ttd_seconds": 2.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_omwmoboc_999_2020-06-19T00-25-41",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 17,
+    "score": 4.251818656921387,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      3.6946418285369873,
+      4.166418075561523,
+      2.9237160682678223,
+      4.251818656921387
+    ],
+    "ttd_seconds": 1200.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_287_2024-01-19T12-06-48",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 4,
+    "score": 4.228451728820801,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      4.228451728820801,
+      2.37443470954895,
+      1.7187594175338745
+    ],
+    "ttd_seconds": 58.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_223_2024-01-31T14-23-56",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 1,
+    "score": 4.2274169921875,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      4.2274169921875,
+      3.901512861251831,
+      1.8727151155471802
+    ],
+    "ttd_seconds": 3.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-02-03T17-05-08",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 4.209800720214844,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      4.209800720214844
+    ],
+    "ttd_seconds": 509.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_161_2024-07-08T14-29-32",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 8,
+    "score": 4.149288177490234,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      4.149288177490234
+    ],
+    "ttd_seconds": 270.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2023-09-13T05-19-50",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 14,
+    "score": 4.127506256103516,
+    "num_tubes_kept": 6,
+    "tube_logits": [
+      4.127506256103516,
+      -4.1487016677856445,
+      -2.4081692695617676,
+      -2.2980756759643555,
+      -3.1211323738098145,
+      0.7086225152015686
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "hpwren-figlib_bhsmoboc_999_2018-07-27T22-44-14",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 4.11345100402832,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      4.11345100402832,
+      2.088710308074951
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_029_2025-05-11T10-52-50",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 2,
+    "score": 4.112123966217041,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      4.112123966217041
+    ],
+    "ttd_seconds": 58.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_courmettes_160_2023-10-23T16-46-08",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 18,
+    "score": 4.109920501708984,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      4.109920501708984,
+      2.4346485137939453
+    ],
+    "ttd_seconds": 480.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_0_2024-08-15T17-37-11",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 9,
+    "score": 4.094288349151611,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      3.3067493438720703,
+      2.7165274620056152,
+      4.094288349151611
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-02-19T10-31-56",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 8,
+    "score": 4.082751750946045,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      0.2712370753288269,
+      4.082751750946045
+    ],
+    "ttd_seconds": 119.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_lpwmoboc_999_2020-12-03T07-11-07",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 18,
+    "score": 4.07716178894043,
+    "num_tubes_kept": 16,
+    "tube_logits": [
+      3.822186231613159,
+      1.4143822193145752,
+      3.0914554595947266,
+      3.4432637691497803,
+      2.462550640106201,
+      -1.4384031295776367,
+      1.3687459230422974,
+      1.6321524381637573,
+      2.8838682174682617,
+      3.353179931640625,
+      0.7602329850196838,
+      1.9767664670944214,
+      4.07716178894043,
+      1.3908464908599854,
+      1.7709121704101562,
+      0.011424453929066658
+    ],
+    "ttd_seconds": 1200.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-01-21T13-36-55",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 3.9680631160736084,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      3.05385422706604,
+      1.7108197212219238,
+      3.9680631160736084,
+      1.50147545337677
+    ],
+    "ttd_seconds": 597.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_200_2024-02-21T15-16-17",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 5,
+    "score": 3.961398124694824,
+    "num_tubes_kept": 5,
+    "tube_logits": [
+      3.961398124694824,
+      2.8621809482574463,
+      2.09187912940979,
+      1.5486482381820679,
+      3.317979335784912
+    ],
+    "ttd_seconds": 61.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_160_2024-08-29T11-43-07",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 15,
+    "score": 3.9062089920043945,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      3.9062089920043945
+    ],
+    "ttd_seconds": 367.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_291_2023-10-15T11-06-20",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 16,
+    "score": 3.8914544582366943,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      -6.462575435638428,
+      3.8914544582366943
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "hpwren-figlib_omemoboc_999_2020-08-06T17-59-37",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 3.637812376022339,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      3.637812376022339
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_courmettes_212_2023-10-30T13-21-53",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 5,
+    "score": 3.636991024017334,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      3.636991024017334
+    ],
+    "ttd_seconds": 90.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_349_2023-10-21T16-09-11",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 3.5775721073150635,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      3.5775721073150635
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-test_st-peray_322_2023-08-30T16-33-40",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 2,
+    "score": 3.554887294769287,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      3.554887294769287
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_287_2023-11-01T09-22-26",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 18,
+    "score": 3.5117716789245605,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      3.5117716789245605,
+      0.6384907960891724,
+      0.6338974833488464,
+      2.0554003715515137
+    ],
+    "ttd_seconds": 1177.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_246_2025-05-08T16-47-18",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 6,
+    "score": 3.394237756729126,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      -1.978249430656433,
+      0.34026336669921875,
+      3.394237756729126
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_138_2023-10-29T07-02-15",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 13,
+    "score": 3.391770124435425,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      1.131142497062683,
+      -4.615131855010986,
+      3.391770124435425
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sis-67_haguenau-01_300_2025-08-15T17-39-56",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 7,
+    "score": 3.360826015472412,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      3.360826015472412,
+      -4.987200736999512
+    ],
+    "ttd_seconds": 59.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-03-11T07-05-37",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 16,
+    "score": 3.357739210128784,
+    "num_tubes_kept": 8,
+    "tube_logits": [
+      -4.064191818237305,
+      2.215336799621582,
+      -3.491875410079956,
+      -3.545346260070801,
+      -0.6419967412948608,
+      0.3939884603023529,
+      3.357739210128784,
+      -0.6339084506034851
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "hpwren-figlib_omnmoboc_999_2021-03-20T04-44-42",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 3.248131275177002,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      3.248131275177002
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_226_2023-02-01T18-19-53",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 3,
+    "score": 3.2033605575561523,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      -0.3910870850086212,
+      3.2033605575561523,
+      -0.14438296854496002
+    ],
+    "ttd_seconds": 90.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-12_pouncho-agast_346_2024-08-17T09-12-20",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 3.032291889190674,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      -1.9236818552017212,
+      -6.448513031005859,
+      -6.8292646408081055,
+      3.032291889190674
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_courmettes_212_2023-10-28T15-32-06",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 14,
+    "score": 3.0316970348358154,
+    "num_tubes_kept": 6,
+    "tube_logits": [
+      2.996593713760376,
+      0.7158306837081909,
+      -5.345263481140137,
+      3.0316970348358154,
+      0.4529016613960266,
+      0.8729622960090637
+    ],
+    "ttd_seconds": 418.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_020_2024-03-21T08-07-04",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 2,
+    "score": 2.9698657989501953,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      2.781867504119873,
+      2.9698657989501953
+    ],
+    "ttd_seconds": 520.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_127_2023-10-22T07-50-48",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 18,
+    "score": 2.9172019958496094,
+    "num_tubes_kept": 6,
+    "tube_logits": [
+      2.303415536880493,
+      -0.2612002193927765,
+      1.9007843732833862,
+      2.9172019958496094,
+      1.3383315801620483,
+      -0.2724834978580475
+    ],
+    "ttd_seconds": 1794.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_127_2023-10-24T14-37-08",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 2,
+    "score": 2.903487205505371,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      2.078895330429077,
+      2.903487205505371
+    ],
+    "ttd_seconds": 463.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_310_2024-09-08T10-10-05",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 2.737274646759033,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      2.737274646759033,
+      2.1247031688690186
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2023-06-14T06-41-47",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 7,
+    "score": 2.6992311477661133,
+    "num_tubes_kept": 5,
+    "tube_logits": [
+      2.6992311477661133,
+      -3.712491989135742,
+      0.10772600769996643,
+      -2.416045904159546,
+      -0.5864279270172119
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-12_pouncho-agast_337_2024-09-04T18-13-16",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 7,
+    "score": 2.652038097381592,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      -2.235504388809204,
+      2.652038097381592,
+      -7.219595909118652
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_127_2023-10-23T15-33-09",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 2,
+    "score": 2.644428253173828,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      2.644428253173828,
+      -0.7221987843513489
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_226_2025-05-29T15-25-39",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 2,
+    "score": 2.6169068813323975,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      2.6169068813323975
+    ],
+    "ttd_seconds": 119.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-04-01T07-00-27",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 18,
+    "score": 2.479025363922119,
+    "num_tubes_kept": 9,
+    "tube_logits": [
+      -5.661585807800293,
+      0.48573189973831177,
+      1.2043565511703491,
+      -1.2275493144989014,
+      -0.7531467080116272,
+      -2.3516433238983154,
+      0.6576719284057617,
+      2.479025363922119,
+      -3.0707783699035645
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_110_2024-01-16T11-00-04",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 8,
+    "score": 2.3635730743408203,
+    "num_tubes_kept": 7,
+    "tube_logits": [
+      0.04832697659730911,
+      -4.771233558654785,
+      2.3635730743408203,
+      0.4391019642353058,
+      -1.2145951986312866,
+      2.2461941242218018,
+      1.82058846950531
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_310_2024-09-09T19-18-38",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 10,
+    "score": 2.336554527282715,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      -7.12402868270874,
+      2.336554527282715
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-12_pouncho-agast_83_2024-09-04T10-49-02",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 6,
+    "score": 2.305720090866089,
+    "num_tubes_kept": 5,
+    "tube_logits": [
+      -1.0819069147109985,
+      2.305720090866089,
+      -5.094224452972412,
+      2.284137725830078,
+      -7.343344688415527
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2024-02-17T17-36-57",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 5,
+    "score": 2.280167818069458,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      -4.696784019470215,
+      1.7469974756240845,
+      2.280167818069458
+    ],
+    "ttd_seconds": 60.0
+  },
+  {
+    "sequence_id": "hpwren-figlib_smnmoboc_999_2018-07-06T20-31-27",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 2.237619400024414,
+    "num_tubes_kept": 5,
+    "tube_logits": [
+      0.7059507369995117,
+      2.237619400024414,
+      1.5749053955078125,
+      1.1060971021652222,
+      -1.7890950441360474
+    ],
+    "ttd_seconds": 1140.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_067_2024-01-15T10-22-06",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 12,
+    "score": 2.2189571857452393,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      2.2189571857452393,
+      0.32781484723091125
+    ],
+    "ttd_seconds": 569.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-09-18T11-18-32",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 7,
+    "score": 2.2127318382263184,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      2.2127318382263184
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_349_2024-06-07T21-33-22",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 14,
+    "score": 2.180055618286133,
+    "num_tubes_kept": 6,
+    "tube_logits": [
+      0.13527467846870422,
+      2.180055618286133,
+      -4.897231101989746,
+      -1.9922171831130981,
+      1.0178322792053223,
+      -4.985915184020996
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_226_2023-07-28T05-42-34",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 6,
+    "score": 2.1284401416778564,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      2.1284401416778564
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_67_2023-10-03T05-22-38",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 8,
+    "score": 1.9878668785095215,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      -0.7933269143104553,
+      1.9878668785095215,
+      -3.106261730194092
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_212_2024-06-05T06-37-05",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 6,
+    "score": 1.8504794836044312,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      -0.8165081143379211,
+      0.1100732833147049,
+      1.8504794836044312
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_20_2024-03-18T06-44-24",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 3,
+    "score": 1.833633303642273,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      1.833633303642273
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_200_2024-02-26T18-38-27",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 6,
+    "score": 1.6882861852645874,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      1.6882861852645874,
+      -2.3326187133789062,
+      -5.913427352905273,
+      -1.7687937021255493
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_20_2024-03-06T07-20-23",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 15,
+    "score": 1.6870113611221313,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      1.6870113611221313
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_20_2024-02-11T07-59-41",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 19,
+    "score": 1.6519834995269775,
+    "num_tubes_kept": 10,
+    "tube_logits": [
+      0.5846983194351196,
+      0.031336791813373566,
+      -0.33560264110565186,
+      -1.5580226182937622,
+      0.27693259716033936,
+      1.1669520139694214,
+      1.3523718118667603,
+      1.6423734426498413,
+      -0.7793912887573242,
+      1.6519834995269775
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2024-03-18T18-14-59",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 4,
+    "score": 1.6463953256607056,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      1.6463953256607056,
+      -2.795746326446533
+    ],
+    "ttd_seconds": 14.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2023-10-10T07-28-58",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 4,
+    "score": 1.5884298086166382,
+    "num_tubes_kept": 3,
+    "tube_logits": [
+      -4.789748191833496,
+      1.5884298086166382,
+      -5.125314712524414
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_20_2024-02-26T18-37-56",
+    "label": "fp",
+    "is_positive": true,
+    "trigger_frame_index": 7,
+    "score": 1.536091685295105,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      1.536091685295105,
+      -1.4822765588760376
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-biobio_florida_180_2025-05-29T21-22-56",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 1,
+    "score": 1.53217351436615,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      1.53217351436615
+    ],
+    "ttd_seconds": 181.0
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-09-19T14-03-46",
+    "label": "smoke",
+    "is_positive": true,
+    "trigger_frame_index": 1,
+    "score": 1.226118803024292,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      1.226118803024292
+    ],
+    "ttd_seconds": 2.0
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_226_2023-11-01T16-54-46",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": 0.813370943069458,
+    "num_tubes_kept": 6,
+    "tube_logits": [
+      0.5783751606941223,
+      -1.264436960220337,
+      0.813370943069458,
+      -2.3209095001220703,
+      0.6262117624282837,
+      -1.6176568269729614
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2023-11-02T16-31-54",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": 0.7612296938896179,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      -2.3747973442077637,
+      -1.266120195388794,
+      0.7612296938896179,
+      -0.6497024893760681
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sis-67_haguenau_100_2025-07-07T23-27-16",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": 0.6538906097412109,
+    "num_tubes_kept": 14,
+    "tube_logits": [
+      -3.1770315170288086,
+      -5.992208480834961,
+      -3.3785934448242188,
+      -0.5711226463317871,
+      0.533361554145813,
+      -3.4814674854278564,
+      -2.963355779647827,
+      0.6538906097412109,
+      -4.770484924316406,
+      -1.139072060585022,
+      -4.5176310539245605,
+      -0.40011700987815857,
+      -1.642651915550232,
+      -4.510488510131836
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-07-12T08-41-56",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": 0.5831157565116882,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      -1.7459286451339722,
+      0.5831157565116882,
+      -0.45041969418525696,
+      0.07053022086620331
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_226_2023-10-20T17-08-48",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": 0.4652726948261261,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      0.4652726948261261,
+      -0.30733349919319153
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-10T14-28-48",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": 0.42375680804252625,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      0.42375680804252625
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-engie_salaunes-2_180_2023-10-31T15-21-16",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": 0.3352152407169342,
+    "num_tubes_kept": 4,
+    "tube_logits": [
+      -2.6400928497314453,
+      -3.073652505874634,
+      -3.3493103981018066,
+      0.3352152407169342
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_226_2023-08-21T16-36-33",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": 0.30648311972618103,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      -1.826142430305481,
+      0.30648311972618103
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-30T16-10-46",
+    "label": "smoke",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -0.044901713728904724,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -0.044901713728904724
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_212_2024-06-26T18-15-28",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -0.3953973948955536,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      -2.7636547088623047,
+      -0.3953973948955536
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_282_2023-09-30T07-31-12",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -0.4049748182296753,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      -0.4049748182296753,
+      -1.9586557149887085
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_150_2024-09-22T19-26-40",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -0.7730128169059753,
+    "num_tubes_kept": 5,
+    "tube_logits": [
+      -4.609060287475586,
+      -2.2149698734283447,
+      -1.8501912355422974,
+      -3.1757216453552246,
+      -0.7730128169059753
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-02-26T17-11-33",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -0.9380478262901306,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -0.9380478262901306
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_39_2023-07-08T04-30-41",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -0.9532588124275208,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -0.9532588124275208
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_250_2024-09-21T11-38-27",
+    "label": "smoke",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -1.0235306024551392,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      -2.7021169662475586,
+      -1.0235306024551392
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_67_2024-06-26T18-59-12",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -1.4561724662780762,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -1.4561724662780762
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2024-01-22T08-15-33",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -1.6022783517837524,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -1.6022783517837524
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-07-08T07-22-53",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -1.846354603767395,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -1.846354603767395
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_8_2024-07-29T05-48-10",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -1.8989485502243042,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      -7.1306304931640625,
+      -1.8989485502243042
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2024-08-16T19-42-46",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -2.015348434448242,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -2.015348434448242
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_287_2023-10-24T15-55-14",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -2.230302333831787,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -2.230302333831787
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-13T09-34-30",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -2.3076350688934326,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -2.3076350688934326
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_350_2024-08-16T16-19-20",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -2.3200442790985107,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -2.3200442790985107
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_200_2024-01-17T16-53-29",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -2.497539520263672,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -2.497539520263672
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-12_pouncho-agast_70_2024-08-16T15-52-45",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -2.8213577270507812,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -2.8213577270507812
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_039_2025-05-11T09-39-59",
+    "label": "smoke",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -2.8241748809814453,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -2.8241748809814453
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_20_2024-07-20T07-35-38",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -2.8457348346710205,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      -3.437986135482788,
+      -2.8457348346710205
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-77_croix-augas_265_2024-08-14T09-22-50",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -3.2773947715759277,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -3.2773947715759277
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_327_2024-07-06T09-05-38",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -3.3115134239196777,
+    "num_tubes_kept": 2,
+    "tube_logits": [
+      -4.469719409942627,
+      -3.3115134239196777
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_200_2024-06-21T09-05-10",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -3.4390640258789062,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -3.4390640258789062
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_46_2024-07-03T18-15-27",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -3.6075539588928223,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -3.6075539588928223
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-05T08-02-09",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -4.07142972946167,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -4.07142972946167
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-engie_salaunes-2_180_2023-08-04T18-07-34",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -4.0842790603637695,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -4.0842790603637695
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-03-27T10-21-45",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -4.638943672180176,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -4.638943672180176
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-20T15-11-37",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -4.722134590148926,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -4.722134590148926
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_39_2023-10-14T08-13-39",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -4.869071960449219,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -4.869071960449219
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_223_2023-10-19T06-09-48",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -5.112171649932861,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -5.112171649932861
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2023-10-20T10-31-13",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -5.246826648712158,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -5.246826648712158
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-02-13T18-26-25",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -5.804279804229736,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -5.804279804229736
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2023-10-14T07-57-10",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -6.085398197174072,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -6.085398197174072
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2024-06-05T09-05-44",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -6.444108963012695,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -6.444108963012695
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-29T15-37-46",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -6.508815288543701,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -6.508815288543701
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-19T12-37-17",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -6.568536758422852,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -6.568536758422852
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2023-11-06T14-35-31",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": -7.8592400550842285,
+    "num_tubes_kept": 1,
+    "tube_logits": [
+      -7.8592400550842285
+    ],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "awf-axis_elephant_999_2023-06-04T15-34-05",
+    "label": "smoke",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-engie_salaunes-2_0_2023-08-27T09-47-37",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-engie_salaunes-2_0_2023-11-05T10-43-51",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-engie_salaunes-2_270_2023-07-21T05-00-37",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-engie_salaunes-2_270_2023-10-31T07-03-48",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-engie_salaunes-2_90_2023-10-31T08-11-45",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2023-10-13T14-51-17",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2024-06-15T20-27-54",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2024-06-16T11-43-13",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2024-07-03T15-28-05",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_125_2024-07-05T14-39-27",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_244_2023-10-11T10-19-11",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-06-04T17-56-49",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-06-10T13-21-14",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-06-17T11-06-43",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-06-22T08-25-23",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-07-08T13-43-03",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_244_2024-07-13T10-11-28",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_291_2023-10-12T08-06-27",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_291_2023-10-22T10-51-18",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_327_2024-07-06T11-36-13",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_46_2023-10-22T07-13-33",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_cabanelle_46_2024-07-08T17-07-07",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2023-10-24T14-40-19",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-06-10T12-42-28",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-06-16T08-05-12",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-06-25T13-40-40",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_160_2024-06-27T09-20-36",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_212_2024-06-10T19-56-14",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2023-10-20T15-58-54",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2024-06-23T13-47-13",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_275_2024-06-25T13-25-13",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_courmettes_80_2024-06-22T06-31-29",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_142_2023-10-18T15-07-01",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_204_2023-11-05T13-28-54",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_287_2023-10-20T16-27-24",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_ferion_60_2023-10-19T12-54-39",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_223_2023-11-02T09-08-30",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_349_2023-10-31T08-08-44",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_349_2023-10-31T09-32-16",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-force-06_valbonne_67_2024-07-10T05-26-49",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-ohiggins_mostazal_180_2025-05-26T18-12-29",
+    "label": "smoke",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_127_2025-05-13T10-21-54",
+    "label": "smoke",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_200_2024-03-08T13-01-01",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_200_2024-03-30T14-49-54",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_200_2024-09-08T13-40-11",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_20_2024-06-20T13-49-58",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_20_2024-06-25T16-57-40",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_226_2023-07-24T04-25-04",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_226_2023-10-26T08-11-36",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_226_2023-10-30T08-59-01",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-01-30T13-50-41",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_290_2024-03-08T12-57-42",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_311_2023-07-04T05-56-26",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_311_2023-08-17T07-23-43",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_311_2024-09-19T19-29-47",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_brison_39_2023-06-13T05-50-20",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_185_2023-07-28T17-15-02",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_185_2024-07-16T21-58-32",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-09-18T06-58-23",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-09-20T17-27-36",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-09-21T15-00-06",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-13T11-59-03",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-18T12-31-20",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-19T13-24-19",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-19T15-00-22",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-20T11-54-30",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-20T13-55-34",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-26T11-16-26",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-29T13-45-12",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-10-30T06-39-26",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2023-11-04T07-35-29",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2024-01-18T09-11-47",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2024-01-23T09-57-05",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2024-01-30T11-55-01",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2024-02-22T07-29-26",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_29_2024-06-25T20-35-20",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2023-06-30T08-30-03",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2023-07-04T07-23-31",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2023-10-21T07-55-21",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_marguerite_339_2023-10-23T12-09-21",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_0_2024-09-22T11-35-32",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_0_2024-09-22T16-03-39",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_203_2024-09-04T19-32-39",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_257_2024-09-04T17-07-37",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-sdis-07_serre-de-barre_257_2024-09-04T19-23-17",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-test_st-peray_322_2023-07-27T13-56-34",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  },
+  {
+    "sequence_id": "pyronear-test_st-peray_322_2023-08-03T05-18-08",
+    "label": "fp",
+    "is_positive": false,
+    "trigger_frame_index": null,
+    "score": null,
+    "num_tubes_kept": 0,
+    "tube_logits": [],
+    "ttd_seconds": null
+  }
+]
