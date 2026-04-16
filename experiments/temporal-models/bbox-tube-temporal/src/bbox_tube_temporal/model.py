@@ -76,6 +76,21 @@ class BboxTubeTemporalModel(TemporalModel):
             device=device,
         )
 
+    @classmethod
+    def from_archive(
+        cls,
+        archive_path: Path,
+        *,
+        device: str | torch.device | None = None,
+    ) -> Self:
+        """Alias for :meth:`from_package`.
+
+        Convenience name used by the evaluation driver so callers can
+        refer to the archive by a generic name independent of the internal
+        packaging terminology.
+        """
+        return cls.from_package(archive_path, device=device)
+
     def predict(self, frames: list[Frame]) -> TemporalModelOutput:
         infer = self._cfg["infer"]
         tubes_cfg = self._cfg["tubes"]
