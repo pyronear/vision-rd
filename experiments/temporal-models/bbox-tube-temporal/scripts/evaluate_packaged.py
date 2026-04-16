@@ -14,6 +14,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+from tqdm import tqdm
 
 from bbox_tube_temporal.data import get_sorted_frames, is_wf_sequence, list_sequences
 from bbox_tube_temporal.eval_plots import (
@@ -65,9 +66,7 @@ def _record_to_json(rec: SequenceRecord) -> dict:
         "num_tubes_total": int(details.get("num_tubes_total", rec.num_tubes_kept)),
         "tube_logits": rec.tube_logits,
         "winner_tube_id": details.get("winner_tube_id"),
-        "threshold": (
-            float(details["threshold"]) if "threshold" in details else None
-        ),
+        "threshold": (float(details["threshold"]) if "threshold" in details else None),
         "kept_tubes": details.get("kept_tubes", []),
         "ttd_seconds": rec.ttd_seconds,
     }
@@ -84,7 +83,7 @@ def main() -> None:
     records: list[SequenceRecord] = []
     dropped: list[dict] = []
 
-    for seq_dir in sequences:
+    for seq_dir in tqdm(sequences, desc=args.model_name, unit="seq"):
         frame_paths = get_sorted_frames(seq_dir)
         if not frame_paths:
             dropped.append({"sequence_id": seq_dir.name, "reason": "no_images"})
