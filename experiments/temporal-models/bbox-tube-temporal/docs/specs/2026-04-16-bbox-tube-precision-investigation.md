@@ -98,7 +98,7 @@ distribution.
 
 ## Investigation tracks
 
-Five tracks ordered by cost / reversibility. Execute in the listed
+Four tracks ordered by cost / reversibility. Execute in the listed
 order; each track's results inform the next's necessity.
 
 ### Track A — Offline sweeps on existing `predictions.json`
@@ -125,16 +125,38 @@ Success bar: identifies a drop-in rule with precision ≥ 0.90 at
 recall ≥ 0.95 on val-packaged, or conclusively rules out that such a
 rule exists.
 
-### Track C — Inference-config alignment (runs before Track B)
+### Track F — Error-visualization notebook
 
-Re-run `evaluate_packaged` with two config ablations. Promoted ahead
-of Track B because changing the upstream tube population is cheaper
-than modifying selection logic and may make tube-selection changes
-moot.
+Qualitative companion to Track A. A Jupyter notebook filters
+per-sequence predictions to FN and FP cases at the deployed threshold
+and renders raw-frame grids so error modes can be characterized by
+eye: are FPs dominated by thin clouds, glints, or built structures?
+Are FNs thin plumes in low-contrast conditions, or distant tiny
+sources?
+
+Runs after Track A so the human has quantitative context, and before
+Track C so qualitative findings can inform which config ablations are
+worth running — cloud-heavy FPs point at `confidence_threshold`
+alignment; structure-heavy FPs do not.
+
+Deliverable: `notebooks/04-error-analysis.ipynb` plus a 2–3-sentence
+observation note per variant at
+`data/08_reporting/error_observations.md`.
+
+Success bar: the observations note names the dominant FN and FP modes
+for each variant. No numeric target — this track is informative, not
+gating.
+
+### Track C — Inference-config alignment
+
+Re-run `evaluate_packaged` with two config ablations. Changing the
+upstream tube population is cheaper than modifying selection logic
+and may make tube-selection changes (Track B) moot.
 
 Prerequisite: confirm what confidence threshold was used to generate
 the training `.txt` labels (inspect `pyro-dataset` preparation scripts
-or dataset docs). Without this, the confidence alignment target is a
+or dataset docs; fall back to the minimum observed confidence in FP
+label files). Without this, the confidence alignment target is a
 guess.
 
 Experiments:
@@ -152,7 +174,7 @@ Success bar: same as Track A, measured under the aligned config.
 
 ### Track B — Single-tube-at-inference
 
-Only pursued if Tracks A + C leave a ≥ 3pp precision gap to target.
+Only pursued if Tracks A + F + C leave a ≥ 3pp precision gap to target.
 
 Experiments (require modifying `BboxTubeTemporalModel.predict` to
 filter `kept` down to one tube before `score_tubes`):
@@ -162,23 +184,6 @@ filter `kept` down to one tube before `score_tubes`):
 
 Watch for smoke-recall regression — the longest tube in a smoke
 sequence under drifted YOLO may not be the smoke plume.
-
-### Track D — YOLO-version alignment + retrain
-
-Heavy. Only if A + B + C fall short. Regenerate training `.txt`
-labels by running the YOLO baked into `model.zip` on the raw
-sequences. Rebuild tubes → patches → retrain classifier. Optionally
-also switch smoke labels to YOLO-generated boxes to close the
-`source = "gt"` asymmetry.
-
-This track is a data-pipeline change and is documented in its own
-follow-up spec if we reach it.
-
-### Track E — Multi-instance retraining
-
-Last resort. Train on bags (all tubes per sequence) with
-sequence-level supervision. Fundamentally addresses the tube-selection
-bias at its source. Documented in its own follow-up spec if reached.
 
 ## Success criteria
 
@@ -199,6 +204,10 @@ ablation breakdown.
 - Architecture changes (new backbone, new head).
 - Alternative experiments (MTB, FSM, pyro-detector) — precision gap
   is bbox-tube-temporal-specific.
+- Any retraining of the classifier (YOLO-version alignment,
+  multi-instance learning, hard-negative mining on leaderboard FPs).
+  If Tracks A + F + C + B do not clear the target, a follow-up spec
+  decides whether a retrain is warranted.
 
 ## Implementation notes
 
@@ -206,9 +215,13 @@ ablation breakdown.
   `scripts/analyze_aggregation_rules.py` (one-off, not wired into
   `dvc.yaml`). Emits a markdown report under
   `data/08_reporting/aggregation_ablation.md`.
+- Track F lives in `bbox-tube-temporal` as
+  `notebooks/04-error-analysis.ipynb`. Reuses
+  `aggregation_analysis.load_predictions` from Track A; strips outputs
+  on commit via `nbstripout`.
 - Track C re-runs `evaluate_packaged` with overridden params, which
   rebuilds `model.zip` via the `package` stage. No new stages needed;
-  just parameter overrides and `dvc repro`.
+  just parameter overrides via `dvc exp run -S`.
 - Track B, if pursued, is a small `predict`-time modification behind
   a config flag; the packaged `config.yaml` gains an optional
   `decision.selection_rule` key with a default of `"all"` to preserve
@@ -221,3 +234,9 @@ ablation breakdown.
   at a given recall target, not per-tube recall.
 - Promote `evaluate_packaged` + Track A's aggregation analysis to a
   standard deliverable for future temporal-model experiments.
+- Retraining fallbacks if this investigation misses the target —
+  candidates include YOLO-version alignment with classifier retrain
+  (regenerate training `.txt` labels using the YOLO baked into
+  `model.zip`, optionally also switching smoke labels from GT to
+  YOLO-generated boxes) and multi-instance learning on bags of tubes.
+  Each is a standalone spec if needed.
