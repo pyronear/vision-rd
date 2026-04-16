@@ -37,6 +37,10 @@ MODEL_REGISTRY: dict[str, tuple[str, str]] = {
         "pyro_detector_baseline.model",
         "PyroDetectorModel",
     ),
+    "bbox-tube-temporal": (
+        "bbox_tube_temporal.model",
+        "BboxTubeTemporalModel",
+    ),
 }
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")

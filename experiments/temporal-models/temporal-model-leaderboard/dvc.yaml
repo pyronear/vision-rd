@@ -47,6 +47,22 @@ stages:
     outs:
       - data/07_model_output/pyro-detector-baseline
 
+  evaluate_bbox_tube_temporal:
+    cmd: >-
+      uv run python scripts/evaluate.py
+      --model-name bbox-tube-temporal
+      --model-type bbox-tube-temporal
+      --model-package data/01_raw/models/bbox-tube-temporal.zip
+      --test-dir data/01_raw/sequential_test/test
+      --output-dir data/07_model_output/bbox-tube-temporal
+    deps:
+      - scripts/evaluate.py
+      - src/temporal_model_leaderboard
+      - data/01_raw/sequential_test
+      - data/01_raw/models/bbox-tube-temporal.zip
+    outs:
+      - data/07_model_output/bbox-tube-temporal
+
   leaderboard:
     cmd: >-
       uv run python scripts/leaderboard.py

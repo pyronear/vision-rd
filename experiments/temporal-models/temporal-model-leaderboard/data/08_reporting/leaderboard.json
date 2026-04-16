@@ -28,6 +28,20 @@
     "median_ttd_seconds": 7.0
   },
   {
+    "model_name": "bbox-tube-temporal",
+    "num_sequences": 298,
+    "tp": 144,
+    "fp": 33,
+    "fn": 5,
+    "tn": 116,
+    "precision": 0.8136,
+    "recall": 0.9664,
+    "f1": 0.8834,
+    "fpr": 0.2215,
+    "mean_ttd_seconds": 503.1,
+    "median_ttd_seconds": 328.5
+  },
+  {
     "model_name": "mtb-change-detection",
     "num_sequences": 298,
     "tp": 139,

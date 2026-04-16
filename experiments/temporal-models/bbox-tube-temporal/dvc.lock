@@ -2621,8 +2621,8 @@ stages:
       md5: e579f7492abf75c9671b89accfc93b10
       size: 27257
   package:
-    cmd: uv run python scripts/package_model.py --variant gru_convnext_finetune 
-      --output data/06_models/gru_convnext_finetune/model.zip
+    cmd: uv run python scripts/package_model.py --variant vit_dinov2_finetune 
+      --output data/06_models/vit_dinov2_finetune/model.zip
     deps:
     - path: data/01_raw/models/best.pt
       hash: md5
@@ -2633,22 +2633,22 @@ stages:
       md5: e662d34ba87b486399cbb444f0b3a1d2.dir
       size: 89476209
       nfiles: 3645
-    - path: data/06_models/gru_convnext_finetune/best_checkpoint.pt
+    - path: data/06_models/vit_dinov2_finetune/best_checkpoint.pt
       hash: md5
-      md5: 85ccbf61d9c7257c9571bd96b9b3e16c
-      size: 239501727
+      md5: 731a3f78bcf2524009b79342b6505d2b
+      size: 143537003
     - path: scripts/package_model.py
       hash: md5
-      md5: 81a1c3392b3cd522a02c92a44bcd94d0
-      size: 5251
+      md5: 06a0202901e0cc5d7973b21897834238
+      size: 5692
     - path: src/bbox_tube_temporal/calibration.py
       hash: md5
       md5: 2303307ff3b86f1186582f9db6982163
       size: 1811
     - path: src/bbox_tube_temporal/package.py
       hash: md5
-      md5: 3bdb44e7c65a2dd962e2b97026a3d0c2
-      size: 6704
+      md5: d7d0c9620433618b5cda5cbf06cdffe7
+      size: 7795
     - path: src/bbox_tube_temporal/val_predict.py
       hash: md5
       md5: 30716090646cf21c42dff4fd6f501a08
@@ -2668,20 +2668,26 @@ stages:
             confidence_threshold: 0.01
             iou_nms: 0.2
             image_size: 1024
-        train_gru_convnext_finetune:
+        train_vit_dinov2_finetune:
           hidden_dim: 128
           max_frames: 20
-          batch_size: 32
+          batch_size: 16
           num_workers: 4
-          learning_rate: 0.001
-          weight_decay: 0.01
+          learning_rate: 0.0001
+          weight_decay: 0.05
           max_epochs: 30
           early_stop_patience: 5
           seed: 42
-          arch: gru
-          backbone: convnext_tiny
-          num_layers: 1
-          bidirectional: false
+          arch: transformer
+          global_pool: token
+          img_size: 224
+          transformer_num_layers: 2
+          transformer_num_heads: 6
+          transformer_ffn_dim: 1536
+          transformer_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          backbone: vit_small_patch14_dinov2.lvd142m
           finetune: true
           finetune_last_n_blocks: 1
           backbone_lr: 1e-05
@@ -2689,10 +2695,10 @@ stages:
           iou_threshold: 0.2
           max_misses: 2
     outs:
-    - path: data/06_models/gru_convnext_finetune/model.zip
+    - path: data/06_models/vit_dinov2_finetune/model.zip
       hash: md5
-      md5: 4eb39dd29edf3dcd3ea3d78796bc776b
-      size: 258728562
+      md5: f6a972c7d14d0bdf1afc527e7d106a02
+      size: 162764055
   train_vit_dinov2_frozen:
     cmd: uv run python scripts/train.py --arch transformer --train-dir 
       data/05_model_input/train --val-dir data/05_model_input/val --output-dir 

@@ -18,17 +18,40 @@ from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
 from bbox_tube_temporal.val_predict import collect_val_probabilities
 
 
+def _classifier_kwargs(cfg: dict) -> dict:
+    """Pick the subset of *cfg* that TemporalSmokeClassifier accepts.
+
+    Works for both params.yaml variant blocks and packaged config["classifier"]
+    dicts — each key falls back to the classifier's own default when absent.
+    """
+    kwargs: dict = {
+        "backbone": cfg["backbone"],
+        "arch": cfg["arch"],
+        "hidden_dim": cfg["hidden_dim"],
+        "pretrained": False,
+        "num_layers": cfg.get("num_layers", 1),
+        "bidirectional": cfg.get("bidirectional", False),
+        "finetune": cfg.get("finetune", False),
+        "finetune_last_n_blocks": cfg.get("finetune_last_n_blocks", 0),
+        "max_frames": cfg.get("max_frames", 20),
+        "global_pool": cfg.get("global_pool", "avg"),
+    }
+    for k in (
+        "transformer_num_layers",
+        "transformer_num_heads",
+        "transformer_ffn_dim",
+        "transformer_dropout",
+        "img_size",
+    ):
+        if k in cfg:
+            kwargs[k] = cfg[k]
+    return kwargs
+
+
 def _load_classifier_from_ckpt(
     ckpt_path: Path, variant_cfg: dict
 ) -> TemporalSmokeClassifier:
-    model = TemporalSmokeClassifier(
-        backbone=variant_cfg["backbone"],
-        arch=variant_cfg["arch"],
-        hidden_dim=variant_cfg["hidden_dim"],
-        pretrained=False,
-        num_layers=variant_cfg.get("num_layers", 1),
-        bidirectional=variant_cfg.get("bidirectional", False),
-    )
+    model = TemporalSmokeClassifier(**_classifier_kwargs(variant_cfg))
     blob = torch.load(ckpt_path, map_location="cpu", weights_only=False)
     if isinstance(blob, dict) and "state_dict" in blob:
         raw = blob["state_dict"]
@@ -63,15 +86,7 @@ def _build_config(
                 "std": [0.229, 0.224, 0.225],
             },
         },
-        "classifier": {
-            "backbone": variant_cfg["backbone"],
-            "arch": variant_cfg["arch"],
-            "hidden_dim": variant_cfg["hidden_dim"],
-            "num_layers": variant_cfg.get("num_layers", 1),
-            "bidirectional": variant_cfg.get("bidirectional", False),
-            "max_frames": variant_cfg["max_frames"],
-            "pretrained": False,
-        },
+        "classifier": _classifier_kwargs(variant_cfg),
         "decision": {
             "aggregation": "max_logit",
             "threshold": float(threshold),

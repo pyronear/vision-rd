@@ -663,10 +663,10 @@ stages:
   package:
     cmd: >-
       uv run python scripts/package_model.py
-      --variant gru_convnext_finetune
-      --output data/06_models/gru_convnext_finetune/model.zip
+      --variant vit_dinov2_finetune
+      --output data/06_models/vit_dinov2_finetune/model.zip
     deps:
-      - data/06_models/gru_convnext_finetune/best_checkpoint.pt
+      - data/06_models/vit_dinov2_finetune/best_checkpoint.pt
       - data/01_raw/models/best.pt
       - data/05_model_input/val
       - scripts/package_model.py
@@ -678,9 +678,9 @@ stages:
       - tubes
       - build_tubes
       - model_input
-      - train_gru_convnext_finetune
+      - train_vit_dinov2_finetune
     outs:
-      - data/06_models/gru_convnext_finetune/model.zip
+      - data/06_models/vit_dinov2_finetune/model.zip
 
   compare_variants:
     cmd: >-
