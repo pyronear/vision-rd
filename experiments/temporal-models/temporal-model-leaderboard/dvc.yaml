@@ -47,21 +47,37 @@ stages:
     outs:
       - data/07_model_output/pyro-detector-baseline
 
-  evaluate_bbox_tube_temporal:
+  evaluate_bbox_tube_vit_dinov2_finetune:
     cmd: >-
       uv run python scripts/evaluate.py
-      --model-name bbox-tube-temporal
+      --model-name bbox-tube-temporal-vit-dinov2-finetune
       --model-type bbox-tube-temporal
-      --model-package data/01_raw/models/bbox-tube-temporal.zip
+      --model-package data/01_raw/models/bbox-tube-temporal-vit-dinov2-finetune.zip
       --test-dir data/01_raw/sequential_test/test
-      --output-dir data/07_model_output/bbox-tube-temporal
+      --output-dir data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune
     deps:
       - scripts/evaluate.py
       - src/temporal_model_leaderboard
       - data/01_raw/sequential_test
-      - data/01_raw/models/bbox-tube-temporal.zip
+      - data/01_raw/models/bbox-tube-temporal-vit-dinov2-finetune.zip
     outs:
-      - data/07_model_output/bbox-tube-temporal
+      - data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune
+
+  evaluate_bbox_tube_gru_convnext_finetune:
+    cmd: >-
+      uv run python scripts/evaluate.py
+      --model-name bbox-tube-temporal-gru-convnext-finetune
+      --model-type bbox-tube-temporal
+      --model-package data/01_raw/models/bbox-tube-temporal-gru-convnext-finetune.zip
+      --test-dir data/01_raw/sequential_test/test
+      --output-dir data/07_model_output/bbox-tube-temporal-gru-convnext-finetune
+    deps:
+      - scripts/evaluate.py
+      - src/temporal_model_leaderboard
+      - data/01_raw/sequential_test
+      - data/01_raw/models/bbox-tube-temporal-gru-convnext-finetune.zip
+    outs:
+      - data/07_model_output/bbox-tube-temporal-gru-convnext-finetune
 
   leaderboard:
     cmd: >-

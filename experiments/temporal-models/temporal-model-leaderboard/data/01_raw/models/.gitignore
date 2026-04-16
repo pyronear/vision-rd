@@ -1,4 +1,5 @@
 /fsm-tracking-baseline.zip
 /mtb-change-detection.zip
 /pyro-detector-baseline.zip
-/bbox-tube-temporal.zip
+/bbox-tube-temporal-vit-dinov2-finetune.zip
+/bbox-tube-temporal-gru-convnext-finetune.zip
