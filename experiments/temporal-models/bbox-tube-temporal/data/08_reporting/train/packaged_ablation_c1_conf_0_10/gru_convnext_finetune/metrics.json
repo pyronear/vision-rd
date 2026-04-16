@@ -1,0 +1,16 @@
+{
+  "model_name": "gru_convnext_finetune-train",
+  "num_sequences": 3104,
+  "tp": 1477,
+  "fp": 90,
+  "fn": 75,
+  "tn": 1462,
+  "precision": 0.9426,
+  "recall": 0.9517,
+  "f1": 0.9471,
+  "fpr": 0.058,
+  "mean_ttd_seconds": 620.3,
+  "median_ttd_seconds": 479.0,
+  "pr_auc": 0.9809,
+  "roc_auc": 0.9804
+}
