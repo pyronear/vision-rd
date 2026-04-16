@@ -49,3 +49,39 @@ def test_plot_roc_curve_writes_nonempty_png(tmp_path):
 
     assert out.exists()
     assert out.stat().st_size > 0
+
+
+def test_plot_pr_curve_handles_no_positives(tmp_path):
+    """Degenerate y_true (all zeros) must still produce a readable PNG."""
+    y_true = np.array([0, 0, 0, 0])
+    scores = np.array([0.1, 0.4, 0.3, 0.2])
+    out = tmp_path / "pr_no_pos.png"
+
+    plot_pr_curve(y_true, scores, out, title="PR")
+
+    assert out.exists()
+    assert out.stat().st_size > 0
+
+
+def test_plot_roc_curve_handles_single_class_all_negative(tmp_path):
+    """Degenerate y_true (all zeros) must still produce a readable PNG."""
+    y_true = np.array([0, 0, 0, 0])
+    scores = np.array([0.1, 0.4, 0.3, 0.2])
+    out = tmp_path / "roc_all_neg.png"
+
+    plot_roc_curve(y_true, scores, out, title="ROC")
+
+    assert out.exists()
+    assert out.stat().st_size > 0
+
+
+def test_plot_roc_curve_handles_single_class_all_positive(tmp_path):
+    """Degenerate y_true (all ones) must still produce a readable PNG."""
+    y_true = np.array([1, 1, 1, 1])
+    scores = np.array([0.1, 0.4, 0.3, 0.2])
+    out = tmp_path / "roc_all_pos.png"
+
+    plot_roc_curve(y_true, scores, out, title="ROC")
+
+    assert out.exists()
+    assert out.stat().st_size > 0

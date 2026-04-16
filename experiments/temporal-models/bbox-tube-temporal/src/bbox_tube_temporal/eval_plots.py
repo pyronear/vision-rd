@@ -55,16 +55,24 @@ def plot_pr_curve(
     output_path: Path,
     title: str = "PR",
 ) -> None:
-    """Render a precision-recall curve. Title includes AP if computable."""
-    ap = float(average_precision_score(y_true, scores)) if y_true.sum() > 0 else 0.0
-    precision, recall, _ = precision_recall_curve(y_true, scores)
+    """Render a precision-recall curve. Title includes AP if computable.
+
+    When ``y_true`` contains no positives, writes a placeholder figure
+    (blank axes + informative title) instead of calling sklearn, which
+    would return a degenerate curve.
+    """
     fig, ax = plt.subplots(figsize=(5, 5))
-    ax.plot(recall, precision)
     ax.set_xlabel("recall")
     ax.set_ylabel("precision")
-    ax.set_title(f"{title} (AP={ap:.3f})")
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
+    if y_true.sum() > 0:
+        ap = float(average_precision_score(y_true, scores))
+        precision, recall, _ = precision_recall_curve(y_true, scores)
+        ax.plot(recall, precision)
+        ax.set_title(f"{title} (AP={ap:.3f})")
+    else:
+        ax.set_title(f"{title} (no positives)")
     fig.savefig(output_path, dpi=120, bbox_inches="tight")
     plt.close(fig)
 
@@ -75,16 +83,23 @@ def plot_roc_curve(
     output_path: Path,
     title: str = "ROC",
 ) -> None:
-    """Render a ROC curve. Title includes AUC if computable."""
-    auc = (
-        float(roc_auc_score(y_true, scores)) if 0 < y_true.sum() < len(y_true) else 0.0
-    )
-    fpr, tpr, _ = roc_curve(y_true, scores)
+    """Render a ROC curve. Title includes AUC if computable.
+
+    When ``y_true`` contains only one class, writes a placeholder figure
+    (diagonal reference only + informative title) instead of calling
+    sklearn, whose ``roc_curve`` returns NaN on single-class input.
+    """
     fig, ax = plt.subplots(figsize=(5, 5))
-    ax.plot(fpr, tpr)
     ax.plot([0, 1], [0, 1], "k--", alpha=0.4)
     ax.set_xlabel("false positive rate")
     ax.set_ylabel("true positive rate")
-    ax.set_title(f"{title} (AUC={auc:.3f})")
+    n_pos = int(y_true.sum())
+    if 0 < n_pos < len(y_true):
+        auc = float(roc_auc_score(y_true, scores))
+        fpr, tpr, _ = roc_curve(y_true, scores)
+        ax.plot(fpr, tpr)
+        ax.set_title(f"{title} (AUC={auc:.3f})")
+    else:
+        ax.set_title(f"{title} (single class)")
     fig.savefig(output_path, dpi=120, bbox_inches="tight")
     plt.close(fig)
