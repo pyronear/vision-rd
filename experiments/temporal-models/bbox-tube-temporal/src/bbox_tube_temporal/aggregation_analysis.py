@@ -51,3 +51,29 @@ def aggregate_score(tube_logits: list[float], *, rule: str, k: int) -> float:
         return -np.inf
     top_k = np.partition(arr, -k)[-k:]
     return float(top_k.mean())
+
+
+def find_threshold_for_recall(
+    y_true: np.ndarray,
+    scores: np.ndarray,
+    *,
+    target_recall: float,
+) -> float:
+    """Return the largest threshold whose recall ≥ target_recall.
+
+    We count a sequence as predicted-positive when ``score >= threshold``.
+    Sorting positive scores ascending, we may drop the ``n_drop`` lowest
+    positives while still hitting the recall target; the returned
+    threshold is the ``n_drop``-th positive score.
+
+    Returns ``-inf`` if target_recall forces including positives whose
+    score is ``-inf``.
+    """
+    if not 0.0 < target_recall <= 1.0:
+        raise ValueError(f"target_recall must be in (0, 1], got {target_recall!r}")
+    pos_scores = np.sort(scores[y_true == 1])
+    if pos_scores.size == 0:
+        raise ValueError("no positives in y_true; cannot calibrate recall")
+    n_pos = pos_scores.size
+    n_drop = int(np.floor(n_pos * (1.0 - target_recall)))
+    return float(pos_scores[n_drop])

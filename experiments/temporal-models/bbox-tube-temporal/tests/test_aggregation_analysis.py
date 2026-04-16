@@ -7,6 +7,7 @@ import pytest
 
 from bbox_tube_temporal.aggregation_analysis import (
     aggregate_score,
+    find_threshold_for_recall,
     load_predictions,
 )
 
@@ -109,3 +110,47 @@ def test_aggregate_score_rejects_unknown_rule():
 def test_aggregate_score_rejects_non_positive_k():
     with pytest.raises(ValueError, match="k must be >= 1"):
         aggregate_score([1.0], rule="max", k=0)
+
+
+def test_find_threshold_returns_lowest_positive_score_for_full_recall():
+    y_true = np.array([1, 1, 0])
+    scores = np.array([3.0, 5.0, 1.0])
+
+    # recall = 1.0 requires threshold <= 3.0; largest such threshold equals 3.0
+    assert find_threshold_for_recall(y_true, scores, target_recall=1.0) == 3.0
+
+
+def test_find_threshold_allows_dropping_one_positive_at_recall_050():
+    y_true = np.array([1, 1, 0])
+    scores = np.array([3.0, 5.0, 1.0])
+
+    # recall = 0.5 only needs 1 of 2 positives; largest threshold = 5.0
+    assert find_threshold_for_recall(y_true, scores, target_recall=0.5) == 5.0
+
+
+def test_find_threshold_handles_neg_inf_positive_scores():
+    # A positive sequence with no tubes (score = -inf) cannot be recovered
+    # except by threshold = -inf, which we represent explicitly.
+    y_true = np.array([1, 1])
+    scores = np.array([-np.inf, 4.0])
+
+    assert find_threshold_for_recall(y_true, scores, target_recall=1.0) == -np.inf
+    assert find_threshold_for_recall(y_true, scores, target_recall=0.5) == 4.0
+
+
+def test_find_threshold_raises_when_no_positives():
+    y_true = np.array([0, 0])
+    scores = np.array([1.0, 2.0])
+
+    with pytest.raises(ValueError, match="no positives"):
+        find_threshold_for_recall(y_true, scores, target_recall=0.95)
+
+
+def test_find_threshold_raises_on_invalid_target():
+    y_true = np.array([1])
+    scores = np.array([1.0])
+
+    with pytest.raises(ValueError, match=r"target_recall must be in \(0, 1\]"):
+        find_threshold_for_recall(y_true, scores, target_recall=0.0)
+    with pytest.raises(ValueError, match=r"target_recall must be in \(0, 1\]"):
+        find_threshold_for_recall(y_true, scores, target_recall=1.5)
