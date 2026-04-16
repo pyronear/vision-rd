@@ -386,6 +386,7 @@ name = "bbox-tube-temporal"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "huggingface-hub" },
     { name = "lightning" },
     { name = "matplotlib" },
     { name = "numpy" },
@@ -414,6 +415,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "huggingface-hub", specifier = ">=0.24" },
     { name = "lightning", specifier = ">=2.2" },
     { name = "matplotlib", specifier = ">=3.8" },
     { name = "numpy", specifier = ">=1.26,<2" },

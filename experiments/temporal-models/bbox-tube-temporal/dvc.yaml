@@ -1,4 +1,18 @@
 stages:
+  prepare:
+    desc: "Download YOLO detector weights from HuggingFace Hub"
+    cmd: >-
+      uv run python scripts/prepare.py
+      --model-repo ${prepare.model_repo}
+      --model-filename ${prepare.model_filename}
+      --output-model-dir data/01_raw/models
+    deps:
+      - scripts/prepare.py
+    params:
+      - prepare
+    outs:
+      - data/01_raw/models
+
   truncate:
     foreach:
       - train
@@ -659,6 +673,45 @@ stages:
         - data/08_reporting/${item}/vit_in21k_finetune/roc_curve.png
         - data/08_reporting/${item}/vit_in21k_finetune/confusion_matrix.png
         - data/08_reporting/${item}/vit_in21k_finetune/confusion_matrix_normalized.png
+
+  evaluate_packaged:
+    foreach:
+      - {variant: vit_dinov2_finetune, split: train}
+      - {variant: vit_dinov2_finetune, split: val}
+      - {variant: gru_convnext_finetune, split: train}
+      - {variant: gru_convnext_finetune, split: val}
+    do:
+      cmd: >-
+        uv run python scripts/evaluate_packaged.py
+        --model-zip data/06_models/${item.variant}/model.zip
+        --sequences-dir data/01_raw/datasets/${item.split}
+        --output-dir data/08_reporting/${item.split}/packaged/${item.variant}
+        --model-name ${item.variant}-${item.split}
+      deps:
+        - scripts/evaluate_packaged.py
+        - src/bbox_tube_temporal/data.py
+        - src/bbox_tube_temporal/eval_plots.py
+        - src/bbox_tube_temporal/inference.py
+        - src/bbox_tube_temporal/model.py
+        - src/bbox_tube_temporal/model_input.py
+        - src/bbox_tube_temporal/protocol_eval.py
+        - src/bbox_tube_temporal/tubes.py
+        - data/06_models/${item.variant}/model.zip
+        - data/01_raw/datasets/${item.split}
+      outs:
+        - data/08_reporting/${item.split}/packaged/${item.variant}/errors
+        - data/08_reporting/${item.split}/packaged/${item.variant}/predictions.json:
+            cache: false
+        - data/08_reporting/${item.split}/packaged/${item.variant}/dropped.json:
+            cache: false
+      metrics:
+        - data/08_reporting/${item.split}/packaged/${item.variant}/metrics.json:
+            cache: false
+      plots:
+        - data/08_reporting/${item.split}/packaged/${item.variant}/pr_curve.png
+        - data/08_reporting/${item.split}/packaged/${item.variant}/roc_curve.png
+        - data/08_reporting/${item.split}/packaged/${item.variant}/confusion_matrix.png
+        - data/08_reporting/${item.split}/packaged/${item.variant}/confusion_matrix_normalized.png
 
   package:
     foreach:

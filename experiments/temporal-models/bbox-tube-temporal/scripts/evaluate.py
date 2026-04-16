@@ -11,50 +11,23 @@ import shutil
 from pathlib import Path
 
 import lightning as L
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import yaml
 from sklearn.metrics import (
     average_precision_score,
     confusion_matrix,
-    precision_recall_curve,
     roc_auc_score,
-    roc_curve,
 )
 from torch.utils.data import DataLoader
 
 from bbox_tube_temporal.dataset import TubePatchDataset
+from bbox_tube_temporal.eval_plots import (
+    plot_confusion_matrix,
+    plot_pr_curve,
+    plot_roc_curve,
+)
 from bbox_tube_temporal.lit_temporal import LitTemporalClassifier
-
-
-def plot_confusion_matrix(
-    matrix: np.ndarray,
-    output_path: Path,
-    title: str,
-    normalized: bool,
-) -> None:
-    labels = ["fp", "smoke"]
-    fig, ax = plt.subplots(figsize=(4, 4))
-    im = ax.imshow(matrix, cmap="Blues")
-    fig.colorbar(im, ax=ax)
-    ax.set_xticks(range(len(labels)))
-    ax.set_yticks(range(len(labels)))
-    ax.set_xticklabels(labels)
-    ax.set_yticklabels(labels)
-    ax.set_xlabel("predicted")
-    ax.set_ylabel("actual")
-    ax.set_title(title)
-    vmax = float(matrix.max()) if matrix.size else 0.0
-    threshold = vmax * 0.5
-    for i in range(matrix.shape[0]):
-        for j in range(matrix.shape[1]):
-            value = matrix[i, j]
-            text = f"{value * 100:.1f}%" if normalized else f"{int(value)}"
-            color = "white" if value > threshold else "black"
-            ax.text(j, i, text, ha="center", va="center", color=color, fontsize=11)
-    fig.savefig(output_path, dpi=120, bbox_inches="tight")
-    plt.close(fig)
 
 
 def main() -> None:
@@ -180,26 +153,19 @@ def main() -> None:
         normalized=True,
     )
 
-    p, r, _ = precision_recall_curve(labels, probs)
-    fig, ax = plt.subplots(figsize=(5, 5))
-    ax.plot(r, p)
-    ax.set_xlabel("recall")
-    ax.set_ylabel("precision")
-    ax.set_title(f"PR (AP={pr_auc:.3f})")
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
-    fig.savefig(args.output_dir / "pr_curve.png", dpi=120, bbox_inches="tight")
-    plt.close(fig)
+    plot_pr_curve(
+        labels,
+        probs,
+        args.output_dir / "pr_curve.png",
+        title="PR",
+    )
 
-    fpr, tpr, _ = roc_curve(labels, probs)
-    fig, ax = plt.subplots(figsize=(5, 5))
-    ax.plot(fpr, tpr)
-    ax.plot([0, 1], [0, 1], "k--", alpha=0.4)
-    ax.set_xlabel("false positive rate")
-    ax.set_ylabel("true positive rate")
-    ax.set_title(f"ROC (AUC={roc_auc:.3f})")
-    fig.savefig(args.output_dir / "roc_curve.png", dpi=120, bbox_inches="tight")
-    plt.close(fig)
+    plot_roc_curve(
+        labels,
+        probs,
+        args.output_dir / "roc_curve.png",
+        title="ROC",
+    )
 
     print(json.dumps(metrics, indent=2))
 

@@ -6,6 +6,10 @@
 # materialize the merged dict (losing the anchor). That's fine for one-off
 # experiments; to keep anchors intact, edit params.yaml by hand.
 
+prepare:
+  model_repo: "pyronear/yolo11s_nimble-narwhal_v6.0.0"
+  model_filename: "best.pt"
+
 truncate:
   max_frames: 20
 
