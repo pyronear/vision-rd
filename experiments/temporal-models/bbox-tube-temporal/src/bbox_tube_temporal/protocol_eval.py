@@ -130,7 +130,11 @@ def compute_metrics(model_name: str, records: list[SequenceRecord]) -> dict:
     n_neg = fp + tn
     fpr = fp / n_neg if n_neg > 0 else 0.0
 
-    ttd_values = [r.ttd_seconds for r in records if r.ttd_seconds is not None]
+    ttd_values = [
+        r.ttd_seconds
+        for r in records
+        if r.label == "smoke" and r.is_positive and r.ttd_seconds is not None
+    ]
     mean_ttd = round(sum(ttd_values) / len(ttd_values), 1) if ttd_values else None
     median_ttd = round(statistics.median(ttd_values), 1) if ttd_values else None
 
