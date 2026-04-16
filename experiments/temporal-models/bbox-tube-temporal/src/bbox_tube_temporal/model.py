@@ -15,6 +15,7 @@ from pyrocore import Frame, TemporalModel, TemporalModelOutput
 from .inference import (
     crop_tube_patches,
     filter_and_interpolate_tubes,
+    pad_frames_symmetrically,
     pick_winner_and_trigger,
     run_yolo_on_frames,
     score_tubes,
@@ -106,6 +107,7 @@ class BboxTubeTemporalModel(TemporalModel):
                 details={
                     "num_frames": 0,
                     "num_truncated": 0,
+                    "num_padded": 0,
                     "num_detections_per_frame": [],
                     "num_tubes_total": 0,
                     "num_tubes_kept": 0,
@@ -119,6 +121,11 @@ class BboxTubeTemporalModel(TemporalModel):
 
         truncated = frames[: clf_cfg["max_frames"]]
         n_truncated = original_len - len(truncated)
+
+        pad_min = int(infer.get("pad_to_min_frames", 0))
+        if pad_min > 0 and len(truncated) < pad_min:
+            truncated = pad_frames_symmetrically(truncated, min_length=pad_min)
+        n_padded = len(truncated) - (original_len - n_truncated)
 
         frame_dets = run_yolo_on_frames(
             self._yolo,
@@ -149,6 +156,7 @@ class BboxTubeTemporalModel(TemporalModel):
                 details={
                     "num_frames": original_len,
                     "num_truncated": n_truncated,
+                    "num_padded": n_padded,
                     "num_detections_per_frame": num_dets_per_frame,
                     "num_tubes_total": len(candidate_tubes),
                     "num_tubes_kept": 0,
@@ -226,6 +234,7 @@ class BboxTubeTemporalModel(TemporalModel):
             details={
                 "num_frames": original_len,
                 "num_truncated": n_truncated,
+                "num_padded": n_padded,
                 "num_detections_per_frame": num_dets_per_frame,
                 "num_tubes_total": len(candidate_tubes),
                 "num_tubes_kept": len(kept),

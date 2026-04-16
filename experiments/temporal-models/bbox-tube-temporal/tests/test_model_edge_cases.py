@@ -13,7 +13,12 @@ from bbox_tube_temporal.model import BboxTubeTemporalModel
 from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
 
 TEST_CONFIG: dict = {
-    "infer": {"confidence_threshold": 0.01, "iou_nms": 0.2, "image_size": 1024},
+    "infer": {
+        "confidence_threshold": 0.01,
+        "iou_nms": 0.2,
+        "image_size": 1024,
+        "pad_to_min_frames": 0,
+    },
     "tubes": {
         "iou_threshold": 0.2,
         "max_misses": 2,
@@ -163,6 +168,68 @@ class TestTruncation:
         out = model.predict(frames=extra)
         assert out.details["num_frames"] == 9
         assert out.details["num_truncated"] == 3
+
+
+class TestShortSequencePadding:
+    """``infer.pad_to_min_frames`` symmetrically pads a short sequence by
+    alternately prepending the first frame and appending the last until the
+    configured minimum is reached. Mirrors the ``pad_sequence`` helper in
+    ``tracking_fsm_baseline`` so both experiments handle truncated benchmark
+    sequences the same way."""
+
+    def test_pad_disabled_by_default(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        short = red_frames[:2]
+        per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in short]
+        yolo = _fake_yolo_factory(per_frame)
+        model = BboxTubeTemporalModel(
+            yolo_model=yolo, classifier=tiny_classifier, config=TEST_CONFIG
+        )
+        out = model.predict(frames=short)
+        assert len(out.details["num_detections_per_frame"]) == 2
+        assert out.details["num_padded"] == 0
+        assert out.details["num_frames"] == 2
+
+    def test_pad_extends_short_sequence_symmetrically(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        # Enable padding up to 5 frames; input has 2 real frames.
+        cfg = {
+            **TEST_CONFIG,
+            "infer": {**TEST_CONFIG["infer"], "pad_to_min_frames": 5},
+        }
+        short = red_frames[:2]
+        # Alternating prepend/append: [A,B] -> [A,A,B] -> [A,A,B,B] -> [A,A,A,B,B].
+        # YOLO sees 5 frames; fake YOLO needs a 5-length list.
+        per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in range(5)]
+        yolo = _fake_yolo_factory(per_frame)
+        model = BboxTubeTemporalModel(
+            yolo_model=yolo, classifier=tiny_classifier, config=cfg
+        )
+        out = model.predict(frames=short)
+
+        assert len(out.details["num_detections_per_frame"]) == 5
+        # num_frames reports the original length (pre-pad) so downstream
+        # metrics remain faithful to the real input.
+        assert out.details["num_frames"] == 2
+        assert out.details["num_padded"] == 3
+
+    def test_pad_noop_when_sequence_already_long_enough(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        cfg = {
+            **TEST_CONFIG,
+            "infer": {**TEST_CONFIG["infer"], "pad_to_min_frames": 3},
+        }
+        per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in red_frames]  # 6 frames
+        yolo = _fake_yolo_factory(per_frame)
+        model = BboxTubeTemporalModel(
+            yolo_model=yolo, classifier=tiny_classifier, config=cfg
+        )
+        out = model.predict(frames=red_frames)
+        assert len(out.details["num_detections_per_frame"]) == 6
+        assert out.details["num_padded"] == 0
 
 
 class TestDeviceSelection:

@@ -18,6 +18,32 @@ from .tubes import interpolate_gaps as _interpolate_gaps
 from .types import Detection, FrameDetections, Tube
 
 
+def pad_frames_symmetrically(
+    frames: list[Frame],
+    *,
+    min_length: int,
+) -> list[Frame]:
+    """Pad ``frames`` up to ``min_length`` by alternating prepend/append.
+
+    Mirrors ``tracking_fsm_baseline.data.pad_sequence``: the first frame is
+    prepended, then the last frame is appended, alternating until the
+    sequence reaches ``min_length``. Empty inputs and inputs already at or
+    above ``min_length`` pass through unchanged.
+    """
+    if not frames or len(frames) >= min_length:
+        return list(frames)
+    result = list(frames)
+    prepend = True
+    while len(result) < min_length:
+        src = frames[0] if prepend else frames[-1]
+        if prepend:
+            result.insert(0, src)
+        else:
+            result.append(src)
+        prepend = not prepend
+    return result
+
+
 def run_yolo_on_frames(
     yolo_model: Any,
     frames: list[Frame],
