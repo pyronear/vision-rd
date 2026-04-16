@@ -77,3 +77,40 @@ def find_threshold_for_recall(
     n_pos = pos_scores.size
     n_drop = int(np.floor(n_pos * (1.0 - target_recall)))
     return float(pos_scores[n_drop])
+
+
+def metrics_at_threshold(
+    y_true: np.ndarray,
+    scores: np.ndarray,
+    *,
+    threshold: float,
+) -> dict[str, float | int]:
+    """Compute TP/FP/FN/TN + precision/recall/f1/fpr for a scalar threshold.
+
+    Sequences with ``score >= threshold`` are predicted positive.
+    """
+    pred = scores >= threshold
+    y_true_bool = y_true.astype(bool)
+    tp = int((pred & y_true_bool).sum())
+    fp = int((pred & ~y_true_bool).sum())
+    fn = int((~pred & y_true_bool).sum())
+    tn = int((~pred & ~y_true_bool).sum())
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+    recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+    f1 = (
+        2 * precision * recall / (precision + recall)
+        if (precision + recall) > 0
+        else 0.0
+    )
+    fpr = fp / (fp + tn) if (fp + tn) > 0 else 0.0
+    return {
+        "threshold": float(threshold),
+        "tp": tp,
+        "fp": fp,
+        "fn": fn,
+        "tn": tn,
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+        "fpr": fpr,
+    }

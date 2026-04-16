@@ -9,6 +9,7 @@ from bbox_tube_temporal.aggregation_analysis import (
     aggregate_score,
     find_threshold_for_recall,
     load_predictions,
+    metrics_at_threshold,
 )
 
 
@@ -154,3 +155,58 @@ def test_find_threshold_raises_on_invalid_target():
         find_threshold_for_recall(y_true, scores, target_recall=0.0)
     with pytest.raises(ValueError, match=r"target_recall must be in \(0, 1\]"):
         find_threshold_for_recall(y_true, scores, target_recall=1.5)
+
+
+def test_metrics_at_threshold_all_correct():
+    y_true = np.array([1, 1, 0, 0])
+    scores = np.array([2.0, 3.0, 0.0, -1.0])
+
+    m = metrics_at_threshold(y_true, scores, threshold=1.0)
+
+    assert m == {
+        "threshold": 1.0,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "tn": 2,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "fpr": 0.0,
+    }
+
+
+def test_metrics_at_threshold_all_false_positives():
+    y_true = np.array([0, 0])
+    scores = np.array([5.0, 5.0])
+
+    m = metrics_at_threshold(y_true, scores, threshold=1.0)
+
+    assert m["tp"] == 0 and m["fp"] == 2 and m["fn"] == 0 and m["tn"] == 0
+    assert m["precision"] == 0.0
+    assert m["recall"] == 0.0  # no positives exist
+    assert m["f1"] == 0.0
+    assert m["fpr"] == 1.0
+
+
+def test_metrics_at_threshold_handles_neg_inf_threshold():
+    y_true = np.array([1, 0])
+    scores = np.array([-np.inf, -np.inf])
+
+    # threshold = -inf => everything predicted positive
+    m = metrics_at_threshold(y_true, scores, threshold=-np.inf)
+
+    assert m["tp"] == 1 and m["fp"] == 1 and m["tn"] == 0 and m["fn"] == 0
+
+
+def test_metrics_at_threshold_no_positives_no_negatives_safe():
+    y_true = np.array([], dtype=int)
+    scores = np.array([], dtype=float)
+
+    m = metrics_at_threshold(y_true, scores, threshold=0.0)
+
+    assert m["tp"] == 0 and m["fp"] == 0 and m["fn"] == 0 and m["tn"] == 0
+    assert m["precision"] == 0.0
+    assert m["recall"] == 0.0
+    assert m["f1"] == 0.0
+    assert m["fpr"] == 0.0
