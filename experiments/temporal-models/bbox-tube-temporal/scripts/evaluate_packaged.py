@@ -48,7 +48,13 @@ def _parse_args() -> argparse.Namespace:
 
 
 def _record_to_json(rec: SequenceRecord) -> dict:
-    """Serialise a record for predictions.json (drops the verbose details blob)."""
+    """Serialise a record for predictions.json.
+
+    Includes per-tube structural details (``kept_tubes``, ``winner_tube_id``,
+    ``threshold``, ``num_tubes_total``) so downstream diagnostics can inspect
+    exactly which tubes the model saw and which one it picked.
+    """
+    details = rec.details
     return {
         "sequence_id": rec.sequence_id,
         "label": rec.label,
@@ -56,7 +62,13 @@ def _record_to_json(rec: SequenceRecord) -> dict:
         "trigger_frame_index": rec.trigger_frame_index,
         "score": rec.score if rec.score != float("-inf") else None,
         "num_tubes_kept": rec.num_tubes_kept,
+        "num_tubes_total": int(details.get("num_tubes_total", rec.num_tubes_kept)),
         "tube_logits": rec.tube_logits,
+        "winner_tube_id": details.get("winner_tube_id"),
+        "threshold": (
+            float(details["threshold"]) if "threshold" in details else None
+        ),
+        "kept_tubes": details.get("kept_tubes", []),
         "ttd_seconds": rec.ttd_seconds,
     }
 
