@@ -18,9 +18,11 @@ For each τ it reports, split by GT class:
   - simulated PR: treat sequence as positive iff any surviving tube has
     ``logit >= threshold`` (same decision rule used by the model).
 
-Usage:
+Usage::
+
     uv run python scripts/simulate_confidence_filter.py \\
-        --predictions-path data/08_reporting/val/packaged/gru_convnext_finetune/predictions.json \\
+        --predictions-path \\
+        data/08_reporting/val/packaged/gru_convnext_finetune/predictions.json \\
         --taus 0.01 0.05 0.10 0.15 0.20 0.25
 """
 
@@ -33,11 +35,7 @@ from bbox_tube_temporal.aggregation_analysis import load_predictions
 
 def _tube_max_confidence(tube: dict) -> float:
     """Max confidence across the tube's detected entries; 0.0 if no detections."""
-    confs = [
-        e["confidence"]
-        for e in tube["entries"]
-        if e["confidence"] is not None
-    ]
+    confs = [e["confidence"] for e in tube["entries"] if e["confidence"] is not None]
     return max(confs) if confs else 0.0
 
 
@@ -54,15 +52,15 @@ def _simulate_at_tau(
             "n_total": 0,
             "n_seq_no_tubes_now": 0,
             "n_seq_all_tubes_drop": 0,
-            "tp": 0, "fn": 0,
-            "baseline_tp": 0, "baseline_fn": 0,
+            "tp": 0,
+            "fn": 0,
         },
         "fp": {
             "n_total": 0,
             "n_seq_no_tubes_now": 0,
             "n_seq_all_tubes_drop": 0,
-            "fp": 0, "tn": 0,
-            "baseline_fp": 0, "baseline_tn": 0,
+            "fp": 0,
+            "tn": 0,
         },
     }
 
@@ -70,18 +68,6 @@ def _simulate_at_tau(
         cls = r["label"]
         bucket = by_class[cls]
         bucket["n_total"] += 1
-
-        # Baseline decision (as persisted).
-        if r["is_positive"]:
-            if cls == "smoke":
-                bucket["baseline_tp"] += 1
-            else:
-                bucket["baseline_fp"] += 1
-        else:
-            if cls == "smoke":
-                bucket["baseline_fn"] += 1
-            else:
-                bucket["baseline_tn"] += 1
 
         kept = r["kept_tubes"]
         if not kept:
@@ -94,9 +80,7 @@ def _simulate_at_tau(
             continue
 
         threshold = r["threshold"]
-        surviving_logits = [
-            t["logit"] for t in kept if _tube_max_confidence(t) >= tau
-        ]
+        surviving_logits = [t["logit"] for t in kept if _tube_max_confidence(t) >= tau]
         if not surviving_logits:
             bucket["n_seq_all_tubes_drop"] += 1
             sim_positive = False
@@ -139,7 +123,6 @@ def _format_summary(simulated_by_tau: dict[float, dict]) -> str:
             all_tp = by_class["smoke"]["tp"]
             all_fp = by_class["fp"]["fp"]
             all_fn = by_class["smoke"]["fn"]
-            all_tn = by_class["fp"]["tn"]
             p = all_tp / (all_tp + all_fp) if (all_tp + all_fp) else float("nan")
             r = all_tp / (all_tp + all_fn) if (all_tp + all_fn) else float("nan")
             lines.append(
@@ -180,9 +163,7 @@ def main() -> None:
         f"Input: `{args.predictions_path}`\n\n"
         f"Approximation: drop tubes whose max entry confidence < τ; keep the\n"
         f"rest as-is. Re-apply the baked classifier threshold. See script\n"
-        f"docstring for caveats.\n\n"
-        + _format_summary(simulated)
-        + "\n"
+        f"docstring for caveats.\n\n" + _format_summary(simulated) + "\n"
     )
 
     print(report)

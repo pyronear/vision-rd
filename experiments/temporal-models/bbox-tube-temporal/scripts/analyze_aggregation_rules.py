@@ -4,7 +4,8 @@ For each (variant, split), loads predictions.json and explores
 alternative sequence-level aggregation rules over per-tube logits.
 Writes a markdown report ranked by precision @ target_recall.
 
-Usage:
+Usage::
+
     uv run python scripts/analyze_aggregation_rules.py \\
         --reporting-dir data/08_reporting \\
         --output data/08_reporting/aggregation_ablation.md \\
@@ -43,8 +44,10 @@ def _render_report(rows: list[dict], target_recall: float) -> str:
         f"Target recall for threshold search: **{target_recall}**.\n\n"
         "One threshold is chosen per (variant, split, rule) to hit the target recall;\n"
         "precision/FPR/etc. are reported at that threshold.\n\n"
-        "| variant | split | rule | k | threshold | precision | recall | F1 | FPR | TP | FP | FN | TN |\n"
-        "|---------|-------|------|---|-----------|-----------|--------|----|----|----|----|----|----|\n"
+        "| variant | split | rule | k | threshold | precision | recall |"
+        " F1 | FPR | TP | FP | FN | TN |\n"
+        "|---------|-------|------|---|-----------|-----------|--------|"
+        "----|----|----|----|----|----|\n"
     )
     body = "\n".join(_format_row(r) for r in rows)
     return header + body + "\n"

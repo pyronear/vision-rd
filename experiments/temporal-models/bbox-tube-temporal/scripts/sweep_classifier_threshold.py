@@ -6,9 +6,12 @@ precision / recall / F1 across a range of thresholds using the deployed
 filters to a reasonable band (R ≥ min-recall AND P ≥ min-precision) to
 keep the output compact.
 
-Usage:
+Usage::
+
     uv run python scripts/sweep_classifier_threshold.py \\
-        --predictions-path data/08_reporting/val/packaged_ablation_c1_conf_0_10/gru_convnext_finetune/predictions.json \\
+        --predictions-path \\
+        data/08_reporting/val/packaged_ablation_c1_conf_0_10/\\
+        gru_convnext_finetune/predictions.json \\
         --min-recall 0.90 \\
         --min-precision 0.85
 """
