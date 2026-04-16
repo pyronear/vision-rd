@@ -1,4 +1,18 @@
 stages:
+  prepare:
+    desc: "Download YOLO detector weights from HuggingFace Hub"
+    cmd: >-
+      uv run python scripts/prepare.py
+      --model-repo ${prepare.model_repo}
+      --model-filename ${prepare.model_filename}
+      --output-model-dir data/01_raw/models
+    deps:
+      - scripts/prepare.py
+    params:
+      - prepare
+    outs:
+      - data/01_raw/models
+
   truncate:
     foreach:
       - train

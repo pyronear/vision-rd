@@ -4060,3 +4060,23 @@ stages:
       hash: md5
       md5: 1f99204feebddd1cb65e74c362aa1673
       size: 31388
+  prepare:
+    cmd: uv run python scripts/prepare.py --model-repo 
+      pyronear/yolo11s_nimble-narwhal_v6.0.0 --model-filename best.pt 
+      --output-model-dir data/01_raw/models
+    deps:
+    - path: scripts/prepare.py
+      hash: md5
+      md5: bdccf5d50ba8f71ed560834ce23a3a52
+      size: 1778
+    params:
+      params.yaml:
+        prepare:
+          model_repo: pyronear/yolo11s_nimble-narwhal_v6.0.0
+          model_filename: best.pt
+    outs:
+    - path: data/01_raw/models
+      hash: md5
+      md5: b2430b0d89561aff2a961e69bfa7b940.dir
+      size: 19225752
+      nfiles: 3
