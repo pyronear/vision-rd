@@ -25,6 +25,7 @@ dependencies = [
     "torchvision>=0.17",
     "tqdm>=4.66",
     "ultralytics>=8.3",
+    "huggingface-hub>=0.24",
 ]
 
 [tool.uv.sources]
