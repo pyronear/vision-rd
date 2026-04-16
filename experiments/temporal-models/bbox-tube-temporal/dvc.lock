@@ -481,8 +481,8 @@ stages:
       nfiles: 2841
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -537,8 +537,8 @@ stages:
       size: 483389
     - path: data/08_reporting/train/mean_pool/roc_curve.png
       hash: md5
-      md5: 134714194dc1bbcf6c484088a66981d6
-      size: 27932
+      md5: b43540cf49a32af1e0d2a61a1cce7e99
+      size: 27911
   evaluate_mean_pool@val:
     cmd: uv run python scripts/evaluate.py --arch mean_pool --data-dir 
       data/05_model_input/val --checkpoint 
@@ -562,8 +562,8 @@ stages:
       nfiles: 284
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -618,8 +618,8 @@ stages:
       size: 48434
     - path: data/08_reporting/val/mean_pool/roc_curve.png
       hash: md5
-      md5: e97ffead401c8e0cd2853273a0b4b88c
-      size: 27521
+      md5: 685b042478a2f41ea1f0adfcd7afd641
+      size: 27501
   evaluate_gru@train:
     cmd: uv run python scripts/evaluate.py --arch gru --data-dir 
       data/05_model_input/train --checkpoint 
@@ -643,8 +643,8 @@ stages:
       nfiles: 2841
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -701,8 +701,8 @@ stages:
       size: 483996
     - path: data/08_reporting/train/gru/roc_curve.png
       hash: md5
-      md5: fdb34276075b5e5b6d147544d6d3c3fd
-      size: 27893
+      md5: b34b362f371600219e223ff7b27dc252
+      size: 27871
   evaluate_gru@val:
     cmd: uv run python scripts/evaluate.py --arch gru --data-dir 
       data/05_model_input/val --checkpoint data/06_models/gru/best_checkpoint.pt
@@ -725,8 +725,8 @@ stages:
       nfiles: 284
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -783,8 +783,8 @@ stages:
       size: 48501
     - path: data/08_reporting/val/gru/roc_curve.png
       hash: md5
-      md5: 2bd30e449c12c191ba3173b8f08072cf
-      size: 27640
+      md5: b2721a45f2bb13f1b48baa64389bc732
+      size: 27619
   train_gru_seed43:
     cmd: uv run python scripts/train.py --arch gru --train-dir 
       data/05_model_input/train --val-dir data/05_model_input/val --output-dir 
@@ -1623,8 +1623,8 @@ stages:
       nfiles: 2841
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -1682,8 +1682,8 @@ stages:
       size: 484206
     - path: data/08_reporting/train/gru_convnext/roc_curve.png
       hash: md5
-      md5: 480bd442f89178f5b467aab59f66cbd3
-      size: 27514
+      md5: dc6de38afb190912f958756c0f9392f7
+      size: 27493
   evaluate_gru_convnext@val:
     cmd: uv run python scripts/evaluate.py --arch gru --data-dir 
       data/05_model_input/val --checkpoint 
@@ -1707,8 +1707,8 @@ stages:
       nfiles: 284
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -1766,8 +1766,8 @@ stages:
       size: 48519
     - path: data/08_reporting/val/gru_convnext/roc_curve.png
       hash: md5
-      md5: f0439eb1b45b1ef05c2aa41b64b2dd2c
-      size: 27271
+      md5: 203c907afe23ab37031313e2ffeff33e
+      size: 27253
   evaluate_gru_finetune@train:
     cmd: uv run python scripts/evaluate.py --arch gru --data-dir 
       data/05_model_input/train --checkpoint 
@@ -1792,8 +1792,8 @@ stages:
       nfiles: 2841
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -1853,8 +1853,8 @@ stages:
       size: 483569
     - path: data/08_reporting/train/gru_finetune/roc_curve.png
       hash: md5
-      md5: f5e34466d4e214b86d11b5e2c1685a79
-      size: 28296
+      md5: 7cbc2e3be224f1ba234453c0c144b015
+      size: 28275
   evaluate_gru_finetune@val:
     cmd: uv run python scripts/evaluate.py --arch gru --data-dir 
       data/05_model_input/val --checkpoint 
@@ -1878,8 +1878,8 @@ stages:
       nfiles: 284
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -1939,8 +1939,8 @@ stages:
       size: 48463
     - path: data/08_reporting/val/gru_finetune/roc_curve.png
       hash: md5
-      md5: ef6110607c4257d7febfe6c37cea6795
-      size: 27845
+      md5: 0153c1898547b1200e352e031f4841c4
+      size: 27826
   evaluate_gru_convnext_finetune@train:
     cmd: uv run python scripts/evaluate.py --arch gru --data-dir 
       data/05_model_input/train --checkpoint 
@@ -1965,8 +1965,8 @@ stages:
       nfiles: 2841
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -2027,8 +2027,8 @@ stages:
       size: 485112
     - path: data/08_reporting/train/gru_convnext_finetune/roc_curve.png
       hash: md5
-      md5: 361f80aa0adb407dd1fe4efb17e7042a
-      size: 27274
+      md5: 6f322d0c96109896b37a2d0c15fc4bfd
+      size: 27253
   evaluate_gru_convnext_finetune@val:
     cmd: uv run python scripts/evaluate.py --arch gru --data-dir 
       data/05_model_input/val --checkpoint 
@@ -2053,8 +2053,8 @@ stages:
       nfiles: 284
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -2115,8 +2115,8 @@ stages:
       size: 48569
     - path: data/08_reporting/val/gru_convnext_finetune/roc_curve.png
       hash: md5
-      md5: aafff3b0be616dd06e16921cb56bf6c5
-      size: 27356
+      md5: 120e32595632972491d4d050d69a2c0b
+      size: 27335
   compare_variants:
     cmd: uv run python scripts/compare_variants.py --variant-dir 
       data/08_reporting/val/gru --variant-dir data/08_reporting/val/gru_convnext
@@ -2466,8 +2466,8 @@ stages:
       nfiles: 2841
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -2529,8 +2529,8 @@ stages:
       size: 484460
     - path: data/08_reporting/train/gru_convnext_base_finetune/roc_curve.png
       hash: md5
-      md5: b085b63dfd9c017293dc6fa3b0a7f7a6
-      size: 27560
+      md5: c5341d8a0e6af30c489ed43285c88611
+      size: 27541
   evaluate_gru_convnext_base_finetune@val:
     cmd: uv run python scripts/evaluate.py --arch gru --data-dir 
       data/05_model_input/val --checkpoint 
@@ -2555,8 +2555,8 @@ stages:
       nfiles: 284
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -2618,8 +2618,8 @@ stages:
       size: 48539
     - path: data/08_reporting/val/gru_convnext_base_finetune/roc_curve.png
       hash: md5
-      md5: e579f7492abf75c9671b89accfc93b10
-      size: 27257
+      md5: e63edc54bc3153ab18bd46f9cfeb7ebb
+      size: 27237
   package:
     cmd: uv run python scripts/package_model.py --variant vit_dinov2_finetune 
       --output data/06_models/vit_dinov2_finetune/model.zip
@@ -2825,8 +2825,8 @@ stages:
       nfiles: 284
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -2891,8 +2891,8 @@ stages:
       size: 48510
     - path: data/08_reporting/val/vit_dinov2_frozen/roc_curve.png
       hash: md5
-      md5: 1b426a77296ff58b9b5d1fa771278a6c
-      size: 27314
+      md5: 55fe73b6e374a015132b201f2bae15ed
+      size: 27294
   train_vit_dinov2_finetune:
     cmd: uv run python scripts/train.py --arch transformer --train-dir 
       data/05_model_input/train --val-dir data/05_model_input/val --output-dir 
@@ -3125,8 +3125,8 @@ stages:
       nfiles: 2841
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -3191,8 +3191,8 @@ stages:
       size: 484108
     - path: data/08_reporting/train/vit_dinov2_frozen/roc_curve.png
       hash: md5
-      md5: 8402a0064387885831d291c404a6041d
-      size: 27854
+      md5: f9d6b745401b35f45663a6135b0ef813
+      size: 27833
   evaluate_vit_dinov2_finetune@train:
     cmd: uv run python scripts/evaluate.py --arch transformer --data-dir 
       data/05_model_input/train --checkpoint 
@@ -3217,8 +3217,8 @@ stages:
       nfiles: 2841
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -3285,8 +3285,8 @@ stages:
       size: 484064
     - path: data/08_reporting/train/vit_dinov2_finetune/roc_curve.png
       hash: md5
-      md5: 33238e9afe4e045250edd31e80f9a015
-      size: 27502
+      md5: 763113c882b287a347d3e829c34fdcb7
+      size: 27481
   evaluate_vit_dinov2_finetune@val:
     cmd: uv run python scripts/evaluate.py --arch transformer --data-dir 
       data/05_model_input/val --checkpoint 
@@ -3311,8 +3311,8 @@ stages:
       nfiles: 284
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -3379,8 +3379,8 @@ stages:
       size: 48505
     - path: data/08_reporting/val/vit_dinov2_finetune/roc_curve.png
       hash: md5
-      md5: 8a275b6376cd9d432f7ee3a372dfc59f
-      size: 27450
+      md5: cc9b8c913deda52c92d148bbd7323c56
+      size: 27431
   evaluate_vit_in21k_finetune@train:
     cmd: uv run python scripts/evaluate.py --arch transformer --data-dir 
       data/05_model_input/train --checkpoint 
@@ -3405,8 +3405,8 @@ stages:
       nfiles: 2841
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -3473,8 +3473,8 @@ stages:
       size: 484744
     - path: data/08_reporting/train/vit_in21k_finetune/roc_curve.png
       hash: md5
-      md5: eae17e0b35609a6a4f75826bb0bbd8c2
-      size: 27537
+      md5: f358a502a577339a95a8f98a4a1681c2
+      size: 27519
   evaluate_vit_in21k_finetune@val:
     cmd: uv run python scripts/evaluate.py --arch transformer --data-dir 
       data/05_model_input/val --checkpoint 
@@ -3499,8 +3499,8 @@ stages:
       nfiles: 284
     - path: scripts/evaluate.py
       hash: md5
-      md5: b44c6f07c2b80eac6b7db346c47ed3a2
-      size: 9029
+      md5: a82acfb44d92a873191f2bf37f9ec199
+      size: 7588
     - path: src/bbox_tube_temporal/dataset.py
       hash: md5
       md5: 2d685d135baa79b0916c936f37a052dd
@@ -3567,8 +3567,8 @@ stages:
       size: 48548
     - path: data/08_reporting/val/vit_in21k_finetune/roc_curve.png
       hash: md5
-      md5: 96e98e294961744a9dcab50b24193cb3
-      size: 27309
+      md5: a42b20985a7dc684f07b936a4e00dbc3
+      size: 27290
   package@gru_convnext_finetune:
     cmd: uv run python scripts/package_model.py --variant gru_convnext_finetune 
       --output data/06_models/gru_convnext_finetune/model.zip
@@ -3739,24 +3739,24 @@ stages:
       size: 162764055
     - path: scripts/evaluate_packaged.py
       hash: md5
-      md5: 59a7c7682a7b0a87246c652b38d9c856
-      size: 5165
+      md5: ef11b9f88bc4509adc4e9ad5ec5d4bea
+      size: 5673
     - path: src/bbox_tube_temporal/data.py
       hash: md5
       md5: b907e5a0baedb93775446678c2cce034
       size: 5078
     - path: src/bbox_tube_temporal/eval_plots.py
       hash: md5
-      md5: 20b2ef6beaafec50e50dea06b24d4c1f
-      size: 2851
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
     - path: src/bbox_tube_temporal/inference.py
       hash: md5
       md5: 1430a3e47e76d00c75f8ed7e428d3c2d
       size: 7468
     - path: src/bbox_tube_temporal/model.py
       hash: md5
-      md5: a1220298c6885a0d892e8cd02a63cca9
-      size: 7113
+      md5: e82bdd5ed5c6d1396ff1acb11935ed9d
+      size: 7914
     - path: src/bbox_tube_temporal/model_input.py
       hash: md5
       md5: fa9e8bd01b4a5228feeeb8d689405f88
@@ -3784,11 +3784,6 @@ stages:
       hash: md5
       md5: d751713988987e9331980363e24189ce
       size: 2
-    - path: data/08_reporting/val/packaged/vit_dinov2_finetune/errors
-      hash: md5
-      md5: d751713988987e9331980363e24189ce.dir
-      size: 0
-      nfiles: 0
     - path: data/08_reporting/val/packaged/vit_dinov2_finetune/metrics.json
       hash: md5
       md5: 48fe8c9dd41616f358f658b5ce638458
@@ -3799,12 +3794,12 @@ stages:
       size: 21957
     - path: data/08_reporting/val/packaged/vit_dinov2_finetune/predictions.json
       hash: md5
-      md5: 5e1bc614f5523f317ab0553369ac7c9e
-      size: 101153
+      md5: 0236918fae0009f63834244fe99d92d3
+      size: 1620028
     - path: data/08_reporting/val/packaged/vit_dinov2_finetune/roc_curve.png
       hash: md5
-      md5: 6483c2a4354de38e8470d86e6ec69582
-      size: 30821
+      md5: 30b3d1d0c86dde8c0457bf35aa4ca6a2
+      size: 30797
   evaluate_packaged@2:
     cmd: uv run python scripts/evaluate_packaged.py --model-zip 
       data/06_models/gru_convnext_finetune/model.zip --sequences-dir 
@@ -3823,24 +3818,24 @@ stages:
       size: 258728626
     - path: scripts/evaluate_packaged.py
       hash: md5
-      md5: 59a7c7682a7b0a87246c652b38d9c856
-      size: 5165
+      md5: ef11b9f88bc4509adc4e9ad5ec5d4bea
+      size: 5673
     - path: src/bbox_tube_temporal/data.py
       hash: md5
       md5: b907e5a0baedb93775446678c2cce034
       size: 5078
     - path: src/bbox_tube_temporal/eval_plots.py
       hash: md5
-      md5: 20b2ef6beaafec50e50dea06b24d4c1f
-      size: 2851
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
     - path: src/bbox_tube_temporal/inference.py
       hash: md5
       md5: 1430a3e47e76d00c75f8ed7e428d3c2d
       size: 7468
     - path: src/bbox_tube_temporal/model.py
       hash: md5
-      md5: a1220298c6885a0d892e8cd02a63cca9
-      size: 7113
+      md5: e82bdd5ed5c6d1396ff1acb11935ed9d
+      size: 7914
     - path: src/bbox_tube_temporal/model_input.py
       hash: md5
       md5: fa9e8bd01b4a5228feeeb8d689405f88
@@ -3868,11 +3863,6 @@ stages:
       hash: md5
       md5: d751713988987e9331980363e24189ce
       size: 2
-    - path: data/08_reporting/train/packaged/gru_convnext_finetune/errors
-      hash: md5
-      md5: d751713988987e9331980363e24189ce.dir
-      size: 0
-      nfiles: 0
     - path: data/08_reporting/train/packaged/gru_convnext_finetune/metrics.json
       hash: md5
       md5: d048fb79e794ad75f91ec8662a6571ea
@@ -3884,12 +3874,12 @@ stages:
     - path: 
         data/08_reporting/train/packaged/gru_convnext_finetune/predictions.json
       hash: md5
-      md5: de8ecacc6c9c4b8ca25acef145fe774a
-      size: 990585
+      md5: 498fce1c4d5bf4fc7ae438cd2c8ce5f9
+      size: 16736562
     - path: data/08_reporting/train/packaged/gru_convnext_finetune/roc_curve.png
       hash: md5
-      md5: ed0283eb114a45d45f2c37ae539c08f4
-      size: 32935
+      md5: 3f3e743bcd678ba59e49cd306b543e01
+      size: 32911
   evaluate_packaged@0:
     cmd: uv run python scripts/evaluate_packaged.py --model-zip 
       data/06_models/vit_dinov2_finetune/model.zip --sequences-dir 
@@ -3908,24 +3898,24 @@ stages:
       size: 162764055
     - path: scripts/evaluate_packaged.py
       hash: md5
-      md5: 59a7c7682a7b0a87246c652b38d9c856
-      size: 5165
+      md5: ef11b9f88bc4509adc4e9ad5ec5d4bea
+      size: 5673
     - path: src/bbox_tube_temporal/data.py
       hash: md5
       md5: b907e5a0baedb93775446678c2cce034
       size: 5078
     - path: src/bbox_tube_temporal/eval_plots.py
       hash: md5
-      md5: 20b2ef6beaafec50e50dea06b24d4c1f
-      size: 2851
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
     - path: src/bbox_tube_temporal/inference.py
       hash: md5
       md5: 1430a3e47e76d00c75f8ed7e428d3c2d
       size: 7468
     - path: src/bbox_tube_temporal/model.py
       hash: md5
-      md5: a1220298c6885a0d892e8cd02a63cca9
-      size: 7113
+      md5: e82bdd5ed5c6d1396ff1acb11935ed9d
+      size: 7914
     - path: src/bbox_tube_temporal/model_input.py
       hash: md5
       md5: fa9e8bd01b4a5228feeeb8d689405f88
@@ -3953,11 +3943,6 @@ stages:
       hash: md5
       md5: d751713988987e9331980363e24189ce
       size: 2
-    - path: data/08_reporting/train/packaged/vit_dinov2_finetune/errors
-      hash: md5
-      md5: d751713988987e9331980363e24189ce.dir
-      size: 0
-      nfiles: 0
     - path: data/08_reporting/train/packaged/vit_dinov2_finetune/metrics.json
       hash: md5
       md5: b959cadeb10ea471750b280687690d39
@@ -3969,12 +3954,12 @@ stages:
     - path: 
         data/08_reporting/train/packaged/vit_dinov2_finetune/predictions.json
       hash: md5
-      md5: 7ffdb8a923940de9222a8729442c14d5
-      size: 989258
+      md5: 71d5cd0b12d211249941264cee45f9a4
+      size: 16734596
     - path: data/08_reporting/train/packaged/vit_dinov2_finetune/roc_curve.png
       hash: md5
-      md5: b6e111a80edf91d7153127c0a186a118
-      size: 32987
+      md5: b2f60c39ba599aca56064682dd55fa54
+      size: 32964
   evaluate_packaged@3:
     cmd: uv run python scripts/evaluate_packaged.py --model-zip 
       data/06_models/gru_convnext_finetune/model.zip --sequences-dir 
@@ -3993,24 +3978,24 @@ stages:
       size: 258728626
     - path: scripts/evaluate_packaged.py
       hash: md5
-      md5: 59a7c7682a7b0a87246c652b38d9c856
-      size: 5165
+      md5: ef11b9f88bc4509adc4e9ad5ec5d4bea
+      size: 5673
     - path: src/bbox_tube_temporal/data.py
       hash: md5
       md5: b907e5a0baedb93775446678c2cce034
       size: 5078
     - path: src/bbox_tube_temporal/eval_plots.py
       hash: md5
-      md5: 20b2ef6beaafec50e50dea06b24d4c1f
-      size: 2851
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
     - path: src/bbox_tube_temporal/inference.py
       hash: md5
       md5: 1430a3e47e76d00c75f8ed7e428d3c2d
       size: 7468
     - path: src/bbox_tube_temporal/model.py
       hash: md5
-      md5: a1220298c6885a0d892e8cd02a63cca9
-      size: 7113
+      md5: e82bdd5ed5c6d1396ff1acb11935ed9d
+      size: 7914
     - path: src/bbox_tube_temporal/model_input.py
       hash: md5
       md5: fa9e8bd01b4a5228feeeb8d689405f88
@@ -4038,11 +4023,6 @@ stages:
       hash: md5
       md5: d751713988987e9331980363e24189ce
       size: 2
-    - path: data/08_reporting/val/packaged/gru_convnext_finetune/errors
-      hash: md5
-      md5: d751713988987e9331980363e24189ce.dir
-      size: 0
-      nfiles: 0
     - path: data/08_reporting/val/packaged/gru_convnext_finetune/metrics.json
       hash: md5
       md5: 1a8e466e64d281738a5e4eedc252b5e4
@@ -4054,12 +4034,12 @@ stages:
     - path: 
         data/08_reporting/val/packaged/gru_convnext_finetune/predictions.json
       hash: md5
-      md5: 84072685f9c0c9a7a6476ef44e3831c2
-      size: 101307
+      md5: 4c3842fcc02855abc5deeecc331a6ed0
+      size: 1620277
     - path: data/08_reporting/val/packaged/gru_convnext_finetune/roc_curve.png
       hash: md5
-      md5: 1f99204feebddd1cb65e74c362aa1673
-      size: 31388
+      md5: e0914bd51c58be45ba7b6a553193dcf0
+      size: 31365
   prepare:
     cmd: uv run python scripts/prepare.py --model-repo 
       pyronear/yolo11s_nimble-narwhal_v6.0.0 --model-filename best.pt 
