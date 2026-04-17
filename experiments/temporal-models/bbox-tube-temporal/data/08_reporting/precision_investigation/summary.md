@@ -25,8 +25,10 @@ configuration (0.895 vs 0.93). Its best operating point on this spec is
 | baseline (deployed) | vit_dinov2_finetune | 0.8226 | 0.9623 | 0.8870 | 33 | 6 |
 | C1 (conf=0.10) | gru_convnext_finetune | **0.9733** | 0.9182 | 0.9450 | 4 | 13 |
 | C1 (conf=0.10) | vit_dinov2_finetune | 0.9259 | 0.9434 | **0.9346** | 12 | 9 |
-| **C1 + pad=20** | **gru_convnext_finetune** | **0.9560** | **0.9560** | **0.9560** | **7** | **7** |
-| C1 + pad=20 | vit_dinov2_finetune | 0.8947 | 0.9623 | 0.9273 | 18 | 6 |
+| **C1 + pad=20 (symmetric)** | **gru_convnext_finetune** | **0.9560** | **0.9560** | **0.9560** | **7** | **7** |
+| C1 + pad=20 (symmetric) | vit_dinov2_finetune | 0.8947 | 0.9623 | 0.9273 | 18 | 6 |
+| C1 + pad=20 (uniform) | gru_convnext_finetune | 0.9560 | 0.9560 | 0.9560 | 7 | 7 |
+| C1 + pad=20 (uniform) | vit_dinov2_finetune | 0.8844 | 0.9623 | 0.9217 | 20 | 6 |
 
 Train-packaged for the same runs:
 
@@ -36,8 +38,10 @@ Train-packaged for the same runs:
 | baseline | vit_dinov2_finetune | 0.8105 | 0.9671 | 0.8819 |
 | C1 | gru_convnext_finetune | 0.9426 | 0.9517 | 0.9471 |
 | C1 | vit_dinov2_finetune | 0.8999 | 0.9555 | 0.9269 |
-| **C1 + pad=20** | **gru_convnext_finetune** | **0.9252** | **0.9716** | **0.9478** |
-| C1 + pad=20 | vit_dinov2_finetune | 0.8897 | 0.9723 | 0.9292 |
+| **C1 + pad=20 (symmetric)** | **gru_convnext_finetune** | **0.9252** | **0.9716** | **0.9478** |
+| C1 + pad=20 (symmetric) | vit_dinov2_finetune | 0.8897 | 0.9723 | 0.9292 |
+| C1 + pad=20 (uniform) | gru_convnext_finetune | 0.9252 | 0.9716 | 0.9478 |
+| C1 + pad=20 (uniform) | vit_dinov2_finetune | 0.8696 | 0.9755 | 0.9195 |
 
 ## Track-by-track findings
 
@@ -100,6 +104,29 @@ C1-alone remains its best operating point. Possibly transformer
 attention amplifies the repeated-frame pattern; worth investigating
 if we later want a ViT-friendly padding scheme.
 
+### Track C + pad (uniform) — `pad_strategy = "uniform"` alternative
+
+**Verdict: no improvement over symmetric; slightly worse for ViT.**
+
+Hypothesis was that transformer attention amplifies the boundary-clustered
+duplicates in symmetric padding, and uniform nearest-neighbor upsampling
+(``i * N // M`` mapping) would distribute them more evenly, improving ViT.
+Results:
+
+- **gru_convnext: identical** — every metric matches symmetric to 4
+  decimals on both train and val. GRU hidden state converges regardless
+  of frame ordering, so the two strategies are functionally equivalent.
+- **vit_dinov2: marginally worse** — val precision dropped 0.895 → 0.884
+  (FP 18 → 20); train precision dropped 0.890 → 0.870 (FP 187 → 227).
+  Uniform distributes duplicate frames across positions with different
+  learned positional embeddings, which may fragment the attention signal
+  rather than concentrating it.
+
+**Conclusion**: symmetric padding remains the recommended strategy.
+ViT's precision gap under padding is not a padding-order problem — it
+appears to be a more fundamental classifier sensitivity to duplicate
+input that retraining might address but config tweaks cannot.
+
 ### Track C2 — `infer_min_tube_length = 4` (standalone)
 
 Not pursued as a real ablation. Offline simulation showed it was
@@ -125,6 +152,11 @@ precision — not a useful standalone lever.
 - **Padding is asymmetric-helpful**: the short-sequence bucket is
   dominantly smoke (those are the ones truncation most hurts),
   so padding mostly rescues TPs, not FPs.
+- **Padding order doesn't matter for GRU, hurts for ViT**: symmetric
+  and uniform padding produce bitwise-identical results for
+  gru_convnext. ViT is marginally worse under uniform. The padding
+  "shape" is not the lever; the ViT's learned positional embeddings
+  react differently to duplicate frames regardless of their placement.
 
 ## Recommendation
 
@@ -136,8 +168,8 @@ precision — not a useful standalone lever.
    the val gain (spec out-of-scope until val bar is cleared — now it
    is).
 3. For `vit_dinov2_finetune`, keep `pad_to_min_frames = 0` (use C1
-   only) for now, or investigate a ViT-friendly padding scheme
-   (e.g. uniform-spread duplicates rather than boundary-only).
+   only) for now. Uniform-spread padding was tested and doesn't
+   help — ViT's precision gap under any padding is more fundamental.
 
 ## Out of scope (and follow-ups)
 
@@ -145,5 +177,6 @@ precision — not a useful standalone lever.
   TTD from ~515s to ~812s; separate PR per spec.
 - Retraining the classifier (YOLO-version alignment, MIL, hard-neg
   mining) — documented in the spec's Follow-ups section.
-- Uniform-spread padding as an alternative to symmetric-boundary
-  padding — might unblock ViT's precision under padding.
+- ViT precision under padding — neither symmetric nor uniform
+  padding recovers the 3pp precision ViT loses vs. C1-alone.
+  Likely requires retraining with padded inputs.
