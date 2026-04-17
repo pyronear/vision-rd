@@ -9,7 +9,9 @@ from bbox_tube_temporal.package_predict import collect_pipeline_records
 
 class _FakeOutput:
     def __init__(self, kept_tubes: list[dict]) -> None:
-        self.details = {"tubes": {"num_candidates": len(kept_tubes), "kept": kept_tubes}}
+        self.details = {
+            "tubes": {"num_candidates": len(kept_tubes), "kept": kept_tubes}
+        }
 
 
 def test_collect_pipeline_records_produces_expected_schema(
