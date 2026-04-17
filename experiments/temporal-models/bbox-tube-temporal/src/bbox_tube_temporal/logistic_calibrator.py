@@ -9,6 +9,7 @@ version drift.
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -53,3 +54,24 @@ class LogisticCalibrator:
             intercept=float(data["intercept"]),
             sanity_checks=list(data.get("sanity_checks", [])),
         )
+
+    def predict_proba(self, features_row: np.ndarray) -> float:
+        """Probability of the positive class for one feature row.
+
+        Args:
+            features_row: 1-D array, shape ``(len(self.features),)``.
+        """
+        z = float(features_row @ self.coefficients) + self.intercept
+        return 1.0 / (1.0 + math.exp(-z))
+
+    def predict_proba_batch(self, X: np.ndarray) -> np.ndarray:
+        """Vectorised :meth:`predict_proba`.
+
+        Args:
+            X: 2-D array, shape ``(n_rows, len(self.features))``.
+
+        Returns:
+            1-D array of probabilities, shape ``(n_rows,)``.
+        """
+        z = X @ self.coefficients + self.intercept
+        return 1.0 / (1.0 + np.exp(-z))

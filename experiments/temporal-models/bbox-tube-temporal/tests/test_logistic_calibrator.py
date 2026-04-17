@@ -48,3 +48,29 @@ def test_json_file_shape_matches_contract(tmp_path: Path) -> None:
     assert payload["sanity_checks"] == [
         {"features": [1.0, 2.0, 3.0, 4.0], "prob": 0.5}
     ]
+
+
+def test_predict_proba_matches_textbook_sigmoid() -> None:
+    # Known weights: z = 1*2 + 2*3 + 0 = 8; sigmoid(8) ~= 0.99966
+    cal = LogisticCalibrator(
+        features=["a", "b"],
+        coefficients=np.array([1.0, 2.0]),
+        intercept=0.0,
+        sanity_checks=[],
+    )
+    prob = cal.predict_proba(np.array([2.0, 3.0]))
+    assert abs(prob - 1.0 / (1.0 + np.exp(-8.0))) < 1e-12
+
+
+def test_predict_proba_batch_matches_single_rows() -> None:
+    cal = LogisticCalibrator(
+        features=["a", "b"],
+        coefficients=np.array([0.5, -0.25]),
+        intercept=0.1,
+        sanity_checks=[],
+    )
+    X = np.array([[1.0, 2.0], [3.0, -1.0], [0.0, 0.0]])
+    batch = cal.predict_proba_batch(X)
+    singles = np.array([cal.predict_proba(row) for row in X])
+    assert np.allclose(batch, singles, atol=1e-12)
+    assert batch.shape == (3,)
