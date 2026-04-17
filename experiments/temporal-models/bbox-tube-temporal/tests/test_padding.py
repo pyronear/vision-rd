@@ -18,8 +18,7 @@ from bbox_tube_temporal.inference import (
 
 def _mk_frames(n: int) -> list[Frame]:
     return [
-        Frame(frame_id=f"f{i}", image_path=Path(f"/tmp/f{i}.jpg"))
-        for i in range(n)
+        Frame(frame_id=f"f{i}", image_path=Path(f"/tmp/f{i}.jpg")) for i in range(n)
     ]
 
 

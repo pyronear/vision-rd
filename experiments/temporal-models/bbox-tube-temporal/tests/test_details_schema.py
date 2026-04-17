@@ -83,9 +83,7 @@ def test_empty_sequence_shape_validates() -> None:
             num_frames_input=0, num_truncated=0, padded_frame_indices=[]
         ),
         tubes=Tubes(num_candidates=0, kept=[]),
-        decision=Decision(
-            aggregation="max_logit", threshold=0.0, trigger_tube_id=None
-        ),
+        decision=Decision(aggregation="max_logit", threshold=0.0, trigger_tube_id=None),
     )
     assert details.model_dump()["tubes"]["kept"] == []
 
@@ -96,9 +94,7 @@ def test_no_tubes_kept_shape_validates() -> None:
             num_frames_input=5, num_truncated=0, padded_frame_indices=[]
         ),
         tubes=Tubes(num_candidates=3, kept=[]),
-        decision=Decision(
-            aggregation="max_logit", threshold=0.0, trigger_tube_id=None
-        ),
+        decision=Decision(aggregation="max_logit", threshold=0.0, trigger_tube_id=None),
     )
     assert details.tubes.num_candidates == 3
     assert details.decision.trigger_tube_id is None
