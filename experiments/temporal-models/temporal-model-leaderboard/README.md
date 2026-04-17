@@ -6,12 +6,13 @@ Standardized evaluation and ranking of `TemporalModel` implementations on the [p
 
 | Rank | Model | Precision | Recall | F1 | FPR | Mean TTD (s) | Median TTD (s) |
 |------|-------|-----------|--------|----|-----|--------------|----------------|
-| 1 | [FSM Tracking Baseline](../tracking-fsm-baseline/) | 0.9474 | 0.9664 | 0.9568 | 0.0537 | 142.0 | 58.0 |
-| 2 | [Pyro-Detector Baseline](../pyro-detector-baseline/) | 0.8563 | 0.9597 | 0.9051 | 0.1611 | 27.0 | 7.0 |
-| 3 | [Bbox-Tube Temporal](../bbox-tube-temporal/) | 0.8136 | 0.9664 | 0.8834 | 0.2215 | 503.1 | 328.5 |
-| 4 | [MTB Change Detection](../mtb-change-detection/) | 0.7165 | 0.9329 | 0.8105 | 0.3691 | 85.4 | 25.0 |
+| 1 | [FSM Tracking Baseline](../tracking-fsm-baseline/) | 0.9474 | 0.9536 | 0.9505 | 0.0530 | 142.0 | 58.0 |
+| 2 | [Bbox-Tube Temporal (GRU-ConvNeXt)](../bbox-tube-temporal/) | 0.9272 | 0.9272 | 0.9272 | 0.0728 | 825.3 | 631.0 |
+| 3 | [Bbox-Tube Temporal (ViT-DINOv2)](../bbox-tube-temporal/) | 0.8802 | 0.9735 | 0.9245 | 0.1325 | 786.6 | 630.0 |
+| 4 | [Pyro-Detector Baseline](../pyro-detector-baseline/) | 0.8580 | 0.9603 | 0.9063 | 0.1589 | 27.0 | 7.0 |
+| 5 | [MTB Change Detection](../mtb-change-detection/) | 0.7121 | 0.9338 | 0.8080 | 0.3775 | 84.2 | 25.0 |
 
-*Evaluated on 298 sequences (149 wildfire + 149 false positive). Last updated: 2026-04-16.*
+*Evaluated on 302 sequences (151 wildfire + 151 false positive). Last updated: 2026-04-17.*
 
 ## 🤖 Models
 
