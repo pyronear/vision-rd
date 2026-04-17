@@ -49,18 +49,19 @@ def collect_pipeline_records(
         model: A ``BboxTubeTemporalModel`` (or duck-type compatible) with
             ``.load_sequence(frame_paths) -> list[Frame]`` and
             ``.predict(frames) -> TemporalModelOutput`` whose
-            ``.details["kept_tubes"]`` carries the tube structure.
+            ``.details["tubes"]["kept"]`` carries the tube structure.
         raw_dir: ``data/01_raw/datasets/{train,val}/`` with
             ``{wildfire,fp}/<seq>/images/*.jpg`` sub-trees.
     """
     records: list[dict] = []
     for label, seq_name, frames in _iter_labelled_sequences(raw_dir, model):
         out = model.predict(frames)
+        kept = out.details.get("tubes", {}).get("kept", [])
         records.append(
             {
                 "label": label,
                 "sequence": seq_name,
-                "kept_tubes": out.details.get("kept_tubes", []),
+                "kept_tubes": kept,
             }
         )
     return records

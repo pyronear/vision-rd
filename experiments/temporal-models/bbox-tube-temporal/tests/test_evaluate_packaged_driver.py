@@ -47,29 +47,39 @@ class _FakeModel:
     def predict(self, frames):
         # Decide based on how many frames we got — purely to vary outputs.
         is_pos = len(frames) >= 3
+        kept = (
+            [
+                {
+                    "tube_id": 0,
+                    "start_frame": 0,
+                    "end_frame": len(frames) - 1,
+                    "logit": 2.5,
+                    "probability": None,
+                    "first_crossing_frame": len(frames) - 1,
+                    "entries": [],
+                }
+            ]
+            if is_pos
+            else []
+        )
         return TemporalModelOutput(
             is_positive=is_pos,
             trigger_frame_index=(len(frames) - 1) if is_pos else None,
             details={
-                "num_tubes_kept": 1 if is_pos else 0,
-                "num_tubes_total": 1 if is_pos else 0,
-                "tube_logits": [2.5] if is_pos else [],
-                "winner_tube_id": 0 if is_pos else None,
-                "kept_tubes": (
-                    [
-                        {
-                            "tube_id": 0,
-                            "start_frame": 0,
-                            "end_frame": len(frames) - 1,
-                            "logit": 2.5,
-                            "is_winner": True,
-                            "entries": [],
-                        }
-                    ]
-                    if is_pos
-                    else []
-                ),
-                "threshold": 0.5,
+                "preprocessing": {
+                    "num_frames_input": len(frames),
+                    "num_truncated": 0,
+                    "padded_frame_indices": [],
+                },
+                "tubes": {
+                    "num_candidates": 1 if is_pos else 0,
+                    "kept": kept,
+                },
+                "decision": {
+                    "aggregation": "max_logit",
+                    "threshold": 0.5,
+                    "trigger_tube_id": 0 if is_pos else None,
+                },
             },
         )
 
@@ -139,11 +149,10 @@ def test_evaluate_packaged_writes_expected_outputs(tmp_path, monkeypatch):
     assert positive_records, "at least one positive record expected"
     a_positive = positive_records[0]
     assert a_positive["num_tubes_total"] == 1
-    assert a_positive["winner_tube_id"] == 0
+    assert a_positive["trigger_tube_id"] == 0
     assert a_positive["threshold"] == 0.5
     assert isinstance(a_positive["kept_tubes"], list)
     assert len(a_positive["kept_tubes"]) == a_positive["num_tubes_kept"]
-    assert a_positive["kept_tubes"][0]["is_winner"] is True
     assert a_positive["kept_tubes"][0]["logit"] == 2.5
 
 

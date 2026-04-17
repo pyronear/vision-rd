@@ -12,6 +12,14 @@ from typing import Any, Self
 import torch
 from pyrocore import Frame, TemporalModel, TemporalModelOutput
 
+from .details_schema import (
+    BboxTubeDetails,
+    Decision,
+    KeptTube,
+    Preprocessing,
+    TubeEntry,
+    Tubes,
+)
 from .inference import (
     crop_tube_patches,
     filter_and_interpolate_tubes,
@@ -21,7 +29,7 @@ from .inference import (
     run_yolo_on_frames,
     score_tubes,
 )
-from .logistic_calibrator import LogisticCalibrator
+from .logistic_calibrator import LogisticCalibrator, extract_features
 from .package import ModelPackage, load_model_package
 from .tubes import build_tubes
 
@@ -109,30 +117,58 @@ class BboxTubeTemporalModel(TemporalModel):
         clf_cfg = self._cfg["classifier"]
         dec = self._cfg["decision"]
 
+        aggregation = dec.get("aggregation", "max_logit")
+        effective_threshold = (
+            float(dec["logistic_threshold"])
+            if aggregation == "logistic"
+            else float(dec["threshold"])
+        )
+
+        def _make_details(
+            *,
+            num_frames_input: int,
+            num_truncated: int,
+            padded_indices: list[int],
+            num_candidates: int,
+            kept_tubes_models: list[KeptTube],
+            trigger_tube_id: int | None,
+        ) -> dict:
+            return BboxTubeDetails(
+                preprocessing=Preprocessing(
+                    num_frames_input=num_frames_input,
+                    num_truncated=num_truncated,
+                    padded_frame_indices=padded_indices,
+                ),
+                tubes=Tubes(
+                    num_candidates=num_candidates,
+                    kept=kept_tubes_models,
+                ),
+                decision=Decision(
+                    aggregation=aggregation,
+                    threshold=effective_threshold,
+                    trigger_tube_id=trigger_tube_id,
+                ),
+            ).model_dump()
+
         original_len = len(frames)
         if original_len == 0:
             return TemporalModelOutput(
                 is_positive=False,
                 trigger_frame_index=None,
-                details={
-                    "num_frames": 0,
-                    "num_truncated": 0,
-                    "num_padded": 0,
-                    "num_detections_per_frame": [],
-                    "num_tubes_total": 0,
-                    "num_tubes_kept": 0,
-                    "tube_logits": [],
-                    "winner_tube_id": None,
-                    "winner_tube_entries": [],
-                    "kept_tubes": [],
-                    "per_tube_first_crossing": {},
-                    "threshold": float(dec["threshold"]),
-                },
+                details=_make_details(
+                    num_frames_input=0,
+                    num_truncated=0,
+                    padded_indices=[],
+                    num_candidates=0,
+                    kept_tubes_models=[],
+                    trigger_tube_id=None,
+                ),
             )
 
         truncated = frames[: clf_cfg["max_frames"]]
         n_truncated = original_len - len(truncated)
 
+        padded_indices: list[int] = []
         pad_min = int(infer.get("pad_to_min_frames", 0))
         if pad_min > 0 and len(truncated) < pad_min:
             strategy = infer.get("pad_strategy", "symmetric")
@@ -143,8 +179,7 @@ class BboxTubeTemporalModel(TemporalModel):
                     f"unknown pad_strategy {strategy!r}; "
                     f"expected one of {sorted(_PAD_STRATEGIES)}"
                 ) from e
-            truncated = pad_fn(truncated, min_length=pad_min)
-        n_padded = len(truncated) - (original_len - n_truncated)
+            truncated, padded_indices = pad_fn(truncated, min_length=pad_min)
 
         frame_dets = run_yolo_on_frames(
             self._yolo,
@@ -154,7 +189,6 @@ class BboxTubeTemporalModel(TemporalModel):
             image_size=infer["image_size"],
             device=self._device,
         )
-        num_dets_per_frame = [len(fd.detections) for fd in frame_dets]
 
         candidate_tubes = build_tubes(
             frame_dets,
@@ -172,20 +206,14 @@ class BboxTubeTemporalModel(TemporalModel):
             return TemporalModelOutput(
                 is_positive=False,
                 trigger_frame_index=None,
-                details={
-                    "num_frames": original_len,
-                    "num_truncated": n_truncated,
-                    "num_padded": n_padded,
-                    "num_detections_per_frame": num_dets_per_frame,
-                    "num_tubes_total": len(candidate_tubes),
-                    "num_tubes_kept": 0,
-                    "tube_logits": [],
-                    "winner_tube_id": None,
-                    "winner_tube_entries": [],
-                    "kept_tubes": [],
-                    "per_tube_first_crossing": {},
-                    "threshold": float(dec["threshold"]),
-                },
+                details=_make_details(
+                    num_frames_input=original_len,
+                    num_truncated=n_truncated,
+                    padded_indices=padded_indices,
+                    num_candidates=len(candidate_tubes),
+                    kept_tubes_models=[],
+                    trigger_tube_id=None,
+                ),
             )
 
         patches_per_tube: list[torch.Tensor] = []
@@ -209,8 +237,7 @@ class BboxTubeTemporalModel(TemporalModel):
             masks_per_tube=masks_per_tube,
         )
 
-        aggregation = dec.get("aggregation", "max_logit")
-        is_positive, trigger, winner_id, per_tube_first_crossing = (
+        is_positive, trigger, trigger_tube_id, per_tube_first_crossing = (
             find_first_crossing_trigger(
                 classifier=self._classifier,
                 tubes=kept,
@@ -226,60 +253,68 @@ class BboxTubeTemporalModel(TemporalModel):
         )
 
         logits_list: list[float] = logits.tolist()
-        kept_tubes: list[dict] = []
+
+        def _probability_for(tube_idx: int, raw_logit: float) -> float | None:
+            if self._calibrator is None:
+                return None
+            tube = kept[tube_idx]
+            tube_dict = {
+                "logit": raw_logit,
+                "start_frame": tube.start_frame,
+                "end_frame": tube.end_frame,
+                "entries": [
+                    {
+                        "confidence": (
+                            e.detection.confidence if e.detection is not None else None
+                        )
+                    }
+                    for e in tube.entries
+                ],
+            }
+            features = extract_features(tube_dict, n_tubes=len(kept))
+            return float(self._calibrator.predict_proba(features))
+
+        kept_models: list[KeptTube] = []
         for tube_idx, tube in enumerate(kept):
-            entries = [
-                {
-                    "frame_idx": e.frame_idx,
-                    "bbox": (
-                        [e.detection.cx, e.detection.cy, e.detection.w, e.detection.h]
+            entries_models = [
+                TubeEntry(
+                    frame_idx=e.frame_idx,
+                    bbox=(
+                        (e.detection.cx, e.detection.cy, e.detection.w, e.detection.h)
                         if e.detection is not None
                         else None
                     ),
-                    "is_gap": e.is_gap,
-                    "confidence": (
+                    is_gap=e.is_gap,
+                    confidence=(
                         e.detection.confidence if e.detection is not None else None
                     ),
-                }
+                )
                 for e in tube.entries
             ]
-            kept_tubes.append(
-                {
-                    "tube_id": tube.tube_id,
-                    "start_frame": tube.start_frame,
-                    "end_frame": tube.end_frame,
-                    "logit": logits_list[tube_idx],
-                    "is_winner": tube.tube_id == winner_id,
-                    "entries": entries,
-                }
+            first_crossing = per_tube_first_crossing.get(tube.tube_id, {}).get(
+                "crossing_frame"
             )
-
-        winner_entries: list[dict] = (
-            next(t["entries"] for t in kept_tubes if t["is_winner"])
-            if winner_id is not None
-            else []
-        )
+            kept_models.append(
+                KeptTube(
+                    tube_id=tube.tube_id,
+                    start_frame=tube.start_frame,
+                    end_frame=tube.end_frame,
+                    logit=logits_list[tube_idx],
+                    probability=_probability_for(tube_idx, logits_list[tube_idx]),
+                    first_crossing_frame=first_crossing,
+                    entries=entries_models,
+                )
+            )
 
         return TemporalModelOutput(
             is_positive=is_positive,
             trigger_frame_index=trigger,
-            details={
-                "num_frames": original_len,
-                "num_truncated": n_truncated,
-                "num_padded": n_padded,
-                "num_detections_per_frame": num_dets_per_frame,
-                "num_tubes_total": len(candidate_tubes),
-                "num_tubes_kept": len(kept),
-                "tube_logits": logits_list,
-                "winner_tube_id": winner_id,
-                "winner_tube_entries": winner_entries,
-                "kept_tubes": kept_tubes,
-                "per_tube_first_crossing": per_tube_first_crossing,
-                "threshold": (
-                    float(dec["logistic_threshold"])
-                    if aggregation == "logistic"
-                    else float(dec["threshold"])
-                ),
-                "aggregation": aggregation,
-            },
+            details=_make_details(
+                num_frames_input=original_len,
+                num_truncated=n_truncated,
+                padded_indices=padded_indices,
+                num_candidates=len(candidate_tubes),
+                kept_tubes_models=kept_models,
+                trigger_tube_id=trigger_tube_id,
+            ),
         )

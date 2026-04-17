@@ -150,11 +150,42 @@ def _frame(stem="f", ts=None):
 # ── build_record ────────────────────────────────────────────────────────
 
 
+def _kept_tube(tube_id: int, logit: float) -> dict:
+    return {
+        "tube_id": tube_id,
+        "start_frame": 0,
+        "end_frame": 5,
+        "logit": logit,
+        "probability": None,
+        "first_crossing_frame": None,
+        "entries": [],
+    }
+
+
+def _details(kept: list[dict], *, trigger_tube_id: int | None, **extra) -> dict:
+    base = {
+        "preprocessing": {
+            "num_frames_input": 6,
+            "num_truncated": 0,
+            "padded_frame_indices": [],
+        },
+        "tubes": {"num_candidates": len(kept), "kept": kept},
+        "decision": {
+            "aggregation": "max_logit",
+            "threshold": 0.0,
+            "trigger_tube_id": trigger_tube_id,
+        },
+    }
+    base.update(extra)
+    return base
+
+
 def test_build_record_extracts_score_and_tube_logits_from_details():
+    kept = [_kept_tube(i, logit) for i, logit in enumerate([1.5, 0.3, -0.2])]
     output = TemporalModelOutput(
         is_positive=True,
         trigger_frame_index=0,
-        details={"tube_logits": [1.5, 0.3, -0.2], "num_tubes_kept": 3},
+        details=_details(kept, trigger_tube_id=0),
     )
 
     rec = build_record(
@@ -177,7 +208,7 @@ def test_build_record_empty_tube_logits_yields_minus_inf_score():
     output = TemporalModelOutput(
         is_positive=False,
         trigger_frame_index=None,
-        details={"tube_logits": [], "num_tubes_kept": 0},
+        details=_details([], trigger_tube_id=None),
     )
 
     rec = build_record(
@@ -194,7 +225,7 @@ def test_build_record_empty_tube_logits_yields_minus_inf_score():
 
 def test_build_record_copies_details_dict():
     """build_record should snapshot output.details, not alias it."""
-    details = {"tube_logits": [0.9], "num_tubes_kept": 1, "extra": "foo"}
+    details = _details([_kept_tube(0, 0.9)], trigger_tube_id=0, extra="foo")
     output = TemporalModelOutput(
         is_positive=True, trigger_frame_index=0, details=details
     )

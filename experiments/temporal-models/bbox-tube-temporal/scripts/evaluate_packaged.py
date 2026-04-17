@@ -51,23 +51,29 @@ def _parse_args() -> argparse.Namespace:
 def _record_to_json(rec: SequenceRecord) -> dict:
     """Serialise a record for predictions.json.
 
-    Includes per-tube structural details (``kept_tubes``, ``winner_tube_id``,
-    ``threshold``, ``num_tubes_total``) so downstream diagnostics can inspect
-    exactly which tubes the model saw and which one it picked.
+    Flattens the nested ``details`` into the legacy predictions.json shape
+    consumed by ``scripts/analyze_variant.py`` and the logistic-calibrator
+    fitter: top-level ``kept_tubes``, ``trigger_tube_id``, ``tube_logits``,
+    ``num_tubes_total``, ``num_tubes_kept``, and ``threshold``.
     """
     details = rec.details
+    tubes = details.get("tubes", {})
+    decision = details.get("decision", {})
+    kept = tubes.get("kept", [])
     return {
         "sequence_id": rec.sequence_id,
         "label": rec.label,
         "is_positive": rec.is_positive,
         "trigger_frame_index": rec.trigger_frame_index,
         "score": rec.score if rec.score != float("-inf") else None,
-        "num_tubes_kept": rec.num_tubes_kept,
-        "num_tubes_total": int(details.get("num_tubes_total", rec.num_tubes_kept)),
-        "tube_logits": rec.tube_logits,
-        "winner_tube_id": details.get("winner_tube_id"),
-        "threshold": (float(details["threshold"]) if "threshold" in details else None),
-        "kept_tubes": details.get("kept_tubes", []),
+        "num_tubes_kept": len(kept),
+        "num_tubes_total": int(tubes.get("num_candidates", 0)),
+        "tube_logits": [float(t["logit"]) for t in kept],
+        "trigger_tube_id": decision.get("trigger_tube_id"),
+        "threshold": (
+            float(decision["threshold"]) if "threshold" in decision else None
+        ),
+        "kept_tubes": kept,
         "ttd_seconds": rec.ttd_seconds,
     }
 
