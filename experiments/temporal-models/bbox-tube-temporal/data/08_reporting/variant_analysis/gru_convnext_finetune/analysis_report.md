@@ -53,20 +53,20 @@ Target: P >= 0.93 and R >= 0.95
 | [val] agg=length_weighted_mean                |  0.9795 |  0.8994 |  0.9377 |  143 |    3 |   16 |  |
 | [train] agg=length_weighted_mean              |  0.9528 |  0.9626 |  0.9577 | 1494 |   74 |   58 |  |
 
-## 6. Platt re-calibration (fit on train)
+## 6. Logistic calibration (fit on train)
 
 Weights: logit=0.647, log_len=1.957, mean_conf=2.588, n_tubes=-0.013, intercept=-6.354
 
 | experiment | P | R | F1 | TP | FP | FN | notes |
 |---|---|---|---|---|---|---|---|
-| [val] platt thr=0.40                          |  0.9737 |  0.9308 |  0.9518 |  148 |    4 |   11 |  |
-| [train] platt thr=0.40                        |  0.9530 |  0.9794 |  0.9660 | 1520 |   75 |   32 |  |
-| [val] platt thr=0.50                          |  0.9735 |  0.9245 |  0.9484 |  147 |    4 |   12 |  |
-| [train] platt thr=0.50                        |  0.9620 |  0.9781 |  0.9700 | 1518 |   60 |   34 |  |
-| [val] platt thr=0.60                          |  0.9863 |  0.9057 |  0.9443 |  144 |    2 |   15 |  |
-| [train] platt thr=0.60                        |  0.9665 |  0.9678 |  0.9672 | 1502 |   52 |   50 |  |
-| [val] platt thr=0.70                          |  0.9859 |  0.8805 |  0.9302 |  140 |    2 |   19 |  |
-| [train] platt thr=0.70                        |  0.9744 |  0.9562 |  0.9652 | 1484 |   39 |   68 |  |
+| [val] logistic thr=0.40                       |  0.9737 |  0.9308 |  0.9518 |  148 |    4 |   11 |  |
+| [train] logistic thr=0.40                     |  0.9530 |  0.9794 |  0.9660 | 1520 |   75 |   32 |  |
+| [val] logistic thr=0.50                       |  0.9735 |  0.9245 |  0.9484 |  147 |    4 |   12 |  |
+| [train] logistic thr=0.50                     |  0.9620 |  0.9781 |  0.9700 | 1518 |   60 |   34 |  |
+| [val] logistic thr=0.60                       |  0.9863 |  0.9057 |  0.9443 |  144 |    2 |   15 |  |
+| [train] logistic thr=0.60                     |  0.9665 |  0.9678 |  0.9672 | 1502 |   52 |   50 |  |
+| [val] logistic thr=0.70                       |  0.9859 |  0.8805 |  0.9302 |  140 |    2 |   19 |  |
+| [train] logistic thr=0.70                     |  0.9744 |  0.9562 |  0.9652 | 1484 |   39 |   68 |  |
 
 ## 7. Recommendation
 

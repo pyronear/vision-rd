@@ -16,21 +16,24 @@ Usage::
 
 import argparse
 import contextlib
-import json
 import math
 from pathlib import Path
 from statistics import mean
 
 import numpy as np
 import yaml
-from sklearn.linear_model import LogisticRegression
 
 from bbox_tube_temporal.aggregation_analysis import load_predictions
+from bbox_tube_temporal.logistic_calibrator import (
+    LogisticCalibrator,
+    extract_features,
+)
+from bbox_tube_temporal.logistic_calibrator_fit import fit as fit_logistic_calibrator
 
 CONF_THRESHOLDS = [0.05, 0.10, 0.15, 0.20, 0.25]
 TUBE_SELECTIONS = [("all", None), ("top-1", 1), ("top-2", 2), ("top-3", 3)]
 AGGREGATION_RULES = ["max", "mean", "length_weighted_mean"]
-PLATT_THRESHOLDS = [0.40, 0.50, 0.60, 0.70]
+LOGISTIC_THRESHOLDS = [0.40, 0.50, 0.60, 0.70]
 
 
 def tube_len(t: dict) -> int:
@@ -163,34 +166,8 @@ def simulate_aggregation(records: list[dict], rule: str) -> dict:
     raise ValueError(f"unknown rule {rule!r}")
 
 
-def fit_platt_model(
-    train_records: list[dict],
-) -> tuple[LogisticRegression, list[str]]:
-    features = ["logit", "log_len", "mean_conf", "n_tubes"]
-    X, y = [], []
-    for r in train_records:
-        label = 1 if r["label"] == "smoke" else 0
-        kept = r["kept_tubes"]
-        if not kept:
-            X.append([0.0, 0.0, 0.0, 0.0])
-        else:
-            best = max(kept, key=lambda t: t["logit"])
-            X.append(
-                [
-                    best["logit"],
-                    math.log1p(tube_len(best)),
-                    tube_mean_conf(best),
-                    len(kept),
-                ]
-            )
-        y.append(label)
-    lr = LogisticRegression(max_iter=1000, C=1.0)
-    lr.fit(np.array(X), np.array(y))
-    return lr, features
-
-
-def evaluate_platt(
-    model: LogisticRegression,
+def evaluate_calibrator(
+    calibrator: LogisticCalibrator,
     records: list[dict],
     threshold: float,
 ) -> dict:
@@ -199,16 +176,11 @@ def evaluate_platt(
         cls = r["label"]
         kept = r["kept_tubes"]
         if not kept:
-            features = [0.0, 0.0, 0.0, 0.0]
+            features = np.zeros(len(calibrator.features), dtype=float)
         else:
             best = max(kept, key=lambda t: t["logit"])
-            features = [
-                best["logit"],
-                math.log1p(tube_len(best)),
-                tube_mean_conf(best),
-                len(kept),
-            ]
-        prob = model.predict_proba(np.array([features]))[0, 1]
+            features = extract_features(best, n_tubes=len(kept))
+        prob = calibrator.predict_proba(features)
         fires = prob >= threshold
         if fires:
             if cls == "smoke":
@@ -311,23 +283,22 @@ def build_report(
             if name == "val":
                 all_configs.append({"name": f"agg={rule}", "split": "val", **m})
 
-    # 6. Platt re-calibration
-    lines.append("\n## 6. Platt re-calibration (fit on train)\n")
-    platt_model, feature_names = fit_platt_model(train_records)
-    coefs = platt_model.coef_[0]
-    intercept = platt_model.intercept_[0]
+    # 6. Logistic calibration
+    lines.append("\n## 6. Logistic calibration (fit on train)\n")
+    calibrator = fit_logistic_calibrator(train_records)
     weights_str = ", ".join(
-        f"{n}={c:.3f}" for n, c in zip(feature_names, coefs, strict=True)
+        f"{n}={c:.3f}"
+        for n, c in zip(calibrator.features, calibrator.coefficients, strict=True)
     )
-    lines.append(f"Weights: {weights_str}, intercept={intercept:.3f}\n")
+    lines.append(f"Weights: {weights_str}, intercept={calibrator.intercept:.3f}\n")
     lines.append(_table_header())
-    for thr in PLATT_THRESHOLDS:
+    for thr in LOGISTIC_THRESHOLDS:
         for name, recs in [("val", val_records), ("train", train_records)]:
-            m = evaluate_platt(platt_model, recs, thr)
-            lines.append(_row(f"[{name}] platt thr={thr:.2f}", m))
+            m = evaluate_calibrator(calibrator, recs, thr)
+            lines.append(_row(f"[{name}] logistic thr={thr:.2f}", m))
             if name == "val":
                 all_configs.append(
-                    {"name": f"platt thr={thr:.2f}", "split": "val", **m}
+                    {"name": f"logistic thr={thr:.2f}", "split": "val", **m}
                 )
 
     # 7. Recommendation
@@ -361,13 +332,7 @@ def build_report(
             f"| {c['f1']:.4f} |"
         )
 
-    platt_weights = {
-        "features": feature_names,
-        "coefficients": [round(float(c), 6) for c in coefs],
-        "intercept": round(float(intercept), 6),
-    }
-
-    return "\n".join(lines) + "\n", platt_weights
+    return "\n".join(lines) + "\n", calibrator
 
 
 def main() -> None:
@@ -390,7 +355,7 @@ def main() -> None:
 
     conf_floor = scan_confidence_floor(args.training_labels_dir)
 
-    report_md, platt_weights = build_report(
+    report_md, calibrator = build_report(
         train_records=train_recs,
         val_records=val_recs,
         conf_floor=conf_floor,
@@ -401,9 +366,7 @@ def main() -> None:
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     (args.output_dir / "analysis_report.md").write_text(report_md)
-    (args.output_dir / "platt_model.json").write_text(
-        json.dumps(platt_weights, indent=2) + "\n"
-    )
+    calibrator.to_json(args.output_dir / "logistic_calibrator.json")
 
     best_config = {
         "package": {

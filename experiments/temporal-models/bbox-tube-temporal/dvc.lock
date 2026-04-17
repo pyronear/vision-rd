@@ -4084,19 +4084,19 @@ stages:
       size: 1472786
     - path: scripts/analyze_variant.py
       hash: md5
-      md5: d065a837ef1d320ed20f7d59966612ec
-      size: 14034
+      md5: ceb474d8e757fdd09f082c015aca7ea2
+      size: 13040
     outs:
     - path: 
         data/08_reporting/variant_analysis/gru_convnext_finetune/analysis_report.md
       hash: md5
-      md5: f9a300ad6c25ea11db4ad8e0c1db8079
+      md5: b553ae7d52271ed5b0a3d29ccdf70a60
       size: 5038
     - path: 
-        data/08_reporting/variant_analysis/gru_convnext_finetune/platt_model.json
+        data/08_reporting/variant_analysis/gru_convnext_finetune/logistic_calibrator.json
       hash: md5
-      md5: 5efe4cf9e605b4fbc1436539ef6794e1
-      size: 190
+      md5: c3b6c51666f80e1c29ed91c03a29271b
+      size: 781
     - path: 
         data/08_reporting/variant_analysis/gru_convnext_finetune/recommended_config.yaml
       hash: md5
@@ -4121,19 +4121,19 @@ stages:
       size: 1472640
     - path: scripts/analyze_variant.py
       hash: md5
-      md5: d065a837ef1d320ed20f7d59966612ec
-      size: 14034
+      md5: ceb474d8e757fdd09f082c015aca7ea2
+      size: 13040
     outs:
     - path: 
         data/08_reporting/variant_analysis/vit_dinov2_finetune/analysis_report.md
       hash: md5
-      md5: 4a91ea208eddd779f59cc812cb5daa51
-      size: 5061
+      md5: 9897d25afda5c63b0272f4c67886cc75
+      size: 5076
     - path: 
-        data/08_reporting/variant_analysis/vit_dinov2_finetune/platt_model.json
+        data/08_reporting/variant_analysis/vit_dinov2_finetune/logistic_calibrator.json
       hash: md5
-      md5: 8345bdfb141f0df093e05ffdbad492e1
-      size: 189
+      md5: f43145039dde6cd894fd6111e017ff1f
+      size: 780
     - path: 
         data/08_reporting/variant_analysis/vit_dinov2_finetune/recommended_config.yaml
       hash: md5

@@ -731,7 +731,7 @@ stages:
             cache: false
         - data/08_reporting/variant_analysis/${item}/recommended_config.yaml:
             cache: false
-        - data/08_reporting/variant_analysis/${item}/platt_model.json:
+        - data/08_reporting/variant_analysis/${item}/logistic_calibrator.json:
             cache: false
 
   package:

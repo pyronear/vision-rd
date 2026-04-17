@@ -53,31 +53,31 @@ Target: P >= 0.93 and R >= 0.95
 | [val] agg=length_weighted_mean                |  0.9379 |  0.9497 |  0.9437 |  151 |   10 |    8 |  |
 | [train] agg=length_weighted_mean              |  0.9198 |  0.9607 |  0.9398 | 1491 |  130 |   61 |  |
 
-## 6. Platt re-calibration (fit on train)
+## 6. Logistic calibration (fit on train)
 
 Weights: logit=0.670, log_len=1.692, mean_conf=2.685, n_tubes=0.059, intercept=-6.364
 
 | experiment | P | R | F1 | TP | FP | FN | notes |
 |---|---|---|---|---|---|---|---|
-| [val] platt thr=0.40                          |  0.9620 |  0.9560 |  0.9590 |  152 |    6 |    7 |  |
-| [train] platt thr=0.40                        |  0.9293 |  0.9736 |  0.9509 | 1511 |  115 |   41 |  |
-| [val] platt thr=0.50                          |  0.9742 |  0.9497 |  0.9618 |  151 |    4 |    8 |  |
-| [train] platt thr=0.50                        |  0.9398 |  0.9665 |  0.9530 | 1500 |   96 |   52 |  |
-| [val] platt thr=0.60                          |  0.9803 |  0.9371 |  0.9582 |  149 |    3 |   10 |  |
-| [train] platt thr=0.60                        |  0.9518 |  0.9536 |  0.9527 | 1480 |   75 |   72 |  |
-| [val] platt thr=0.70                          |  0.9799 |  0.9182 |  0.9481 |  146 |    3 |   13 |  |
-| [train] platt thr=0.70                        |  0.9641 |  0.9356 |  0.9496 | 1452 |   54 |  100 |  |
+| [val] logistic thr=0.40                       |  0.9620 |  0.9560 |  0.9590 |  152 |    6 |    7 |  |
+| [train] logistic thr=0.40                     |  0.9293 |  0.9736 |  0.9509 | 1511 |  115 |   41 |  |
+| [val] logistic thr=0.50                       |  0.9742 |  0.9497 |  0.9618 |  151 |    4 |    8 |  |
+| [train] logistic thr=0.50                     |  0.9398 |  0.9665 |  0.9530 | 1500 |   96 |   52 |  |
+| [val] logistic thr=0.60                       |  0.9803 |  0.9371 |  0.9582 |  149 |    3 |   10 |  |
+| [train] logistic thr=0.60                     |  0.9518 |  0.9536 |  0.9527 | 1480 |   75 |   72 |  |
+| [val] logistic thr=0.70                       |  0.9799 |  0.9182 |  0.9481 |  146 |    3 |   13 |  |
+| [train] logistic thr=0.70                     |  0.9641 |  0.9356 |  0.9496 | 1452 |   54 |  100 |  |
 
 ## 7. Recommendation
 
-**Target cleared** by **platt thr=0.40**: P=0.9620 R=0.9560 F1=0.9590
+**Target cleared** by **logistic thr=0.40**: P=0.9620 R=0.9560 F1=0.9590
 
 Top 5 configs by val F1:
 
 | rank | config | P | R | F1 |
 |---|---|---|---|---|
-| 1 | platt thr=0.50 | 0.9742 | 0.9497 | 0.9618 |
-| 2 | ** platt thr=0.40** | 0.9620 | 0.9560 | 0.9590 |
-| 3 | platt thr=0.60 | 0.9803 | 0.9371 | 0.9582 |
-| 4 | platt thr=0.70 | 0.9799 | 0.9182 | 0.9481 |
+| 1 | logistic thr=0.50 | 0.9742 | 0.9497 | 0.9618 |
+| 2 | ** logistic thr=0.40** | 0.9620 | 0.9560 | 0.9590 |
+| 3 | logistic thr=0.60 | 0.9803 | 0.9371 | 0.9582 |
+| 4 | logistic thr=0.70 | 0.9799 | 0.9182 | 0.9481 |
 | 5 | agg=length_weighted_mean | 0.9379 | 0.9497 | 0.9437 |
