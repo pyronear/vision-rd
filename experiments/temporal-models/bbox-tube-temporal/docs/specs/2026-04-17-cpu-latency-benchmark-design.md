@@ -67,6 +67,25 @@ quantisation, ONNX export) differ between them.
 Iteration order is the sorted output of `list_sequences(sequences_dir)`
 (deterministic). `--max-sequences N` takes the first N.
 
+**Why we need warmup.** The first 1–3 `predict()` calls on CPU are
+systematically slower than steady state because:
+
+1. **PyTorch kernel selection + allocator warmup.** The first forward
+   through a new model/input-shape combo triggers oneDNN / MKL kernel
+   dispatch, which is cached for subsequent calls. Typical 2–5× speedup
+   on iter 2 vs iter 1.
+2. **Ultralytics YOLO lazy init.** Weights + device transfers happen on
+   the first `predict()`.
+3. **BLAS / OpenMP thread pool init.** PyTorch spins up the thread pool
+   on the first op.
+4. **Cold filesystem cache.** First JPEGs are read from disk; later
+   frames may hit the OS page cache.
+
+Without discarding these, p50/p95 get pulled up noticeably at small
+`--max-sequences`. Warmup records are kept in `records[]` with
+`is_warmup=true` so the cold-start cost is still inspectable — only
+excluded from the summary aggregates.
+
 ### Timing methodology
 
 The benchmark wraps the two learned components with timing proxies
