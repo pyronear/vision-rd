@@ -13,6 +13,7 @@ from PIL import Image
 from pyrocore.types import Frame
 from torchvision.transforms.functional import to_tensor
 
+from .logistic_calibrator import LogisticCalibrator, extract_features
 from .model_input import crop_and_resize, expand_bbox, norm_bbox_to_pixel_square
 from .tubes import interpolate_gaps as _interpolate_gaps
 from .types import Detection, FrameDetections, Tube
@@ -243,22 +244,71 @@ def pick_winner_and_trigger(
     tubes: list[Tube],
     logits: torch.Tensor,
     threshold: float,
+    aggregation: str = "max_logit",
+    calibrator: LogisticCalibrator | None = None,
+    logistic_threshold: float = 0.5,
 ) -> tuple[bool, int | None, int | None]:
     """Aggregate per-tube logits into a sequence-level decision.
 
-    Rule: ``winner = argmax(logits)``. If ``logits[winner] >= threshold``,
-    the sequence is positive and the trigger frame is the winner tube's
-    ``end_frame``. Otherwise the sequence is negative (but ``winner_tube_id``
-    is still returned for diagnostics).
+    Two aggregation rules share the same winner-selection (``argmax`` on
+    ``logits``) and the same trigger-frame rule (winner's ``end_frame``
+    when fired). The decision rule itself switches on ``aggregation``:
+
+    * ``"max_logit"`` (default): fire when ``logits[winner] >= threshold``.
+    * ``"logistic"``: run the fitted :class:`LogisticCalibrator` on the
+      winner tube's ``(logit, log_len, mean_conf, n_tubes)`` features
+      and fire when ``prob >= logistic_threshold``.
+
+    Args:
+        tubes: Kept tubes, aligned with ``logits``.
+        logits: 1-D tensor of classifier logits, one per tube.
+        threshold: Raw logit threshold. Used only by ``max_logit``.
+        aggregation: Decision rule — ``"max_logit"`` or ``"logistic"``.
+        calibrator: Required when ``aggregation == "logistic"``.
+        logistic_threshold: Probability threshold. Used only by
+            ``"logistic"``.
 
     Returns:
         Tuple ``(is_positive, trigger_frame_index, winner_tube_id)``.
         All three are ``None``-ish when ``tubes`` is empty.
+
+    Raises:
+        ValueError: if ``aggregation`` is unknown or ``"logistic"`` is
+            requested without a calibrator.
     """
     if not tubes:
         return False, None, None
+
     idx = int(torch.argmax(logits).item())
     winner = tubes[idx]
-    is_positive = float(logits[idx].item()) >= threshold
+
+    if aggregation == "max_logit":
+        is_positive = float(logits[idx].item()) >= threshold
+    elif aggregation == "logistic":
+        if calibrator is None:
+            raise ValueError(
+                "aggregation='logistic' requires a fitted calibrator"
+            )
+        winner_dict = {
+            "logit": float(logits[idx].item()),
+            "start_frame": winner.start_frame,
+            "end_frame": winner.end_frame,
+            "entries": [
+                {
+                    "confidence": (
+                        e.detection.confidence
+                        if e.detection is not None
+                        else None
+                    )
+                }
+                for e in winner.entries
+            ],
+        }
+        features = extract_features(winner_dict, n_tubes=len(tubes))
+        prob = calibrator.predict_proba(features)
+        is_positive = bool(prob >= logistic_threshold)
+    else:
+        raise ValueError(f"unknown aggregation: {aggregation!r}")
+
     trigger = winner.end_frame if is_positive else None
     return is_positive, trigger, winner.tube_id
