@@ -255,7 +255,7 @@ class TestShortSequencePadding:
             yolo_model=yolo, classifier=tiny_classifier, config=cfg
         )
         out = model.predict(frames=short)
-        # Uniform i*2//6 for i in 0..5 -> [0,0,0,1,1,1]; duplicates are slots 1, 2, 4, 5.
+        # Uniform i*2//6 for i in 0..5 -> [0,0,0,1,1,1]; dupes at slots 1, 2, 4, 5.
         assert out.details["preprocessing"]["padded_frame_indices"] == [1, 2, 4, 5]
         assert out.details["preprocessing"]["num_frames_input"] == 2
 

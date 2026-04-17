@@ -17,14 +17,17 @@ from bbox_tube_temporal.inference import (
 
 
 def _mk_frames(n: int) -> list[Frame]:
-    return [Frame(frame_id=f"f{i}", image_path=Path(f"/tmp/f{i}.jpg")) for i in range(n)]
+    return [
+        Frame(frame_id=f"f{i}", image_path=Path(f"/tmp/f{i}.jpg"))
+        for i in range(n)
+    ]
 
 
 def test_pad_symmetrically_returns_padded_indices() -> None:
     frames = _mk_frames(2)  # A, B -> [A, A, B] -> [A, A, B, B] -> [A, A, A, B, B]
     padded, indices = pad_frames_symmetrically(frames, min_length=5)
     assert len(padded) == 5
-    # After three pad steps (prepend, append, prepend), real frames sit at slots 2 and 3.
+    # After three pad steps (prepend, append, prepend), real frames at slots 2, 3.
     assert indices == [0, 1, 4]
 
 
