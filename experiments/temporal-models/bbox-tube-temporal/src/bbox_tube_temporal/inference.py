@@ -286,9 +286,7 @@ def pick_winner_and_trigger(
         is_positive = float(logits[idx].item()) >= threshold
     elif aggregation == "logistic":
         if calibrator is None:
-            raise ValueError(
-                "aggregation='logistic' requires a fitted calibrator"
-            )
+            raise ValueError("aggregation='logistic' requires a fitted calibrator")
         winner_dict = {
             "logit": float(logits[idx].item()),
             "start_frame": winner.start_frame,
@@ -296,9 +294,7 @@ def pick_winner_and_trigger(
             "entries": [
                 {
                     "confidence": (
-                        e.detection.confidence
-                        if e.detection is not None
-                        else None
+                        e.detection.confidence if e.detection is not None else None
                     )
                 }
                 for e in winner.entries

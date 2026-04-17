@@ -28,13 +28,9 @@ def test_collect_pipeline_records_produces_expected_schema(
 
     fake_model = MagicMock()
     fake_model.predict.side_effect = [
-        _FakeOutput(
-            [{"logit": 1.5, "start_frame": 0, "end_frame": 4, "entries": []}]
-        ),
+        _FakeOutput([{"logit": 1.5, "start_frame": 0, "end_frame": 4, "entries": []}]),
         _FakeOutput([]),
-        _FakeOutput(
-            [{"logit": -0.2, "start_frame": 0, "end_frame": 2, "entries": []}]
-        ),
+        _FakeOutput([{"logit": -0.2, "start_frame": 0, "end_frame": 2, "entries": []}]),
     ]
 
     records = collect_pipeline_records(model=fake_model, raw_dir=tmp_path)

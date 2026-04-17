@@ -49,9 +49,7 @@ def fit(records: list[dict]) -> LogisticCalibrator:
         RuntimeError: if the numpy / sklearn parity check fails.
     """
     X = np.stack([_features_for_record(r) for r in records])
-    y = np.array(
-        [1 if r["label"] == "smoke" else 0 for r in records], dtype=int
-    )
+    y = np.array([1 if r["label"] == "smoke" else 0 for r in records], dtype=int)
 
     model = LogisticRegression(max_iter=1000, C=1.0)
     model.fit(X, y)
@@ -78,9 +76,7 @@ def fit(records: list[dict]) -> LogisticCalibrator:
     # Pick sanity-check rows spanning the prob range so drift anywhere
     # in the operating band gets caught at load time.
     order = np.argsort(sklearn_probs)
-    pick = order[
-        np.linspace(0, len(order) - 1, num=_N_SANITY_CHECKS, dtype=int)
-    ]
+    pick = order[np.linspace(0, len(order) - 1, num=_N_SANITY_CHECKS, dtype=int)]
     sanity_checks = [
         {
             "features": [float(v) for v in X[i]],

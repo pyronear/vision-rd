@@ -49,9 +49,7 @@ def test_json_file_shape_matches_contract(tmp_path: Path) -> None:
     assert payload["features"] == ["logit", "log_len", "mean_conf", "n_tubes"]
     assert payload["coefficients"] == [0.1, 0.2, 0.3, 0.4]
     assert payload["intercept"] == -1.0
-    assert payload["sanity_checks"] == [
-        {"features": [1.0, 2.0, 3.0, 4.0], "prob": 0.5}
-    ]
+    assert payload["sanity_checks"] == [{"features": [1.0, 2.0, 3.0, 4.0], "prob": 0.5}]
 
 
 def test_predict_proba_matches_textbook_sigmoid() -> None:

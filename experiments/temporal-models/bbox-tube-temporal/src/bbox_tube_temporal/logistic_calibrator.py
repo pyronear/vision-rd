@@ -86,9 +86,7 @@ class LogisticCalibrator:
         """
         for i, pair in enumerate(self.sanity_checks):
             expected = float(pair["prob"])
-            actual = self.predict_proba(
-                np.asarray(pair["features"], dtype=float)
-            )
+            actual = self.predict_proba(np.asarray(pair["features"], dtype=float))
             if abs(actual - expected) > atol:
                 raise ValueError(
                     f"logistic calibrator sanity check #{i} failed: "
@@ -105,11 +103,7 @@ def _tube_len(tube: dict) -> int:
 
 
 def _tube_mean_conf(tube: dict) -> float:
-    confs = [
-        e["confidence"]
-        for e in tube["entries"]
-        if e["confidence"] is not None
-    ]
+    confs = [e["confidence"] for e in tube["entries"] if e["confidence"] is not None]
     return sum(confs) / len(confs) if confs else 0.0
 
 

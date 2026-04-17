@@ -155,9 +155,7 @@ def _fit_logistic_calibrator_and_threshold(
         config=pipeline_config,
     )
 
-    train_records = collect_pipeline_records(
-        model=fit_model, raw_dir=raw_train_dir
-    )
+    train_records = collect_pipeline_records(model=fit_model, raw_dir=raw_train_dir)
     calibrator = fit_logistic_calibrator(train_records)
     print(
         f"[package] logistic calibrator fit on {len(train_records)} train "
@@ -165,14 +163,10 @@ def _fit_logistic_calibrator_and_threshold(
         f"intercept={calibrator.intercept:.6f}"
     )
 
-    val_records = collect_pipeline_records(
-        model=fit_model, raw_dir=raw_val_dir
-    )
+    val_records = collect_pipeline_records(model=fit_model, raw_dir=raw_val_dir)
     probs = _calibrated_probs(val_records, calibrator)
     labels = _labels_array(val_records)
-    logistic_threshold = calibrate_threshold(
-        probs, labels, target_recall=target_recall
-    )
+    logistic_threshold = calibrate_threshold(probs, labels, target_recall=target_recall)
     return calibrator, float(logistic_threshold)
 
 
@@ -239,9 +233,7 @@ def main() -> None:
         probs, labels, target_recall=package_params["target_recall"]
     )
 
-    aggregation = package_params.get("aggregation", {}).get(
-        args.variant, "max_logit"
-    )
+    aggregation = package_params.get("aggregation", {}).get(args.variant, "max_logit")
     calibrator: LogisticCalibrator | None = None
     logistic_threshold: float | None = None
     if aggregation == "logistic":

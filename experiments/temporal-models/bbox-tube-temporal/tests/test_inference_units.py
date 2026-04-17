@@ -315,9 +315,7 @@ class TestPickWinnerAndTrigger:
             _tube(20, [(2, _det()), (3, _det()), (4, _det())]),
         ]
         logits = torch.tensor([-1.0, 0.5])
-        default = pick_winner_and_trigger(
-            tubes=tubes, logits=logits, threshold=0.0
-        )
+        default = pick_winner_and_trigger(tubes=tubes, logits=logits, threshold=0.0)
         explicit = pick_winner_and_trigger(
             tubes=tubes,
             logits=logits,

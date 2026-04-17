@@ -75,9 +75,7 @@ def test_fit_parity_between_sklearn_and_numpy() -> None:
         if kept:
             t = max(kept, key=lambda t: t["logit"])
             entries = [
-                e["confidence"]
-                for e in t["entries"]
-                if e["confidence"] is not None
+                e["confidence"] for e in t["entries"] if e["confidence"] is not None
             ]
             X.append(
                 [
@@ -115,8 +113,7 @@ def test_fit_handles_empty_kept_tubes() -> None:
 
 def test_fit_rejects_single_class_dataset() -> None:
     records = [
-        _record(label="smoke", logit=1.0, length=5, mean_conf=0.5)
-        for _ in range(10)
+        _record(label="smoke", logit=1.0, length=5, mean_conf=0.5) for _ in range(10)
     ]
     with pytest.raises(ValueError):
         fit(records)
