@@ -14,7 +14,6 @@ from bbox_tube_temporal.inference import (
     crop_tube_patches,
     filter_and_interpolate_tubes,
     find_first_crossing_trigger,
-    pick_winner_and_trigger,
     run_yolo_on_frames,
     score_tubes,
 )
@@ -279,118 +278,6 @@ class TestScoreTubes:
         assert args[0].shape == (2, 4, 3, 8, 8)
         assert args[1].shape == (2, 4)
         assert logits.tolist() == pytest.approx([1.2, -0.3], rel=1e-5)
-
-
-class TestPickWinnerAndTrigger:
-    def test_no_tubes_returns_negative(self) -> None:
-        res = pick_winner_and_trigger(tubes=[], logits=torch.zeros(0), threshold=0.0)
-        assert res == (False, None, None)
-
-    def test_argmax_and_threshold_crossed(self) -> None:
-        tubes = [
-            _tube(10, [(0, _det()), (1, _det())]),  # end_frame = 1
-            _tube(20, [(2, _det()), (3, _det()), (4, _det())]),  # end_frame = 4
-        ]
-        logits = torch.tensor([-1.0, 0.5])
-        res = pick_winner_and_trigger(tubes=tubes, logits=logits, threshold=0.0)
-        assert res == (True, 4, 20)
-
-    def test_argmax_below_threshold(self) -> None:
-        tubes = [
-            _tube(1, [(0, _det()), (1, _det())]),
-            _tube(2, [(2, _det()), (3, _det())]),
-        ]
-        logits = torch.tensor([-2.0, -0.5])
-        is_positive, trigger, winner = pick_winner_and_trigger(
-            tubes=tubes, logits=logits, threshold=0.0
-        )
-        assert is_positive is False
-        assert trigger is None
-        assert winner == 2
-
-    def test_max_logit_default_is_byte_identical_regression(self) -> None:
-        # Explicit regression guard: the default aggregation must match
-        # the pre-refactor max_logit behaviour.
-        tubes = [
-            _tube(10, [(0, _det()), (1, _det())]),
-            _tube(20, [(2, _det()), (3, _det()), (4, _det())]),
-        ]
-        logits = torch.tensor([-1.0, 0.5])
-        default = pick_winner_and_trigger(tubes=tubes, logits=logits, threshold=0.0)
-        explicit = pick_winner_and_trigger(
-            tubes=tubes,
-            logits=logits,
-            threshold=0.0,
-            aggregation="max_logit",
-        )
-        assert default == explicit == (True, 4, 20)
-
-    def test_logistic_fires_when_prob_exceeds_threshold(self) -> None:
-        tubes = [_tube(7, [(0, _det()), (1, _det()), (2, _det()), (3, _det())])]
-        logits = torch.tensor([3.0])
-        # coef on logit=2.0, intercept=0 → z=6 → prob ~= 0.9975
-        cal = LogisticCalibrator(
-            features=["logit", "log_len", "mean_conf", "n_tubes"],
-            coefficients=np.array([2.0, 0.0, 0.0, 0.0]),
-            intercept=0.0,
-            sanity_checks=[],
-        )
-        is_positive, trigger, winner = pick_winner_and_trigger(
-            tubes=tubes,
-            logits=logits,
-            threshold=0.0,  # ignored in logistic branch
-            aggregation="logistic",
-            calibrator=cal,
-            logistic_threshold=0.5,
-        )
-        assert is_positive is True
-        assert winner == 7
-        assert trigger == 3
-
-    def test_logistic_does_not_fire_below_threshold(self) -> None:
-        tubes = [_tube(8, [(0, _det()), (1, _det()), (2, _det())])]
-        logits = torch.tensor([-3.0])
-        cal = LogisticCalibrator(
-            features=["logit", "log_len", "mean_conf", "n_tubes"],
-            coefficients=np.array([2.0, 0.0, 0.0, 0.0]),
-            intercept=0.0,
-            sanity_checks=[],
-        )
-        is_positive, trigger, winner = pick_winner_and_trigger(
-            tubes=tubes,
-            logits=logits,
-            threshold=0.0,
-            aggregation="logistic",
-            calibrator=cal,
-            logistic_threshold=0.5,
-        )
-        assert is_positive is False
-        assert trigger is None
-        assert winner == 8
-
-    def test_logistic_requires_calibrator(self) -> None:
-        tubes = [_tube(1, [(0, _det()), (1, _det())])]
-        logits = torch.tensor([1.0])
-        with pytest.raises(ValueError, match="calibrator"):
-            pick_winner_and_trigger(
-                tubes=tubes,
-                logits=logits,
-                threshold=0.0,
-                aggregation="logistic",
-                calibrator=None,
-                logistic_threshold=0.5,
-            )
-
-    def test_unknown_aggregation_raises(self) -> None:
-        tubes = [_tube(1, [(0, _det()), (1, _det())])]
-        logits = torch.tensor([1.0])
-        with pytest.raises(ValueError, match="aggregation"):
-            pick_winner_and_trigger(
-                tubes=tubes,
-                logits=logits,
-                threshold=0.0,
-                aggregation="bogus",
-            )
 
 
 def _make_patches_and_masks(
