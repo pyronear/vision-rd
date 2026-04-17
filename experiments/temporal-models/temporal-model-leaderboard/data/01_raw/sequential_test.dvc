@@ -1,14 +1,14 @@
-md5: 276edbd25c2908332ef974cafa894f3b
+md5: f787200f2c38ebd83eb063a1dc670a7b
 frozen: true
 deps:
 - path: data/processed/sequential_test
   repo:
     url: https://github.com/pyronear/pyro-dataset
-    rev: v2.2.0
-    rev_lock: ca3b7bbfc9f072d101849e99a5ec91791a3e7c7a
+    rev: v3.0.0
+    rev_lock: ca2a1b0a47163feefaeb02ba43b239eb64898362
 outs:
 - hash: md5
   path: sequential_test
-  md5: 828edb7fb8f0909f0d6115d67ffbddc9.dir
-  size: 1594484536
-  nfiles: 32640
+  md5: 4c08a891e654943188a1df69646f6b4c.dir
+  size: 802254456
+  nfiles: 16408
