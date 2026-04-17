@@ -185,14 +185,18 @@ Two variants are packaged for the leaderboard: `gru_convnext_finetune` (CNN winn
 
 Qualitative error galleries live next to the metrics: `data/08_reporting/val/<variant>/errors/{fp,fn}/` (one PNG per misclassified tube, annotated with predicted probability).
 
-### End-to-end protocol metrics (packaged, val, 318 sequences)
+### End-to-end protocol metrics (packaged)
 
-| variant | aggregation | precision | recall | F1 | FP | FN | mean TTD (s) | median TTD (s) |
-|---|---|---|---|---|---|---|---|---|
-| gru_convnext_finetune | max_logit | 0.956 | 0.956 | 0.956 | 7 | 7 | 78.9 | 14.0 |
-| vit_dinov2_finetune | logistic | 0.968 | 0.962 | 0.965 | 5 | 6 | 100.2 | 27.5 |
+Train (3104 sequences) and val (318 sequences) of the packaged `model.zip` for each variant:
 
-Both packaged variants now clear the precision target (≥ 0.93) at recall ≥ 0.95. ViT is the F1 leader thanks to the logistic calibrator, which weights tube length and YOLO confidence alongside the raw logit. The exact operating point comes from automated variant analysis (next section) — change the target recall to shift the trade-off. TTD numbers reflect the first-crossing trigger; pre-fix values on the same weights were ~812s (GRU) and ~830s (ViT).
+| variant | split | aggregation | precision | recall | F1 | FP | FN | mean TTD (s) | median TTD (s) |
+|---|---|---|---|---|---|---|---|---|---|
+| gru_convnext_finetune | train | max_logit | 0.9252 | 0.9716 | 0.9478 | 122 | 44 | 80.8 | 23.0 |
+| gru_convnext_finetune | val | max_logit | 0.9560 | 0.9560 | 0.9560 | 7 | 7 | 78.9 | 14.0 |
+| vit_dinov2_finetune | train | logistic | 0.9376 | 0.9781 | 0.9574 | 101 | 34 | 126.7 | 30.0 |
+| vit_dinov2_finetune | val | logistic | 0.9684 | 0.9623 | 0.9653 | 5 | 6 | 100.2 | 27.5 |
+
+Both packaged variants clear the precision target (≥ 0.93) at recall ≥ 0.95 on val. ViT is the F1 leader thanks to the logistic calibrator, which weights tube length and YOLO confidence alongside the raw logit. The exact operating point comes from automated variant analysis (next section) — change the target recall to shift the trade-off. TTD numbers reflect the first-crossing trigger; pre-fix mean TTD on the same weights was ~812-835s (GRU train/val) and ~819-830s (ViT train/val), so both splits see the ~6-10× drop equally — the fix is not val-specific. Train splits show comparable per-split reductions: 80.8s/126.7s mean TTD vs. their respective ~835s/~819s pre-fix baselines.
 
 ### Variant analysis and threshold calibration
 
