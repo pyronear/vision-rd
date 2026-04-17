@@ -21,6 +21,7 @@ from .inference import (
     run_yolo_on_frames,
     score_tubes,
 )
+from .logistic_calibrator import LogisticCalibrator
 from .package import ModelPackage, load_model_package
 from .tubes import build_tubes
 
@@ -58,11 +59,13 @@ class BboxTubeTemporalModel(TemporalModel):
         classifier: Any,
         config: dict[str, Any],
         device: str | torch.device | None = None,
+        calibrator: LogisticCalibrator | None = None,
     ) -> None:
         self._yolo = yolo_model
         self._device = _select_device(device)
         self._classifier = classifier.to(self._device).eval()
         self._cfg = config
+        self._calibrator = calibrator
 
     @property
     def device(self) -> torch.device:
@@ -81,6 +84,7 @@ class BboxTubeTemporalModel(TemporalModel):
             classifier=pkg.classifier,
             config=pkg.config,
             device=device,
+            calibrator=pkg.calibrator,
         )
 
     @classmethod
@@ -203,8 +207,14 @@ class BboxTubeTemporalModel(TemporalModel):
             masks_per_tube=masks_per_tube,
         )
 
+        aggregation = dec.get("aggregation", "max_logit")
         is_positive, trigger, winner_id = pick_winner_and_trigger(
-            tubes=kept, logits=logits, threshold=float(dec["threshold"])
+            tubes=kept,
+            logits=logits,
+            threshold=float(dec["threshold"]),
+            aggregation=aggregation,
+            calibrator=self._calibrator,
+            logistic_threshold=float(dec.get("logistic_threshold", 0.5)),
         )
 
         logits_list: list[float] = logits.tolist()
@@ -256,6 +266,11 @@ class BboxTubeTemporalModel(TemporalModel):
                 "winner_tube_id": winner_id,
                 "winner_tube_entries": winner_entries,
                 "kept_tubes": kept_tubes,
-                "threshold": float(dec["threshold"]),
+                "threshold": (
+                    float(dec["logistic_threshold"])
+                    if aggregation == "logistic"
+                    else float(dec["threshold"])
+                ),
+                "aggregation": aggregation,
             },
         )
