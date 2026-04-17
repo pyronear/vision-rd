@@ -3818,8 +3818,8 @@ stages:
       nfiles: 89870
     - path: data/06_models/gru_convnext_finetune/model.zip
       hash: md5
-      md5: 20dde58942c7dd1b89f7cf0a45359e17
-      size: 258728673
+      md5: 7292fc429442f6564a403a1cebac6ed3
+      size: 258728675
     - path: scripts/evaluate_packaged.py
       hash: md5
       md5: ef11b9f88bc4509adc4e9ad5ec5d4bea
@@ -3978,8 +3978,8 @@ stages:
       nfiles: 8752
     - path: data/06_models/gru_convnext_finetune/model.zip
       hash: md5
-      md5: 20dde58942c7dd1b89f7cf0a45359e17
-      size: 258728673
+      md5: 7292fc429442f6564a403a1cebac6ed3
+      size: 258728675
     - path: scripts/evaluate_packaged.py
       hash: md5
       md5: ef11b9f88bc4509adc4e9ad5ec5d4bea
@@ -4064,3 +4064,78 @@ stages:
       md5: b2430b0d89561aff2a961e69bfa7b940.dir
       size: 19225752
       nfiles: 3
+  analyze_variant@gru_convnext_finetune:
+    cmd: uv run python scripts/analyze_variant.py --train-predictions 
+      data/08_reporting/train/packaged/gru_convnext_finetune/predictions.json 
+      --val-predictions 
+      data/08_reporting/val/packaged/gru_convnext_finetune/predictions.json 
+      --training-labels-dir data/01_raw/datasets/val/fp --output-dir 
+      data/08_reporting/variant_analysis/gru_convnext_finetune
+    deps:
+    - path: 
+        data/08_reporting/train/packaged/gru_convnext_finetune/predictions.json
+      hash: md5
+      md5: 490e322dcb96e36e400615ac260e27a4
+      size: 14678161
+    - path: 
+        data/08_reporting/val/packaged/gru_convnext_finetune/predictions.json
+      hash: md5
+      md5: 6126089407da46a78436fdf1c3018fc6
+      size: 1472786
+    - path: scripts/analyze_variant.py
+      hash: md5
+      md5: d065a837ef1d320ed20f7d59966612ec
+      size: 14034
+    outs:
+    - path: 
+        data/08_reporting/variant_analysis/gru_convnext_finetune/analysis_report.md
+      hash: md5
+      md5: f9a300ad6c25ea11db4ad8e0c1db8079
+      size: 5038
+    - path: 
+        data/08_reporting/variant_analysis/gru_convnext_finetune/platt_model.json
+      hash: md5
+      md5: 5efe4cf9e605b4fbc1436539ef6794e1
+      size: 190
+    - path: 
+        data/08_reporting/variant_analysis/gru_convnext_finetune/recommended_config.yaml
+      hash: md5
+      md5: 96512a5d54bd7e530f60794c171500b9
+      size: 197
+  analyze_variant@vit_dinov2_finetune:
+    cmd: uv run python scripts/analyze_variant.py --train-predictions 
+      data/08_reporting/train/packaged/vit_dinov2_finetune/predictions.json 
+      --val-predictions 
+      data/08_reporting/val/packaged/vit_dinov2_finetune/predictions.json 
+      --training-labels-dir data/01_raw/datasets/val/fp --output-dir 
+      data/08_reporting/variant_analysis/vit_dinov2_finetune
+    deps:
+    - path: 
+        data/08_reporting/train/packaged/vit_dinov2_finetune/predictions.json
+      hash: md5
+      md5: 53023c4f34af0a1ca8ed13c704deb515
+      size: 14677506
+    - path: data/08_reporting/val/packaged/vit_dinov2_finetune/predictions.json
+      hash: md5
+      md5: f95df31d8c9d97baffce263829af92d3
+      size: 1472640
+    - path: scripts/analyze_variant.py
+      hash: md5
+      md5: d065a837ef1d320ed20f7d59966612ec
+      size: 14034
+    outs:
+    - path: 
+        data/08_reporting/variant_analysis/vit_dinov2_finetune/analysis_report.md
+      hash: md5
+      md5: 4a91ea208eddd779f59cc812cb5daa51
+      size: 5061
+    - path: 
+        data/08_reporting/variant_analysis/vit_dinov2_finetune/platt_model.json
+      hash: md5
+      md5: 8345bdfb141f0df093e05ffdbad492e1
+      size: 189
+    - path: 
+        data/08_reporting/variant_analysis/vit_dinov2_finetune/recommended_config.yaml
+      hash: md5
+      md5: 96512a5d54bd7e530f60794c171500b9
+      size: 197
