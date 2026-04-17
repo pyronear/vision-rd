@@ -13,8 +13,12 @@ interpret for each new tube-classifier variant.
 
 ## Context
 
+> Note: originally named "Platt re-calibration"; renamed to "logistic
+> calibration" for accuracy — the model is a multivariate logistic
+> regression, not univariate Platt scaling.
+
 The precision investigation showed that the optimal inference config is
-variant-dependent (GRU prefers max-logit + padding; ViT prefers Platt
+variant-dependent (GRU prefers max-logit + padding; ViT prefers logistic
 re-calibration). Every experiment except the real DVC ablations was an
 offline simulation on the existing `predictions.json` `kept_tubes` data
 and ran in seconds. Automating these simulations means a new variant gets
@@ -55,7 +59,7 @@ All simulations are offline on existing `predictions.json` (requires
    losing all tubes).
 4. **Tube selection sweep**: all, top-1, top-2, top-3 by tube length.
 5. **Aggregation rule sweep**: max, mean, length-weighted-mean.
-6. **Platt re-calibration**: fit `sklearn.LogisticRegression` on train
+6. **Logistic calibration**: fit `sklearn.LogisticRegression` on train
    features (max-tube logit, log-tube-length, mean-YOLO-confidence,
    n-tubes). Evaluate on val at thresholds [0.40, 0.50, 0.60, 0.70].
    Report weights + best threshold.
@@ -71,7 +75,7 @@ All simulations are offline on existing `predictions.json` (requires
 <output-dir>/
   analysis_report.md       # full sweep tables + diagnostics
   recommended_config.yaml  # best config per optimization target
-  platt_model.json         # fitted Platt weights (coefficients + intercept)
+  logistic_calibrator.json # fitted logistic weights (coefficients + intercept)
 ```
 
 ### DVC stage
@@ -97,7 +101,7 @@ analyze_variant:
           cache: false
       - data/08_reporting/variant_analysis/${item}/recommended_config.yaml:
           cache: false
-      - data/08_reporting/variant_analysis/${item}/platt_model.json:
+      - data/08_reporting/variant_analysis/${item}/logistic_calibrator.json:
           cache: false
 ```
 
@@ -107,8 +111,9 @@ predictions.json for a variant.
 ## Testing
 
 - Unit tests on `scan_confidence_floor` with a tiny fixture dir.
-- Unit test on Platt fitting with synthetic data (verify the model
-  outputs valid probabilities and the weights dict is well-formed).
+- Unit test on logistic calibrator fitting with synthetic data (verify
+  the model outputs valid probabilities and the weights dict is
+  well-formed).
 - Integration smoke test: run the full script on a tiny synthetic
   predictions.json (3 smoke + 3 fp records) and verify all output
   files are written and well-formed.
@@ -118,6 +123,7 @@ predictions.json for a variant.
 - Real DVC ablation runs (conf-threshold change requires repackaging).
   The analysis SIMULATES these; the researcher decides whether to run
   the real ablation based on the simulation's results.
-- Implementing Platt aggregation in `BboxTubeTemporalModel.predict`
-  (separate PR).
+- Implementing logistic aggregation in `BboxTubeTemporalModel.predict`
+  — landed; see
+  `docs/specs/2026-04-17-logistic-calibrator-deployment-design.md`.
 - Automated config promotion to `params.yaml`.

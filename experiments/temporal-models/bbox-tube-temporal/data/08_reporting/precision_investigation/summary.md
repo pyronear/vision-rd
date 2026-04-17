@@ -399,3 +399,7 @@ precision — not a useful standalone lever.
   surpassing all previous ViT configs including longest-only (0.945)
   and length-weighted-mean (0.955). Implementing Platt as a
   `decision.aggregation: platt` config option ships the fix.
+
+---
+
+_Footnote (2026-04-17): the "Platt re-calibration" intervention referenced throughout this investigation is productized under the more accurate name `LogisticCalibrator` (multivariate logistic regression). See `docs/specs/2026-04-17-logistic-calibrator-deployment-design.md` for the deployment design._
