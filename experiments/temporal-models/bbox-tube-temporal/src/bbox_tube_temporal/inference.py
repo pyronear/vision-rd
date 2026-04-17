@@ -308,3 +308,131 @@ def pick_winner_and_trigger(
 
     trigger = winner.end_frame if is_positive else None
     return is_positive, trigger, winner.tube_id
+
+
+def find_first_crossing_trigger(
+    *,
+    classifier: Any,
+    tubes: list[Tube],
+    patches_per_tube: list[torch.Tensor],
+    masks_per_tube: list[torch.Tensor],
+    full_logits: torch.Tensor,
+    aggregation: str = "max_logit",
+    threshold: float,
+    calibrator: LogisticCalibrator | None = None,
+    logistic_threshold: float = 0.5,
+    min_prefix_length: int,
+) -> tuple[bool, int | None, int | None, dict]:
+    """Find the earliest frame at which the aggregation rule would have fired.
+
+    Under the full-tube guard (D2), only tubes whose *full-length*
+    decision is positive qualify. For each qualifying tube, prefixes of
+    length ``L = min_prefix_length .. len(tube.entries)`` are scored
+    serially; the first L whose decision is positive gives that tube's
+    first-crossing ``frame_idx = tube.entries[L-1].frame_idx``. The
+    sequence-level trigger is the qualifying tube with the earliest
+    first-crossing frame (tie-break: smallest ``tube_id``).
+
+    ``is_positive`` is preserved bit-for-bit versus
+    :func:`pick_winner_and_trigger`: the sequence is positive iff any
+    tube's full-length decision is positive.
+
+    Micro-optimisation: at ``L = len(tube.entries)`` the prefix logit is
+    exactly ``full_logits[i]`` — we reuse it rather than re-running the
+    classifier.
+
+    Args:
+        classifier: Callable ``(patches[1,T,3,H,W], mask[1,T]) -> logits[1]``.
+        tubes: Kept tubes, aligned with ``full_logits``.
+        patches_per_tube: One ``[max_frames, 3, H, W]`` tensor per tube.
+        masks_per_tube: One ``[max_frames]`` bool tensor per tube.
+        full_logits: Output of :func:`score_tubes` on the full tubes.
+        aggregation: ``"max_logit"`` or ``"logistic"``.
+        threshold: Raw logit threshold (``max_logit`` only).
+        calibrator: Required when ``aggregation == "logistic"``.
+        logistic_threshold: Probability threshold (``logistic`` only).
+        min_prefix_length: Smallest prefix length to score. Must equal
+            the inference-time ``infer_min_tube_length``.
+
+    Returns:
+        Tuple ``(is_positive, trigger_frame_index, winner_tube_id,
+        per_tube_first_crossing)``. The trailing dict maps
+        ``tube_id -> {"crossing_frame": int, "prefix_length": int}`` for
+        every qualifying tube.
+
+    Raises:
+        ValueError: unknown ``aggregation`` or ``"logistic"`` without a
+            calibrator.
+    """
+    if not tubes:
+        return False, None, None, {}
+
+    if aggregation == "max_logit":
+
+        def decides_positive(logit: float, _tube_prefix: Tube, _n_tubes: int) -> bool:
+            return logit >= threshold
+    elif aggregation == "logistic":
+        raise NotImplementedError("logistic aggregation wired in Task 2")
+    else:
+        raise ValueError(f"unknown aggregation: {aggregation!r}")
+
+    n_tubes = len(tubes)
+
+    qualifying_indices: list[int] = [
+        i
+        for i, tube in enumerate(tubes)
+        if decides_positive(float(full_logits[i].item()), tube, n_tubes)
+    ]
+    if not qualifying_indices:
+        return False, None, None, {}
+
+    per_tube: dict[int, dict] = {}
+    for i in qualifying_indices:
+        tube = tubes[i]
+        full_len = len(tube.entries)
+        assert full_len >= min_prefix_length, (
+            f"tube {tube.tube_id} len {full_len} < min_prefix_length "
+            f"{min_prefix_length}"
+        )
+
+        patches_i = patches_per_tube[i]
+        mask_i = masks_per_tube[i]
+
+        crossed = False
+        for L in range(min_prefix_length, full_len + 1):
+            if full_len == L:
+                prefix_logit = float(full_logits[i].item())
+            else:
+                prefix_mask = mask_i.clone()
+                prefix_mask[L:] = False
+                with torch.no_grad():
+                    out = classifier(patches_i.unsqueeze(0), prefix_mask.unsqueeze(0))
+                prefix_logit = float(out[0].item())
+
+            prefix_entries = tube.entries[:L]
+            prefix_tube = Tube(
+                tube_id=tube.tube_id,
+                entries=prefix_entries,
+                start_frame=prefix_entries[0].frame_idx,
+                end_frame=prefix_entries[-1].frame_idx,
+            )
+
+            if decides_positive(prefix_logit, prefix_tube, n_tubes):
+                per_tube[tube.tube_id] = {
+                    "crossing_frame": prefix_entries[-1].frame_idx,
+                    "prefix_length": L,
+                }
+                crossed = True
+                break
+
+        assert crossed, (
+            f"D2 invariant violated: qualifying tube {tube.tube_id} "
+            f"produced no crossing prefix"
+        )
+
+    winner_tube_id = min(
+        per_tube,
+        key=lambda tid: (per_tube[tid]["crossing_frame"], tid),
+    )
+    trigger = per_tube[winner_tube_id]["crossing_frame"]
+    return True, trigger, winner_tube_id, per_tube
