@@ -22,8 +22,8 @@ the highest of any ViT configuration tested.
 
 | variant | config | P | R | F1 |
 |---|---|---|---|---|
-| gru_convnext_finetune | C1 + pad=20 (sym) + all tubes | 0.956 | 0.956 | 0.956 |
-| vit_dinov2_finetune | C1 + longest-tube-only | 0.967 | 0.925 | 0.945 |
+| gru_convnext_finetune | C1 + pad=20(sym) + max aggregation | 0.956 | 0.956 | 0.956 |
+| vit_dinov2_finetune | C1 + length-weighted-mean aggregation | 0.974 | 0.937 | 0.955 |
 
 ## Headline results (val-packaged)
 
@@ -180,6 +180,100 @@ Key findings:
   most-persistent tube with no padding. Worth implementing as a
   `decision.tube_selection` config knob (``"all"`` or ``"longest"``).
 
+### Tube filtering / selection experiments (offline simulations)
+
+Three additional tube-level manipulation experiments were run offline
+on the C1 and C1+pad predictions to explore whether tube filtering,
+deduplication, or selection could further improve performance.
+
+**Experiment: Tube confidence filtering** — require the mean YOLO
+confidence across a tube's entries to exceed a threshold, dropping
+low-confidence tubes before aggregation.
+
+Verdict: **marginal**. On C1+pad/train (gru_convnext), `conf≥0.20`
+lifts F1 from 0.948 → 0.954 (+0.6pp). On C1+pad/val (the spec-target
+split), every confidence threshold hurts F1 — recall drops faster
+than precision climbs from the 0.956 baseline. For ViT on C1/val,
+`conf≥0.20` gives F1=0.942 (close to top-1's 0.945 but not better).
+A second-order lever at best.
+
+**Experiment: Spatial deduplication** — greedily merge tubes with high
+pairwise mean-IoU (> 0.3 or > 0.5), keeping the higher-logit tube.
+
+Verdict: **no effect**. Under C1 (conf≥0.10), tubes are already
+spatially distinct — the YOLO confidence filter already eliminated the
+overlapping junk detections that would have produced duplicate tubes.
+Every dedup threshold produces numbers identical to baseline.
+
+**Experiment: Top-N by tube length** — keep only the N longest tubes
+per sequence, discard shorter ones. N=1 is Track B's longest-only.
+
+Verdict: **top-2 is a Pareto-improvement for gru_convnext C1+pad**.
+On val:
+
+| top-N | P | R | F1 | FP | FN |
+|---|---|---|---|---|---|
+| all (current) | 0.956 | 0.956 | 0.956 | 7 | 7 |
+| top-1 | 0.973 | 0.899 | 0.935 | 4 | 16 |
+| **top-2** | **0.962** | **0.950** | **0.956** | **6** | 8 |
+| top-3 | 0.956 | 0.950 | 0.953 | 7 | 8 |
+
+Top-2 matches the current F1 (0.956) with +0.6pp higher precision
+and one fewer FP. On train, top-1 gives the best F1 (0.954).
+For ViT, top-1 (longest-only) remains the best strategy.
+
+**Experiment: Tube area filtering** — require minimum mean bbox area
+per tube.
+
+Verdict: **not viable**. Even the smallest threshold (area ≥ 0.001)
+collapses recall from ~0.95 to ~0.64. Smoke plumes are often distant
+and small — area filtering destroys them.
+
+**Experiment: Tube consistency filtering** — require low bbox-center
+standard deviation (stable tracking) per tube.
+
+Verdict: **no effect**. Most tubes are already spatially stable under
+C1. Threshold ≤ 0.02 slightly hurts recall; ≥ 0.05 is a no-op.
+
+**Experiment: Weighted logit aggregation** — replace
+`max(tube_logits)` with `length_weighted_mean(tube_logits)`.
+
+Verdict: **major win for ViT** — the best vit_dinov2 config found in
+the entire investigation. On C1/val:
+
+| aggregation | P | R | F1 |
+|---|---|---|---|
+| max (deployed) | 0.926 | 0.943 | 0.935 |
+| top-1 longest (Track B) | 0.967 | 0.925 | 0.945 |
+| mean logit | 0.967 | 0.931 | 0.949 |
+| **length-weighted mean** | **0.974** | **0.937** | **0.955** |
+
+F1=0.955 — highest ViT result, beating Track B's top-1 (0.945) by
+1pp. On train: P=0.922 R=0.944 F1=0.933 (vs 0.900/0.956/0.927
+baseline, +0.6pp F1). Length-weighted mean naturally downweights short
+noisy tubes without the harsh binary cutoff of longest-only: longer
+tubes dominate the score; multiple medium-length tubes still
+contribute. It is the "soft" version of longest-only.
+
+For GRU on C1+pad: mixed — helps on train (F1 0.948 → 0.958) but
+hurts on val (F1 0.956 → 0.938, recall drops). GRU's max aggregation
+is already well-calibrated under padding.
+
+Takeaway: the optimal inference knobs have grown to include both
+tube selection and aggregation rule:
+
+- **`tube_selection`**: `"all"` (GRU + padding), `"top_2"` (GRU
+  conservative), `"longest"` (ViT standalone).
+- **`aggregation`**: `"max_logit"` (GRU), `"length_weighted_mean"`
+  (ViT).
+
+Recommended per-variant configs:
+
+| variant | tube_selection | aggregation | padding | val P/R/F1 |
+|---|---|---|---|---|
+| gru_convnext | all | max_logit | pad=20 sym | 0.956/0.956/0.956 |
+| vit_dinov2 | all | length_weighted_mean | none | 0.974/0.937/0.955 |
+
 ### Track C2 — `infer_min_tube_length = 4` (standalone)
 
 Not pursued as a real ablation. Offline simulation showed it was
@@ -212,9 +306,13 @@ precision — not a useful standalone lever.
   react differently to duplicate frames regardless of their placement.
 - **Optimal inference strategy is variant-dependent**: GRU is robust
   to multi-tube aggregation and benefits from seeing all tubes +
-  padded sequences. ViT's attention is distracted by noisy
-  non-longest tubes and duplicate frames — it performs best when
-  restricted to the single longest tube with no padding.
+  padded sequences. ViT performs best with length-weighted-mean
+  aggregation (no padding) — a "soft" version of longest-only that
+  downweights short noisy tubes without discarding them entirely.
+- **Aggregation rule matters more than tube selection for ViT**: the
+  biggest ViT F1 jump came from switching max → length-weighted-mean
+  (+2pp F1 on val), not from filtering tubes. The GRU is insensitive
+  to aggregation rule changes under its optimal config (C1+pad).
 
 ## Recommendation
 
@@ -222,11 +320,16 @@ precision — not a useful standalone lever.
    - `package.infer.confidence_threshold: 0.10`
    - `package.infer.pad_to_min_frames: 20` (for gru_convnext)
    - `package.infer.pad_strategy: symmetric`
-2. Add a `decision.tube_selection` config knob (`"all"` or `"longest"`)
-   so the inference strategy can be set per variant:
-   - gru_convnext: `tube_selection: all` + `pad_to_min_frames: 20`
-   - vit_dinov2: `tube_selection: longest` + `pad_to_min_frames: 0`
-3. Re-package both variants and re-run the leaderboard. Verify the
+2. Add two per-variant config knobs:
+   - `decision.tube_selection`: `"all"` (GRU) or `"longest"` (ViT)
+   - `decision.aggregation`: `"max_logit"` (GRU) or
+     `"length_weighted_mean"` (ViT)
+3. Recommended per-variant configurations:
+   - gru_convnext: `conf=0.10`, `pad=20(sym)`, `selection=all`,
+     `agg=max_logit` → val P=0.956 R=0.956 F1=0.956
+   - vit_dinov2: `conf=0.10`, `pad=0`, `selection=all`,
+     `agg=length_weighted_mean` → val P=0.974 R=0.937 F1=0.955
+4. Re-package both variants and re-run the leaderboard. Verify the
    test-split precision follows the val gain.
 
 ## Out of scope (and follow-ups)
