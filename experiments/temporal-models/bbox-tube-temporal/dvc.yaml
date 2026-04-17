@@ -699,9 +699,7 @@ stages:
         - data/06_models/${item.variant}/model.zip
         - data/01_raw/datasets/${item.split}
       outs:
-        - data/08_reporting/${item.split}/packaged/${item.variant}/errors
-        - data/08_reporting/${item.split}/packaged/${item.variant}/predictions.json:
-            cache: false
+        - data/08_reporting/${item.split}/packaged/${item.variant}/predictions.json
         - data/08_reporting/${item.split}/packaged/${item.variant}/dropped.json:
             cache: false
       metrics:
@@ -712,6 +710,29 @@ stages:
         - data/08_reporting/${item.split}/packaged/${item.variant}/roc_curve.png
         - data/08_reporting/${item.split}/packaged/${item.variant}/confusion_matrix.png
         - data/08_reporting/${item.split}/packaged/${item.variant}/confusion_matrix_normalized.png
+
+  analyze_variant:
+    foreach:
+      - gru_convnext_finetune
+      - vit_dinov2_finetune
+    do:
+      cmd: >-
+        uv run python scripts/analyze_variant.py
+        --train-predictions data/08_reporting/train/packaged/${item}/predictions.json
+        --val-predictions data/08_reporting/val/packaged/${item}/predictions.json
+        --training-labels-dir data/01_raw/datasets/val/fp
+        --output-dir data/08_reporting/variant_analysis/${item}
+      deps:
+        - scripts/analyze_variant.py
+        - data/08_reporting/train/packaged/${item}/predictions.json
+        - data/08_reporting/val/packaged/${item}/predictions.json
+      outs:
+        - data/08_reporting/variant_analysis/${item}/analysis_report.md:
+            cache: false
+        - data/08_reporting/variant_analysis/${item}/recommended_config.yaml:
+            cache: false
+        - data/08_reporting/variant_analysis/${item}/logistic_calibrator.json:
+            cache: false
 
   package:
     foreach:
@@ -726,10 +747,17 @@ stages:
         - data/06_models/${item}/best_checkpoint.pt
         - data/01_raw/models/best.pt
         - data/05_model_input/val
+        - data/01_raw/datasets/train
+        - data/01_raw/datasets/val
         - scripts/package_model.py
         - src/bbox_tube_temporal/package.py
         - src/bbox_tube_temporal/calibration.py
         - src/bbox_tube_temporal/val_predict.py
+        - src/bbox_tube_temporal/package_predict.py
+        - src/bbox_tube_temporal/logistic_calibrator.py
+        - src/bbox_tube_temporal/logistic_calibrator_fit.py
+        - src/bbox_tube_temporal/inference.py
+        - src/bbox_tube_temporal/model.py
       params:
         - package
         - tubes

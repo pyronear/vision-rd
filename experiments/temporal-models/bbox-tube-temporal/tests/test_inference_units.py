@@ -13,10 +13,11 @@ from pyrocore.types import Frame
 from bbox_tube_temporal.inference import (
     crop_tube_patches,
     filter_and_interpolate_tubes,
-    pick_winner_and_trigger,
+    find_first_crossing_trigger,
     run_yolo_on_frames,
     score_tubes,
 )
+from bbox_tube_temporal.logistic_calibrator import LogisticCalibrator
 from bbox_tube_temporal.types import Detection, FrameDetections, Tube, TubeEntry
 
 
@@ -279,29 +280,309 @@ class TestScoreTubes:
         assert logits.tolist() == pytest.approx([1.2, -0.3], rel=1e-5)
 
 
-class TestPickWinnerAndTrigger:
-    def test_no_tubes_returns_negative(self) -> None:
-        res = pick_winner_and_trigger(tubes=[], logits=torch.zeros(0), threshold=0.0)
-        assert res == (False, None, None)
+def _make_patches_and_masks(
+    tubes: list[Tube], max_frames: int = 8
+) -> tuple[list[torch.Tensor], list[torch.Tensor]]:
+    """Build dummy patches/masks for tubes; mask reflects tube length."""
+    patches: list[torch.Tensor] = []
+    masks: list[torch.Tensor] = []
+    for t in tubes:
+        n = len(t.entries)
+        patches.append(torch.zeros(max_frames, 3, 8, 8))
+        m = torch.zeros(max_frames, dtype=torch.bool)
+        m[:n] = True
+        masks.append(m)
+    return patches, masks
 
-    def test_argmax_and_threshold_crossed(self) -> None:
-        tubes = [
-            _tube(10, [(0, _det()), (1, _det())]),  # end_frame = 1
-            _tube(20, [(2, _det()), (3, _det()), (4, _det())]),  # end_frame = 4
-        ]
-        logits = torch.tensor([-1.0, 0.5])
-        res = pick_winner_and_trigger(tubes=tubes, logits=logits, threshold=0.0)
-        assert res == (True, 4, 20)
 
-    def test_argmax_below_threshold(self) -> None:
-        tubes = [
-            _tube(1, [(0, _det()), (1, _det())]),
-            _tube(2, [(2, _det()), (3, _det())]),
-        ]
-        logits = torch.tensor([-2.0, -0.5])
-        is_positive, trigger, winner = pick_winner_and_trigger(
-            tubes=tubes, logits=logits, threshold=0.0
+class TestFindFirstCrossingTrigger:
+    """Unit tests for find_first_crossing_trigger (max_logit mode)."""
+
+    def test_empty_tubes_returns_negative(self) -> None:
+        res = find_first_crossing_trigger(
+            classifier=MagicMock(),
+            tubes=[],
+            patches_per_tube=[],
+            masks_per_tube=[],
+            full_logits=torch.zeros(0),
+            aggregation="max_logit",
+            threshold=0.0,
+            min_prefix_length=2,
         )
-        assert is_positive is False
-        assert trigger is None
+        assert res == (False, None, None, {})
+
+    def test_no_qualifying_tubes_returns_negative(self) -> None:
+        tubes = [_tube(1, [(0, _det()), (1, _det())])]
+        patches, masks = _make_patches_and_masks(tubes)
+        full_logits = torch.tensor([-1.0])
+        classifier = MagicMock()
+
+        res = find_first_crossing_trigger(
+            classifier=classifier,
+            tubes=tubes,
+            patches_per_tube=patches,
+            masks_per_tube=masks,
+            full_logits=full_logits,
+            aggregation="max_logit",
+            threshold=0.0,
+            min_prefix_length=2,
+        )
+        assert res == (False, None, None, {})
+        classifier.assert_not_called()
+
+    def test_single_qualifying_tube_crosses_at_min_prefix(self) -> None:
+        tubes = [
+            _tube(7, [(3, _det()), (4, _det()), (5, _det()), (6, _det())]),
+        ]
+        patches, masks = _make_patches_and_masks(tubes)
+        full_logits = torch.tensor([1.0])
+        classifier = MagicMock(return_value=torch.tensor([2.0]))
+
+        is_positive, trigger, winner, diag = find_first_crossing_trigger(
+            classifier=classifier,
+            tubes=tubes,
+            patches_per_tube=patches,
+            masks_per_tube=masks,
+            full_logits=full_logits,
+            aggregation="max_logit",
+            threshold=0.0,
+            min_prefix_length=2,
+        )
+        assert is_positive is True
+        assert winner == 7
+        assert trigger == 4
+        assert diag == {7: {"crossing_frame": 4, "prefix_length": 2}}
+        assert classifier.call_count == 1
+
+    def test_earliest_crossing_wins_across_tubes(self) -> None:
+        tube_a = _tube(1, [(5, _det()), (6, _det()), (7, _det())])
+        tube_b = _tube(2, [(0, _det()), (1, _det()), (2, _det())])
+        tubes = [tube_a, tube_b]
+        patches, masks = _make_patches_and_masks(tubes)
+        full_logits = torch.tensor([1.0, 1.0])
+        classifier = MagicMock(return_value=torch.tensor([2.0]))
+
+        is_positive, trigger, winner, diag = find_first_crossing_trigger(
+            classifier=classifier,
+            tubes=tubes,
+            patches_per_tube=patches,
+            masks_per_tube=masks,
+            full_logits=full_logits,
+            aggregation="max_logit",
+            threshold=0.0,
+            min_prefix_length=2,
+        )
+        assert is_positive is True
         assert winner == 2
+        assert trigger == 1
+        assert diag == {
+            1: {"crossing_frame": 6, "prefix_length": 2},
+            2: {"crossing_frame": 1, "prefix_length": 2},
+        }
+
+    def test_tie_on_crossing_frame_breaks_on_smallest_tube_id(self) -> None:
+        tube_a = _tube(9, [(0, _det()), (1, _det()), (2, _det())])
+        tube_b = _tube(5, [(0, _det()), (1, _det()), (2, _det())])
+        tubes = [tube_a, tube_b]
+        patches, masks = _make_patches_and_masks(tubes)
+        full_logits = torch.tensor([1.0, 1.0])
+        classifier = MagicMock(return_value=torch.tensor([2.0]))
+
+        _, _, winner, _ = find_first_crossing_trigger(
+            classifier=classifier,
+            tubes=tubes,
+            patches_per_tube=patches,
+            masks_per_tube=masks,
+            full_logits=full_logits,
+            aggregation="max_logit",
+            threshold=0.0,
+            min_prefix_length=2,
+        )
+        assert winner == 5
+
+    def test_d2_guard_ignores_non_qualifying_tube(self) -> None:
+        tube_q = _tube(1, [(4, _det()), (5, _det()), (6, _det())])
+        tube_skip = _tube(2, [(0, _det()), (1, _det()), (2, _det())])
+        tubes = [tube_q, tube_skip]
+        patches, masks = _make_patches_and_masks(tubes)
+        full_logits = torch.tensor([1.0, -1.0])
+        classifier = MagicMock(return_value=torch.tensor([2.0]))
+
+        _, trigger, winner, diag = find_first_crossing_trigger(
+            classifier=classifier,
+            tubes=tubes,
+            patches_per_tube=patches,
+            masks_per_tube=masks,
+            full_logits=full_logits,
+            aggregation="max_logit",
+            threshold=0.0,
+            min_prefix_length=2,
+        )
+        assert winner == 1
+        assert trigger == 5
+        assert diag == {1: {"crossing_frame": 5, "prefix_length": 2}}
+
+    def test_loop_walks_prefix_lengths_until_crossing(self) -> None:
+        tube = _tube(3, [(0, _det()), (1, _det()), (2, _det()), (3, _det())])
+        tubes = [tube]
+        patches, masks = _make_patches_and_masks(tubes)
+        full_logits = torch.tensor([1.0])
+        classifier = MagicMock(side_effect=[torch.tensor([-0.5]), torch.tensor([0.5])])
+
+        _, trigger, winner, diag = find_first_crossing_trigger(
+            classifier=classifier,
+            tubes=tubes,
+            patches_per_tube=patches,
+            masks_per_tube=masks,
+            full_logits=full_logits,
+            aggregation="max_logit",
+            threshold=0.0,
+            min_prefix_length=2,
+        )
+        assert winner == 3
+        assert trigger == 2
+        assert diag == {3: {"crossing_frame": 2, "prefix_length": 3}}
+        assert classifier.call_count == 2
+
+    def test_full_length_crossing_reuses_full_logits(self) -> None:
+        tube = _tube(1, [(0, _det()), (1, _det()), (2, _det())])
+        tubes = [tube]
+        patches, masks = _make_patches_and_masks(tubes)
+        full_logits = torch.tensor([1.0])
+        classifier = MagicMock(return_value=torch.tensor([-0.5]))
+
+        _, trigger, winner, diag = find_first_crossing_trigger(
+            classifier=classifier,
+            tubes=tubes,
+            patches_per_tube=patches,
+            masks_per_tube=masks,
+            full_logits=full_logits,
+            aggregation="max_logit",
+            threshold=0.0,
+            min_prefix_length=2,
+        )
+        assert winner == 1
+        assert trigger == 2
+        assert diag == {1: {"crossing_frame": 2, "prefix_length": 3}}
+        assert classifier.call_count == 1
+
+    def test_find_first_crossing_unknown_aggregation_raises(self) -> None:
+        tubes = [_tube(1, [(0, _det()), (1, _det())])]
+        patches, masks = _make_patches_and_masks(tubes)
+        with pytest.raises(ValueError, match="aggregation"):
+            find_first_crossing_trigger(
+                classifier=MagicMock(),
+                tubes=tubes,
+                patches_per_tube=patches,
+                masks_per_tube=masks,
+                full_logits=torch.tensor([1.0]),
+                aggregation="bogus",
+                threshold=0.0,
+                min_prefix_length=2,
+            )
+
+    def test_logistic_mode_fires_at_first_crossing(self) -> None:
+        tube = _tube(4, [(0, _det()), (1, _det()), (2, _det())])
+        tubes = [tube]
+        patches, masks = _make_patches_and_masks(tubes)
+        full_logits = torch.tensor([2.0])
+        classifier = MagicMock(return_value=torch.tensor([0.5]))
+
+        cal = LogisticCalibrator(
+            features=["logit", "log_len", "mean_conf", "n_tubes"],
+            coefficients=np.array([2.0, 0.0, 0.0, 0.0]),
+            intercept=0.0,
+            sanity_checks=[],
+        )
+
+        is_positive, trigger, winner, diag = find_first_crossing_trigger(
+            classifier=classifier,
+            tubes=tubes,
+            patches_per_tube=patches,
+            masks_per_tube=masks,
+            full_logits=full_logits,
+            aggregation="logistic",
+            threshold=0.0,
+            calibrator=cal,
+            logistic_threshold=0.5,
+            min_prefix_length=2,
+        )
+        assert is_positive is True
+        assert winner == 4
+        assert trigger == 1
+        assert diag == {4: {"crossing_frame": 1, "prefix_length": 2}}
+
+    def test_logistic_mode_no_qualifying_tube(self) -> None:
+        tube = _tube(1, [(0, _det()), (1, _det()), (2, _det())])
+        tubes = [tube]
+        patches, masks = _make_patches_and_masks(tubes)
+        full_logits = torch.tensor([-2.0])
+        classifier = MagicMock()
+
+        cal = LogisticCalibrator(
+            features=["logit", "log_len", "mean_conf", "n_tubes"],
+            coefficients=np.array([2.0, 0.0, 0.0, 0.0]),
+            intercept=0.0,
+            sanity_checks=[],
+        )
+
+        res = find_first_crossing_trigger(
+            classifier=classifier,
+            tubes=tubes,
+            patches_per_tube=patches,
+            masks_per_tube=masks,
+            full_logits=full_logits,
+            aggregation="logistic",
+            threshold=0.0,
+            calibrator=cal,
+            logistic_threshold=0.5,
+            min_prefix_length=2,
+        )
+        assert res == (False, None, None, {})
+        classifier.assert_not_called()
+
+    def test_logistic_mode_requires_calibrator(self) -> None:
+        tubes = [_tube(1, [(0, _det()), (1, _det())])]
+        patches, masks = _make_patches_and_masks(tubes)
+        with pytest.raises(ValueError, match="calibrator"):
+            find_first_crossing_trigger(
+                classifier=MagicMock(),
+                tubes=tubes,
+                patches_per_tube=patches,
+                masks_per_tube=masks,
+                full_logits=torch.tensor([1.0]),
+                aggregation="logistic",
+                threshold=0.0,
+                calibrator=None,
+                logistic_threshold=0.5,
+                min_prefix_length=2,
+            )
+
+    def test_logistic_log_len_affects_prefix_decision(self) -> None:
+        """Predicate sees prefix length via log_len, not just the logit."""
+        tube = _tube(1, [(0, _det()), (1, _det()), (2, _det()), (3, _det())])
+        tubes = [tube]
+        patches, masks = _make_patches_and_masks(tubes)
+        full_logits = torch.tensor([10.0])
+        classifier = MagicMock(return_value=torch.tensor([10.0]))
+
+        cal = LogisticCalibrator(
+            features=["logit", "log_len", "mean_conf", "n_tubes"],
+            coefficients=np.array([0.0, -2.0, 0.0, 0.0]),
+            intercept=0.0,
+            sanity_checks=[],
+        )
+
+        res = find_first_crossing_trigger(
+            classifier=classifier,
+            tubes=tubes,
+            patches_per_tube=patches,
+            masks_per_tube=masks,
+            full_logits=full_logits,
+            aggregation="logistic",
+            threshold=0.0,
+            calibrator=cal,
+            logistic_threshold=0.5,
+            min_prefix_length=2,
+        )
+        assert res == (False, None, None, {})

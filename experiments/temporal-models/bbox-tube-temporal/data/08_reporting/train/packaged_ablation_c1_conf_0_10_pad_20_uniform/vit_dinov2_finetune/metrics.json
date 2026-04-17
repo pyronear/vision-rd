@@ -1,0 +1,16 @@
+{
+  "model_name": "vit_dinov2_finetune-train",
+  "num_sequences": 3104,
+  "tp": 1514,
+  "fp": 227,
+  "fn": 38,
+  "tn": 1325,
+  "precision": 0.8696,
+  "recall": 0.9755,
+  "f1": 0.9195,
+  "fpr": 0.1463,
+  "mean_ttd_seconds": 823.8,
+  "median_ttd_seconds": 685.0,
+  "pr_auc": 0.9718,
+  "roc_auc": 0.9744
+}

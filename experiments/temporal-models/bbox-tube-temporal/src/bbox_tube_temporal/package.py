@@ -9,14 +9,17 @@ The archive is a standard .zip file containing:
   decision).
 """
 
+import json
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import torch
 import yaml
 
+from .logistic_calibrator import LogisticCalibrator
 from .temporal_classifier import TemporalSmokeClassifier
 
 FORMAT_VERSION = 1
@@ -24,6 +27,7 @@ MANIFEST_FILENAME = "manifest.yaml"
 YOLO_WEIGHTS_FILENAME = "yolo_weights.pt"
 CLASSIFIER_CKPT_FILENAME = "classifier.ckpt"
 CONFIG_FILENAME = "config.yaml"
+LOGISTIC_CALIBRATOR_FILENAME = "logistic_calibrator.json"
 DEFAULT_EXTRACT_DIR = Path(".cache/bbox_tube_temporal_model")
 
 
@@ -34,6 +38,7 @@ class ModelPackage:
     classifier: Any  # TemporalSmokeClassifier; Any avoids import cycles in this module
     yolo_model: Any  # ultralytics.YOLO; same reason
     config: dict[str, Any]
+    calibrator: LogisticCalibrator | None = None
 
     @property
     def infer(self) -> dict[str, Any]:
@@ -63,6 +68,7 @@ def build_model_package(
     config: dict[str, Any],
     variant: str,
     output_path: Path,
+    calibrator: LogisticCalibrator | None = None,
 ) -> Path:
     """Bundle YOLO weights + classifier checkpoint + config into a .zip archive.
 
@@ -73,6 +79,9 @@ def build_model_package(
         config: Full package config dict (see module docstring for schema).
         variant: Identifier recorded in the manifest (informational).
         output_path: Destination ``.zip`` path.
+        calibrator: Optional fitted :class:`LogisticCalibrator`. When
+            provided, its JSON payload is bundled into the archive and
+            the manifest gets a ``logistic_calibrator`` pointer.
 
     Returns:
         The resolved ``output_path``.
@@ -94,6 +103,8 @@ def build_model_package(
         "classifier_checkpoint": CLASSIFIER_CKPT_FILENAME,
         "config": CONFIG_FILENAME,
     }
+    if calibrator is not None:
+        manifest["logistic_calibrator"] = LOGISTIC_CALIBRATOR_FILENAME
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(output_path, "w", compression=zipfile.ZIP_STORED) as zf:
@@ -101,6 +112,17 @@ def build_model_package(
         zf.write(yolo_weights_path, YOLO_WEIGHTS_FILENAME)
         zf.write(classifier_ckpt_path, CLASSIFIER_CKPT_FILENAME)
         zf.writestr(CONFIG_FILENAME, yaml.dump(config, default_flow_style=False))
+        if calibrator is not None:
+            payload = {
+                "features": list(calibrator.features),
+                "coefficients": [float(c) for c in calibrator.coefficients],
+                "intercept": float(calibrator.intercept),
+                "sanity_checks": list(calibrator.sanity_checks),
+            }
+            zf.writestr(
+                LOGISTIC_CALIBRATOR_FILENAME,
+                json.dumps(payload, indent=2),
+            )
     return output_path.resolve()
 
 
@@ -215,6 +237,25 @@ def load_model_package(
         zf.extract(ckpt_name, extract_dir)
         config = yaml.safe_load(zf.read(config_name))
 
+        calibrator: LogisticCalibrator | None = None
+        calibrator_name = manifest.get("logistic_calibrator")
+        if calibrator_name is not None:
+            if calibrator_name not in names:
+                raise KeyError(f"Archive missing {calibrator_name}")
+            payload = json.loads(zf.read(calibrator_name))
+            calibrator = LogisticCalibrator(
+                features=list(payload["features"]),
+                coefficients=np.asarray(payload["coefficients"], dtype=float),
+                intercept=float(payload["intercept"]),
+                sanity_checks=list(payload.get("sanity_checks", [])),
+            )
+            calibrator.verify_sanity_checks()
+
     yolo_model = _load_yolo(extract_dir / yolo_name)
     classifier = _load_classifier(extract_dir / ckpt_name, config["classifier"])
-    return ModelPackage(classifier=classifier, yolo_model=yolo_model, config=config)
+    return ModelPackage(
+        classifier=classifier,
+        yolo_model=yolo_model,
+        config=config,
+        calibrator=calibrator,
+    )

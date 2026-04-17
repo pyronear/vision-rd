@@ -142,6 +142,15 @@ package:
   target_recall: 0.95
   infer_min_tube_length: 2
   infer:
-    confidence_threshold: 0.01
+    confidence_threshold: 0.1
     iou_nms: 0.2
     image_size: 1024
+    pad_to_min_frames: 20
+    pad_strategy: symmetric
+  # Per-variant decision rule used by BboxTubeTemporalModel.predict.
+  # "max_logit": default fire-if-logit >= threshold.
+  # "logistic": apply the bundled LogisticCalibrator; fire when
+  # predicted probability >= package.logistic_threshold.
+  aggregation:
+    gru_convnext_finetune: max_logit
+    vit_dinov2_finetune: logistic

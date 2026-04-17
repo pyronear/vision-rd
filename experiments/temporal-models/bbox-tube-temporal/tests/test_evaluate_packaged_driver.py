@@ -52,7 +52,24 @@ class _FakeModel:
             trigger_frame_index=(len(frames) - 1) if is_pos else None,
             details={
                 "num_tubes_kept": 1 if is_pos else 0,
+                "num_tubes_total": 1 if is_pos else 0,
                 "tube_logits": [2.5] if is_pos else [],
+                "winner_tube_id": 0 if is_pos else None,
+                "kept_tubes": (
+                    [
+                        {
+                            "tube_id": 0,
+                            "start_frame": 0,
+                            "end_frame": len(frames) - 1,
+                            "logit": 2.5,
+                            "is_winner": True,
+                            "entries": [],
+                        }
+                    ]
+                    if is_pos
+                    else []
+                ),
+                "threshold": 0.5,
             },
         )
 
@@ -96,7 +113,6 @@ def test_evaluate_packaged_writes_expected_outputs(tmp_path, monkeypatch):
     assert (output_dir / "confusion_matrix_normalized.png").is_file()
     assert (output_dir / "pr_curve.png").is_file()
     assert (output_dir / "roc_curve.png").is_file()
-    assert (output_dir / "errors").is_dir()
 
     metrics = json.loads((output_dir / "metrics.json").read_text())
     assert metrics["model_name"] == "fake-variant-fake-split"
@@ -115,6 +131,20 @@ def test_evaluate_packaged_writes_expected_outputs(tmp_path, monkeypatch):
         "fp_seq_c",
         "fp_seq_d",
     }
+
+    # Predictions now carry the full per-tube details so downstream
+    # diagnostics (e.g. the error-analysis notebook) can inspect every
+    # tube the model saw, not just the winner.
+    positive_records = [p for p in predictions if p["is_positive"]]
+    assert positive_records, "at least one positive record expected"
+    a_positive = positive_records[0]
+    assert a_positive["num_tubes_total"] == 1
+    assert a_positive["winner_tube_id"] == 0
+    assert a_positive["threshold"] == 0.5
+    assert isinstance(a_positive["kept_tubes"], list)
+    assert len(a_positive["kept_tubes"]) == a_positive["num_tubes_kept"]
+    assert a_positive["kept_tubes"][0]["is_winner"] is True
+    assert a_positive["kept_tubes"][0]["logit"] == 2.5
 
 
 def test_evaluate_packaged_strict_errors_abort(tmp_path, monkeypatch):

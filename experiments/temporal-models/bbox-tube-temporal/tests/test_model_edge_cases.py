@@ -13,7 +13,13 @@ from bbox_tube_temporal.model import BboxTubeTemporalModel
 from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
 
 TEST_CONFIG: dict = {
-    "infer": {"confidence_threshold": 0.01, "iou_nms": 0.2, "image_size": 1024},
+    "infer": {
+        "confidence_threshold": 0.01,
+        "iou_nms": 0.2,
+        "image_size": 1024,
+        "pad_to_min_frames": 0,
+        "pad_strategy": "symmetric",
+    },
     "tubes": {
         "iou_threshold": 0.2,
         "max_misses": 2,
@@ -165,6 +171,114 @@ class TestTruncation:
         assert out.details["num_truncated"] == 3
 
 
+class TestShortSequencePadding:
+    """``infer.pad_to_min_frames`` symmetrically pads a short sequence by
+    alternately prepending the first frame and appending the last until the
+    configured minimum is reached. Mirrors the ``pad_sequence`` helper in
+    ``tracking_fsm_baseline`` so both experiments handle truncated benchmark
+    sequences the same way."""
+
+    def test_pad_disabled_by_default(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        short = red_frames[:2]
+        per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in short]
+        yolo = _fake_yolo_factory(per_frame)
+        model = BboxTubeTemporalModel(
+            yolo_model=yolo, classifier=tiny_classifier, config=TEST_CONFIG
+        )
+        out = model.predict(frames=short)
+        assert len(out.details["num_detections_per_frame"]) == 2
+        assert out.details["num_padded"] == 0
+        assert out.details["num_frames"] == 2
+
+    def test_pad_extends_short_sequence_symmetrically(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        # Enable padding up to 5 frames; input has 2 real frames.
+        cfg = {
+            **TEST_CONFIG,
+            "infer": {**TEST_CONFIG["infer"], "pad_to_min_frames": 5},
+        }
+        short = red_frames[:2]
+        # Alternating prepend/append: [A,B] -> [A,A,B] -> [A,A,B,B] -> [A,A,A,B,B].
+        # YOLO sees 5 frames; fake YOLO needs a 5-length list.
+        per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in range(5)]
+        yolo = _fake_yolo_factory(per_frame)
+        model = BboxTubeTemporalModel(
+            yolo_model=yolo, classifier=tiny_classifier, config=cfg
+        )
+        out = model.predict(frames=short)
+
+        assert len(out.details["num_detections_per_frame"]) == 5
+        # num_frames reports the original length (pre-pad) so downstream
+        # metrics remain faithful to the real input.
+        assert out.details["num_frames"] == 2
+        assert out.details["num_padded"] == 3
+
+    def test_pad_noop_when_sequence_already_long_enough(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        cfg = {
+            **TEST_CONFIG,
+            "infer": {**TEST_CONFIG["infer"], "pad_to_min_frames": 3},
+        }
+        per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in red_frames]  # 6 frames
+        yolo = _fake_yolo_factory(per_frame)
+        model = BboxTubeTemporalModel(
+            yolo_model=yolo, classifier=tiny_classifier, config=cfg
+        )
+        out = model.predict(frames=red_frames)
+        assert len(out.details["num_detections_per_frame"]) == 6
+        assert out.details["num_padded"] == 0
+
+    def test_pad_strategy_uniform_spreads_duplicates(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        """``pad_strategy='uniform'`` uses nearest-neighbor upsampling so the
+        real frames are spread evenly across the padded sequence rather than
+        clustered at the boundaries (cf. symmetric)."""
+        cfg = {
+            **TEST_CONFIG,
+            "infer": {
+                **TEST_CONFIG["infer"],
+                "pad_to_min_frames": 6,
+                "pad_strategy": "uniform",
+            },
+        }
+        short = red_frames[:2]  # N=2 real frames, pad to M=6
+        # Uniform nearest-neighbor map: i*2//6 for i in 0..5 = [0,0,0,1,1,1]
+        # so the first 3 slots sample frame 0 and the last 3 sample frame 1.
+        per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in range(6)]
+        yolo = _fake_yolo_factory(per_frame)
+        model = BboxTubeTemporalModel(
+            yolo_model=yolo, classifier=tiny_classifier, config=cfg
+        )
+        out = model.predict(frames=short)
+        assert len(out.details["num_detections_per_frame"]) == 6
+        assert out.details["num_padded"] == 4
+        assert out.details["num_frames"] == 2
+
+    def test_pad_strategy_unknown_raises(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        cfg = {
+            **TEST_CONFIG,
+            "infer": {
+                **TEST_CONFIG["infer"],
+                "pad_to_min_frames": 5,
+                "pad_strategy": "bogus",
+            },
+        }
+        short = red_frames[:2]
+        yolo = MagicMock()
+        model = BboxTubeTemporalModel(
+            yolo_model=yolo, classifier=tiny_classifier, config=cfg
+        )
+        with pytest.raises(ValueError, match="unknown pad_strategy"):
+            model.predict(frames=short)
+
+
 class TestDeviceSelection:
     def test_explicit_cpu_puts_classifier_on_cpu(
         self, tiny_classifier: TemporalSmokeClassifier
@@ -194,6 +308,46 @@ class TestDeviceSelection:
         assert out.details["num_tubes_kept"] == 1
         assert len(out.details["tube_logits"]) == 1
 
+    def test_predict_details_include_per_tube_entries(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        """``details['kept_tubes']`` exposes every kept tube's full entries
+        alongside its logit and is_winner flag, so downstream diagnostics can
+        render any tube — not just the winner."""
+        per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in red_frames]
+        yolo = _fake_yolo_factory(per_frame)
+        # Force positive sequence so the single kept tube is the winner
+        # (under D2, winner_tube_id is None when no tube qualifies).
+        cfg = {
+            **TEST_CONFIG,
+            "decision": {**TEST_CONFIG["decision"], "threshold": -1e6},
+        }
+        model = BboxTubeTemporalModel(
+            yolo_model=yolo,
+            classifier=tiny_classifier,
+            config=cfg,
+            device="cpu",
+        )
+        out = model.predict(frames=red_frames)
+
+        kept = out.details["kept_tubes"]
+        assert isinstance(kept, list)
+        assert len(kept) == out.details["num_tubes_kept"]
+        tube = kept[0]
+        assert set(tube.keys()) == {
+            "tube_id",
+            "start_frame",
+            "end_frame",
+            "logit",
+            "is_winner",
+            "entries",
+        }
+        assert tube["is_winner"] is True  # single-tube case
+        assert tube["logit"] == out.details["tube_logits"][0]
+        assert isinstance(tube["entries"], list)
+        entry = tube["entries"][0]
+        assert set(entry.keys()) == {"frame_idx", "bbox", "is_gap", "confidence"}
+
     @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
     def test_predict_on_cuda_runs_end_to_end(
         self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
@@ -222,3 +376,41 @@ class TestDeviceSelection:
         if not torch.cuda.is_available() and torch.backends.mps.is_available():
             expected = "mps"
         assert model.device.type == expected
+
+
+class TestFirstCrossingTrigger:
+    def test_first_crossing_trigger_never_exceeds_end_frame(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        """Trigger frame must not exceed the winner tube's end_frame, and
+        ``per_tube_first_crossing`` must record the winner."""
+        per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in red_frames]
+        yolo = _fake_yolo_factory(per_frame)
+        cfg = {
+            **TEST_CONFIG,
+            "decision": {
+                **TEST_CONFIG["decision"],
+                "threshold": -1e6,
+            },
+        }
+        model = BboxTubeTemporalModel(
+            yolo_model=yolo,
+            classifier=tiny_classifier,
+            config=cfg,
+            device="cpu",
+        )
+        out = model.predict(frames=red_frames)
+
+        assert out.is_positive is True
+        assert out.trigger_frame_index is not None
+
+        winner_id = out.details["winner_tube_id"]
+        winner_tube = next(
+            t for t in out.details["kept_tubes"] if t["tube_id"] == winner_id
+        )
+        assert out.trigger_frame_index <= winner_tube["end_frame"]
+
+        assert winner_id in out.details["per_tube_first_crossing"]
+        entry = out.details["per_tube_first_crossing"][winner_id]
+        assert entry["crossing_frame"] == out.trigger_frame_index
+        assert entry["prefix_length"] >= 2

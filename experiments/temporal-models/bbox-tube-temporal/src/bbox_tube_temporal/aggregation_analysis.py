@@ -1,0 +1,152 @@
+"""Offline analysis of sequence-level aggregation rules over per-tube logits.
+
+Reads predictions.json files produced by scripts/evaluate_packaged.py and
+derives sequence-level scores under alternative aggregation rules (max,
+top-k-mean). Supports threshold sweeps, target-recall search, and
+confusion-matrix derivation.
+"""
+
+import json
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+
+AGGREGATION_RULES = ("max", "top_k_mean")
+
+
+def load_predictions(predictions_path: Path) -> list[dict[str, Any]]:
+    """Load per-sequence prediction records, sorted by sequence_id.
+
+    Accepts the JSON written by scripts/evaluate_packaged.py, which uses
+    json.dump with default settings (so +/-Infinity serializes as the
+    non-strict "Infinity" / "-Infinity" literals that json.loads handles).
+    """
+    records = json.loads(predictions_path.read_text())
+    records.sort(key=lambda r: r["sequence_id"])
+    return records
+
+
+def aggregate_score(tube_logits: list[float], *, rule: str, k: int) -> float:
+    """Aggregate per-tube logits into a single sequence-level score.
+
+    Rules:
+        * ``max``: maximum logit across all tubes. ``k`` is ignored.
+        * ``top_k_mean``: mean of the k largest logits. If fewer than k
+          tubes exist, returns ``-inf`` (sequence cannot clear the rule).
+
+    Empty tube list always returns ``-inf``.
+    """
+    if k < 1:
+        raise ValueError("k must be >= 1")
+    if rule not in AGGREGATION_RULES:
+        raise ValueError(f"unknown rule {rule!r}; expected one of {AGGREGATION_RULES}")
+    if not tube_logits:
+        return -np.inf
+    arr = np.asarray(tube_logits, dtype=float)
+    if rule == "max":
+        return float(arr.max())
+    # top_k_mean
+    if arr.size < k:
+        return -np.inf
+    top_k = np.partition(arr, -k)[-k:]
+    return float(top_k.mean())
+
+
+def find_threshold_for_recall(
+    y_true: np.ndarray,
+    scores: np.ndarray,
+    *,
+    target_recall: float,
+) -> float:
+    """Return the largest threshold whose recall ≥ target_recall.
+
+    We count a sequence as predicted-positive when ``score >= threshold``.
+    Sorting positive scores ascending, we may drop the ``n_drop`` lowest
+    positives while still hitting the recall target; the returned
+    threshold is the ``n_drop``-th positive score.
+
+    Returns ``-inf`` if target_recall forces including positives whose
+    score is ``-inf``.
+    """
+    if not 0.0 < target_recall <= 1.0:
+        raise ValueError(f"target_recall must be in (0, 1], got {target_recall!r}")
+    pos_scores = np.sort(scores[y_true == 1])
+    if pos_scores.size == 0:
+        raise ValueError("no positives in y_true; cannot calibrate recall")
+    n_pos = pos_scores.size
+    n_drop = int(np.floor(n_pos * (1.0 - target_recall)))
+    return float(pos_scores[n_drop])
+
+
+def metrics_at_threshold(
+    y_true: np.ndarray,
+    scores: np.ndarray,
+    *,
+    threshold: float,
+) -> dict[str, float | int]:
+    """Compute TP/FP/FN/TN + precision/recall/f1/fpr for a scalar threshold.
+
+    Sequences with ``score >= threshold`` are predicted positive.
+    """
+    pred = scores >= threshold
+    y_true_bool = y_true.astype(bool)
+    tp = int((pred & y_true_bool).sum())
+    fp = int((pred & ~y_true_bool).sum())
+    fn = int((~pred & y_true_bool).sum())
+    tn = int((~pred & ~y_true_bool).sum())
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+    recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+    f1 = (
+        2 * precision * recall / (precision + recall)
+        if (precision + recall) > 0
+        else 0.0
+    )
+    fpr = fp / (fp + tn) if (fp + tn) > 0 else 0.0
+    return {
+        "threshold": float(threshold),
+        "tp": tp,
+        "fp": fp,
+        "fn": fn,
+        "tn": tn,
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+        "fpr": fpr,
+    }
+
+
+def build_scores_and_labels(
+    records: list[dict[str, Any]],
+    *,
+    rule: str,
+    k: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Apply ``aggregate_score`` across records; return (y_true, scores)."""
+    y = np.array([1 if r["label"] == "smoke" else 0 for r in records], dtype=int)
+    s = np.array(
+        [aggregate_score(r["tube_logits"], rule=rule, k=k) for r in records],
+        dtype=float,
+    )
+    return y, s
+
+
+def summarize_rule(
+    records: list[dict[str, Any]],
+    *,
+    rule: str,
+    k: int,
+    target_recall: float,
+) -> dict[str, Any]:
+    """Run one aggregation rule at one target recall; return a flat row."""
+    y, s = build_scores_and_labels(records, rule=rule, k=k)
+    threshold = find_threshold_for_recall(y, s, target_recall=target_recall)
+    metrics = metrics_at_threshold(y, s, threshold=threshold)
+    return {
+        "rule": rule,
+        "k": k,
+        "target_recall": target_recall,
+        "n_sequences": int(y.size),
+        "n_positive": int(y.sum()),
+        **metrics,
+    }

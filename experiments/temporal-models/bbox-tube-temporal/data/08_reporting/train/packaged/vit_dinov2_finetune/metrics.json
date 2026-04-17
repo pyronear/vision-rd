@@ -1,16 +1,16 @@
 {
   "model_name": "vit_dinov2_finetune-train",
   "num_sequences": 3104,
-  "tp": 1501,
-  "fp": 351,
-  "fn": 51,
-  "tn": 1201,
-  "precision": 0.8105,
-  "recall": 0.9671,
-  "f1": 0.8819,
-  "fpr": 0.2262,
-  "mean_ttd_seconds": 595.4,
-  "median_ttd_seconds": 450.0,
-  "pr_auc": 0.9604,
-  "roc_auc": 0.9595
+  "tp": 1518,
+  "fp": 101,
+  "fn": 34,
+  "tn": 1451,
+  "precision": 0.9376,
+  "recall": 0.9781,
+  "f1": 0.9574,
+  "fpr": 0.0651,
+  "mean_ttd_seconds": 126.7,
+  "median_ttd_seconds": 30.0,
+  "pr_auc": 0.9728,
+  "roc_auc": 0.9762
 }

@@ -1,0 +1,16 @@
+{
+  "model_name": "gru_convnext_finetune-val",
+  "num_sequences": 318,
+  "tp": 152,
+  "fp": 7,
+  "fn": 7,
+  "tn": 152,
+  "precision": 0.956,
+  "recall": 0.956,
+  "f1": 0.956,
+  "fpr": 0.044,
+  "mean_ttd_seconds": 812.1,
+  "median_ttd_seconds": 809.5,
+  "pr_auc": 0.9807,
+  "roc_auc": 0.9785
+}
