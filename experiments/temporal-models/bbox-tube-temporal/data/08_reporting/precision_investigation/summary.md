@@ -13,9 +13,17 @@ least one variant, without regressing train-packaged precision below 0.90.
   ~0.6pp margin each).
 - train: P=0.9252, R=0.9716, F1=0.9478 (guardrail ≥ 0.90 cleared).
 
-`vit_dinov2_finetune` narrowly missed the precision bar under the same
-configuration (0.895 vs 0.93). Its best operating point on this spec is
-**C1 alone** (conf=0.10, no padding): P=0.926 / R=0.943.
+`vit_dinov2_finetune` clears the precision bar under a *different*
+optimal strategy — **C1 + longest-tube-only** (no padding): P=0.967,
+R=0.925, F1=0.945. Recall is 2.5pp short of the spec bar, but F1 is
+the highest of any ViT configuration tested.
+
+**Recommended per-variant inference strategy:**
+
+| variant | config | P | R | F1 |
+|---|---|---|---|---|
+| gru_convnext_finetune | C1 + pad=20 (sym) + all tubes | 0.956 | 0.956 | 0.956 |
+| vit_dinov2_finetune | C1 + longest-tube-only | 0.967 | 0.925 | 0.945 |
 
 ## Headline results (val-packaged)
 
@@ -29,6 +37,10 @@ configuration (0.895 vs 0.93). Its best operating point on this spec is
 | C1 + pad=20 (symmetric) | vit_dinov2_finetune | 0.8947 | 0.9623 | 0.9273 | 18 | 6 |
 | C1 + pad=20 (uniform) | gru_convnext_finetune | 0.9560 | 0.9560 | 0.9560 | 7 | 7 |
 | C1 + pad=20 (uniform) | vit_dinov2_finetune | 0.8844 | 0.9623 | 0.9217 | 20 | 6 |
+| C1 + longest-only | gru_convnext_finetune | 0.9856 | 0.8616 | 0.9195 | 2 | 22 |
+| **C1 + longest-only** | **vit_dinov2_finetune** | **0.9671** | 0.9245 | **0.9453** | 5 | 12 |
+| C1 + pad(sym) + longest | gru_convnext_finetune | 0.9728 | 0.8994 | 0.9346 | 4 | 16 |
+| C1 + pad(sym) + longest | vit_dinov2_finetune | 0.9317 | 0.9434 | 0.9375 | 11 | 9 |
 
 Train-packaged for the same runs:
 
@@ -127,6 +139,47 @@ ViT's precision gap under padding is not a padding-order problem — it
 appears to be a more fundamental classifier sensitivity to duplicate
 input that retraining might address but config tweaks cannot.
 
+### Track B — Single-tube-at-inference (longest-only)
+
+**Verdict: powerful precision lever; optimal strategy is variant-dependent.**
+
+Simulated offline from existing `predictions.json` `kept_tubes` data:
+for each sequence, keep only the longest tube (by `end_frame -
+start_frame + 1`, tie-break by earliest start), check its logit against
+the baked threshold.
+
+Effect across configs (val):
+
+| config | variant | all-tubes P/R/F1 | longest P/R/F1 |
+|---|---|---|---|
+| baseline | gru_convnext | 0.868/0.950/0.907 | 0.909/0.881/0.895 |
+| C1 | gru_convnext | 0.973/0.918/0.945 | **0.986**/0.862/0.920 |
+| C1+pad(sym) | gru_convnext | 0.956/0.956/0.956 | 0.973/0.899/0.935 |
+| baseline | vit_dinov2 | 0.823/0.962/0.887 | 0.898/0.937/0.917 |
+| **C1** | **vit_dinov2** | **0.926/0.943/0.935** | **0.967/0.925/0.945** |
+| C1+pad(sym) | vit_dinov2 | 0.895/0.962/0.927 | 0.932/0.943/0.938 |
+
+Key findings:
+
+- **Longest-only consistently lifts precision (+1 to +8pp)** at a
+  recall cost (−2 to −7pp). The classifier is most accurate on
+  longest tubes — which is what it was trained on.
+- **For GRU, all-tubes + padding is still the best strategy** (F1=0.956
+  vs 0.935 for longest-only). The recall cost of longest-only outweighs
+  the precision gain because the GRU is already precise enough under
+  C1+pad.
+- **For ViT, C1 + longest-only is the BEST config** (F1=0.945). ViT
+  loses precision under any padding but gains precision from
+  longest-only. The two levers (padding for recall, longest-only for
+  precision) are partly redundant for ViT — they both address the
+  multi-tube aggregation problem, but longest-only does it without
+  introducing the duplicate-frame sensitivity that degrades ViT
+  precision.
+- **The optimal inference strategy is variant-dependent**: GRU benefits
+  from seeing all tubes + padding; ViT benefits from seeing only the
+  most-persistent tube with no padding. Worth implementing as a
+  `decision.tube_selection` config knob (``"all"`` or ``"longest"``).
+
 ### Track C2 — `infer_min_tube_length = 4` (standalone)
 
 Not pursued as a real ablation. Offline simulation showed it was
@@ -157,19 +210,24 @@ precision — not a useful standalone lever.
   gru_convnext. ViT is marginally worse under uniform. The padding
   "shape" is not the lever; the ViT's learned positional embeddings
   react differently to duplicate frames regardless of their placement.
+- **Optimal inference strategy is variant-dependent**: GRU is robust
+  to multi-tube aggregation and benefits from seeing all tubes +
+  padded sequences. ViT's attention is distracted by noisy
+  non-longest tubes and duplicate frames — it performs best when
+  restricted to the single longest tube with no padding.
 
 ## Recommendation
 
 1. Promote the combined config to `params.yaml` as the new default:
    - `package.infer.confidence_threshold: 0.10`
-   - `package.infer.pad_to_min_frames: 20`
-2. Re-package `gru_convnext_finetune` for production and re-run the
-   leaderboard. Verify the leaderboard's test-split precision follows
-   the val gain (spec out-of-scope until val bar is cleared — now it
-   is).
-3. For `vit_dinov2_finetune`, keep `pad_to_min_frames = 0` (use C1
-   only) for now. Uniform-spread padding was tested and doesn't
-   help — ViT's precision gap under any padding is more fundamental.
+   - `package.infer.pad_to_min_frames: 20` (for gru_convnext)
+   - `package.infer.pad_strategy: symmetric`
+2. Add a `decision.tube_selection` config knob (`"all"` or `"longest"`)
+   so the inference strategy can be set per variant:
+   - gru_convnext: `tube_selection: all` + `pad_to_min_frames: 20`
+   - vit_dinov2: `tube_selection: longest` + `pad_to_min_frames: 0`
+3. Re-package both variants and re-run the leaderboard. Verify the
+   test-split precision follows the val gain.
 
 ## Out of scope (and follow-ups)
 
@@ -177,6 +235,7 @@ precision — not a useful standalone lever.
   TTD from ~515s to ~812s; separate PR per spec.
 - Retraining the classifier (YOLO-version alignment, MIL, hard-neg
   mining) — documented in the spec's Follow-ups section.
-- ViT precision under padding — neither symmetric nor uniform
-  padding recovers the 3pp precision ViT loses vs. C1-alone.
-  Likely requires retraining with padded inputs.
+- ViT precision under padding — resolved via Track B: ViT's
+  best operating point is C1 + longest-only (no padding), not
+  padding. Adding a `tube_selection: longest` config knob would
+  let each variant use its optimal strategy without code changes.
