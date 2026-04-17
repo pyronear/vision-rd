@@ -23,33 +23,41 @@ def pad_frames_symmetrically(
     frames: list[Frame],
     *,
     min_length: int,
-) -> list[Frame]:
+) -> tuple[list[Frame], list[int]]:
     """Pad ``frames`` up to ``min_length`` by alternating prepend/append.
 
     Mirrors ``tracking_fsm_baseline.data.pad_sequence``: the first frame is
     prepended, then the last frame is appended, alternating until the
-    sequence reaches ``min_length``. Empty inputs and inputs already at or
-    above ``min_length`` pass through unchanged.
+    sequence reaches ``min_length``.
+
+    Returns ``(padded_frames, padded_indices)`` where ``padded_indices`` lists
+    slots in ``padded_frames`` that are synthesised duplicates (not real
+    captures). Empty inputs and inputs already at or above ``min_length``
+    pass through with an empty index list.
     """
     if not frames or len(frames) >= min_length:
-        return list(frames)
+        return list(frames), []
     result = list(frames)
+    real_positions = list(range(len(frames)))
     prepend = True
     while len(result) < min_length:
         src = frames[0] if prepend else frames[-1]
         if prepend:
             result.insert(0, src)
+            real_positions = [p + 1 for p in real_positions]
         else:
             result.append(src)
         prepend = not prepend
-    return result
+    real_set = set(real_positions)
+    padded_indices = [i for i in range(len(result)) if i not in real_set]
+    return result, padded_indices
 
 
 def pad_frames_uniform(
     frames: list[Frame],
     *,
     min_length: int,
-) -> list[Frame]:
+) -> tuple[list[Frame], list[int]]:
     """Pad ``frames`` up to ``min_length`` by uniform nearest-neighbor upsampling.
 
     Each of ``min_length`` output slots picks the real frame whose position
@@ -57,14 +65,26 @@ def pad_frames_uniform(
     in-place, spread evenly across the padded sequence rather than clustered
     at the boundaries. Useful as an alternative to
     :func:`pad_frames_symmetrically` when the classifier is sensitive to the
-    temporal distribution of duplicates (e.g. transformer attention). Empty
-    inputs and inputs already at or above ``min_length`` pass through
-    unchanged.
+    temporal distribution of duplicates (e.g. transformer attention).
+
+    Returns ``(padded_frames, padded_indices)``. The first occurrence of each
+    real source frame is treated as the "real" slot; repeats are padding.
+    Empty inputs and inputs already at or above ``min_length`` pass through
+    with an empty index list.
     """
     if not frames or len(frames) >= min_length:
-        return list(frames)
+        return list(frames), []
     n = len(frames)
-    return [frames[i * n // min_length] for i in range(min_length)]
+    source = [i * n // min_length for i in range(min_length)]
+    padded_frames = [frames[i] for i in source]
+    seen: set[int] = set()
+    padded_indices: list[int] = []
+    for slot, src_idx in enumerate(source):
+        if src_idx in seen:
+            padded_indices.append(slot)
+        else:
+            seen.add(src_idx)
+    return padded_frames, padded_indices
 
 
 def run_yolo_on_frames(
