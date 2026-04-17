@@ -22,7 +22,7 @@ Each arrow is one stage of the DVC pipeline and is implemented in a single modul
 - `build_model_input` → `src/bbox_tube_temporal/model_input.py` (context-expanded square crop + resize).
 - `train_<variant>` → `scripts/train.py` + `src/bbox_tube_temporal/{temporal_classifier.py,lit_temporal.py}`.
 - `evaluate_<variant>` → `scripts/evaluate.py` + `src/bbox_tube_temporal/eval_plots.py`.
-- `package` → `scripts/package_model.py` (zips YOLO + classifier + calibrated threshold).
+- `package` → `scripts/package_model.py` (zips YOLO + classifier + calibrated threshold + optional `LogisticCalibrator`).
 
 YOLO bboxes are pre-computed and shipped with the dataset; we do not run YOLO during training.
 
@@ -148,7 +148,7 @@ All 11 variants share the `truncate → build_tubes → build_model_input` input
 Two levels of evaluation coexist, and they measure slightly different things. Read the difference before comparing numbers:
 
 - **Per-tube classifier metrics** (`data/08_reporting/val/<variant>/metrics.json`) — one score per tube, decision at threshold 0.5. This is the comparison table below and captures pure classifier quality.
-- **Per-sequence protocol metrics** (`data/08_reporting/val/packaged/<variant>/metrics.json`) — end-to-end protocol run: YOLO → tubes → classifier → `max_logit` aggregation → calibrated threshold → sequence-level decision. These are what the leaderboard consumes.
+- **Per-sequence protocol metrics** (`data/08_reporting/val/packaged/<variant>/metrics.json`) — end-to-end protocol run: YOLO → tubes → classifier → per-variant aggregation (`max_logit` or `logistic` — see `package.aggregation` in `params.yaml`) → decision threshold → first-crossing trigger → sequence-level decision. These are what the leaderboard consumes.
 
 ### Variant comparison (per-tube, val)
 
@@ -187,12 +187,12 @@ Qualitative error galleries live next to the metrics: `data/08_reporting/val/<va
 
 ### End-to-end protocol metrics (packaged, val, 318 sequences)
 
-| variant | precision | recall | F1 | FP | FN | mean TTD (s) |
-|---|---|---|---|---|---|---|
-| gru_convnext_finetune | 0.956 | 0.956 | 0.956 | 7 | 7 | 812 |
-| vit_dinov2_finetune | 0.895 | 0.962 | 0.927 | 18 | 6 | 830 |
+| variant | aggregation | precision | recall | F1 | FP | FN | mean TTD (s) | median TTD (s) |
+|---|---|---|---|---|---|---|---|---|
+| gru_convnext_finetune | max_logit | 0.956 | 0.956 | 0.956 | 7 | 7 | 78.9 | 14.0 |
+| vit_dinov2_finetune | logistic | 0.968 | 0.962 | 0.965 | 5 | 6 | 100.2 | 27.5 |
 
-At the packaged operating point, the two winners trade off differently: the ConvNeXt package is more balanced (P/R both ~0.956); the ViT package favours recall at the cost of precision (higher FP count). The exact operating point comes from automated variant analysis (next section) — change the target recall to shift the trade-off.
+Both packaged variants now clear the precision target (≥ 0.93) at recall ≥ 0.95. ViT is the F1 leader thanks to the logistic calibrator, which weights tube length and YOLO confidence alongside the raw logit. The exact operating point comes from automated variant analysis (next section) — change the target recall to shift the trade-off. TTD numbers reflect the first-crossing trigger; pre-fix values on the same weights were ~812s (GRU) and ~830s (ViT).
 
 ### Variant analysis and threshold calibration
 
@@ -202,16 +202,16 @@ At the packaged operating point, the two winners trade off differently: the Conv
 2. Detection confidence filter at `{0.05, 0.10, 0.15, 0.20, 0.25}`.
 3. Tube selection (all tubes / top-1 / top-2 / top-3 by length).
 4. Sequence aggregation rule (`max`, `mean`, `length_weighted_mean`).
-5. **Platt re-calibration**: fits a logistic regression on `(logit, log_tube_length, mean_confidence, n_tubes)` and rescans thresholds.
+5. **Logistic calibrator**: fits a multivariate logistic regression on `(logit, log_tube_length, mean_confidence, n_tubes)` and rescans thresholds. Used as the runtime decision rule for variants configured with `package.aggregation: logistic`.
 6. Recommendation: best config meeting target precision ≥ 0.93 and recall ≥ 0.95, ranked by F1.
 
 Outputs, per variant, under `data/08_reporting/variant_analysis/<variant>/`:
 
 - `analysis_report.md` — full sweep tables + diagnostic notes.
 - `recommended_config.yaml` — the chosen operating point (e.g. `confidence_threshold`, `pad_strategy`).
-- `platt_model.json` — fitted Platt weights (features, coefficients, intercept).
+- `logistic_calibrator.json` — fitted calibrator weights (features, coefficients, intercept). Also bundled inside the packaged `model.zip`.
 
-The packaging stage consumes `recommended_config.yaml` and bakes the calibrated `decision.threshold` into the archive's `config.yaml`.
+The packaging stage consumes `recommended_config.yaml` and bakes the calibrated `decision.threshold` (and, for `logistic` aggregation, the fitted `LogisticCalibrator`) into the archive.
 
 ## DVC pipeline
 
@@ -234,7 +234,7 @@ Stages (`dvc.yaml`):
 | `train_<variant>` | Train one variant (Lightning + CSV logger + training plots). |
 | `evaluate_<variant>` (foreach train/val) | Per-tube predictions + metrics + error galleries. |
 | `evaluate_packaged` (foreach variant × split) | Protocol-level eval of the packaged `model.zip`. |
-| `analyze_variant` (foreach packaged variant) | Sweep + Platt calibration + recommended config. |
+| `analyze_variant` (foreach packaged variant) | Sweep + logistic calibrator fit + recommended config. |
 | `package` (foreach packaged variant) | Assemble `model.zip` with calibrated threshold. |
 | `compare_variants` | Aggregate `data/08_reporting/comparison.md` across all variants. |
 
@@ -264,7 +264,7 @@ See `params.yaml`. Highlights:
 - `model_input.context_factor`, `model_input.patch_size` — patch geometry.
 - `train_<variant>.*` — per-variant hyperparameters (lr, batch size, epochs, early stopping, seed, backbone / head config). Shared defaults live in YAML anchors (`_train_defaults`, `_gru_defaults`, `_vit_defaults`).
 - `augment.*` — spatial / photometric / temporal augmentation toggles.
-- `package.target_recall`, `package.infer.pad_to_min_frames`, `package.infer.pad_strategy` — packaging and inference-time knobs.
+- `package.target_recall`, `package.infer.pad_to_min_frames`, `package.infer.pad_strategy`, `package.aggregation` (per-variant: `max_logit` or `logistic`), `package.logistic_threshold` — packaging and inference-time knobs.
 
 ## Notebooks
 
@@ -284,12 +284,14 @@ Pointers to the most load-bearing design docs:
 - `docs/specs/2026-04-16-bbox-tube-precision-investigation.md` — precision-focused error analysis that motivated the packaged operating point.
 - `docs/specs/2026-04-17-automated-variant-analysis.md` — the `analyze_variant` stage.
 - `docs/specs/2026-04-16-protocol-eval-stage-design.md` — the `evaluate_packaged` stage.
+- `docs/specs/2026-04-17-logistic-calibrator-deployment-design.md` — runtime `LogisticCalibrator` bundled into the packaged archive and the `package.aggregation` per-variant knob.
+- `docs/specs/2026-04-17-first-crossing-trigger-design.md` — first-crossing trigger rule (replaces the `winner.end_frame` trigger).
 
 ## Deployment (TemporalModel)
 
 `BboxTubeTemporalModel` (in `src/bbox_tube_temporal/model.py`) implements `pyrocore.TemporalModel`. It ships with a YOLO companion detector inside a single archive built by `scripts/package_model.py`.
 
-Pipeline inside `predict()`: truncate → symmetric pad (if the sequence is shorter than `package.infer.pad_to_min_frames`, see *Symmetric padding at inference* above) → YOLO → build + filter tubes → crop 224×224 patches → classifier forward → `max_logit` aggregation → threshold-based decision (`trigger_frame_index = winner_tube.end_frame`).
+Pipeline inside `predict()`: truncate → symmetric pad (if the sequence is shorter than `package.infer.pad_to_min_frames`, see *Symmetric padding at inference* above) → YOLO → build + filter tubes → crop 224×224 patches → classifier forward → per-variant aggregation (`max_logit` or `logistic`) → threshold-based decision → **first-crossing trigger**: among the tubes whose full-length decision is positive (D2 guard), pick the earliest frame at which any qualifying tube's prefix crosses threshold. `is_positive` stays bit-identical to the legacy argmax-winner rule; `trigger_frame_index` is now the earliest frame the model would have fired rather than the winning tube's `end_frame`. See `docs/specs/2026-04-17-first-crossing-trigger-design.md`.
 
 ### Build the archive
 
@@ -299,7 +301,7 @@ uv run dvc repro package
 # -> data/06_models/vit_dinov2_finetune/model.zip
 ```
 
-The packager consumes the recommended config from `analyze_variant` (Platt-calibrated `decision.threshold` at `package.target_recall=0.95`) and bakes it into the archive's `config.yaml`.
+The packager consumes the recommended config from `analyze_variant` (decision threshold calibrated at `package.target_recall=0.95`; for logistic aggregation the fitted `LogisticCalibrator` is bundled as `logistic_calibrator.json`) and bakes it into the archive's `config.yaml`.
 
 ### Use the archive
 
