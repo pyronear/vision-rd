@@ -57,9 +57,11 @@ def main() -> None:
     if args.max_sequences is not None:
         sequences = sequences[: args.max_sequences]
 
+    # Pass the tqdm iterator directly so the progress bar tracks actual
+    # prediction work, not list materialization.
     result = run_benchmark_on_model(
         model,
-        list(tqdm(sequences, desc=f"bench {args.model_zip.name}", unit="seq")),
+        tqdm(sequences, desc=f"bench {args.model_zip.name}", unit="seq"),
         warmup=args.warmup,
     )
     # Self-describing JSON: record which model + device produced the numbers.

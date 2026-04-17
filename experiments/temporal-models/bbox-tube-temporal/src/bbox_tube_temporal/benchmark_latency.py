@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import statistics
 import time
+from collections.abc import Iterable
 from pathlib import Path
 
 import torch
@@ -125,7 +126,7 @@ def _build_record(
 
 def run_benchmark_on_model(
     model: object,
-    sequence_dirs: list[Path],
+    sequence_dirs: Iterable[Path],
     *,
     warmup: int,
 ) -> dict:
