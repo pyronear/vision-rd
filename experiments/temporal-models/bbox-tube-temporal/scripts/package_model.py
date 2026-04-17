@@ -239,7 +239,9 @@ def main() -> None:
         probs, labels, target_recall=package_params["target_recall"]
     )
 
-    aggregation = variant_cfg.get("aggregation", "max_logit")
+    aggregation = package_params.get("aggregation", {}).get(
+        args.variant, "max_logit"
+    )
     calibrator: LogisticCalibrator | None = None
     logistic_threshold: float | None = None
     if aggregation == "logistic":

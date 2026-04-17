@@ -76,7 +76,6 @@ train_gru_convnext_finetune:
   finetune: true
   finetune_last_n_blocks: 1
   backbone_lr: 0.00001
-  aggregation: max_logit
 
 train_gru_convnext_base_finetune:
   <<: *gru_defaults
@@ -113,7 +112,6 @@ train_vit_dinov2_finetune:
   finetune: true
   finetune_last_n_blocks: 1
   backbone_lr: 0.00001
-  aggregation: logistic
 
 train_vit_in21k_finetune:
   <<: *vit_defaults
@@ -149,3 +147,10 @@ package:
     image_size: 1024
     pad_to_min_frames: 20
     pad_strategy: symmetric
+  # Per-variant decision rule used by BboxTubeTemporalModel.predict.
+  # "max_logit": default fire-if-logit >= threshold.
+  # "logistic": apply the bundled LogisticCalibrator; fire when
+  # predicted probability >= package.logistic_threshold.
+  aggregation:
+    gru_convnext_finetune: max_logit
+    vit_dinov2_finetune: logistic
