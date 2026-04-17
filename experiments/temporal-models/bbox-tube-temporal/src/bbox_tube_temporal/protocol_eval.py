@@ -88,7 +88,8 @@ def build_record(
     output: TemporalModelOutput,
 ) -> SequenceRecord:
     """Bundle a per-sequence eval record from the model's output + frames."""
-    tube_logits = list(output.details.get("tube_logits", []))
+    kept = output.details.get("tubes", {}).get("kept", [])
+    tube_logits = [float(t["logit"]) for t in kept]
     ttd_seconds = _compute_ttd_seconds(
         ground_truth=(label == "smoke"),
         predicted=output.is_positive,
@@ -101,7 +102,7 @@ def build_record(
         is_positive=output.is_positive,
         trigger_frame_index=output.trigger_frame_index,
         score=_score_from_tube_logits(tube_logits),
-        num_tubes_kept=int(output.details.get("num_tubes_kept", 0)),
+        num_tubes_kept=len(kept),
         tube_logits=tube_logits,
         ttd_seconds=ttd_seconds,
         details=dict(output.details),
