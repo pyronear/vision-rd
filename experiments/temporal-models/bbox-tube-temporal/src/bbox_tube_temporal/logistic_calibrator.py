@@ -75,3 +75,37 @@ class LogisticCalibrator:
         """
         z = X @ self.coefficients + self.intercept
         return 1.0 / (1.0 + np.exp(-z))
+
+
+FEATURE_NAMES: list[str] = ["logit", "log_len", "mean_conf", "n_tubes"]
+
+
+def _tube_len(tube: dict) -> int:
+    return tube["end_frame"] - tube["start_frame"] + 1
+
+
+def _tube_mean_conf(tube: dict) -> float:
+    confs = [
+        e["confidence"]
+        for e in tube["entries"]
+        if e["confidence"] is not None
+    ]
+    return sum(confs) / len(confs) if confs else 0.0
+
+
+def extract_features(tube: dict, n_tubes: int) -> np.ndarray:
+    """Build the feature row consumed by :class:`LogisticCalibrator`.
+
+    Matches ``scripts/analyze_variant.py:tube_len`` /
+    ``tube_mean_conf`` exactly — the order is
+    ``["logit", "log_len", "mean_conf", "n_tubes"]``.
+    """
+    return np.array(
+        [
+            tube["logit"],
+            math.log1p(_tube_len(tube)),
+            _tube_mean_conf(tube),
+            float(n_tubes),
+        ],
+        dtype=float,
+    )

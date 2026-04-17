@@ -5,7 +5,10 @@ from pathlib import Path
 
 import numpy as np
 
-from bbox_tube_temporal.logistic_calibrator import LogisticCalibrator
+from bbox_tube_temporal.logistic_calibrator import (
+    LogisticCalibrator,
+    extract_features,
+)
 
 
 def test_json_roundtrip_preserves_weights(tmp_path: Path) -> None:
@@ -74,3 +77,42 @@ def test_predict_proba_batch_matches_single_rows() -> None:
     singles = np.array([cal.predict_proba(row) for row in X])
     assert np.allclose(batch, singles, atol=1e-12)
     assert batch.shape == (3,)
+
+
+def test_extract_features_matches_analyze_variant_convention() -> None:
+    tube = {
+        "logit": 2.5,
+        "start_frame": 4,
+        "end_frame": 12,  # length 9
+        "entries": [
+            {"confidence": 0.3},
+            {"confidence": 0.5},
+            {"confidence": None},  # gap entry, must be skipped
+            {"confidence": 0.7},
+        ],
+    }
+    feats = extract_features(tube, n_tubes=3)
+    # length = 9, log1p(9), mean_conf = (0.3+0.5+0.7)/3 = 0.5
+    np.testing.assert_allclose(
+        feats,
+        np.array([2.5, np.log1p(9), 0.5, 3.0]),
+        atol=1e-12,
+    )
+
+
+def test_extract_features_all_none_confidence_defaults_to_zero() -> None:
+    tube = {
+        "logit": -1.0,
+        "start_frame": 0,
+        "end_frame": 0,  # length 1
+        "entries": [
+            {"confidence": None},
+            {"confidence": None},
+        ],
+    }
+    feats = extract_features(tube, n_tubes=1)
+    np.testing.assert_allclose(
+        feats,
+        np.array([-1.0, np.log1p(1), 0.0, 1.0]),
+        atol=1e-12,
+    )
