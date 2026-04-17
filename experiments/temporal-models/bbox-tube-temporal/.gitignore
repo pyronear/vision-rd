@@ -4,6 +4,7 @@ __pycache__/
 .ipynb_checkpoints/
 .cache/
 data/08_reporting/augment_samples/
+data/08_reporting/benchmarks/
 data/06_models/*/batch_samples/
 data/06_models/*/tb_logs/
 data/06_models/*/best-v*.ckpt
