@@ -4,14 +4,17 @@ import zipfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import numpy as np
 import pytest
 import torch
 import yaml
 
+from bbox_tube_temporal.logistic_calibrator import LogisticCalibrator
 from bbox_tube_temporal.package import (
     CLASSIFIER_CKPT_FILENAME,
     CONFIG_FILENAME,
     FORMAT_VERSION,
+    LOGISTIC_CALIBRATOR_FILENAME,
     MANIFEST_FILENAME,
     YOLO_WEIGHTS_FILENAME,
     build_model_package,
@@ -284,3 +287,113 @@ class TestLoadRejectsBadArchive:
             zf.writestr(CONFIG_FILENAME, "{}")
         with pytest.raises(ValueError, match="format_version"):
             load_model_package(bad, extract_dir=tmp_path / "ext")
+
+
+def _make_calibrator() -> LogisticCalibrator:
+    """Calibrator whose sanity check is computed so verify_sanity_checks passes."""
+    coefs = np.array([0.5, 1.5, 2.5, 0.0])
+    intercept = -3.0
+    feats = np.array([1.0, 2.0, 0.5, 2.0])
+    z = float(feats @ coefs) + intercept
+    prob = float(1.0 / (1.0 + np.exp(-z)))
+    return LogisticCalibrator(
+        features=["logit", "log_len", "mean_conf", "n_tubes"],
+        coefficients=coefs,
+        intercept=intercept,
+        sanity_checks=[{"features": feats.tolist(), "prob": prob}],
+    )
+
+
+class TestCalibratorBundling:
+    @patch("bbox_tube_temporal.package._load_yolo")
+    def test_package_without_calibrator_has_no_entry(
+        self,
+        mock_yolo: MagicMock,
+        real_tiny_archive: Path,
+        tmp_path: Path,
+    ) -> None:
+        mock_yolo.return_value = MagicMock(name="FakeYOLO")
+        with zipfile.ZipFile(real_tiny_archive, "r") as zf:
+            assert LOGISTIC_CALIBRATOR_FILENAME not in zf.namelist()
+            manifest = yaml.safe_load(zf.read(MANIFEST_FILENAME))
+            assert "logistic_calibrator" not in manifest
+
+        pkg = load_model_package(real_tiny_archive, extract_dir=tmp_path / "ext")
+        assert pkg.calibrator is None
+
+    @patch("bbox_tube_temporal.package._load_yolo")
+    def test_package_with_calibrator_round_trips(
+        self,
+        mock_yolo: MagicMock,
+        tmp_path: Path,
+        dummy_yolo_weights: Path,
+        real_tiny_classifier_ckpt: Path,
+        real_tiny_config: dict,
+    ) -> None:
+        mock_yolo.return_value = MagicMock(name="FakeYOLO")
+        cal = _make_calibrator()
+
+        out = tmp_path / "m.zip"
+        build_model_package(
+            yolo_weights_path=dummy_yolo_weights,
+            classifier_ckpt_path=real_tiny_classifier_ckpt,
+            config=real_tiny_config,
+            variant="tiny",
+            output_path=out,
+            calibrator=cal,
+        )
+
+        with zipfile.ZipFile(out, "r") as zf:
+            names = zf.namelist()
+            assert LOGISTIC_CALIBRATOR_FILENAME in names
+            manifest = yaml.safe_load(zf.read(MANIFEST_FILENAME))
+            assert manifest["logistic_calibrator"] == LOGISTIC_CALIBRATOR_FILENAME
+
+        pkg = load_model_package(out, extract_dir=tmp_path / "ext")
+        assert pkg.calibrator is not None
+        assert pkg.calibrator.features == cal.features
+        np.testing.assert_allclose(pkg.calibrator.coefficients, cal.coefficients)
+        assert pkg.calibrator.intercept == cal.intercept
+        pkg.calibrator.verify_sanity_checks()  # no raise
+
+    @patch("bbox_tube_temporal.package._load_yolo")
+    def test_load_rejects_tampered_calibrator(
+        self,
+        mock_yolo: MagicMock,
+        tmp_path: Path,
+        dummy_yolo_weights: Path,
+        real_tiny_classifier_ckpt: Path,
+        real_tiny_config: dict,
+    ) -> None:
+        mock_yolo.return_value = MagicMock(name="FakeYOLO")
+        cal = _make_calibrator()
+
+        out = tmp_path / "m.zip"
+        build_model_package(
+            yolo_weights_path=dummy_yolo_weights,
+            classifier_ckpt_path=real_tiny_classifier_ckpt,
+            config=real_tiny_config,
+            variant="tiny",
+            output_path=out,
+            calibrator=cal,
+        )
+
+        # Rewrite the zip with tampered coefficients.
+        import json as _json
+
+        tampered_path = tmp_path / "tampered.zip"
+        with zipfile.ZipFile(out, "r") as src, zipfile.ZipFile(
+            tampered_path, "w"
+        ) as dst:
+            for name in src.namelist():
+                data = src.read(name)
+                if name == LOGISTIC_CALIBRATOR_FILENAME:
+                    payload = _json.loads(data)
+                    payload["coefficients"] = [
+                        2.0 * c for c in payload["coefficients"]
+                    ]
+                    data = _json.dumps(payload).encode()
+                dst.writestr(name, data)
+
+        with pytest.raises(ValueError, match="sanity check"):
+            load_model_package(tampered_path, extract_dir=tmp_path / "ext2")
