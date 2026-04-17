@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from bbox_tube_temporal.logistic_calibrator import (
     LogisticCalibrator,
@@ -116,3 +117,39 @@ def test_extract_features_all_none_confidence_defaults_to_zero() -> None:
         np.array([-1.0, np.log1p(1), 0.0, 1.0]),
         atol=1e-12,
     )
+
+
+def _reference_sigmoid(x: float) -> float:
+    return 1.0 / (1.0 + np.exp(-x))
+
+
+def test_verify_sanity_checks_passes_on_correct_weights() -> None:
+    cal = LogisticCalibrator(
+        features=["a", "b"],
+        coefficients=np.array([1.0, 2.0]),
+        intercept=0.0,
+        sanity_checks=[
+            {"features": [2.0, 3.0], "prob": _reference_sigmoid(8.0)},
+            {"features": [0.0, 0.0], "prob": 0.5},
+        ],
+    )
+    cal.verify_sanity_checks()  # no raise
+
+
+def test_verify_sanity_checks_raises_on_tampered_weights() -> None:
+    cal = LogisticCalibrator(
+        features=["a", "b"],
+        coefficients=np.array([1.0, 2.0]),
+        intercept=0.0,
+        sanity_checks=[
+            {"features": [2.0, 3.0], "prob": _reference_sigmoid(8.0)},
+        ],
+    )
+    tampered = LogisticCalibrator(
+        features=cal.features,
+        coefficients=cal.coefficients * 2.0,
+        intercept=cal.intercept,
+        sanity_checks=cal.sanity_checks,
+    )
+    with pytest.raises(ValueError, match="sanity check"):
+        tampered.verify_sanity_checks()

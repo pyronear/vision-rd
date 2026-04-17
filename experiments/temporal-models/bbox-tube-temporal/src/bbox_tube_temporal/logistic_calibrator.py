@@ -76,6 +76,26 @@ class LogisticCalibrator:
         z = X @ self.coefficients + self.intercept
         return 1.0 / (1.0 + np.exp(-z))
 
+    def verify_sanity_checks(self, atol: float = 1e-6) -> None:
+        """Re-run each persisted (features, prob) pair; raise on mismatch.
+
+        Guards against sklearn-version drift or JSON tampering: if the
+        numpy inference path no longer reproduces the probabilities
+        captured at fit time within ``atol``, we refuse to use the
+        calibrator.
+        """
+        for i, pair in enumerate(self.sanity_checks):
+            expected = float(pair["prob"])
+            actual = self.predict_proba(
+                np.asarray(pair["features"], dtype=float)
+            )
+            if abs(actual - expected) > atol:
+                raise ValueError(
+                    f"logistic calibrator sanity check #{i} failed: "
+                    f"expected prob={expected!r} got {actual!r} "
+                    f"(features={pair['features']!r})"
+                )
+
 
 FEATURE_NAMES: list[str] = ["logit", "log_len", "mean_conf", "n_tubes"]
 
