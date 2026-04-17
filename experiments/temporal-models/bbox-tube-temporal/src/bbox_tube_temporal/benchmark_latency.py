@@ -9,8 +9,11 @@ See ``docs/specs/2026-04-17-cpu-latency-benchmark-design.md``.
 from __future__ import annotations
 
 import time
+from pathlib import Path
 
 import torch
+
+from .data import get_sorted_frames
 
 
 def percentile(xs: list[float], p: float) -> float:
@@ -96,3 +99,103 @@ def wrap_for_timing(model: object, bucket: dict[str, float]) -> None:
     """
     model._yolo = TimedYoloProxy(model._yolo, bucket)
     model._classifier = TimedClassifier(model._classifier, bucket).eval()
+
+
+def _build_record(
+    *,
+    seq_dir: Path,
+    num_frames: int,
+    num_tubes_kept: int,
+    yolo_s: float,
+    classifier_s: float,
+    total_s: float,
+    is_warmup: bool,
+) -> dict:
+    return {
+        "sequence_id": seq_dir.name,
+        "num_frames": num_frames,
+        "num_tubes_kept": num_tubes_kept,
+        "yolo_s": yolo_s,
+        "classifier_s": classifier_s,
+        "total_s": total_s,
+        "is_warmup": is_warmup,
+    }
+
+
+def run_benchmark_on_model(
+    model: object,
+    sequence_dirs: list[Path],
+    *,
+    warmup: int,
+) -> dict:
+    """Run ``model.predict`` on each sequence, accumulating per-sequence timings.
+
+    Installs :class:`TimedYoloProxy` and :class:`TimedClassifier` on ``model``
+    in-place, then iterates ``sequence_dirs`` in the given order. The first
+    ``warmup`` records are retained but flagged ``is_warmup=True`` and excluded
+    from summary aggregates.
+
+    Returns a dict ``{"summary": {...}, "records": [...]}`` matching the spec's
+    output schema (minus the top-level ``model_zip`` / ``device`` fields, which
+    the CLI wrapper fills in).
+    """
+    bucket = {"yolo_s": 0.0, "classifier_s": 0.0}
+    wrap_for_timing(model, bucket)
+
+    records: list[dict] = []
+    for i, seq_dir in enumerate(sequence_dirs):
+        frame_paths = get_sorted_frames(seq_dir)
+        if not frame_paths:
+            continue
+        frames = model.load_sequence(frame_paths)
+
+        # Zero the bucket right before each prediction so per-sequence
+        # timings are independent of prior calls.
+        bucket["yolo_s"] = 0.0
+        bucket["classifier_s"] = 0.0
+
+        t0 = time.perf_counter()
+        output = model.predict(frames)
+        total_s = time.perf_counter() - t0
+
+        records.append(
+            _build_record(
+                seq_dir=seq_dir,
+                num_frames=len(frames),
+                num_tubes_kept=len(output.details.get("tubes", {}).get("kept", [])),
+                yolo_s=bucket["yolo_s"],
+                classifier_s=bucket["classifier_s"],
+                total_s=total_s,
+                is_warmup=i < warmup,
+            )
+        )
+
+    body = [r for r in records if not r["is_warmup"]]
+    if not body:
+        raise ValueError(
+            f"benchmark produced no non-warmup records "
+            f"(got {len(records)} records with warmup={warmup})"
+        )
+
+    total_ms = [r["total_s"] * 1000.0 for r in body]
+    yolo_ms = [r["yolo_s"] * 1000.0 for r in body]
+    classifier_ms = [r["classifier_s"] * 1000.0 for r in body]
+    other_ms = [
+        (r["total_s"] - r["yolo_s"] - r["classifier_s"]) * 1000.0 for r in body
+    ]
+    per_frame_total_ms = [
+        (r["total_s"] * 1000.0) / r["num_frames"]
+        for r in body
+        if r["num_frames"] > 0
+    ]
+
+    summary = {
+        "num_sequences": len(body),
+        "num_warmup_skipped": sum(1 for r in records if r["is_warmup"]),
+        "total_ms": summarize(total_ms),
+        "yolo_ms": summarize(yolo_ms),
+        "classifier_ms": summarize(classifier_ms),
+        "other_ms": summarize(other_ms),
+        "per_frame_total_ms": summarize(per_frame_total_ms),
+    }
+    return {"summary": summary, "records": records}
