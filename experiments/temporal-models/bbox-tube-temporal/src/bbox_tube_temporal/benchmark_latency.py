@@ -8,6 +8,7 @@ See ``docs/specs/2026-04-17-cpu-latency-benchmark-design.md``.
 
 from __future__ import annotations
 
+import statistics
 import time
 from pathlib import Path
 
@@ -199,3 +200,34 @@ def run_benchmark_on_model(
         "per_frame_total_ms": summarize(per_frame_total_ms),
     }
     return {"summary": summary, "records": records}
+
+
+def print_summary(result: dict) -> None:
+    """4-row table (total / yolo / classifier / other) + tail line."""
+    summary = result["summary"]
+    records = result["records"]
+    body = [r for r in records if not r["is_warmup"]]
+
+    rows = [
+        ("total", summary["total_ms"]),
+        ("yolo", summary["yolo_ms"]),
+        ("classifier", summary["classifier_ms"]),
+        ("other", summary["other_ms"]),
+    ]
+    print(f"{'metric':<12} {'p50 (ms)':>12} {'p95 (ms)':>12} {'mean (ms)':>12}")
+    print("-" * 52)
+    for name, stats in rows:
+        print(
+            f"{name:<12} {stats['p50']:>12.2f} {stats['p95']:>12.2f} "
+            f"{stats['mean']:>12.2f}"
+        )
+    median_frames = statistics.median(r["num_frames"] for r in body)
+    median_tubes = statistics.median(r["num_tubes_kept"] for r in body)
+    median_total_s = summary["total_ms"]["p50"] / 1000.0
+    print(
+        f"\n{summary['num_sequences']} sequences "
+        f"(excluded {summary['num_warmup_skipped']} warmup), "
+        f"median {median_total_s:.2f} s/seq, "
+        f"{median_frames:g} frames median, "
+        f"{median_tubes:g} tubes kept median"
+    )
