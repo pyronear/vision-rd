@@ -8,6 +8,10 @@ See ``docs/specs/2026-04-17-cpu-latency-benchmark-design.md``.
 
 from __future__ import annotations
 
+import time
+
+import torch
+
 
 def percentile(xs: list[float], p: float) -> float:
     """Linear-interpolation percentile.
@@ -43,3 +47,52 @@ def summarize(xs: list[float]) -> dict[str, float]:
         "min": float(min(xs)),
         "max": float(max(xs)),
     }
+
+
+class TimedYoloProxy:
+    """Forward ``.predict`` to a wrapped YOLO, accumulating wall-clock into a bucket.
+
+    ``bucket`` is a mutable dict shared across sequences; the driver zeros
+    ``bucket["yolo_s"]`` between sequences.
+    """
+
+    def __init__(self, wrapped: object, bucket: dict[str, float]) -> None:
+        self._wrapped = wrapped
+        self._bucket = bucket
+
+    def predict(self, *args: object, **kwargs: object) -> object:
+        t0 = time.perf_counter()
+        result = self._wrapped.predict(*args, **kwargs)
+        self._bucket["yolo_s"] += time.perf_counter() - t0
+        return result
+
+
+class TimedClassifier(torch.nn.Module):
+    """Forward-wrap the packaged classifier, accumulating wall-clock into a bucket.
+
+    Subclasses ``nn.Module`` so ``.eval()``, ``.to()``, and parameter iteration
+    keep working through the proxy. Captures every forward pass — including the
+    prefix-scoring calls inside ``find_first_crossing_trigger`` — because the
+    wrapper is installed on ``model._classifier`` itself.
+    """
+
+    def __init__(self, wrapped: torch.nn.Module, bucket: dict[str, float]) -> None:
+        super().__init__()
+        self.wrapped = wrapped
+        self.bucket = bucket
+
+    def forward(self, *args: object, **kwargs: object) -> object:
+        t0 = time.perf_counter()
+        result = self.wrapped(*args, **kwargs)
+        self.bucket["classifier_s"] += time.perf_counter() - t0
+        return result
+
+
+def wrap_for_timing(model: object, bucket: dict[str, float]) -> None:
+    """Install :class:`TimedYoloProxy` and :class:`TimedClassifier` on ``model``.
+
+    Expected to be called exactly once per benchmark, immediately after
+    ``BboxTubeTemporalModel.from_archive``.
+    """
+    model._yolo = TimedYoloProxy(model._yolo, bucket)
+    model._classifier = TimedClassifier(model._classifier, bucket).eval()
