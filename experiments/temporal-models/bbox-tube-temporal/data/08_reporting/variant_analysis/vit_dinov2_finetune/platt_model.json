@@ -1,0 +1,15 @@
+{
+  "features": [
+    "logit",
+    "log_len",
+    "mean_conf",
+    "n_tubes"
+  ],
+  "coefficients": [
+    0.69138,
+    1.672666,
+    2.449859,
+    -0.01339
+  ],
+  "intercept": -6.172852
+}

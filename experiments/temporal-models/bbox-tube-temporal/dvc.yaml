@@ -711,6 +711,29 @@ stages:
         - data/08_reporting/${item.split}/packaged/${item.variant}/confusion_matrix.png
         - data/08_reporting/${item.split}/packaged/${item.variant}/confusion_matrix_normalized.png
 
+  analyze_variant:
+    foreach:
+      - gru_convnext_finetune
+      - vit_dinov2_finetune
+    do:
+      cmd: >-
+        uv run python scripts/analyze_variant.py
+        --train-predictions data/08_reporting/train/packaged/${item}/predictions.json
+        --val-predictions data/08_reporting/val/packaged/${item}/predictions.json
+        --training-labels-dir data/01_raw/datasets/val/fp
+        --output-dir data/08_reporting/variant_analysis/${item}
+      deps:
+        - scripts/analyze_variant.py
+        - data/08_reporting/train/packaged/${item}/predictions.json
+        - data/08_reporting/val/packaged/${item}/predictions.json
+      outs:
+        - data/08_reporting/variant_analysis/${item}/analysis_report.md:
+            cache: false
+        - data/08_reporting/variant_analysis/${item}/recommended_config.yaml:
+            cache: false
+        - data/08_reporting/variant_analysis/${item}/platt_model.json:
+            cache: false
+
   package:
     foreach:
       - gru_convnext_finetune
