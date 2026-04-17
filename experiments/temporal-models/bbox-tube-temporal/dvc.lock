@@ -3618,6 +3618,7 @@ stages:
             iou_nms: 0.2
             image_size: 1024
             pad_to_min_frames: 20
+            pad_strategy: symmetric
         train_gru_convnext_finetune:
           hidden_dim: 128
           max_frames: 20
@@ -3641,8 +3642,8 @@ stages:
     outs:
     - path: data/06_models/gru_convnext_finetune/model.zip
       hash: md5
-      md5: 2281bcb930037ecb0ad2b0efbf3e6d71
-      size: 258728649
+      md5: 7292fc429442f6564a403a1cebac6ed3
+      size: 258728675
   package@vit_dinov2_finetune:
     cmd: uv run python scripts/package_model.py --variant vit_dinov2_finetune 
       --output data/06_models/vit_dinov2_finetune/model.zip
@@ -3692,6 +3693,7 @@ stages:
             iou_nms: 0.2
             image_size: 1024
             pad_to_min_frames: 20
+            pad_strategy: symmetric
         train_vit_dinov2_finetune:
           hidden_dim: 128
           max_frames: 20
@@ -3721,8 +3723,8 @@ stages:
     outs:
     - path: data/06_models/vit_dinov2_finetune/model.zip
       hash: md5
-      md5: a9493915234caa4fcb55281bfa5fb117
-      size: 162764078
+      md5: b364a467942610a7f502bede3360914b
+      size: 162764104
   evaluate_packaged@1:
     cmd: uv run python scripts/evaluate_packaged.py --model-zip 
       data/06_models/vit_dinov2_finetune/model.zip --sequences-dir 
@@ -3737,8 +3739,8 @@ stages:
       nfiles: 8752
     - path: data/06_models/vit_dinov2_finetune/model.zip
       hash: md5
-      md5: 17091b28d62bd9a12234220d329f1794
-      size: 162764077
+      md5: b364a467942610a7f502bede3360914b
+      size: 162764104
     - path: scripts/evaluate_packaged.py
       hash: md5
       md5: ef11b9f88bc4509adc4e9ad5ec5d4bea
@@ -3896,8 +3898,8 @@ stages:
       nfiles: 89870
     - path: data/06_models/vit_dinov2_finetune/model.zip
       hash: md5
-      md5: 17091b28d62bd9a12234220d329f1794
-      size: 162764077
+      md5: b364a467942610a7f502bede3360914b
+      size: 162764104
     - path: scripts/evaluate_packaged.py
       hash: md5
       md5: ef11b9f88bc4509adc4e9ad5ec5d4bea
@@ -3947,7 +3949,7 @@ stages:
       size: 2
     - path: data/08_reporting/train/packaged/vit_dinov2_finetune/metrics.json
       hash: md5
-      md5: 29a45d43ffe26803a69e07ea679f1ecf
+      md5: 8f8e8a1688e5deed984f6d88eed1170c
       size: 302
     - path: data/08_reporting/train/packaged/vit_dinov2_finetune/pr_curve.png
       hash: md5
