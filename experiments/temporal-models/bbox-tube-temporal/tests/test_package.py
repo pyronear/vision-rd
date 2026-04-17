@@ -1,5 +1,6 @@
 """Tests for BboxTubeTemporalModel packaging."""
 
+import json
 import zipfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -379,8 +380,6 @@ class TestCalibratorBundling:
         )
 
         # Rewrite the zip with tampered coefficients.
-        import json as _json
-
         tampered_path = tmp_path / "tampered.zip"
         with zipfile.ZipFile(out, "r") as src, zipfile.ZipFile(
             tampered_path, "w"
@@ -388,11 +387,11 @@ class TestCalibratorBundling:
             for name in src.namelist():
                 data = src.read(name)
                 if name == LOGISTIC_CALIBRATOR_FILENAME:
-                    payload = _json.loads(data)
+                    payload = json.loads(data)
                     payload["coefficients"] = [
                         2.0 * c for c in payload["coefficients"]
                     ]
-                    data = _json.dumps(payload).encode()
+                    data = json.dumps(payload).encode()
                 dst.writestr(name, data)
 
         with pytest.raises(ValueError, match="sanity check"):

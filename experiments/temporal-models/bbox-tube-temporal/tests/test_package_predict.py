@@ -57,7 +57,9 @@ def test_iter_labelled_sequences_uses_model_load_sequence(
     (tmp_path / "fp" / "seqB" / "images" / "g1.jpg").write_bytes(b"")
 
     fake_model = MagicMock()
-    fake_model.load_sequence.side_effect = lambda paths: [f"frame:{p.name}" for p in paths]
+    fake_model.load_sequence.side_effect = lambda paths: [
+        f"frame:{p.name}" for p in paths
+    ]
 
     yielded = list(package_predict._iter_labelled_sequences(tmp_path, fake_model))
 

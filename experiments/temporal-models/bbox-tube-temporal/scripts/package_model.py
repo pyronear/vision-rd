@@ -9,11 +9,19 @@ Usage:
 import argparse
 from pathlib import Path
 
+import numpy as np
 import torch
 import yaml
 
 from bbox_tube_temporal.calibration import calibrate_threshold
-from bbox_tube_temporal.package import build_model_package
+from bbox_tube_temporal.logistic_calibrator import (
+    LogisticCalibrator,
+    extract_features,
+)
+from bbox_tube_temporal.logistic_calibrator_fit import fit as fit_logistic_calibrator
+from bbox_tube_temporal.model import BboxTubeTemporalModel
+from bbox_tube_temporal.package import _load_yolo, build_model_package
+from bbox_tube_temporal.package_predict import collect_pipeline_records
 from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
 from bbox_tube_temporal.val_predict import collect_val_probabilities
 
@@ -66,8 +74,23 @@ def _load_classifier_from_ckpt(
 
 
 def _build_config(
-    all_params: dict, variant_cfg: dict, package_params: dict, threshold: float
+    all_params: dict,
+    variant_cfg: dict,
+    package_params: dict,
+    threshold: float,
+    *,
+    aggregation: str,
+    logistic_threshold: float | None,
 ) -> dict:
+    decision: dict = {
+        "aggregation": aggregation,
+        "threshold": float(threshold),
+        "target_recall": package_params["target_recall"],
+        "trigger_rule": "end_of_winner",
+    }
+    if logistic_threshold is not None:
+        decision["logistic_threshold"] = float(logistic_threshold)
+
     return {
         "infer": package_params["infer"],
         "tubes": {
@@ -87,13 +110,70 @@ def _build_config(
             },
         },
         "classifier": _classifier_kwargs(variant_cfg),
-        "decision": {
-            "aggregation": "max_logit",
-            "threshold": float(threshold),
-            "target_recall": package_params["target_recall"],
-            "trigger_rule": "end_of_winner",
-        },
+        "decision": decision,
     }
+
+
+def _calibrated_probs(
+    records: list[dict], calibrator: LogisticCalibrator
+) -> np.ndarray:
+    probs = []
+    for r in records:
+        kept = r["kept_tubes"]
+        if not kept:
+            probs.append(0.0)
+        else:
+            best = max(kept, key=lambda t: t["logit"])
+            feats = extract_features(best, n_tubes=len(kept))
+            probs.append(calibrator.predict_proba(feats))
+    return np.array(probs)
+
+
+def _labels_array(records: list[dict]) -> np.ndarray:
+    return np.array([1 if r["label"] == "smoke" else 0 for r in records])
+
+
+def _fit_logistic_calibrator_and_threshold(
+    *,
+    yolo_weights_path: Path,
+    classifier: TemporalSmokeClassifier,
+    pipeline_config: dict,
+    raw_train_dir: Path,
+    raw_val_dir: Path,
+    target_recall: float,
+) -> tuple[LogisticCalibrator, float]:
+    """Run full-pipeline inference on train+val, fit calibrator, pick threshold.
+
+    Package-time helper: produces the artifacts the logistic branch needs
+    to embed in the model zip (the fitted :class:`LogisticCalibrator`
+    plus a calibrated probability threshold at ``target_recall``).
+    """
+    yolo_model = _load_yolo(yolo_weights_path)
+    fit_model = BboxTubeTemporalModel(
+        yolo_model=yolo_model,
+        classifier=classifier,
+        config=pipeline_config,
+    )
+
+    train_records = collect_pipeline_records(
+        model=fit_model, raw_dir=raw_train_dir
+    )
+    calibrator = fit_logistic_calibrator(train_records)
+    print(
+        f"[package] logistic calibrator fit on {len(train_records)} train "
+        f"records; coefs={calibrator.coefficients.tolist()} "
+        f"intercept={calibrator.intercept:.6f}"
+    )
+
+    val_records = collect_pipeline_records(
+        model=fit_model, raw_dir=raw_val_dir
+    )
+    probs = _calibrated_probs(val_records, calibrator)
+    labels = _labels_array(val_records)
+    logistic_threshold = calibrate_threshold(
+        probs, labels, target_recall=target_recall
+    )
+    return calibrator, float(logistic_threshold)
 
 
 def main() -> None:
@@ -116,6 +196,18 @@ def main() -> None:
         "--val-patches-dir",
         type=Path,
         default=Path("data/05_model_input/val"),
+    )
+    parser.add_argument(
+        "--raw-train-dir",
+        type=Path,
+        default=Path("data/01_raw/datasets/train"),
+        help="Used only when variant aggregation is 'logistic'.",
+    )
+    parser.add_argument(
+        "--raw-val-dir",
+        type=Path,
+        default=Path("data/01_raw/datasets/val"),
+        help="Used only when variant aggregation is 'logistic'.",
     )
     args = parser.parse_args()
 
@@ -147,17 +239,55 @@ def main() -> None:
         probs, labels, target_recall=package_params["target_recall"]
     )
 
-    config = _build_config(all_params, variant_cfg, package_params, threshold)
+    aggregation = variant_cfg.get("aggregation", "max_logit")
+    calibrator: LogisticCalibrator | None = None
+    logistic_threshold: float | None = None
+    if aggregation == "logistic":
+        # Build a pipeline-only config so BboxTubeTemporalModel can run the
+        # full inference pipeline during fitting; the decision branch uses
+        # max_logit here because we re-decide manually via the fitted
+        # calibrator. The calibrator + logistic threshold get embedded in
+        # the final config below.
+        pipeline_config = _build_config(
+            all_params,
+            variant_cfg,
+            package_params,
+            threshold,
+            aggregation="max_logit",
+            logistic_threshold=None,
+        )
+        calibrator, logistic_threshold = _fit_logistic_calibrator_and_threshold(
+            yolo_weights_path=args.yolo_weights_path,
+            classifier=classifier,
+            pipeline_config=pipeline_config,
+            raw_train_dir=args.raw_train_dir,
+            raw_val_dir=args.raw_val_dir,
+            target_recall=package_params["target_recall"],
+        )
+
+    config = _build_config(
+        all_params,
+        variant_cfg,
+        package_params,
+        threshold,
+        aggregation=aggregation,
+        logistic_threshold=logistic_threshold,
+    )
     build_model_package(
         yolo_weights_path=args.yolo_weights_path,
         classifier_ckpt_path=checkpoint,
         config=config,
         variant=args.variant,
         output_path=args.output,
+        calibrator=calibrator,
     )
+    suffix = ""
+    if aggregation == "logistic" and logistic_threshold is not None:
+        suffix = f" logistic_threshold={logistic_threshold:.4f}"
     print(
         f"[package] wrote {args.output} | variant={args.variant} "
-        f"threshold={threshold:.4f} target_recall={package_params['target_recall']}"
+        f"aggregation={aggregation} threshold={threshold:.4f} "
+        f"target_recall={package_params['target_recall']}{suffix}"
     )
 
 

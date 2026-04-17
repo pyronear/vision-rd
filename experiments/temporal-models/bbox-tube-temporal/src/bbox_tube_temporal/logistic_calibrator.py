@@ -46,7 +46,7 @@ class LogisticCalibrator:
         path.write_text(json.dumps(payload, indent=2))
 
     @classmethod
-    def from_json(cls, path: Path) -> "LogisticCalibrator":
+    def from_json(cls, path: Path) -> LogisticCalibrator:
         data = json.loads(path.read_text())
         return cls(
             features=list(data["features"]),
