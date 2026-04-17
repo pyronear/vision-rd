@@ -593,3 +593,109 @@ class TestFindFirstCrossingTrigger:
                 threshold=0.0,
                 min_prefix_length=2,
             )
+
+    def test_logistic_mode_fires_at_first_crossing(self) -> None:
+        tube = _tube(4, [(0, _det()), (1, _det()), (2, _det())])
+        tubes = [tube]
+        patches, masks = _make_patches_and_masks(tubes)
+        full_logits = torch.tensor([2.0])
+        classifier = MagicMock(return_value=torch.tensor([0.5]))
+
+        cal = LogisticCalibrator(
+            features=["logit", "log_len", "mean_conf", "n_tubes"],
+            coefficients=np.array([2.0, 0.0, 0.0, 0.0]),
+            intercept=0.0,
+            sanity_checks=[],
+        )
+
+        is_positive, trigger, winner, diag = find_first_crossing_trigger(
+            classifier=classifier,
+            tubes=tubes,
+            patches_per_tube=patches,
+            masks_per_tube=masks,
+            full_logits=full_logits,
+            aggregation="logistic",
+            threshold=0.0,
+            calibrator=cal,
+            logistic_threshold=0.5,
+            min_prefix_length=2,
+        )
+        assert is_positive is True
+        assert winner == 4
+        assert trigger == 1
+        assert diag == {4: {"crossing_frame": 1, "prefix_length": 2}}
+
+    def test_logistic_mode_no_qualifying_tube(self) -> None:
+        tube = _tube(1, [(0, _det()), (1, _det()), (2, _det())])
+        tubes = [tube]
+        patches, masks = _make_patches_and_masks(tubes)
+        full_logits = torch.tensor([-2.0])
+        classifier = MagicMock()
+
+        cal = LogisticCalibrator(
+            features=["logit", "log_len", "mean_conf", "n_tubes"],
+            coefficients=np.array([2.0, 0.0, 0.0, 0.0]),
+            intercept=0.0,
+            sanity_checks=[],
+        )
+
+        res = find_first_crossing_trigger(
+            classifier=classifier,
+            tubes=tubes,
+            patches_per_tube=patches,
+            masks_per_tube=masks,
+            full_logits=full_logits,
+            aggregation="logistic",
+            threshold=0.0,
+            calibrator=cal,
+            logistic_threshold=0.5,
+            min_prefix_length=2,
+        )
+        assert res == (False, None, None, {})
+        classifier.assert_not_called()
+
+    def test_logistic_mode_requires_calibrator(self) -> None:
+        tubes = [_tube(1, [(0, _det()), (1, _det())])]
+        patches, masks = _make_patches_and_masks(tubes)
+        with pytest.raises(ValueError, match="calibrator"):
+            find_first_crossing_trigger(
+                classifier=MagicMock(),
+                tubes=tubes,
+                patches_per_tube=patches,
+                masks_per_tube=masks,
+                full_logits=torch.tensor([1.0]),
+                aggregation="logistic",
+                threshold=0.0,
+                calibrator=None,
+                logistic_threshold=0.5,
+                min_prefix_length=2,
+            )
+
+    def test_logistic_log_len_affects_prefix_decision(self) -> None:
+        """Predicate sees prefix length via log_len, not just the logit."""
+        tube = _tube(1, [(0, _det()), (1, _det()), (2, _det()), (3, _det())])
+        tubes = [tube]
+        patches, masks = _make_patches_and_masks(tubes)
+        full_logits = torch.tensor([10.0])
+        classifier = MagicMock(return_value=torch.tensor([10.0]))
+
+        cal = LogisticCalibrator(
+            features=["logit", "log_len", "mean_conf", "n_tubes"],
+            coefficients=np.array([0.0, -2.0, 0.0, 0.0]),
+            intercept=0.0,
+            sanity_checks=[],
+        )
+
+        res = find_first_crossing_trigger(
+            classifier=classifier,
+            tubes=tubes,
+            patches_per_tube=patches,
+            masks_per_tube=masks,
+            full_logits=full_logits,
+            aggregation="logistic",
+            threshold=0.0,
+            calibrator=cal,
+            logistic_threshold=0.5,
+            min_prefix_length=2,
+        )
+        assert res == (False, None, None, {})

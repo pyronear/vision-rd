@@ -372,7 +372,25 @@ def find_first_crossing_trigger(
         def decides_positive(logit: float, _tube_prefix: Tube, _n_tubes: int) -> bool:
             return logit >= threshold
     elif aggregation == "logistic":
-        raise NotImplementedError("logistic aggregation wired in Task 2")
+        if calibrator is None:
+            raise ValueError("aggregation='logistic' requires a fitted calibrator")
+
+        def decides_positive(logit: float, tube_prefix: Tube, n_tubes: int) -> bool:
+            tube_dict = {
+                "logit": logit,
+                "start_frame": tube_prefix.start_frame,
+                "end_frame": tube_prefix.end_frame,
+                "entries": [
+                    {
+                        "confidence": (
+                            e.detection.confidence if e.detection is not None else None
+                        )
+                    }
+                    for e in tube_prefix.entries
+                ],
+            }
+            features = extract_features(tube_dict, n_tubes=n_tubes)
+            return bool(calibrator.predict_proba(features) >= logistic_threshold)
     else:
         raise ValueError(f"unknown aggregation: {aggregation!r}")
 
