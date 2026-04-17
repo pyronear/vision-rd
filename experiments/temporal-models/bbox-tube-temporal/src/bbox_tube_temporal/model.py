@@ -15,9 +15,9 @@ from pyrocore import Frame, TemporalModel, TemporalModelOutput
 from .inference import (
     crop_tube_patches,
     filter_and_interpolate_tubes,
+    find_first_crossing_trigger,
     pad_frames_symmetrically,
     pad_frames_uniform,
-    pick_winner_and_trigger,
     run_yolo_on_frames,
     score_tubes,
 )
@@ -125,6 +125,7 @@ class BboxTubeTemporalModel(TemporalModel):
                     "winner_tube_id": None,
                     "winner_tube_entries": [],
                     "kept_tubes": [],
+                    "per_tube_first_crossing": {},
                     "threshold": float(dec["threshold"]),
                 },
             )
@@ -182,6 +183,7 @@ class BboxTubeTemporalModel(TemporalModel):
                     "winner_tube_id": None,
                     "winner_tube_entries": [],
                     "kept_tubes": [],
+                    "per_tube_first_crossing": {},
                     "threshold": float(dec["threshold"]),
                 },
             )
@@ -208,13 +210,19 @@ class BboxTubeTemporalModel(TemporalModel):
         )
 
         aggregation = dec.get("aggregation", "max_logit")
-        is_positive, trigger, winner_id = pick_winner_and_trigger(
-            tubes=kept,
-            logits=logits,
-            threshold=float(dec["threshold"]),
-            aggregation=aggregation,
-            calibrator=self._calibrator,
-            logistic_threshold=float(dec.get("logistic_threshold", 0.5)),
+        is_positive, trigger, winner_id, per_tube_first_crossing = (
+            find_first_crossing_trigger(
+                classifier=self._classifier,
+                tubes=kept,
+                patches_per_tube=patches_per_tube,
+                masks_per_tube=masks_per_tube,
+                full_logits=logits,
+                aggregation=aggregation,
+                threshold=float(dec["threshold"]),
+                calibrator=self._calibrator,
+                logistic_threshold=float(dec.get("logistic_threshold", 0.5)),
+                min_prefix_length=tubes_cfg["infer_min_tube_length"],
+            )
         )
 
         logits_list: list[float] = logits.tolist()
@@ -266,6 +274,7 @@ class BboxTubeTemporalModel(TemporalModel):
                 "winner_tube_id": winner_id,
                 "winner_tube_entries": winner_entries,
                 "kept_tubes": kept_tubes,
+                "per_tube_first_crossing": per_tube_first_crossing,
                 "threshold": (
                     float(dec["logistic_threshold"])
                     if aggregation == "logistic"

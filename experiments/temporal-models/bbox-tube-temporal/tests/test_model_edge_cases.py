@@ -316,10 +316,16 @@ class TestDeviceSelection:
         render any tube — not just the winner."""
         per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in red_frames]
         yolo = _fake_yolo_factory(per_frame)
+        # Force positive sequence so the single kept tube is the winner
+        # (under D2, winner_tube_id is None when no tube qualifies).
+        cfg = {
+            **TEST_CONFIG,
+            "decision": {**TEST_CONFIG["decision"], "threshold": -1e6},
+        }
         model = BboxTubeTemporalModel(
             yolo_model=yolo,
             classifier=tiny_classifier,
-            config=TEST_CONFIG,
+            config=cfg,
             device="cpu",
         )
         out = model.predict(frames=red_frames)
@@ -370,3 +376,41 @@ class TestDeviceSelection:
         if not torch.cuda.is_available() and torch.backends.mps.is_available():
             expected = "mps"
         assert model.device.type == expected
+
+
+class TestFirstCrossingTrigger:
+    def test_first_crossing_trigger_never_exceeds_end_frame(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        """Trigger frame must not exceed the winner tube's end_frame, and
+        ``per_tube_first_crossing`` must record the winner."""
+        per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in red_frames]
+        yolo = _fake_yolo_factory(per_frame)
+        cfg = {
+            **TEST_CONFIG,
+            "decision": {
+                **TEST_CONFIG["decision"],
+                "threshold": -1e6,
+            },
+        }
+        model = BboxTubeTemporalModel(
+            yolo_model=yolo,
+            classifier=tiny_classifier,
+            config=cfg,
+            device="cpu",
+        )
+        out = model.predict(frames=red_frames)
+
+        assert out.is_positive is True
+        assert out.trigger_frame_index is not None
+
+        winner_id = out.details["winner_tube_id"]
+        winner_tube = next(
+            t for t in out.details["kept_tubes"] if t["tube_id"] == winner_id
+        )
+        assert out.trigger_frame_index <= winner_tube["end_frame"]
+
+        assert winner_id in out.details["per_tube_first_crossing"]
+        entry = out.details["per_tube_first_crossing"][winner_id]
+        assert entry["crossing_frame"] == out.trigger_frame_index
+        assert entry["prefix_length"] >= 2
