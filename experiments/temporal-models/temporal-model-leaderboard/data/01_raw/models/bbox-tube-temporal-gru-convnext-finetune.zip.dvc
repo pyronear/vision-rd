@@ -1,5 +1,5 @@
 outs:
-- md5: 7292fc429442f6564a403a1cebac6ed3
+- md5: a54f5498755fcf5364cde93cbc8098df
   size: 258728675
   hash: md5
   path: bbox-tube-temporal-gru-convnext-finetune.zip

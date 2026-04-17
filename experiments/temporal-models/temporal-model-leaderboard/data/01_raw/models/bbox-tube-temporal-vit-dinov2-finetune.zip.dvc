@@ -1,5 +1,5 @@
 outs:
-- md5: b364a467942610a7f502bede3360914b
-  size: 162764104
+- md5: ed96bcdf1ab2eb40b8feb1aed0642f92
+  size: 162765093
   hash: md5
   path: bbox-tube-temporal-vit-dinov2-finetune.zip

@@ -37,8 +37,8 @@ stages:
     deps:
     - path: data/07_model_output
       hash: md5
-      md5: 2044169115d3d8e242a5c2d4a43395c8.dir
-      size: 236407
+      md5: 30e27b1ce72d57e51cb8a309e5df1f9f.dir
+      size: 236140
       nfiles: 12
     - path: scripts/leaderboard.py
       hash: md5
@@ -52,11 +52,11 @@ stages:
     outs:
     - path: data/08_reporting/leaderboard.json
       hash: md5
-      md5: 993f95d6f78814155e5296590e53a63c
-      size: 1440
+      md5: 35d7d8e2ab85a1b98078c32e61226bf7
+      size: 1434
     - path: data/08_reporting/leaderboard.txt
       hash: md5
-      md5: 0cfad910e13f958dd42612acc43bbb5e
+      md5: efea0a3b3dc7b8e1fbd0596c65b71df8
       size: 784
   evaluate_mtb_change_detection:
     cmd: uv run python scripts/evaluate.py --model-name mtb-change-detection 
@@ -161,8 +161,8 @@ stages:
     deps:
     - path: data/01_raw/models/bbox-tube-temporal-vit-dinov2-finetune.zip
       hash: md5
-      md5: b364a467942610a7f502bede3360914b
-      size: 162764104
+      md5: ed96bcdf1ab2eb40b8feb1aed0642f92
+      size: 162765093
     - path: data/01_raw/sequential_test
       hash: md5
       md5: 4c08a891e654943188a1df69646f6b4c.dir
@@ -180,8 +180,8 @@ stages:
     outs:
     - path: data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune
       hash: md5
-      md5: 92467884a832d5f9a6f4d1b6700f6971.dir
-      size: 47327
+      md5: 9db907b6869e0617acb32704956acb29.dir
+      size: 47224
       nfiles: 2
   evaluate_bbox_tube_gru_convnext_finetune:
     cmd: uv run python scripts/evaluate.py --model-name 
@@ -193,7 +193,7 @@ stages:
     deps:
     - path: data/01_raw/models/bbox-tube-temporal-gru-convnext-finetune.zip
       hash: md5
-      md5: 7292fc429442f6564a403a1cebac6ed3
+      md5: a54f5498755fcf5364cde93cbc8098df
       size: 258728675
     - path: data/01_raw/sequential_test
       hash: md5
@@ -212,6 +212,6 @@ stages:
     outs:
     - path: data/07_model_output/bbox-tube-temporal-gru-convnext-finetune
       hash: md5
-      md5: fbc4edca011487921b46789d8a48b09d.dir
-      size: 47350
+      md5: 4a39161fbb3711dff7e5c4d3a9b75ce1.dir
+      size: 47186
       nfiles: 2
