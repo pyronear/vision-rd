@@ -9,8 +9,8 @@
   "recall": 0.9716,
   "f1": 0.9478,
   "fpr": 0.0786,
-  "mean_ttd_seconds": 835.2,
-  "median_ttd_seconds": 720.0,
+  "mean_ttd_seconds": 80.8,
+  "median_ttd_seconds": 23.0,
   "pr_auc": 0.9825,
   "roc_auc": 0.9853
 }
