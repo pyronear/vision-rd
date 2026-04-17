@@ -304,7 +304,7 @@ def find_first_crossing_trigger(
             the inference-time ``infer_min_tube_length``.
 
     Returns:
-        Tuple ``(is_positive, trigger_frame_index, winner_tube_id,
+        Tuple ``(is_positive, trigger_frame_index, trigger_tube_id,
         per_tube_first_crossing)``. The trailing dict maps
         ``tube_id -> {"crossing_frame": int, "prefix_length": int}`` for
         every qualifying tube.
@@ -397,9 +397,9 @@ def find_first_crossing_trigger(
             f"produced no crossing prefix"
         )
 
-    winner_tube_id = min(
+    trigger_tube_id = min(
         per_tube,
         key=lambda tid: (per_tube[tid]["crossing_frame"], tid),
     )
-    trigger = per_tube[winner_tube_id]["crossing_frame"]
-    return True, trigger, winner_tube_id, per_tube
+    trigger = per_tube[trigger_tube_id]["crossing_frame"]
+    return True, trigger, trigger_tube_id, per_tube
