@@ -76,6 +76,7 @@ train_gru_convnext_finetune:
   finetune: true
   finetune_last_n_blocks: 1
   backbone_lr: 0.00001
+  aggregation: max_logit
 
 train_gru_convnext_base_finetune:
   <<: *gru_defaults
@@ -112,6 +113,7 @@ train_vit_dinov2_finetune:
   finetune: true
   finetune_last_n_blocks: 1
   backbone_lr: 0.00001
+  aggregation: logistic
 
 train_vit_in21k_finetune:
   <<: *vit_defaults

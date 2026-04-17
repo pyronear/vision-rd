@@ -747,10 +747,17 @@ stages:
         - data/06_models/${item}/best_checkpoint.pt
         - data/01_raw/models/best.pt
         - data/05_model_input/val
+        - data/01_raw/datasets/train
+        - data/01_raw/datasets/val
         - scripts/package_model.py
         - src/bbox_tube_temporal/package.py
         - src/bbox_tube_temporal/calibration.py
         - src/bbox_tube_temporal/val_predict.py
+        - src/bbox_tube_temporal/package_predict.py
+        - src/bbox_tube_temporal/logistic_calibrator.py
+        - src/bbox_tube_temporal/logistic_calibrator_fit.py
+        - src/bbox_tube_temporal/inference.py
+        - src/bbox_tube_temporal/model.py
       params:
         - package
         - tubes
