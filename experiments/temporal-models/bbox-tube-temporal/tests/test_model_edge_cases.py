@@ -119,7 +119,10 @@ class TestEmptyFrames:
         out = model.predict(frames=[])
         assert out.is_positive is False
         assert out.trigger_frame_index is None
-        assert out.details["num_frames"] == 0
+        assert out.details["preprocessing"]["num_frames_input"] == 0
+        assert out.details["tubes"]["num_candidates"] == 0
+        assert out.details["tubes"]["kept"] == []
+        assert out.details["decision"]["trigger_tube_id"] is None
         yolo.predict.assert_not_called()
 
 
@@ -134,8 +137,8 @@ class TestZeroDetections:
         out = model.predict(frames=red_frames)
         assert out.is_positive is False
         assert out.trigger_frame_index is None
-        assert out.details["num_tubes_total"] == 0
-        assert out.details["num_tubes_kept"] == 0
+        assert out.details["tubes"]["num_candidates"] == 0
+        assert out.details["tubes"]["kept"] == []
 
 
 class TestShortTubeBelowInferFloor:
@@ -150,8 +153,8 @@ class TestShortTubeBelowInferFloor:
         )
         out = model.predict(frames=red_frames)
         assert out.is_positive is False
-        assert out.details["num_tubes_total"] == 1
-        assert out.details["num_tubes_kept"] == 0
+        assert out.details["tubes"]["num_candidates"] == 1
+        assert out.details["tubes"]["kept"] == []
 
 
 class TestTruncation:
@@ -167,8 +170,8 @@ class TestTruncation:
             yolo_model=yolo, classifier=tiny_classifier, config=TEST_CONFIG
         )
         out = model.predict(frames=extra)
-        assert out.details["num_frames"] == 9
-        assert out.details["num_truncated"] == 3
+        assert out.details["preprocessing"]["num_frames_input"] == 9
+        assert out.details["preprocessing"]["num_truncated"] == 3
 
 
 class TestShortSequencePadding:
@@ -188,9 +191,8 @@ class TestShortSequencePadding:
             yolo_model=yolo, classifier=tiny_classifier, config=TEST_CONFIG
         )
         out = model.predict(frames=short)
-        assert len(out.details["num_detections_per_frame"]) == 2
-        assert out.details["num_padded"] == 0
-        assert out.details["num_frames"] == 2
+        assert out.details["preprocessing"]["padded_frame_indices"] == []
+        assert out.details["preprocessing"]["num_frames_input"] == 2
 
     def test_pad_extends_short_sequence_symmetrically(
         self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
@@ -210,11 +212,10 @@ class TestShortSequencePadding:
         )
         out = model.predict(frames=short)
 
-        assert len(out.details["num_detections_per_frame"]) == 5
-        # num_frames reports the original length (pre-pad) so downstream
-        # metrics remain faithful to the real input.
-        assert out.details["num_frames"] == 2
-        assert out.details["num_padded"] == 3
+        # Symmetric pad of [A, B] to length 5: real frames end up at slots 2, 3.
+        assert out.details["preprocessing"]["padded_frame_indices"] == [0, 1, 4]
+        # num_frames_input reports the original length (pre-pad).
+        assert out.details["preprocessing"]["num_frames_input"] == 2
 
     def test_pad_noop_when_sequence_already_long_enough(
         self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
@@ -229,8 +230,7 @@ class TestShortSequencePadding:
             yolo_model=yolo, classifier=tiny_classifier, config=cfg
         )
         out = model.predict(frames=red_frames)
-        assert len(out.details["num_detections_per_frame"]) == 6
-        assert out.details["num_padded"] == 0
+        assert out.details["preprocessing"]["padded_frame_indices"] == []
 
     def test_pad_strategy_uniform_spreads_duplicates(
         self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
@@ -255,9 +255,9 @@ class TestShortSequencePadding:
             yolo_model=yolo, classifier=tiny_classifier, config=cfg
         )
         out = model.predict(frames=short)
-        assert len(out.details["num_detections_per_frame"]) == 6
-        assert out.details["num_padded"] == 4
-        assert out.details["num_frames"] == 2
+        # Uniform i*2//6 for i in 0..5 -> [0,0,0,1,1,1]; duplicates are slots 1, 2, 4, 5.
+        assert out.details["preprocessing"]["padded_frame_indices"] == [1, 2, 4, 5]
+        assert out.details["preprocessing"]["num_frames_input"] == 2
 
     def test_pad_strategy_unknown_raises(
         self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
@@ -305,19 +305,19 @@ class TestDeviceSelection:
             device="cpu",
         )
         out = model.predict(frames=red_frames)
-        assert out.details["num_tubes_kept"] == 1
-        assert len(out.details["tube_logits"]) == 1
+        kept = out.details["tubes"]["kept"]
+        assert len(kept) == 1
 
     def test_predict_details_include_per_tube_entries(
         self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
     ) -> None:
-        """``details['kept_tubes']`` exposes every kept tube's full entries
-        alongside its logit and is_winner flag, so downstream diagnostics can
-        render any tube — not just the winner."""
+        """``details['tubes']['kept']`` exposes every kept tube's full entries
+        alongside its logit, so downstream diagnostics can render any tube —
+        not just the trigger."""
         per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in red_frames]
         yolo = _fake_yolo_factory(per_frame)
-        # Force positive sequence so the single kept tube is the winner
-        # (under D2, winner_tube_id is None when no tube qualifies).
+        # Force positive sequence so the single kept tube is the trigger
+        # (under D2, trigger_tube_id is None when no tube qualifies).
         cfg = {
             **TEST_CONFIG,
             "decision": {**TEST_CONFIG["decision"], "threshold": -1e6},
@@ -330,20 +330,20 @@ class TestDeviceSelection:
         )
         out = model.predict(frames=red_frames)
 
-        kept = out.details["kept_tubes"]
+        kept = out.details["tubes"]["kept"]
         assert isinstance(kept, list)
-        assert len(kept) == out.details["num_tubes_kept"]
+        assert len(kept) == 1
         tube = kept[0]
         assert set(tube.keys()) == {
             "tube_id",
             "start_frame",
             "end_frame",
             "logit",
-            "is_winner",
+            "probability",
+            "first_crossing_frame",
             "entries",
         }
-        assert tube["is_winner"] is True  # single-tube case
-        assert tube["logit"] == out.details["tube_logits"][0]
+        assert out.details["decision"]["trigger_tube_id"] == tube["tube_id"]
         assert isinstance(tube["entries"], list)
         entry = tube["entries"][0]
         assert set(entry.keys()) == {"frame_idx", "bbox", "is_gap", "confidence"}
@@ -363,7 +363,7 @@ class TestDeviceSelection:
         assert model.device.type == "cuda"
         assert next(model._classifier.parameters()).device.type == "cuda"
         out = model.predict(frames=red_frames)
-        assert out.details["num_tubes_kept"] == 1
+        assert len(out.details["tubes"]["kept"]) == 1
 
     def test_auto_detect_picks_cuda_when_available(
         self, tiny_classifier: TemporalSmokeClassifier
@@ -382,8 +382,8 @@ class TestFirstCrossingTrigger:
     def test_first_crossing_trigger_never_exceeds_end_frame(
         self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
     ) -> None:
-        """Trigger frame must not exceed the winner tube's end_frame, and
-        ``per_tube_first_crossing`` must record the winner."""
+        """Trigger frame must not exceed the trigger tube's end_frame, and
+        the trigger tube's ``first_crossing_frame`` must equal the trigger."""
         per_frame = [[(0.5, 0.5, 0.1, 0.1, 0.9)] for _ in red_frames]
         yolo = _fake_yolo_factory(per_frame)
         cfg = {
@@ -404,13 +404,9 @@ class TestFirstCrossingTrigger:
         assert out.is_positive is True
         assert out.trigger_frame_index is not None
 
-        winner_id = out.details["winner_tube_id"]
-        winner_tube = next(
-            t for t in out.details["kept_tubes"] if t["tube_id"] == winner_id
+        trigger_tube_id = out.details["decision"]["trigger_tube_id"]
+        trigger_tube = next(
+            t for t in out.details["tubes"]["kept"] if t["tube_id"] == trigger_tube_id
         )
-        assert out.trigger_frame_index <= winner_tube["end_frame"]
-
-        assert winner_id in out.details["per_tube_first_crossing"]
-        entry = out.details["per_tube_first_crossing"][winner_id]
-        assert entry["crossing_frame"] == out.trigger_frame_index
-        assert entry["prefix_length"] >= 2
+        assert out.trigger_frame_index <= trigger_tube["end_frame"]
+        assert trigger_tube["first_crossing_frame"] == out.trigger_frame_index

@@ -168,8 +168,9 @@ def test_parity_logit_matches(classifier: TemporalSmokeClassifier) -> None:
     )
     out = model.predict(frames=frames)
 
-    assert out.details["num_tubes_kept"] >= 1
-    online = max(out.details["tube_logits"])
+    kept = out.details["tubes"]["kept"]
+    assert len(kept) >= 1
+    online = max(t["logit"] for t in kept)
 
     assert online == pytest.approx(offline, abs=1e-5)
 
@@ -284,7 +285,8 @@ def test_parity_logit_matches_transformer(
     )
     out = model.predict(frames=frames)
 
-    assert out.details["num_tubes_kept"] >= 1
-    online = max(out.details["tube_logits"])
+    kept = out.details["tubes"]["kept"]
+    assert len(kept) >= 1
+    online = max(t["logit"] for t in kept)
 
     assert online == pytest.approx(offline, abs=1e-5)
