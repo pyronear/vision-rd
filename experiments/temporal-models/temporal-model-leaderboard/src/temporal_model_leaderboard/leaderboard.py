@@ -6,7 +6,7 @@ import json
 from .types import LeaderboardEntry
 
 # Metrics where lower is better (sorted ascending).
-_LOWER_IS_BETTER = {"fpr", "mean_ttd_seconds", "median_ttd_seconds"}
+_LOWER_IS_BETTER = {"fpr", "mean_ttd_frames", "median_ttd_frames"}
 
 
 def sort_entries(
@@ -54,8 +54,8 @@ def format_table(entries: list[LeaderboardEntry]) -> str:
         "Recall",
         "F1",
         "FPR",
-        "Mean TTD (s)",
-        "Median TTD (s)",
+        "Mean TTD (frames)",
+        "Median TTD (frames)",
     ]
 
     rows: list[list[str]] = []
@@ -69,10 +69,10 @@ def format_table(entries: list[LeaderboardEntry]) -> str:
                 f"{m.recall:.4f}",
                 f"{m.f1:.4f}",
                 f"{m.fpr:.4f}",
-                f"{m.mean_ttd_seconds:.1f}" if m.mean_ttd_seconds is not None else "-",
+                f"{m.mean_ttd_frames:.1f}" if m.mean_ttd_frames is not None else "-",
                 (
-                    f"{m.median_ttd_seconds:.1f}"
-                    if m.median_ttd_seconds is not None
+                    f"{m.median_ttd_frames:.1f}"
+                    if m.median_ttd_frames is not None
                     else "-"
                 ),
             ]

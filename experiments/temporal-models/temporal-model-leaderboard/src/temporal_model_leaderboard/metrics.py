@@ -11,6 +11,9 @@ def compute_metrics(
 ) -> ModelMetrics:
     """Compute precision, recall, F1, FPR, and TTD from sequence results.
 
+    TTD is reported in frame indices (0-based). See
+    ``pyrocore.TemporalModelOutput.trigger_frame_index`` for the convention.
+
     Args:
         model_name: Human-readable model identifier.
         results: Per-sequence evaluation results.
@@ -35,9 +38,9 @@ def compute_metrics(
     fpr = fp / n_negative_gt if n_negative_gt > 0 else 0.0
 
     ttd_values = [
-        r.ttd_seconds
+        r.ttd_frames
         for r in results
-        if r.ground_truth and r.predicted and r.ttd_seconds is not None
+        if r.ground_truth and r.predicted and r.ttd_frames is not None
     ]
     mean_ttd = round(sum(ttd_values) / len(ttd_values), 1) if ttd_values else None
     median_ttd = round(statistics.median(ttd_values), 1) if ttd_values else None
@@ -53,6 +56,6 @@ def compute_metrics(
         recall=round(recall, 4),
         f1=round(f1, 4),
         fpr=round(fpr, 4),
-        mean_ttd_seconds=mean_ttd,
-        median_ttd_seconds=median_ttd,
+        mean_ttd_frames=mean_ttd,
+        median_ttd_frames=median_ttd,
     )

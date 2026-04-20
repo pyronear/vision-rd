@@ -38,21 +38,29 @@ via `dvc import` (sequential_train_val split):
 
 ### Evaluate (optimized params: conf=0.2, nb_frames=4)
 
-| Split | Method | Precision | Recall | F1 | FPR | Median TTD |
+| Split | Method | Precision | Recall | F1 | FPR | Median TTD (frames) |
 |---|---|---|---|---|---|---|
 | val/all | Single-frame | 0.853 | 0.960 | 0.903 | 0.166 | -- |
-| val/all | Predictor | 0.892 | 0.934 | **0.913** | 0.113 | 9s |
+| val/all | Predictor | 0.892 | 0.934 | **0.913** | 0.113 | 1 |
 | train/all | Single-frame | 0.820 | 0.981 | 0.893 | 0.215 | -- |
-| train/all | Predictor | 0.849 | 0.971 | **0.906** | 0.172 | 20s |
+| train/all | Predictor | 0.849 | 0.971 | **0.906** | 0.172 | 1 |
+
+#### Why `conf=0.2, nb_frames=4` (and why median TTD = 1 frame)
+
+Packaged params come from the sweep above (F1-optimal on val/all). Production runs `conf=0.35, nb_frames=7` — more conservative, trades recall for fewer false alarms. The leaderboard's TTD therefore reflects the F1-optimized packaging, not a faithful prod reproduction.
+
+Regardless of params, `nb_consecutive_frames` is a sliding-window **size**, not a "wait N frames" gate (see `pyro_predictor/predictor.py::_update_states`): alarm fires as soon as `conf = max_sum_score / (nb+1)` exceeds `conf_thresh` within the rolling window. With `nb=4, conf=0.2`, the earliest possible fire is **frame 1** — two overlapping detections from frames 0 and 1, sum ≈ 1.6, `conf ≈ 0.32`. Hence median TTD = 1.
+
+With prod `nb=7, conf=0.35`, the earliest possible fire shifts to frame 2–3 (~60–90s at 30s/frame) — not 7 frames. If you want prod-faithful numbers, repackage with prod params and re-run the `evaluate_pyro_detector` leaderboard stage.
 
 ### Sweep top configs (val/all, ranked by F1)
 
-| conf | nb_frames | Precision | Recall | F1 | FPR | Mean TTD |
+| conf | nb_frames | Precision | Recall | F1 | FPR | Mean TTD (frames) |
 |---|---|---|---|---|---|---|
-| 0.20 | 4 | 0.892 | 0.934 | **0.913** | 0.113 | 90s |
-| 0.25 | 3 | 0.897 | 0.927 | 0.912 | 0.106 | 80s |
-| 0.20 | 5 | 0.892 | 0.927 | 0.909 | 0.113 | 100s |
-| 0.30 | 2 | 0.892 | 0.927 | 0.909 | 0.113 | 72s |
+| 0.20 | 4 | 0.892 | 0.934 | **0.913** | 0.113 | 2.0 |
+| 0.25 | 3 | 0.897 | 0.927 | 0.912 | 0.106 | 1.8 |
+| 0.20 | 5 | 0.892 | 0.927 | 0.909 | 0.113 | 2.2 |
+| 0.30 | 2 | 0.892 | 0.927 | 0.909 | 0.113 | 1.7 |
 
 Production defaults (conf=0.35, nb_frames=7) scored F1=0.825 on val/all.
 The sweep-optimized params improve F1 by ~9pp.

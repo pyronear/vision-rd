@@ -1,7 +1,7 @@
-Rank  Model                                     Precision  Recall  F1      FPR     Mean TTD (s)  Median TTD (s)
-----  ----------------------------------------  ---------  ------  ------  ------  ------------  --------------
-1     bbox-tube-temporal-vit-dinov2-finetune    0.9608     0.9735  0.9671  0.0397  89.1          29.0          
-2     fsm-tracking-baseline                     0.9474     0.9536  0.9505  0.0530  142.0         58.0          
-3     bbox-tube-temporal-gru-convnext-finetune  0.9272     0.9272  0.9272  0.0728  55.5          7.0           
-4     pyro-detector-baseline                    0.8580     0.9603  0.9063  0.1589  27.0          7.0           
-5     mtb-change-detection                      0.7121     0.9338  0.8080  0.3775  84.2          25.0          
+Rank  Model                                     Precision  Recall  F1      FPR     Mean TTD (frames)  Median TTD (frames)
+----  ----------------------------------------  ---------  ------  ------  ------  -----------------  -------------------
+1     bbox-tube-temporal-vit-dinov2-finetune    0.9608     0.9735  0.9671  0.0397  3.4                2.0                
+2     fsm-tracking-baseline                     0.9474     0.9536  0.9505  0.0530  4.6                4.0                
+3     bbox-tube-temporal-gru-convnext-finetune  0.9272     0.9272  0.9272  0.0728  2.0                1.0                
+4     pyro-detector-baseline                    0.8580     0.9603  0.9063  0.1589  1.3                1.0                
+5     mtb-change-detection                      0.7121     0.9338  0.8080  0.3775  3.0                2.0                

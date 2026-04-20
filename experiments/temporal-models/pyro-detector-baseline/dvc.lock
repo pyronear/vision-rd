@@ -68,21 +68,21 @@ stages:
       nfiles: 1
     - path: scripts/evaluate.py
       hash: md5
-      md5: fb9c7ea2e105f28eb457932ed6c3cc76
-      size: 3608
+      md5: 96cdd7250b5420e3b5e067704c819167
+      size: 3617
     - path: src/pyro_detector_baseline/evaluator.py
       hash: md5
-      md5: 873acf4e0538965efb5ac88164252c3a
-      size: 8280
+      md5: 0b70938b43322679d8380b7492ef5d75
+      size: 8104
     outs:
     - path: data/08_reporting/val/all/metrics.json
       hash: md5
-      md5: d2f29617e99d52c22fd4a57023285fea
-      size: 781
+      md5: c78bbb1abae48c9b174b584adbc0cf0e
+      size: 772
     - path: data/08_reporting/val/all/plots
       hash: md5
-      md5: a1d7010477118f1c1df3d9afcceca5c8.dir
-      size: 101491
+      md5: db373095f610b8c6cd7477a81ba7007d.dir
+      size: 100447
       nfiles: 4
   evaluate@val_pyronear:
     cmd: uv run python scripts/evaluate.py --track-dir data/07_model_output/val 
@@ -95,21 +95,21 @@ stages:
       nfiles: 1
     - path: scripts/evaluate.py
       hash: md5
-      md5: fb9c7ea2e105f28eb457932ed6c3cc76
-      size: 3608
+      md5: 96cdd7250b5420e3b5e067704c819167
+      size: 3617
     - path: src/pyro_detector_baseline/evaluator.py
       hash: md5
-      md5: 873acf4e0538965efb5ac88164252c3a
-      size: 8280
+      md5: 0b70938b43322679d8380b7492ef5d75
+      size: 8104
     outs:
     - path: data/08_reporting/val/pyronear/metrics.json
       hash: md5
-      md5: f29f0a62679c1453517896e2e56b3fc5
-      size: 780
+      md5: af4e0228e3b17656de88042bc5975ca8
+      size: 771
     - path: data/08_reporting/val/pyronear/plots
       hash: md5
-      md5: ce652e293b54c3ca86ba8a2a66df4d27.dir
-      size: 95991
+      md5: 90609ef63d10082bff5745d703933d0b.dir
+      size: 97242
       nfiles: 4
   package:
     cmd: uv run python scripts/package.py --model-dir data/01_raw/models 
@@ -189,16 +189,16 @@ stages:
       nfiles: 302
     - path: scripts/sweep.py
       hash: md5
-      md5: 7e150b4201e840171ec29fdea8551c0d
-      size: 7164
+      md5: bb9c4a7bf645e889d461d0d22a0d96cb
+      size: 6810
     - path: src/pyro_detector_baseline/data.py
       hash: md5
       md5: 2ff239d58eac9694ef8ae3d07e5410ee
       size: 3553
     - path: src/pyro_detector_baseline/evaluator.py
       hash: md5
-      md5: 873acf4e0538965efb5ac88164252c3a
-      size: 8280
+      md5: 0b70938b43322679d8380b7492ef5d75
+      size: 8104
     - path: src/pyro_detector_baseline/predictor_wrapper.py
       hash: md5
       md5: 1d8b78500bab5f515aaa058b3802f24d
@@ -206,8 +206,8 @@ stages:
     outs:
     - path: data/08_reporting/sweep/val/all
       hash: md5
-      md5: ffce0faf22f724c67f77dc0ae5958ff6.dir
-      size: 6161
+      md5: 2533355b612ab25fb2c925ff1c78a69a.dir
+      size: 5940
       nfiles: 1
   infer@train:
     cmd: uv run python scripts/infer.py --data-dir data/01_raw/datasets/train 
@@ -258,16 +258,16 @@ stages:
       nfiles: 2933
     - path: scripts/sweep.py
       hash: md5
-      md5: 7e150b4201e840171ec29fdea8551c0d
-      size: 7164
+      md5: bb9c4a7bf645e889d461d0d22a0d96cb
+      size: 6810
     - path: src/pyro_detector_baseline/data.py
       hash: md5
       md5: 2ff239d58eac9694ef8ae3d07e5410ee
       size: 3553
     - path: src/pyro_detector_baseline/evaluator.py
       hash: md5
-      md5: 873acf4e0538965efb5ac88164252c3a
-      size: 8280
+      md5: 0b70938b43322679d8380b7492ef5d75
+      size: 8104
     - path: src/pyro_detector_baseline/predictor_wrapper.py
       hash: md5
       md5: 1d8b78500bab5f515aaa058b3802f24d
@@ -275,8 +275,8 @@ stages:
     outs:
     - path: data/08_reporting/sweep/train/all
       hash: md5
-      md5: 03fcfa0ec3f410a88e32ea7471f879cd.dir
-      size: 6637
+      md5: b1f601320c71ec82b9e09137a4bb1e26.dir
+      size: 6388
       nfiles: 1
   predict@train:
     cmd: uv run python scripts/predict.py --infer-dir data/03_primary/train 
@@ -332,16 +332,16 @@ stages:
       nfiles: 2933
     - path: scripts/sweep.py
       hash: md5
-      md5: 7e150b4201e840171ec29fdea8551c0d
-      size: 7164
+      md5: bb9c4a7bf645e889d461d0d22a0d96cb
+      size: 6810
     - path: src/pyro_detector_baseline/data.py
       hash: md5
       md5: 2ff239d58eac9694ef8ae3d07e5410ee
       size: 3553
     - path: src/pyro_detector_baseline/evaluator.py
       hash: md5
-      md5: 873acf4e0538965efb5ac88164252c3a
-      size: 8280
+      md5: 0b70938b43322679d8380b7492ef5d75
+      size: 8104
     - path: src/pyro_detector_baseline/predictor_wrapper.py
       hash: md5
       md5: 1d8b78500bab5f515aaa058b3802f24d
@@ -349,8 +349,8 @@ stages:
     outs:
     - path: data/08_reporting/sweep/train/pyronear
       hash: md5
-      md5: 7236534aa05ac83af7ef6e84192a5ee9.dir
-      size: 6557
+      md5: 3d30603bb16c32fdcce81fbe0d4517e5.dir
+      size: 6368
       nfiles: 1
   sweep@val_pyronear:
     cmd: uv run python scripts/sweep.py --infer-dir data/03_primary/val 
@@ -369,16 +369,16 @@ stages:
       nfiles: 302
     - path: scripts/sweep.py
       hash: md5
-      md5: 7e150b4201e840171ec29fdea8551c0d
-      size: 7164
+      md5: bb9c4a7bf645e889d461d0d22a0d96cb
+      size: 6810
     - path: src/pyro_detector_baseline/data.py
       hash: md5
       md5: 2ff239d58eac9694ef8ae3d07e5410ee
       size: 3553
     - path: src/pyro_detector_baseline/evaluator.py
       hash: md5
-      md5: 873acf4e0538965efb5ac88164252c3a
-      size: 8280
+      md5: 0b70938b43322679d8380b7492ef5d75
+      size: 8104
     - path: src/pyro_detector_baseline/predictor_wrapper.py
       hash: md5
       md5: 1d8b78500bab5f515aaa058b3802f24d
@@ -386,8 +386,8 @@ stages:
     outs:
     - path: data/08_reporting/sweep/val/pyronear
       hash: md5
-      md5: 4018fc6999fbc8cc9ae8f8a2b29af91b.dir
-      size: 6052
+      md5: b0d1a8fe5b82abc4fa8c46721034dea9.dir
+      size: 5865
       nfiles: 1
   evaluate@train_all:
     cmd: 'uv run python scripts/evaluate.py --track-dir data/07_model_output/train
@@ -400,21 +400,21 @@ stages:
       nfiles: 1
     - path: scripts/evaluate.py
       hash: md5
-      md5: fb9c7ea2e105f28eb457932ed6c3cc76
-      size: 3608
+      md5: 96cdd7250b5420e3b5e067704c819167
+      size: 3617
     - path: src/pyro_detector_baseline/evaluator.py
       hash: md5
-      md5: 873acf4e0538965efb5ac88164252c3a
-      size: 8280
+      md5: 0b70938b43322679d8380b7492ef5d75
+      size: 8104
     outs:
     - path: data/08_reporting/train/all/metrics.json
       hash: md5
-      md5: 19bb37502e9ccb286cb8eb2cff922514
-      size: 795
+      md5: 9a08c0396ab4159647add0b727dcef87
+      size: 789
     - path: data/08_reporting/train/all/plots
       hash: md5
-      md5: 6c270fe1974ca2bd89fab127708a3cc1.dir
-      size: 103113
+      md5: 640205abf7b33e2e795a37d8a684f1b2.dir
+      size: 103740
       nfiles: 4
   evaluate@train_pyronear:
     cmd: uv run python scripts/evaluate.py --track-dir 
@@ -428,19 +428,19 @@ stages:
       nfiles: 1
     - path: scripts/evaluate.py
       hash: md5
-      md5: fb9c7ea2e105f28eb457932ed6c3cc76
-      size: 3608
+      md5: 96cdd7250b5420e3b5e067704c819167
+      size: 3617
     - path: src/pyro_detector_baseline/evaluator.py
       hash: md5
-      md5: 873acf4e0538965efb5ac88164252c3a
-      size: 8280
+      md5: 0b70938b43322679d8380b7492ef5d75
+      size: 8104
     outs:
     - path: data/08_reporting/train/pyronear/metrics.json
       hash: md5
-      md5: 6ac45e595aba2722ff1e3b35e8ef7292
-      size: 794
+      md5: 95cae58e0a4bec32429f8de2d07c1d17
+      size: 787
     - path: data/08_reporting/train/pyronear/plots
       hash: md5
-      md5: 53168deb07bc9fde372ce9159a8090a1.dir
-      size: 99793
+      md5: 27e4955b6504d63e1bd4bdfa8b2c1d36.dir
+      size: 100798
       nfiles: 4

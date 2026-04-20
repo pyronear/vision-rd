@@ -93,11 +93,11 @@ def main() -> None:
         tracking_metrics["f1"],
         tracking_metrics["fpr"],
     )
-    if tracking_metrics["mean_ttd_seconds"] is not None:
+    if tracking_metrics["mean_ttd_frames"] is not None:
         logger.info(
-            "  Mean TTD=%.1fs  Median TTD=%.1fs",
-            tracking_metrics["mean_ttd_seconds"],
-            tracking_metrics["median_ttd_seconds"],
+            "  Mean TTD=%.1f frames  Median TTD=%.1f frames",
+            tracking_metrics["mean_ttd_frames"],
+            tracking_metrics["median_ttd_frames"],
         )
 
     # Generate plots

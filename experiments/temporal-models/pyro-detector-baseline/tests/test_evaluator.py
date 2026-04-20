@@ -6,14 +6,13 @@ from pyro_detector_baseline.evaluator import (
 )
 
 
-def _result(gt, pred, n_det=0, first_ts=None, conf_ts=None):
+def _result(gt, pred, n_det=0, confirmed_frame_index=None):
     """Build a minimal sequence result dict."""
     return {
         "is_positive_gt": gt,
         "is_positive_pred": pred,
         "num_detections_total": n_det,
-        "confirmed_timestamp": conf_ts,
-        "first_timestamp": first_ts,
+        "confirmed_frame_index": confirmed_frame_index,
     }
 
 
@@ -74,35 +73,25 @@ class TestComputeMetrics:
 
     def test_ttd_computed(self):
         results = [
-            _result(
-                True,
-                True,
-                first_ts="2024-01-01T12:00:00",
-                conf_ts="2024-01-01T12:01:00",
-            ),
-            _result(
-                True,
-                True,
-                first_ts="2024-01-01T12:00:00",
-                conf_ts="2024-01-01T12:02:00",
-            ),
+            _result(True, True, confirmed_frame_index=2),
+            _result(True, True, confirmed_frame_index=4),
         ]
         m = compute_metrics(results)
-        assert m["mean_ttd_seconds"] == 90.0
-        assert m["median_ttd_seconds"] == 90.0
+        assert m["mean_ttd_frames"] == 3.0
+        assert m["median_ttd_frames"] == 3.0
 
     def test_ttd_none_when_no_tp(self):
         results = [_result(True, False)]
         m = compute_metrics(results)
-        assert m["mean_ttd_seconds"] is None
-        assert m["median_ttd_seconds"] is None
+        assert m["mean_ttd_frames"] is None
+        assert m["median_ttd_frames"] is None
 
 
 class TestComputeSingleFrameBaseline:
     def test_any_detection_triggers_alarm(self):
         results = [
-            _result(True, False, n_det=3, first_ts="2024-01-01T12:00:00"),
-            _result(False, False, n_det=1, first_ts="2024-01-01T12:00:00"),
+            _result(True, False, n_det=3),
+            _result(False, False, n_det=1),
         ]
         m = compute_single_frame_baseline(results)
         # Both have detections, so both predicted positive
@@ -111,8 +100,8 @@ class TestComputeSingleFrameBaseline:
 
     def test_no_detections_all_negative(self):
         results = [
-            _result(True, False, n_det=0, first_ts="2024-01-01T12:00:00"),
-            _result(False, False, n_det=0, first_ts="2024-01-01T12:00:00"),
+            _result(True, False, n_det=0),
+            _result(False, False, n_det=0),
         ]
         m = compute_single_frame_baseline(results)
         assert m["fn"] == 1

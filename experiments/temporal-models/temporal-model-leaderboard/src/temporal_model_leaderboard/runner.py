@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-from pyrocore import Frame, TemporalModel
+from pyrocore import TemporalModel
 from tqdm import tqdm
 
 from .dataset import get_sorted_frames, list_sequences
@@ -21,9 +21,9 @@ def evaluate_model(
     For each sequence:
 
     1. Discover sorted frame paths via :func:`get_sorted_frames`.
-    2. Call ``model.load_sequence`` then ``model.predict`` to obtain both
-       loaded frames (for TTD timestamp extraction) and the output.
-    3. Compute time-to-detection for true positives.
+    2. Call ``model.load_sequence`` then ``model.predict`` to obtain the
+       model's decision and trigger frame index.
+    3. Record TTD in frames (= ``trigger_frame_index``) for true positives.
 
     Sequences with no images are skipped with a warning.
 
@@ -49,11 +49,12 @@ def evaluate_model(
         frames = model.load_sequence(frame_paths)
         output = model.predict(frames)
 
-        ttd_seconds = _compute_ttd(
-            ground_truth=ground_truth,
-            predicted=output.is_positive,
-            trigger_frame_index=output.trigger_frame_index,
-            frames=frames,
+        ttd_frames = (
+            output.trigger_frame_index
+            if ground_truth
+            and output.is_positive
+            and output.trigger_frame_index is not None
+            else None
         )
 
         results.append(
@@ -61,37 +62,9 @@ def evaluate_model(
                 sequence_id=seq_path.name,
                 ground_truth=ground_truth,
                 predicted=output.is_positive,
-                ttd_seconds=ttd_seconds,
+                ttd_frames=ttd_frames,
             )
         )
 
     logger.info("Evaluated %d sequences", len(results))
     return results
-
-
-def _compute_ttd(
-    *,
-    ground_truth: bool,
-    predicted: bool,
-    trigger_frame_index: int | None,
-    frames: list[Frame],
-) -> float | None:
-    """Compute time-to-detection in seconds for a true positive.
-
-    Returns ``None`` if the sequence is not a TP, if the trigger frame
-    index is missing, or if timestamps are unavailable.
-    """
-    if not (ground_truth and predicted and trigger_frame_index is not None):
-        return None
-
-    first_ts = frames[0].timestamp if frames else None
-    trigger_ts = (
-        frames[trigger_frame_index].timestamp
-        if trigger_frame_index < len(frames)
-        else None
-    )
-
-    if first_ts is None or trigger_ts is None:
-        return None
-
-    return (trigger_ts - first_ts).total_seconds()

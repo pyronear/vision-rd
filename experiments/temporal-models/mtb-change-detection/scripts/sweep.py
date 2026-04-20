@@ -110,12 +110,6 @@ def _evaluate_combo(combo: tuple) -> dict:
         is_alarm, _tracks, confirmed_idx, _ft = tracker.process_sequence(
             filtered_frames
         )
-        first_ts = filtered_frames[0].timestamp if filtered_frames else None
-        confirmed_ts = (
-            filtered_frames[confirmed_idx].timestamp
-            if confirmed_idx is not None
-            else None
-        )
         total_dets = sum(len(f.detections) for f in filtered_frames)
 
         results.append(
@@ -123,10 +117,7 @@ def _evaluate_combo(combo: tuple) -> dict:
                 "is_positive_gt": gt,
                 "is_positive_pred": is_alarm,
                 "num_detections_total": total_dets,
-                "confirmed_timestamp": (
-                    confirmed_ts.isoformat() if confirmed_ts else None
-                ),
-                "first_timestamp": first_ts.isoformat() if first_ts else None,
+                "confirmed_frame_index": confirmed_idx,
             }
         )
 
@@ -309,8 +300,8 @@ def main() -> None:
         "TTD",
     )
     for row in rows[:10]:
-        ttd = row.get("mean_ttd_seconds")
-        ttd_str = f"{ttd:.0f}" if ttd is not None else "N/A"
+        ttd = row.get("mean_ttd_frames")
+        ttd_str = f"{ttd:.1f}" if ttd is not None else "N/A"
         max_area = row["max_detection_area"]
         max_area_str = f"{max_area}" if max_area is not None else "None"
         logger.info(

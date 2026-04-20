@@ -149,26 +149,26 @@ stages:
     deps:
     - path: data/07_model_output/val
       hash: md5
-      md5: d7b0a84de3e0af5ed5456276be354ef2.dir
-      size: 101527
+      md5: afb791148045e966ae7dc2929a61c53c.dir
+      size: 101563
       nfiles: 1
     - path: scripts/evaluate.py
       hash: md5
-      md5: 17a58161fbbbef80ad8112772d9d6f64
-      size: 3544
+      md5: a31e5545b97d336333351d5c334d910f
+      size: 3553
     - path: src/mtb_change_detection/evaluator.py
       hash: md5
-      md5: 1c8be4a0a9d403dae68bde6433b5fd33
-      size: 11040
+      md5: d82d964e761f294f0bd306cf0b61baed
+      size: 10488
     outs:
     - path: data/08_reporting/val/all/metrics.json
       hash: md5
-      md5: 5eab7805c260adb0db1814c25519d7b1
-      size: 780
+      md5: c1471d6549b68f9e064ce8544b982489
+      size: 770
     - path: data/08_reporting/val/all/plots
       hash: md5
-      md5: 06769aa90e45b3efb7426158eb93df1a.dir
-      size: 97705
+      md5: 57a264b1c0b9819083f413eae13020ba.dir
+      size: 99576
       nfiles: 4
   infer@train:
     cmd: uv run python scripts/infer.py --data-dir data/01_raw/datasets/train 
@@ -320,26 +320,26 @@ stages:
     deps:
     - path: data/07_model_output/train
       hash: md5
-      md5: 3be42e7618de4f9cb6912f875474609e.dir
-      size: 987237
+      md5: 8be1e12a76b60fd04d74112b4d977d74.dir
+      size: 988081
       nfiles: 1
     - path: scripts/evaluate.py
       hash: md5
-      md5: 17a58161fbbbef80ad8112772d9d6f64
-      size: 3544
+      md5: a31e5545b97d336333351d5c334d910f
+      size: 3553
     - path: src/mtb_change_detection/evaluator.py
       hash: md5
-      md5: 1c8be4a0a9d403dae68bde6433b5fd33
-      size: 11040
+      md5: d82d964e761f294f0bd306cf0b61baed
+      size: 10488
     outs:
     - path: data/08_reporting/train/all/metrics.json
       hash: md5
-      md5: 455b7a23789ff4b2efb35b8c5846ef4c
-      size: 790
+      md5: afffb27271ac5b04993c94f3863f4d4a
+      size: 788
     - path: data/08_reporting/train/all/plots
       hash: md5
-      md5: f4af8f24c96eb7693a4819c429c87c60.dir
-      size: 102355
+      md5: d04bc911a4be269ec1985615223c6f23.dir
+      size: 106301
       nfiles: 4
   evaluate@val_pyronear:
     cmd: uv run python scripts/evaluate.py --track-dir data/07_model_output/val 
@@ -347,26 +347,26 @@ stages:
     deps:
     - path: data/07_model_output/val
       hash: md5
-      md5: d7b0a84de3e0af5ed5456276be354ef2.dir
-      size: 101527
+      md5: afb791148045e966ae7dc2929a61c53c.dir
+      size: 101563
       nfiles: 1
     - path: scripts/evaluate.py
       hash: md5
-      md5: 17a58161fbbbef80ad8112772d9d6f64
-      size: 3544
+      md5: a31e5545b97d336333351d5c334d910f
+      size: 3553
     - path: src/mtb_change_detection/evaluator.py
       hash: md5
-      md5: 1c8be4a0a9d403dae68bde6433b5fd33
-      size: 11040
+      md5: d82d964e761f294f0bd306cf0b61baed
+      size: 10488
     outs:
     - path: data/08_reporting/val/pyronear/metrics.json
       hash: md5
-      md5: 9774f311d5cdb5fe670505921b24a526
-      size: 780
+      md5: 79647d1231b834d3169910871ea2e353
+      size: 770
     - path: data/08_reporting/val/pyronear/plots
       hash: md5
-      md5: fa805b95afb3da85502aeca96857aed8.dir
-      size: 98042
+      md5: 3272f4e34e82f6884fc062298288c31d.dir
+      size: 96489
       nfiles: 4
   evaluate@train_pyronear:
     cmd: uv run python scripts/evaluate.py --track-dir 
@@ -375,26 +375,26 @@ stages:
     deps:
     - path: data/07_model_output/train
       hash: md5
-      md5: 3be42e7618de4f9cb6912f875474609e.dir
-      size: 987237
+      md5: 8be1e12a76b60fd04d74112b4d977d74.dir
+      size: 988081
       nfiles: 1
     - path: scripts/evaluate.py
       hash: md5
-      md5: 17a58161fbbbef80ad8112772d9d6f64
-      size: 3544
+      md5: a31e5545b97d336333351d5c334d910f
+      size: 3553
     - path: src/mtb_change_detection/evaluator.py
       hash: md5
-      md5: 1c8be4a0a9d403dae68bde6433b5fd33
-      size: 11040
+      md5: d82d964e761f294f0bd306cf0b61baed
+      size: 10488
     outs:
     - path: data/08_reporting/train/pyronear/metrics.json
       hash: md5
-      md5: 8dce6fb3b36c1f860e8a225a89f46edd
-      size: 790
+      md5: a347111047600d281495543844bdacee
+      size: 778
     - path: data/08_reporting/train/pyronear/plots
       hash: md5
-      md5: 5c2c5191be5b18d1c766987932d31d94.dir
-      size: 99285
+      md5: 7636bd3f03c62dee8e9a75ba3d73dc99.dir
+      size: 100471
       nfiles: 4
   sweep@val_all:
     cmd: 'uv run python scripts/sweep.py --infer-dir data/03_primary/val --data-dir
@@ -412,16 +412,16 @@ stages:
       nfiles: 302
     - path: scripts/sweep.py
       hash: md5
-      md5: cd60211986883523b2f308f4302d42d7
-      size: 11005
+      md5: 454ade56adf7483912412b6d2b6f4a4b
+      size: 10622
     - path: src/mtb_change_detection/change_detector.py
       hash: md5
       md5: 953ca1eadedf51fc057bf5d217daa8a0
       size: 1858
     - path: src/mtb_change_detection/evaluator.py
       hash: md5
-      md5: 1c8be4a0a9d403dae68bde6433b5fd33
-      size: 11040
+      md5: d82d964e761f294f0bd306cf0b61baed
+      size: 10488
     - path: src/mtb_change_detection/tracker.py
       hash: md5
       md5: 27d2515c26f5bc414e8bc1063a57069f
@@ -433,8 +433,8 @@ stages:
     outs:
     - path: data/08_reporting/sweep/val/all
       hash: md5
-      md5: c632a640f809040fb8ab192491e5375e.dir
-      size: 29932
+      md5: 12e9ae8acd89d49b31e2b61e4285e809.dir
+      size: 28799
       nfiles: 1
   sweep@train_all:
     cmd: 'uv run python scripts/sweep.py --infer-dir data/03_primary/train --data-dir
@@ -452,16 +452,16 @@ stages:
       nfiles: 2933
     - path: scripts/sweep.py
       hash: md5
-      md5: cd60211986883523b2f308f4302d42d7
-      size: 11005
+      md5: 454ade56adf7483912412b6d2b6f4a4b
+      size: 10622
     - path: src/mtb_change_detection/change_detector.py
       hash: md5
       md5: 953ca1eadedf51fc057bf5d217daa8a0
       size: 1858
     - path: src/mtb_change_detection/evaluator.py
       hash: md5
-      md5: 1c8be4a0a9d403dae68bde6433b5fd33
-      size: 11040
+      md5: d82d964e761f294f0bd306cf0b61baed
+      size: 10488
     - path: src/mtb_change_detection/tracker.py
       hash: md5
       md5: 27d2515c26f5bc414e8bc1063a57069f
@@ -473,8 +473,8 @@ stages:
     outs:
     - path: data/08_reporting/sweep/train/all
       hash: md5
-      md5: fc93d6cd495635a18c0030328c10217a.dir
-      size: 31839
+      md5: b4fbb8899efe8c5a98e1b7541fbf70f1.dir
+      size: 30686
       nfiles: 1
   sweep@val_pyronear:
     cmd: uv run python scripts/sweep.py --infer-dir data/03_primary/val 
@@ -493,16 +493,16 @@ stages:
       nfiles: 302
     - path: scripts/sweep.py
       hash: md5
-      md5: cd60211986883523b2f308f4302d42d7
-      size: 11005
+      md5: 454ade56adf7483912412b6d2b6f4a4b
+      size: 10622
     - path: src/mtb_change_detection/change_detector.py
       hash: md5
       md5: 953ca1eadedf51fc057bf5d217daa8a0
       size: 1858
     - path: src/mtb_change_detection/evaluator.py
       hash: md5
-      md5: 1c8be4a0a9d403dae68bde6433b5fd33
-      size: 11040
+      md5: d82d964e761f294f0bd306cf0b61baed
+      size: 10488
     - path: src/mtb_change_detection/tracker.py
       hash: md5
       md5: 27d2515c26f5bc414e8bc1063a57069f
@@ -514,8 +514,8 @@ stages:
     outs:
     - path: data/08_reporting/sweep/val/pyronear
       hash: md5
-      md5: 1579a2799ff9e49796bfce782b088370.dir
-      size: 29576
+      md5: bc5c80fec7b566b0e7d0d1a70096d609.dir
+      size: 28593
       nfiles: 1
   sweep@train_pyronear:
     cmd: uv run python scripts/sweep.py --infer-dir data/03_primary/train 
@@ -534,16 +534,16 @@ stages:
       nfiles: 2933
     - path: scripts/sweep.py
       hash: md5
-      md5: cd60211986883523b2f308f4302d42d7
-      size: 11005
+      md5: 454ade56adf7483912412b6d2b6f4a4b
+      size: 10622
     - path: src/mtb_change_detection/change_detector.py
       hash: md5
       md5: 953ca1eadedf51fc057bf5d217daa8a0
       size: 1858
     - path: src/mtb_change_detection/evaluator.py
       hash: md5
-      md5: 1c8be4a0a9d403dae68bde6433b5fd33
-      size: 11040
+      md5: d82d964e761f294f0bd306cf0b61baed
+      size: 10488
     - path: src/mtb_change_detection/tracker.py
       hash: md5
       md5: 27d2515c26f5bc414e8bc1063a57069f
@@ -555,8 +555,8 @@ stages:
     outs:
     - path: data/08_reporting/sweep/train/pyronear
       hash: md5
-      md5: 0bae719a075918c7e7a1220a196e3c24.dir
-      size: 31577
+      md5: a4ac3c862c7fc8e4622d55bf0641bf73.dir
+      size: 30517
       nfiles: 1
   package:
     cmd: uv run python scripts/package.py --weights-path 

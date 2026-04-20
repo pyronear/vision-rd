@@ -31,7 +31,7 @@ from pathlib import Path
 import numpy as np
 from tqdm import tqdm
 
-from pyro_detector_baseline.data import is_wf_sequence, parse_timestamp
+from pyro_detector_baseline.data import is_wf_sequence
 from pyro_detector_baseline.evaluator import compute_metrics
 from pyro_detector_baseline.predictor_wrapper import (
     create_replay_predictor,
@@ -61,20 +61,14 @@ def _evaluate_combo(combo: tuple[float, int]) -> dict:
     replay = create_replay_predictor(conf_thresh, nb_frames)
 
     results: list[dict] = []
-    for seq_id, is_positive_gt, frame_detections, first_ts in _all_sequences:
+    for seq_id, is_positive_gt, frame_detections in _all_sequences:
         trigger_idx, _confidences = replay_sequence(replay, frame_detections, seq_id)
-
-        confirmed_ts = None
-        if trigger_idx is not None:
-            trigger_filename = frame_detections[trigger_idx][0]
-            confirmed_ts = parse_timestamp(trigger_filename).isoformat()
 
         results.append(
             {
                 "is_positive_gt": is_positive_gt,
                 "is_positive_pred": trigger_idx is not None,
-                "confirmed_timestamp": confirmed_ts,
-                "first_timestamp": first_ts,
+                "confirmed_frame_index": trigger_idx,
             }
         )
 
@@ -159,8 +153,7 @@ def main() -> None:
             continue
 
         gt = is_wf_sequence(seq_dir)
-        first_ts = parse_timestamp(frame_detections[0][0]).isoformat()
-        all_sequences.append((seq_id, gt, frame_detections, first_ts))
+        all_sequences.append((seq_id, gt, frame_detections))
 
     logger.info("Loaded %d sequences.", len(all_sequences))
 
@@ -211,11 +204,11 @@ def main() -> None:
         "R",
         "F1",
         "FPR",
-        "TTD(s)",
+        "TTD(fr)",
     )
     for row in rows[:10]:
-        ttd = row.get("mean_ttd_seconds")
-        ttd_str = f"{ttd:.0f}" if ttd is not None else "N/A"
+        ttd = row.get("mean_ttd_frames")
+        ttd_str = f"{ttd:.1f}" if ttd is not None else "N/A"
         logger.info(
             "  %-6s %-6s | %-6s %-6s %-6s %-6s | %-8s",
             row["conf_thresh"],

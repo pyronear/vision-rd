@@ -21,8 +21,8 @@ def _make_entry(
             recall=0.9,
             f1=f1,
             fpr=fpr,
-            mean_ttd_seconds=mean_ttd,
-            median_ttd_seconds=mean_ttd,
+            mean_ttd_frames=mean_ttd,
+            median_ttd_frames=mean_ttd,
         )
     )
 
@@ -52,7 +52,7 @@ class TestSortEntries:
             _make_entry("slow", f1=0.9, mean_ttd=120.0),
             _make_entry("fast", f1=0.9, mean_ttd=30.0),
         ]
-        result = sort_entries(entries, "mean_ttd_seconds")
+        result = sort_entries(entries, "mean_ttd_frames")
         names = [e.metrics.model_name for e in result]
         assert names == ["fast", "slow"]
 
@@ -61,7 +61,7 @@ class TestSortEntries:
             _make_entry("no_ttd", f1=0.9, mean_ttd=None),
             _make_entry("has_ttd", f1=0.9, mean_ttd=30.0),
         ]
-        result = sort_entries(entries, "mean_ttd_seconds")
+        result = sort_entries(entries, "mean_ttd_frames")
         names = [e.metrics.model_name for e in result]
         assert names == ["has_ttd", "no_ttd"]
 

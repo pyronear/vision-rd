@@ -62,11 +62,11 @@ class TestEvaluateModel:
 
         wf_result = next(r for r in results if r.ground_truth)
         assert wf_result.predicted is True
-        assert wf_result.ttd_seconds == 60.0  # frame 2 - frame 0
+        assert wf_result.ttd_frames == 2  # trigger at frame 2
 
         fp_result = next(r for r in results if not r.ground_truth)
         assert fp_result.predicted is True
-        assert fp_result.ttd_seconds is None  # not a TP
+        assert fp_result.ttd_frames is None  # not a TP
 
     def test_always_negative_model(self, tmp_path: Path) -> None:
         test_dir = _create_test_dataset(tmp_path)
@@ -76,7 +76,7 @@ class TestEvaluateModel:
 
         assert len(results) == 2
         assert all(not r.predicted for r in results)
-        assert all(r.ttd_seconds is None for r in results)
+        assert all(r.ttd_frames is None for r in results)
 
     def test_skips_empty_sequences(self, tmp_path: Path) -> None:
         test_dir = _create_test_dataset(tmp_path)
@@ -114,7 +114,7 @@ class TestTTDComputation:
         results = evaluate_model(model, test_dir)
 
         wf_result = next(r for r in results if r.ground_truth)
-        assert wf_result.ttd_seconds == 0.0
+        assert wf_result.ttd_frames == 0
 
     def test_ttd_none_when_no_trigger_index(self, tmp_path: Path) -> None:
         """TTD should be None when trigger_frame_index is None."""
@@ -128,4 +128,4 @@ class TestTTDComputation:
         results = evaluate_model(model, test_dir)
 
         wf_result = next(r for r in results if r.ground_truth)
-        assert wf_result.ttd_seconds is None
+        assert wf_result.ttd_frames is None

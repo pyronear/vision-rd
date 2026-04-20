@@ -121,11 +121,11 @@ def main() -> None:
         metrics.f1,
         metrics.fpr,
     )
-    if metrics.mean_ttd_seconds is not None:
+    if metrics.mean_ttd_frames is not None:
         logger.info(
-            "  Mean TTD=%.1fs  Median TTD=%.1fs",
-            metrics.mean_ttd_seconds,
-            metrics.median_ttd_seconds,
+            "  Mean TTD=%.1f frames  Median TTD=%.1f frames",
+            metrics.mean_ttd_frames,
+            metrics.median_ttd_frames,
         )
 
 
