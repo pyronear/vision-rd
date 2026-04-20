@@ -189,14 +189,14 @@ Qualitative error galleries live next to the metrics: `data/08_reporting/val/<va
 
 Train (3104 sequences) and val (318 sequences) of the packaged `model.zip` for each variant:
 
-| variant | split | aggregation | precision | recall | F1 | FP | FN | mean TTD (s) | median TTD (s) |
+| variant | split | aggregation | precision | recall | F1 | FP | FN | mean TTD (frames) | median TTD (frames) |
 |---|---|---|---|---|---|---|---|---|---|
-| gru_convnext_finetune | train | max_logit | 0.9252 | 0.9716 | 0.9478 | 122 | 44 | 80.8 | 23.0 |
-| gru_convnext_finetune | val | max_logit | 0.9560 | 0.9560 | 0.9560 | 7 | 7 | 78.9 | 14.0 |
-| vit_dinov2_finetune | train | logistic | 0.9376 | 0.9781 | 0.9574 | 101 | 34 | 126.7 | 30.0 |
-| vit_dinov2_finetune | val | logistic | 0.9684 | 0.9623 | 0.9653 | 5 | 6 | 100.2 | 27.5 |
+| gru_convnext_finetune | train | max_logit | 0.9252 | 0.9716 | 0.9478 | 122 | 44 | 2.2 | 1.0 |
+| gru_convnext_finetune | val | max_logit | 0.9560 | 0.9560 | 0.9560 | 7 | 7 | 2.3 | 1.0 |
+| vit_dinov2_finetune | train | logistic | 0.9376 | 0.9781 | 0.9574 | 101 | 34 | 3.1 | 2.0 |
+| vit_dinov2_finetune | val | logistic | 0.9684 | 0.9623 | 0.9653 | 5 | 6 | 3.1 | 2.0 |
 
-Both packaged variants clear the precision target (≥ 0.93) at recall ≥ 0.95 on val. ViT is the F1 leader thanks to the logistic calibrator, which weights tube length and YOLO confidence alongside the raw logit. The exact operating point comes from automated variant analysis (next section) — change the target recall to shift the trade-off. TTD numbers reflect the first-crossing trigger; pre-fix mean TTD on the same weights was ~812-835s (GRU train/val) and ~819-830s (ViT train/val), so both splits see the ~6-10× drop equally — the fix is not val-specific. Train splits show comparable per-split reductions: 80.8s/126.7s mean TTD vs. their respective ~835s/~819s pre-fix baselines.
+Both packaged variants clear the precision target (≥ 0.93) at recall ≥ 0.95 on val. ViT is the F1 leader thanks to the logistic calibrator, which weights tube length and YOLO confidence alongside the raw logit. The exact operating point comes from automated variant analysis (next section) — change the target recall to shift the trade-off. TTD numbers reflect the first-crossing trigger and are reported in **frame index** (0-based `trigger_frame_index`) per the pyrocore convention — pyro-dataset filename timestamps are unreliable, so we do not convert to seconds. In production (30s/frame cadence), these correspond to ~30–90s wall-clock for GRU and ~90s for ViT.
 
 ### CPU latency (packaged, full val)
 

@@ -3809,8 +3809,8 @@ stages:
       size: 162765093
     - path: scripts/evaluate_packaged.py
       hash: md5
-      md5: a210fd7103c67240456f54ef0b71fe3b
-      size: 5848
+      md5: a303d5bcce54c84deb883c937affa281
+      size: 5846
     - path: src/bbox_tube_temporal/data.py
       hash: md5
       md5: b907e5a0baedb93775446678c2cce034
@@ -3833,8 +3833,8 @@ stages:
       size: 3612
     - path: src/bbox_tube_temporal/protocol_eval.py
       hash: md5
-      md5: 75f3b43e4c3a51f7a8529c5a960edb15
-      size: 5810
+      md5: d8d5d69d2f7884a7e54d38f785e43726
+      size: 5327
     - path: src/bbox_tube_temporal/tubes.py
       hash: md5
       md5: 2f6f8e5e9ff7342a45ddaec8d0bedc1f
@@ -3856,16 +3856,16 @@ stages:
       size: 2
     - path: data/08_reporting/val/packaged/vit_dinov2_finetune/metrics.json
       hash: md5
-      md5: 2e59843a5046e36416387a3be2a0e362
-      size: 293
+      md5: dee522971e6c3d97b58b0004a44ae487
+      size: 286
     - path: data/08_reporting/val/packaged/vit_dinov2_finetune/pr_curve.png
       hash: md5
       md5: 08b71a51f7cc86d0a7a585ebad7de6f4
       size: 20960
     - path: data/08_reporting/val/packaged/vit_dinov2_finetune/predictions.json
       hash: md5
-      md5: 9876d5cf718026aed114e55bc5de5a10
-      size: 1492661
+      md5: 47c2eb3527dff4927c96adfa13376958
+      size: 1491909
     - path: data/08_reporting/val/packaged/vit_dinov2_finetune/roc_curve.png
       hash: md5
       md5: 551f5247a01b310f593a528890228e7e
@@ -3888,8 +3888,8 @@ stages:
       size: 258728675
     - path: scripts/evaluate_packaged.py
       hash: md5
-      md5: a210fd7103c67240456f54ef0b71fe3b
-      size: 5848
+      md5: a303d5bcce54c84deb883c937affa281
+      size: 5846
     - path: src/bbox_tube_temporal/data.py
       hash: md5
       md5: b907e5a0baedb93775446678c2cce034
@@ -3912,8 +3912,8 @@ stages:
       size: 3612
     - path: src/bbox_tube_temporal/protocol_eval.py
       hash: md5
-      md5: 75f3b43e4c3a51f7a8529c5a960edb15
-      size: 5810
+      md5: d8d5d69d2f7884a7e54d38f785e43726
+      size: 5327
     - path: src/bbox_tube_temporal/tubes.py
       hash: md5
       md5: 2f6f8e5e9ff7342a45ddaec8d0bedc1f
@@ -3935,8 +3935,8 @@ stages:
       size: 2
     - path: data/08_reporting/train/packaged/gru_convnext_finetune/metrics.json
       hash: md5
-      md5: 017ab2862557e1cbce07d1f224ab0819
-      size: 302
+      md5: b43a9e8beb51d50fde49a3e63a2d8fc2
+      size: 298
     - path: data/08_reporting/train/packaged/gru_convnext_finetune/pr_curve.png
       hash: md5
       md5: 2b0dc9c7147560114b0f41cefb6cf805
@@ -3944,8 +3944,8 @@ stages:
     - path: 
         data/08_reporting/train/packaged/gru_convnext_finetune/predictions.json
       hash: md5
-      md5: 7abb8e99a4f761e5a1c79b730fd08cb0
-      size: 14824619
+      md5: 1c9ec3a8aefa617ceeb6067aca1d8227
+      size: 14817375
     - path: data/08_reporting/train/packaged/gru_convnext_finetune/roc_curve.png
       hash: md5
       md5: ca410d669faed21337d62d2c11204f62
@@ -3968,8 +3968,8 @@ stages:
       size: 162765093
     - path: scripts/evaluate_packaged.py
       hash: md5
-      md5: a210fd7103c67240456f54ef0b71fe3b
-      size: 5848
+      md5: a303d5bcce54c84deb883c937affa281
+      size: 5846
     - path: src/bbox_tube_temporal/data.py
       hash: md5
       md5: b907e5a0baedb93775446678c2cce034
@@ -3992,8 +3992,8 @@ stages:
       size: 3612
     - path: src/bbox_tube_temporal/protocol_eval.py
       hash: md5
-      md5: 75f3b43e4c3a51f7a8529c5a960edb15
-      size: 5810
+      md5: d8d5d69d2f7884a7e54d38f785e43726
+      size: 5327
     - path: src/bbox_tube_temporal/tubes.py
       hash: md5
       md5: 2f6f8e5e9ff7342a45ddaec8d0bedc1f
@@ -4015,8 +4015,8 @@ stages:
       size: 2
     - path: data/08_reporting/train/packaged/vit_dinov2_finetune/metrics.json
       hash: md5
-      md5: 98fab5759f68efac272c1784050d5565
-      size: 301
+      md5: ce37f554461731581670823b9ba7feb2
+      size: 296
     - path: data/08_reporting/train/packaged/vit_dinov2_finetune/pr_curve.png
       hash: md5
       md5: 365585c0280865cfed6fdc5507f14351
@@ -4024,8 +4024,8 @@ stages:
     - path: 
         data/08_reporting/train/packaged/vit_dinov2_finetune/predictions.json
       hash: md5
-      md5: 8b7b1653c9ec338498243e97480eb053
-      size: 14877427
+      md5: 77950c4b8aa2c28005ebf7bc48f89a6d
+      size: 14869891
     - path: data/08_reporting/train/packaged/vit_dinov2_finetune/roc_curve.png
       hash: md5
       md5: 3cbb34dbb85483ec5a2a3e5242111815
@@ -4048,8 +4048,8 @@ stages:
       size: 258728675
     - path: scripts/evaluate_packaged.py
       hash: md5
-      md5: a210fd7103c67240456f54ef0b71fe3b
-      size: 5848
+      md5: a303d5bcce54c84deb883c937affa281
+      size: 5846
     - path: src/bbox_tube_temporal/data.py
       hash: md5
       md5: b907e5a0baedb93775446678c2cce034
@@ -4072,8 +4072,8 @@ stages:
       size: 3612
     - path: src/bbox_tube_temporal/protocol_eval.py
       hash: md5
-      md5: 75f3b43e4c3a51f7a8529c5a960edb15
-      size: 5810
+      md5: d8d5d69d2f7884a7e54d38f785e43726
+      size: 5327
     - path: src/bbox_tube_temporal/tubes.py
       hash: md5
       md5: 2f6f8e5e9ff7342a45ddaec8d0bedc1f
@@ -4095,8 +4095,8 @@ stages:
       size: 2
     - path: data/08_reporting/val/packaged/gru_convnext_finetune/metrics.json
       hash: md5
-      md5: 64e0aa1098d9629db3fe25f002b026f6
-      size: 290
+      md5: 7ca6e276f66a9fd774c7a5345e1a2f1e
+      size: 286
     - path: data/08_reporting/val/packaged/gru_convnext_finetune/pr_curve.png
       hash: md5
       md5: 1a33651425d1e760f71d0fa5e5ebeb07
@@ -4104,8 +4104,8 @@ stages:
     - path: 
         data/08_reporting/val/packaged/gru_convnext_finetune/predictions.json
       hash: md5
-      md5: 5621e5267b866cce741c021fd85a3229
-      size: 1487499
+      md5: 9f29195b5410bd26d91451bfb3841ad1
+      size: 1486777
     - path: data/08_reporting/val/packaged/gru_convnext_finetune/roc_curve.png
       hash: md5
       md5: 6e7ae4d144c2e8cc30ee4b7d167a5036
