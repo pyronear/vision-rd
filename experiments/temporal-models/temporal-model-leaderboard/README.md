@@ -27,7 +27,7 @@ Standardized evaluation and ranking of `TemporalModel` implementations on the [p
 
 - **Precision, Recall, F1** -- sequence-level binary classification (smoke vs. no smoke)
 - **FPR** -- false positive rate
-- **Mean / Median TTD** -- time-to-detection in **frames** for true positives (0-based `trigger_frame_index` where the model first decides positive). Frames are nominally 30s apart in production, but filename timestamps in the sequential test set are unreliable so we report in frames directly
+- **Mean / Median TTD** -- time-to-detection in **frames** for true positives, interpreted as **delay** from the first frame. TTD = `trigger_frame_index` (0-based): firing on frame 0 → TTD = 0 (instant detection on the first frame); firing on frame 1 → TTD = 1 frame of delay; and so on. TTD × 30 s/frame ≈ wall-clock delay in production. We report in frames directly because filename timestamps in the sequential test set are unreliable.
 
 ## 📦 Data
 
