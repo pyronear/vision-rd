@@ -1,14 +1,14 @@
-md5: 180164308103dcd9b3ebdbb2395deac6
+md5: 309877aea89876c71e35def86c8e3cce
 frozen: true
 deps:
 - path: data/processed/sequential_train_val/val
   repo:
     url: https://github.com/pyronear/pyro-dataset
-    rev: v2.2.0
-    rev_lock: ca3b7bbfc9f072d101849e99a5ec91791a3e7c7a
+    rev: v3.0.0
+    rev_lock: ca2a1b0a47163feefaeb02ba43b239eb64898362
 outs:
-- md5: 2ca47638a4b0cc9ca7d4011376c54e45.dir
-  size: 631259421
-  nfiles: 12448
+- md5: b58404e2160d272fd736fad3aa561223.dir
+  size: 668383256
+  nfiles: 13044
   hash: md5
   path: val
