@@ -45,17 +45,13 @@ via `dvc import` (sequential_train_val split):
 | train/all | Single-frame | 0.820 | 0.981 | 0.893 | 0.215 | -- |
 | train/all | Predictor | 0.849 | 0.971 | **0.906** | 0.172 | 1 |
 
-#### Note on `nb_consecutive_frames` semantics
+#### Why `conf=0.2, nb_frames=4` (and why median TTD = 1 frame)
 
-Despite the name, **`nb_consecutive_frames` is the sliding-window size, not a hard "wait N frames before alarm" gate** — see `pyro_predictor/predictor.py::_update_states`. The aggregation is roughly:
+Packaged params come from the sweep above (F1-optimal on val/all). Production runs `conf=0.35, nb_frames=7` — more conservative, trades recall for fewer false alarms. The leaderboard's TTD therefore reflects the F1-optimized packaging, not a faithful prod reproduction.
 
-- `conf_th = conf_thresh * nb_consecutive_frames` (threshold on the NMS-summed score)
-- `strong_detection = sum(iou > 0, axis=0) >= nb_consecutive_frames // 2` (= 2 when `nb_frames=4`)
-- `conf = max(summed_scores) / (nb_consecutive_frames + 1)`; alarm when `conf > conf_thresh`
+Regardless of params, `nb_consecutive_frames` is a sliding-window **size**, not a "wait N frames" gate (see `pyro_predictor/predictor.py::_update_states`): alarm fires as soon as `conf = max_sum_score / (nb+1)` exceeds `conf_thresh` within the rolling window. With `nb=4, conf=0.2`, the earliest possible fire is **frame 1** — two overlapping detections from frames 0 and 1, sum ≈ 1.6, `conf ≈ 0.32`. Hence median TTD = 1.
 
-The `strong_detection` check counts **overlapping boxes across the window**, including multiple co-located boxes returned on the current frame. YOLO often emits 2+ overlapping high-confidence boxes for a clear smoke plume, so the ≥ 2 check can pass on **frame 0 alone**. If the sum of overlapping scores exceeds `conf_th`, the alarm fires immediately → `trigger_frame_index = 0`.
-
-**Consequence**: median TTD = 1 frame on the leaderboard test set is a real artifact of the production algorithm, not of the TTD migration. If you actually need "wait N consecutive frames before alarm" semantics for the baseline, that's an algorithm change in `pyro-engine`, not a leaderboard/evaluator change.
+With prod `nb=7, conf=0.35`, the earliest possible fire shifts to frame 2–3 (~60–90s at 30s/frame) — not 7 frames. If you want prod-faithful numbers, repackage with prod params and re-run the `evaluate_pyro_detector` leaderboard stage.
 
 ### Sweep top configs (val/all, ranked by F1)
 
