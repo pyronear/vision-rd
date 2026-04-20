@@ -4,15 +4,15 @@ Standardized evaluation and ranking of `TemporalModel` implementations on the [p
 
 ## 📊 Leaderboard
 
-| Rank | Model | Precision | Recall | F1 | FPR | Mean TTD (s) | Median TTD (s) |
-|------|-------|-----------|--------|----|-----|--------------|----------------|
-| 1 | [Bbox-Tube Temporal (ViT-DINOv2)](../bbox-tube-temporal/) | 0.9608 | 0.9735 | 0.9671 | 0.0397 | 89.1 | 29.0 |
-| 2 | [FSM Tracking Baseline](../tracking-fsm-baseline/) | 0.9474 | 0.9536 | 0.9505 | 0.0530 | 142.0 | 58.0 |
-| 3 | [Bbox-Tube Temporal (GRU-ConvNeXt)](../bbox-tube-temporal/) | 0.9272 | 0.9272 | 0.9272 | 0.0728 | 55.5 | 7.0 |
-| 4 | [Pyro-Detector Baseline](../pyro-detector-baseline/) | 0.8580 | 0.9603 | 0.9063 | 0.1589 | 27.0 | 7.0 |
-| 5 | [MTB Change Detection](../mtb-change-detection/) | 0.7121 | 0.9338 | 0.8080 | 0.3775 | 84.2 | 25.0 |
+| Rank | Model | Precision | Recall | F1 | FPR | Mean TTD (frames) | Median TTD (frames) |
+|------|-------|-----------|--------|----|-----|-------------------|---------------------|
+| 1 | [Bbox-Tube Temporal (ViT-DINOv2)](../bbox-tube-temporal/) | 0.9608 | 0.9735 | 0.9671 | 0.0397 | 3.4 | 2.0 |
+| 2 | [FSM Tracking Baseline](../tracking-fsm-baseline/) | 0.9474 | 0.9536 | 0.9505 | 0.0530 | 4.6 | 4.0 |
+| 3 | [Bbox-Tube Temporal (GRU-ConvNeXt)](../bbox-tube-temporal/) | 0.9272 | 0.9272 | 0.9272 | 0.0728 | 2.0 | 1.0 |
+| 4 | [Pyro-Detector Baseline](../pyro-detector-baseline/) | 0.8580 | 0.9603 | 0.9063 | 0.1589 | 1.3 | 1.0 |
+| 5 | [MTB Change Detection](../mtb-change-detection/) | 0.7121 | 0.9338 | 0.8080 | 0.3775 | 3.0 | 2.0 |
 
-*Evaluated on 302 sequences (151 wildfire + 151 false positive). Last updated: 2026-04-17.*
+*Evaluated on 302 sequences (151 wildfire + 151 false positive). Last updated: 2026-04-20.*
 
 ## 🤖 Models
 
@@ -27,14 +27,14 @@ Standardized evaluation and ranking of `TemporalModel` implementations on the [p
 
 - **Precision, Recall, F1** -- sequence-level binary classification (smoke vs. no smoke)
 - **FPR** -- false positive rate
-- **Mean / Median TTD** -- time-to-detection in seconds for true positives (time from first frame to trigger frame)
+- **Mean / Median TTD** -- time-to-detection in **frames** for true positives (0-based `trigger_frame_index` where the model first decides positive). Frames are nominally 30s apart in production, but filename timestamps in the sequential test set are unreliable so we report in frames directly
 
 ## 📦 Data
 
 Test set imported via DVC from [pyro-dataset](https://github.com/pyronear/pyro-dataset) v3.0.0:
 - 151 wildfire (positive) + 151 false positive (negative) sequences
 - Ground truth determined by directory structure (`wildfire/` vs `fp/`)
-- Max 20 frames per sequence, 30s apart
+- Up to ~40 frames per sequence; production cadence is nominally 30s per frame, but filename timestamps in this test set are unreliable (see the TTD note above)
 
 ## 🔄 How to Reproduce
 

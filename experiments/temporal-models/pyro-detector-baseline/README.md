@@ -38,21 +38,35 @@ via `dvc import` (sequential_train_val split):
 
 ### Evaluate (optimized params: conf=0.2, nb_frames=4)
 
-| Split | Method | Precision | Recall | F1 | FPR | Median TTD |
+| Split | Method | Precision | Recall | F1 | FPR | Median TTD (frames) |
 |---|---|---|---|---|---|---|
 | val/all | Single-frame | 0.853 | 0.960 | 0.903 | 0.166 | -- |
-| val/all | Predictor | 0.892 | 0.934 | **0.913** | 0.113 | 9s |
+| val/all | Predictor | 0.892 | 0.934 | **0.913** | 0.113 | _TBD_ |
 | train/all | Single-frame | 0.820 | 0.981 | 0.893 | 0.215 | -- |
-| train/all | Predictor | 0.849 | 0.971 | **0.906** | 0.172 | 20s |
+| train/all | Predictor | 0.849 | 0.971 | **0.906** | 0.172 | _TBD_ |
+
+_TTD values pending regeneration — TTD migrated from seconds to frame index; re-run `dvc repro` in this experiment to refresh. Leaderboard test-set median TTD for this model is 1 frame._
+
+#### Note on `nb_consecutive_frames` semantics
+
+Despite the name, **`nb_consecutive_frames` is the sliding-window size, not a hard "wait N frames before alarm" gate** — see `pyro_predictor/predictor.py::_update_states`. The aggregation is roughly:
+
+- `conf_th = conf_thresh * nb_consecutive_frames` (threshold on the NMS-summed score)
+- `strong_detection = sum(iou > 0, axis=0) >= nb_consecutive_frames // 2` (= 2 when `nb_frames=4`)
+- `conf = max(summed_scores) / (nb_consecutive_frames + 1)`; alarm when `conf > conf_thresh`
+
+The `strong_detection` check counts **overlapping boxes across the window**, including multiple co-located boxes returned on the current frame. YOLO often emits 2+ overlapping high-confidence boxes for a clear smoke plume, so the ≥ 2 check can pass on **frame 0 alone**. If the sum of overlapping scores exceeds `conf_th`, the alarm fires immediately → `trigger_frame_index = 0`.
+
+**Consequence**: median TTD = 1 frame on the leaderboard test set is a real artifact of the production algorithm, not of the TTD migration. If you actually need "wait N consecutive frames before alarm" semantics for the baseline, that's an algorithm change in `pyro-engine`, not a leaderboard/evaluator change.
 
 ### Sweep top configs (val/all, ranked by F1)
 
-| conf | nb_frames | Precision | Recall | F1 | FPR | Mean TTD |
+| conf | nb_frames | Precision | Recall | F1 | FPR | Mean TTD (frames) |
 |---|---|---|---|---|---|---|
-| 0.20 | 4 | 0.892 | 0.934 | **0.913** | 0.113 | 90s |
-| 0.25 | 3 | 0.897 | 0.927 | 0.912 | 0.106 | 80s |
-| 0.20 | 5 | 0.892 | 0.927 | 0.909 | 0.113 | 100s |
-| 0.30 | 2 | 0.892 | 0.927 | 0.909 | 0.113 | 72s |
+| 0.20 | 4 | 0.892 | 0.934 | **0.913** | 0.113 | _TBD_ |
+| 0.25 | 3 | 0.897 | 0.927 | 0.912 | 0.106 | _TBD_ |
+| 0.20 | 5 | 0.892 | 0.927 | 0.909 | 0.113 | _TBD_ |
+| 0.30 | 2 | 0.892 | 0.927 | 0.909 | 0.113 | _TBD_ |
 
 Production defaults (conf=0.35, nb_frames=7) scored F1=0.825 on val/all.
 The sweep-optimized params improve F1 by ~9pp.

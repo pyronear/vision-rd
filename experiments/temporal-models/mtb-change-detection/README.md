@@ -41,7 +41,7 @@ All metrics are computed **at the sequence level**, not per-frame, on both all s
 - **Recall** — of sequences with real smoke, how many did we catch?
 - **F1** — harmonic mean of precision and recall
 - **FPR** — of FP sequences, how many falsely raised an alarm?
-- **Time-to-detection (TTD)** — seconds from first frame to tracker confirmation (for true positives)
+- **Time-to-detection (TTD)** — frames from first frame to tracker confirmation (for true positives). Frames are nominally 30s apart in production.
 
 **YOLO-only baseline:** any YOLO detection in any frame counts as a positive prediction. Upper bound on recall, lower bound on precision.
 
@@ -53,24 +53,24 @@ Best parameters from sweep on train/pyronear (`pixel_threshold=10, min_change_ra
 
 **Validation (267 sequences: 116 WF + 151 FP):**
 
-| Method | Precision | Recall | F1 | FPR | Mean TTD |
+| Method | Precision | Recall | F1 | FPR | Mean TTD (frames) |
 |---|---|---|---|---|---|
 | YOLO-only | 0.578 | 0.991 | 0.730 | 0.556 | — |
-| MTB tracking | 0.682 | 0.922 | 0.784 | 0.331 | 58s |
+| MTB tracking | 0.682 | 0.922 | 0.784 | 0.331 | _TBD — re-run `dvc repro`_ |
 
 **Training (2,536 sequences: 1,070 WF + 1,466 FP):**
 
-| Method | Precision | Recall | F1 | FPR | Mean TTD |
+| Method | Precision | Recall | F1 | FPR | Mean TTD (frames) |
 |---|---|---|---|---|---|
 | YOLO-only | 0.525 | 0.971 | 0.682 | 0.641 | — |
-| MTB tracking | 0.617 | 0.930 | 0.742 | 0.421 | 87s |
+| MTB tracking | 0.617 | 0.930 | 0.742 | 0.421 | _TBD — re-run `dvc repro`_ |
 
 ### Key improvements over YOLO-only (val/pyronear)
 
 - **+10.4pp precision** (0.578 → 0.682)
 - **-22.5pp FPR** (0.556 → 0.331) — 40% reduction in false alarms
 - **-6.9pp recall** (0.991 → 0.922) — moderate cost
-- **Mean TTD: 58s** (median: 15s)
+- **Mean TTD**: pending regeneration (TTD migrated to frame index; re-run `dvc repro` in this experiment to refresh)
 
 ## Pipeline
 
