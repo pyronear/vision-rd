@@ -93,11 +93,11 @@ def main() -> None:
         predictor_metrics["f1"],
         predictor_metrics["fpr"],
     )
-    if predictor_metrics["mean_ttd_seconds"] is not None:
+    if predictor_metrics["mean_ttd_frames"] is not None:
         logger.info(
-            "  Mean TTD=%.1fs  Median TTD=%.1fs",
-            predictor_metrics["mean_ttd_seconds"],
-            predictor_metrics["median_ttd_seconds"],
+            "  Mean TTD=%.1f frames  Median TTD=%.1f frames",
+            predictor_metrics["mean_ttd_frames"],
+            predictor_metrics["median_ttd_frames"],
         )
 
     # Generate plots

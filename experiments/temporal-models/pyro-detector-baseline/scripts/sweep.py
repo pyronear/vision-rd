@@ -211,11 +211,11 @@ def main() -> None:
         "R",
         "F1",
         "FPR",
-        "TTD(s)",
+        "TTD(fr)",
     )
     for row in rows[:10]:
-        ttd = row.get("mean_ttd_seconds")
-        ttd_str = f"{ttd:.0f}" if ttd is not None else "N/A"
+        ttd = row.get("mean_ttd_frames")
+        ttd_str = f"{ttd:.1f}" if ttd is not None else "N/A"
         logger.info(
             "  %-6s %-6s | %-6s %-6s %-6s %-6s | %-8s",
             row["conf_thresh"],
