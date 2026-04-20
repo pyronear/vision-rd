@@ -80,9 +80,7 @@ def _fake_yolo_factory(per_frame_xywhn):
                 r.boxes.xywhn = torch.tensor(
                     [[c, cy, w, h] for (c, cy, w, h, _) in boxes]
                 )
-                r.boxes.conf = torch.tensor(
-                    [conf for (_, _, _, _, conf) in boxes]
-                )
+                r.boxes.conf = torch.tensor([conf for (_, _, _, _, conf) in boxes])
                 r.boxes.cls = torch.zeros(n)
             results.append(r)
         return results

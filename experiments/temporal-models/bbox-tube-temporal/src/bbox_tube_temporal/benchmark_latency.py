@@ -182,13 +182,9 @@ def run_benchmark_on_model(
     total_ms = [r["total_s"] * 1000.0 for r in body]
     yolo_ms = [r["yolo_s"] * 1000.0 for r in body]
     classifier_ms = [r["classifier_s"] * 1000.0 for r in body]
-    other_ms = [
-        (r["total_s"] - r["yolo_s"] - r["classifier_s"]) * 1000.0 for r in body
-    ]
+    other_ms = [(r["total_s"] - r["yolo_s"] - r["classifier_s"]) * 1000.0 for r in body]
     per_frame_total_ms = [
-        (r["total_s"] * 1000.0) / r["num_frames"]
-        for r in body
-        if r["num_frames"] > 0
+        (r["total_s"] * 1000.0) / r["num_frames"] for r in body if r["num_frames"] > 0
     ]
 
     summary = {
