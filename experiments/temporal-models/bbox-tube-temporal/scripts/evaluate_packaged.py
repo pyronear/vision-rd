@@ -74,7 +74,7 @@ def _record_to_json(rec: SequenceRecord) -> dict:
             float(decision["threshold"]) if "threshold" in decision else None
         ),
         "kept_tubes": kept,
-        "ttd_seconds": rec.ttd_seconds,
+        "ttd_frames": rec.ttd_frames,
     }
 
 
