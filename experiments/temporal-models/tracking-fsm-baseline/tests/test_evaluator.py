@@ -1,18 +1,20 @@
 from tracking_fsm_baseline.evaluator import compute_metrics, compute_yolo_only_baseline
 
 
-def _result(gt: bool, pred: bool) -> dict:
+def _result(gt: bool, pred: bool, *, confirmed_frame_index: int | None = None) -> dict:
     return {
         "is_positive_gt": gt,
         "is_positive_pred": pred,
-        "confirmed_timestamp": "2024-01-01T00:01:00" if pred else None,
-        "first_timestamp": "2024-01-01T00:00:00",
+        "confirmed_frame_index": confirmed_frame_index if pred else None,
     }
 
 
 class TestComputeMetrics:
     def test_perfect_predictions(self):
-        results = [_result(True, True), _result(False, False)]
+        results = [
+            _result(True, True, confirmed_frame_index=2),
+            _result(False, False),
+        ]
         m = compute_metrics(results)
         assert m["precision"] == 1.0
         assert m["recall"] == 1.0
@@ -20,7 +22,10 @@ class TestComputeMetrics:
         assert m["fpr"] == 0.0
 
     def test_all_false_positives(self):
-        results = [_result(False, True), _result(False, True)]
+        results = [
+            _result(False, True, confirmed_frame_index=1),
+            _result(False, True, confirmed_frame_index=1),
+        ]
         m = compute_metrics(results)
         assert m["precision"] == 0.0
         assert m["fpr"] == 1.0
@@ -34,9 +39,9 @@ class TestComputeMetrics:
 
     def test_mixed(self):
         results = [
-            _result(True, True),
+            _result(True, True, confirmed_frame_index=2),
             _result(True, False),
-            _result(False, True),
+            _result(False, True, confirmed_frame_index=1),
             _result(False, False),
         ]
         m = compute_metrics(results)
@@ -58,50 +63,44 @@ class TestComputeMetrics:
             {
                 "is_positive_gt": True,
                 "is_positive_pred": True,
-                "confirmed_timestamp": "2024-01-01T00:01:00",
-                "first_timestamp": "2024-01-01T00:00:00",
+                "confirmed_frame_index": 2,
             },
             {
                 "is_positive_gt": True,
                 "is_positive_pred": True,
-                "confirmed_timestamp": "2024-01-01T00:03:00",
-                "first_timestamp": "2024-01-01T00:00:00",
+                "confirmed_frame_index": 6,
             },
         ]
         m = compute_metrics(results)
-        assert m["mean_ttd_seconds"] == 120.0
-        assert m["median_ttd_seconds"] == 120.0
+        assert m["mean_ttd_frames"] == 4.0
+        assert m["median_ttd_frames"] == 4.0
 
     def test_median_even_count(self):
         results = [
             {
                 "is_positive_gt": True,
                 "is_positive_pred": True,
-                "confirmed_timestamp": "2024-01-01T00:01:00",
-                "first_timestamp": "2024-01-01T00:00:00",
+                "confirmed_frame_index": 2,
             },
             {
                 "is_positive_gt": True,
                 "is_positive_pred": True,
-                "confirmed_timestamp": "2024-01-01T00:02:00",
-                "first_timestamp": "2024-01-01T00:00:00",
+                "confirmed_frame_index": 4,
             },
             {
                 "is_positive_gt": True,
                 "is_positive_pred": True,
-                "confirmed_timestamp": "2024-01-01T00:03:00",
-                "first_timestamp": "2024-01-01T00:00:00",
+                "confirmed_frame_index": 6,
             },
             {
                 "is_positive_gt": True,
                 "is_positive_pred": True,
-                "confirmed_timestamp": "2024-01-01T00:04:00",
-                "first_timestamp": "2024-01-01T00:00:00",
+                "confirmed_frame_index": 8,
             },
         ]
         m = compute_metrics(results)
-        # Median of [60, 120, 180, 240] = (120 + 180) / 2 = 150
-        assert m["median_ttd_seconds"] == 150.0
+        # Median of [2, 4, 6, 8] = (4 + 6) / 2 = 5
+        assert m["median_ttd_frames"] == 5.0
 
 
 class TestComputeYoloOnlyBaseline:
@@ -111,15 +110,13 @@ class TestComputeYoloOnlyBaseline:
                 "is_positive_gt": True,
                 "is_positive_pred": False,
                 "num_detections_total": 5,
-                "confirmed_timestamp": None,
-                "first_timestamp": "2024-01-01T00:00:00",
+                "confirmed_frame_index": None,
             },
             {
                 "is_positive_gt": False,
                 "is_positive_pred": False,
                 "num_detections_total": 0,
-                "confirmed_timestamp": None,
-                "first_timestamp": "2024-01-01T00:00:00",
+                "confirmed_frame_index": None,
             },
         ]
         m = compute_yolo_only_baseline(results)
@@ -135,8 +132,7 @@ class TestComputeYoloOnlyBaseline:
                 "is_positive_gt": True,
                 "is_positive_pred": False,
                 "num_detections_total": 0,
-                "confirmed_timestamp": None,
-                "first_timestamp": "2024-01-01T00:00:00",
+                "confirmed_frame_index": None,
             },
         ]
         m = compute_yolo_only_baseline(results)

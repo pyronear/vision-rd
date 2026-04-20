@@ -139,8 +139,8 @@ def main() -> None:
     logger.info(header)
     logger.info("-" * len(header))
     for row in rows:
-        ttd = row.get("mean_ttd_seconds")
-        ttd_str = f"{ttd:.0f}s" if ttd is not None else "N/A"
+        ttd = row.get("mean_ttd_frames")
+        ttd_str = f"{ttd:.1f}" if ttd is not None else "N/A"
         logger.info(
             "%-30s %6.3f %6.3f %6.3f %6.3f %8s",
             row["rules"],
