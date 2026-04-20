@@ -26,8 +26,11 @@ class TemporalModelOutput:
 
     Attributes:
         is_positive: Binary classification decision (``True`` = smoke detected).
-        trigger_frame_index: Index of the frame where the model decided positive
-            (for time-to-detection computation), or ``None`` if negative.
+        trigger_frame_index: Index of the frame (0-based) where the model
+            decided positive, or ``None`` if negative. Time-to-detection
+            in frames equals this value for a true positive. Do not
+            compute TTD by subtracting frame filename timestamps — they
+            are unreliable in the pyro-dataset test set.
         details: Arbitrary model-specific metadata (e.g., tracks, confidence
             scores, attention maps).
     """
