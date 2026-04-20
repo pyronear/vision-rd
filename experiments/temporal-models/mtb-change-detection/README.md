@@ -56,21 +56,21 @@ Best parameters from sweep on train/pyronear (`pixel_threshold=10, min_change_ra
 | Method | Precision | Recall | F1 | FPR | Mean TTD (frames) |
 |---|---|---|---|---|---|
 | YOLO-only | 0.578 | 0.991 | 0.730 | 0.556 | — |
-| MTB tracking | 0.682 | 0.922 | 0.784 | 0.331 | _TBD — re-run `dvc repro`_ |
+| MTB tracking | 0.682 | 0.922 | 0.784 | 0.331 | 3.3 |
 
 **Training (2,536 sequences: 1,070 WF + 1,466 FP):**
 
 | Method | Precision | Recall | F1 | FPR | Mean TTD (frames) |
 |---|---|---|---|---|---|
 | YOLO-only | 0.525 | 0.971 | 0.682 | 0.641 | — |
-| MTB tracking | 0.617 | 0.930 | 0.742 | 0.421 | _TBD — re-run `dvc repro`_ |
+| MTB tracking | 0.617 | 0.930 | 0.742 | 0.421 | 3.1 |
 
 ### Key improvements over YOLO-only (val/pyronear)
 
 - **+10.4pp precision** (0.578 → 0.682)
 - **-22.5pp FPR** (0.556 → 0.331) — 40% reduction in false alarms
 - **-6.9pp recall** (0.991 → 0.922) — moderate cost
-- **Mean TTD**: pending regeneration (TTD migrated to frame index; re-run `dvc repro` in this experiment to refresh)
+- **Mean TTD: 3.3 frames** (median: 2.0) on val/pyronear
 
 ## Pipeline
 

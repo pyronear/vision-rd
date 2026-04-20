@@ -41,11 +41,9 @@ via `dvc import` (sequential_train_val split):
 | Split | Method | Precision | Recall | F1 | FPR | Median TTD (frames) |
 |---|---|---|---|---|---|---|
 | val/all | Single-frame | 0.853 | 0.960 | 0.903 | 0.166 | -- |
-| val/all | Predictor | 0.892 | 0.934 | **0.913** | 0.113 | _TBD_ |
+| val/all | Predictor | 0.892 | 0.934 | **0.913** | 0.113 | 1 |
 | train/all | Single-frame | 0.820 | 0.981 | 0.893 | 0.215 | -- |
-| train/all | Predictor | 0.849 | 0.971 | **0.906** | 0.172 | _TBD_ |
-
-_TTD values pending regeneration — TTD migrated from seconds to frame index; re-run `dvc repro` in this experiment to refresh. Leaderboard test-set median TTD for this model is 1 frame._
+| train/all | Predictor | 0.849 | 0.971 | **0.906** | 0.172 | 1 |
 
 #### Note on `nb_consecutive_frames` semantics
 
@@ -63,10 +61,10 @@ The `strong_detection` check counts **overlapping boxes across the window**, inc
 
 | conf | nb_frames | Precision | Recall | F1 | FPR | Mean TTD (frames) |
 |---|---|---|---|---|---|---|
-| 0.20 | 4 | 0.892 | 0.934 | **0.913** | 0.113 | _TBD_ |
-| 0.25 | 3 | 0.897 | 0.927 | 0.912 | 0.106 | _TBD_ |
-| 0.20 | 5 | 0.892 | 0.927 | 0.909 | 0.113 | _TBD_ |
-| 0.30 | 2 | 0.892 | 0.927 | 0.909 | 0.113 | _TBD_ |
+| 0.20 | 4 | 0.892 | 0.934 | **0.913** | 0.113 | _regen from `dvc repro sweep` to refresh_ |
+| 0.25 | 3 | 0.897 | 0.927 | 0.912 | 0.106 | _regen from `dvc repro sweep` to refresh_ |
+| 0.20 | 5 | 0.892 | 0.927 | 0.909 | 0.113 | _regen from `dvc repro sweep` to refresh_ |
+| 0.30 | 2 | 0.892 | 0.927 | 0.909 | 0.113 | _regen from `dvc repro sweep` to refresh_ |
 
 Production defaults (conf=0.35, nb_frames=7) scored F1=0.825 on val/all.
 The sweep-optimized params improve F1 by ~9pp.

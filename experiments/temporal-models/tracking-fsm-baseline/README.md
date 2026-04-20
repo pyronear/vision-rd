@@ -67,21 +67,21 @@ Best parameters from sweep on train/pyronear (`conf=0.3, iou=0.1, min_consecutiv
 | Method | Precision | Recall | F1 | FPR | Mean TTD (frames) |
 |---|---|---|---|---|---|
 | YOLO-only | 0.775 | 0.982 | 0.866 | 0.218 | — |
-| Tracking | 0.893 | 0.964 | 0.927 | 0.088 | _TBD — re-run `dvc repro`_ |
+| Tracking | 0.893 | 0.964 | 0.927 | 0.088 | 4.2 |
 
 **Training (2,467 sequences: 1,034 WF + 1,433 FP):**
 
 | Method | Precision | Recall | F1 | FPR | Mean TTD (frames) |
 |---|---|---|---|---|---|
 | YOLO-only | 0.696 | 0.987 | 0.816 | 0.311 | — |
-| Tracking | 0.873 | 0.962 | 0.915 | 0.101 | _TBD — re-run `dvc repro`_ |
+| Tracking | 0.873 | 0.962 | 0.915 | 0.101 | 4.3 |
 
 ### ✅ Key improvements over YOLO-only (val/pyronear)
 
 - **+11.8pp precision** (0.775 → 0.893)
 - **-13.0pp FPR** (0.218 → 0.088) — 60% reduction in false alarms
 - **-1.8pp recall** (0.982 → 0.964) — minimal cost
-- **Mean TTD**: pending regeneration (TTD migrated to frame index; re-run `dvc repro` in this experiment to refresh). Leaderboard test-set TTD for this model is ~4 frames (median).
+- **Mean TTD: 4.2 frames** (median: 4.0) on val/pyronear — consistent with the 5-consecutive-frames rule (0-indexed trigger at frame 4 = fires on the 5th detection)
 
 ## ⚙️ Pipeline
 

@@ -15,8 +15,8 @@
     "recall": 0.9897,
     "f1": 0.8665,
     "fpr": 0.2147,
-    "mean_ttd_seconds": 0.0,
-    "median_ttd_seconds": 0.0
+    "mean_ttd_frames": 0.0,
+    "median_ttd_frames": 0.0
   },
   "predictor": {
     "num_sequences": 2536,
@@ -34,7 +34,7 @@
     "recall": 0.9794,
     "f1": 0.8839,
     "fpr": 0.1725,
-    "mean_ttd_seconds": 41.7,
-    "median_ttd_seconds": 7.0
+    "mean_ttd_frames": 1.2,
+    "median_ttd_frames": 1
   }
 }
