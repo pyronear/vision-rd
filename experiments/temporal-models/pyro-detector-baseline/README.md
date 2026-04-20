@@ -61,10 +61,10 @@ The `strong_detection` check counts **overlapping boxes across the window**, inc
 
 | conf | nb_frames | Precision | Recall | F1 | FPR | Mean TTD (frames) |
 |---|---|---|---|---|---|---|
-| 0.20 | 4 | 0.892 | 0.934 | **0.913** | 0.113 | _regen from `dvc repro sweep` to refresh_ |
-| 0.25 | 3 | 0.897 | 0.927 | 0.912 | 0.106 | _regen from `dvc repro sweep` to refresh_ |
-| 0.20 | 5 | 0.892 | 0.927 | 0.909 | 0.113 | _regen from `dvc repro sweep` to refresh_ |
-| 0.30 | 2 | 0.892 | 0.927 | 0.909 | 0.113 | _regen from `dvc repro sweep` to refresh_ |
+| 0.20 | 4 | 0.892 | 0.934 | **0.913** | 0.113 | 2.0 |
+| 0.25 | 3 | 0.897 | 0.927 | 0.912 | 0.106 | 1.8 |
+| 0.20 | 5 | 0.892 | 0.927 | 0.909 | 0.113 | 2.2 |
+| 0.30 | 2 | 0.892 | 0.927 | 0.909 | 0.113 | 1.7 |
 
 Production defaults (conf=0.35, nb_frames=7) scored F1=0.825 on val/all.
 The sweep-optimized params improve F1 by ~9pp.
