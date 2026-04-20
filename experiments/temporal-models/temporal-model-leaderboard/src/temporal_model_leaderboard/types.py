@@ -11,14 +11,15 @@ class SequenceResult:
         sequence_id: Unique identifier (typically the sequence directory name).
         ground_truth: ``True`` if wildfire (positive), ``False`` if false positive.
         predicted: The model's binary classification decision.
-        ttd_seconds: Time-to-detection in seconds for true positives,
-            or ``None`` if not a TP or timestamps are unavailable.
+        ttd_frames: Time-to-detection in frames (0-based trigger index)
+            for true positives, or ``None`` if not a TP or the model did
+            not report a trigger frame.
     """
 
     sequence_id: str
     ground_truth: bool
     predicted: bool
-    ttd_seconds: float | None = None
+    ttd_frames: int | None = None
 
 
 @dataclass
@@ -36,8 +37,8 @@ class ModelMetrics:
         recall: TP / (TP + FN).
         f1: Harmonic mean of precision and recall.
         fpr: FP / (FP + TN).
-        mean_ttd_seconds: Mean time-to-detection across TPs, or ``None``.
-        median_ttd_seconds: Median time-to-detection across TPs, or ``None``.
+        mean_ttd_frames: Mean time-to-detection across TPs, or ``None``.
+        median_ttd_frames: Median time-to-detection across TPs, or ``None``.
     """
 
     model_name: str
@@ -50,8 +51,8 @@ class ModelMetrics:
     recall: float
     f1: float
     fpr: float
-    mean_ttd_seconds: float | None = None
-    median_ttd_seconds: float | None = None
+    mean_ttd_frames: float | None = None
+    median_ttd_frames: float | None = None
 
 
 @dataclass
