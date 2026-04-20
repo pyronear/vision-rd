@@ -18,18 +18,18 @@ stages:
       nfiles: 16408
     - path: scripts/evaluate.py
       hash: md5
-      md5: 0024e38167d489e943e6e80735f9fd56
-      size: 4083
+      md5: e53dc61019b22e082dc68cf29cecdbaf
+      size: 4092
     - path: src/temporal_model_leaderboard
       hash: md5
-      md5: 48674f685af78ecc1a587833008a537b.dir
-      size: 32457
+      md5: a0517be7b04b8a892023b63e46d2cb6f.dir
+      size: 31157
       nfiles: 12
     outs:
     - path: data/07_model_output/fsm-tracking-baseline
       hash: md5
-      md5: a45cbac352c3e4eb4ed6784d205eab45.dir
-      size: 47270
+      md5: 3ef84d68c8eb82d9d766e931232f15ff.dir
+      size: 46494
       nfiles: 2
   leaderboard:
     cmd: uv run python scripts/leaderboard.py --results-dir data/07_model_output
@@ -37,8 +37,8 @@ stages:
     deps:
     - path: data/07_model_output
       hash: md5
-      md5: 30e27b1ce72d57e51cb8a309e5df1f9f.dir
-      size: 236140
+      md5: 2513847bdf5c540431b2d2d166568547.dir
+      size: 232600
       nfiles: 12
     - path: scripts/leaderboard.py
       hash: md5
@@ -46,18 +46,18 @@ stages:
       size: 2507
     - path: src/temporal_model_leaderboard
       hash: md5
-      md5: 48674f685af78ecc1a587833008a537b.dir
-      size: 32457
+      md5: a0517be7b04b8a892023b63e46d2cb6f.dir
+      size: 31157
       nfiles: 12
     outs:
     - path: data/08_reporting/leaderboard.json
       hash: md5
-      md5: 35d7d8e2ab85a1b98078c32e61226bf7
-      size: 1434
+      md5: 5cbdb2ffccb3b82592c60661497efb0c
+      size: 1409
     - path: data/08_reporting/leaderboard.txt
       hash: md5
-      md5: efea0a3b3dc7b8e1fbd0596c65b71df8
-      size: 784
+      md5: 4ff90f57fdf78b2049947d617325bb72
+      size: 854
   evaluate_mtb_change_detection:
     cmd: uv run python scripts/evaluate.py --model-name mtb-change-detection 
       --model-type mtb-change-detection --model-package 
@@ -76,18 +76,18 @@ stages:
       nfiles: 16408
     - path: scripts/evaluate.py
       hash: md5
-      md5: 0024e38167d489e943e6e80735f9fd56
-      size: 4083
+      md5: e53dc61019b22e082dc68cf29cecdbaf
+      size: 4092
     - path: src/temporal_model_leaderboard
       hash: md5
-      md5: 48674f685af78ecc1a587833008a537b.dir
-      size: 32457
+      md5: a0517be7b04b8a892023b63e46d2cb6f.dir
+      size: 31157
       nfiles: 12
     outs:
     - path: data/07_model_output/mtb-change-detection
       hash: md5
-      md5: 7ae5f6e1a2caea65e2f18769976a98e4.dir
-      size: 47172
+      md5: 9aacee4c2b235ce000a43d4ab3e28684.dir
+      size: 46452
       nfiles: 2
   evaluate_pyro_detector:
     cmd: uv run python scripts/evaluate.py --model-name pyro-detector-baseline 
@@ -107,18 +107,18 @@ stages:
       nfiles: 16408
     - path: scripts/evaluate.py
       hash: md5
-      md5: 0024e38167d489e943e6e80735f9fd56
-      size: 4083
+      md5: e53dc61019b22e082dc68cf29cecdbaf
+      size: 4092
     - path: src/temporal_model_leaderboard
       hash: md5
-      md5: 48674f685af78ecc1a587833008a537b.dir
-      size: 32457
+      md5: a0517be7b04b8a892023b63e46d2cb6f.dir
+      size: 31157
       nfiles: 12
     outs:
     - path: data/07_model_output/pyro-detector-baseline
       hash: md5
-      md5: 4054791327ea602e60431afd010ece73.dir
-      size: 47137
+      md5: aa9e278d32afffc685c845bf4526713b.dir
+      size: 46469
       nfiles: 2
   evaluate_bbox_tube_temporal:
     cmd: uv run python scripts/evaluate.py --model-name bbox-tube-temporal 
@@ -170,18 +170,18 @@ stages:
       nfiles: 16408
     - path: scripts/evaluate.py
       hash: md5
-      md5: 0024e38167d489e943e6e80735f9fd56
-      size: 4083
+      md5: e53dc61019b22e082dc68cf29cecdbaf
+      size: 4092
     - path: src/temporal_model_leaderboard
       hash: md5
-      md5: 48674f685af78ecc1a587833008a537b.dir
-      size: 32457
+      md5: a0517be7b04b8a892023b63e46d2cb6f.dir
+      size: 31157
       nfiles: 12
     outs:
     - path: data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune
       hash: md5
-      md5: 9db907b6869e0617acb32704956acb29.dir
-      size: 47224
+      md5: d39c31969ba808e06987035d60edf0dd.dir
+      size: 46505
       nfiles: 2
   evaluate_bbox_tube_gru_convnext_finetune:
     cmd: uv run python scripts/evaluate.py --model-name 
@@ -202,16 +202,16 @@ stages:
       nfiles: 16408
     - path: scripts/evaluate.py
       hash: md5
-      md5: 0024e38167d489e943e6e80735f9fd56
-      size: 4083
+      md5: e53dc61019b22e082dc68cf29cecdbaf
+      size: 4092
     - path: src/temporal_model_leaderboard
       hash: md5
-      md5: 48674f685af78ecc1a587833008a537b.dir
-      size: 32457
+      md5: a0517be7b04b8a892023b63e46d2cb6f.dir
+      size: 31157
       nfiles: 12
     outs:
     - path: data/07_model_output/bbox-tube-temporal-gru-convnext-finetune
       hash: md5
-      md5: 4a39161fbb3711dff7e5c4d3a9b75ce1.dir
-      size: 47186
+      md5: b5bf3d738f539ac969e9607af55afa07.dir
+      size: 46529
       nfiles: 2
