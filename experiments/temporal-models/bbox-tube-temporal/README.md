@@ -198,6 +198,17 @@ Train (3104 sequences) and val (318 sequences) of the packaged `model.zip` for e
 
 Both packaged variants clear the precision target (≥ 0.93) at recall ≥ 0.95 on val. ViT is the F1 leader thanks to the logistic calibrator, which weights tube length and YOLO confidence alongside the raw logit. The exact operating point comes from automated variant analysis (next section) — change the target recall to shift the trade-off. TTD numbers reflect the first-crossing trigger; pre-fix mean TTD on the same weights was ~812-835s (GRU train/val) and ~819-830s (ViT train/val), so both splits see the ~6-10× drop equally — the fix is not val-specific. Train splits show comparable per-split reductions: 80.8s/126.7s mean TTD vs. their respective ~835s/~819s pre-fix baselines.
 
+### CPU latency (packaged, full val)
+
+Measured by `scripts/benchmark_cpu_latency.py` on the val split (315 sequences, 3 warmup discarded). JSON outputs are machine-specific and gitignored; the script + spec + tests are committed so any contributor can reproduce on their own hardware.
+
+| variant | total p50 | total p95 | yolo p50 | classifier p50 | classifier p95 | per-frame p50 |
+|---|---|---|---|---|---|---|
+| `vit_dinov2_finetune` | 2831 ms | 6640 ms | 2155 ms | 631 ms | 3986 ms | 237 ms |
+| `gru_convnext_finetune` | 2666 ms | 5597 ms | 2017 ms | 616 ms | 3409 ms | 219 ms |
+
+**Takeaways.** Both packaged variants run end-to-end on CPU. ViT DINOv2 is only ~6% slower than GRU+ConvNeXt at median (~2.8 s/seq vs ~2.7 s/seq). YOLO dominates the pipeline (~75% of total time for both); the tail (p95) is where the ViT classifier pays — 17% slower than GRU+ConvNeXt's classifier, consistent with attention's quadratic cost over tube length. At 30 s between real frames, the per-frame CPU budget consumed is ~0.8% — no latency concern for either packaged variant on CPU-only hardware. Spec: `docs/specs/2026-04-17-cpu-latency-benchmark-design.md`.
+
 ### Variant analysis and threshold calibration
 
 `scripts/analyze_variant.py` (DVC stage `analyze_variant`) runs a batch of offline simulations on the packaged predictions and emits a recommended config. For each analyzed variant (`gru_convnext_finetune`, `vit_dinov2_finetune`) it sweeps:
@@ -290,6 +301,7 @@ Pointers to the most load-bearing design docs:
 - `docs/specs/2026-04-16-protocol-eval-stage-design.md` — the `evaluate_packaged` stage.
 - `docs/specs/2026-04-17-logistic-calibrator-deployment-design.md` — runtime `LogisticCalibrator` bundled into the packaged archive and the `package.aggregation` per-variant knob.
 - `docs/specs/2026-04-17-first-crossing-trigger-design.md` — first-crossing trigger rule (replaces the `winner.end_frame` trigger).
+- `docs/specs/2026-04-17-cpu-latency-benchmark-design.md` — CPU (and any-device) latency benchmark harness with YOLO-vs-classifier timing split.
 
 ## Deployment (TemporalModel)
 
