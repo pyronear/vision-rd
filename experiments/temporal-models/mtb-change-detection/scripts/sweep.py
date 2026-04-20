@@ -309,8 +309,8 @@ def main() -> None:
         "TTD",
     )
     for row in rows[:10]:
-        ttd = row.get("mean_ttd_seconds")
-        ttd_str = f"{ttd:.0f}" if ttd is not None else "N/A"
+        ttd = row.get("mean_ttd_frames")
+        ttd_str = f"{ttd:.1f}" if ttd is not None else "N/A"
         max_area = row["max_detection_area"]
         max_area_str = f"{max_area}" if max_area is not None else "None"
         logger.info(

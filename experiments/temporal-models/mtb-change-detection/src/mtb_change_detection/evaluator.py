@@ -7,7 +7,6 @@ against a YOLO-only baseline.
 
 import json
 import statistics
-from datetime import datetime
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -30,30 +29,26 @@ def load_tracking_results(results_path: Path) -> list[dict]:
     return json.loads(results_path.read_text())
 
 
-def _extract_ttd_seconds(results: list[dict]) -> list[float]:
-    """Extract time-to-detection in seconds for true-positive sequences.
+def _extract_ttd_frames(results: list[dict]) -> list[int]:
+    """Extract time-to-detection in frames for true-positive sequences.
 
-    Only considers sequences that are both ground-truth positive and
-    predicted positive (TP), and where both timestamps are available.
+    TTD in frames = ``confirmed_frame_index`` (0-based). Only considers
+    sequences that are both ground-truth positive and predicted positive
+    (TP), and where ``confirmed_frame_index`` is not None.
 
     Args:
         results: List of per-sequence result dicts.
 
     Returns:
-        List of TTD values in seconds (one per qualifying TP sequence).
+        List of TTD values in frame indices (one per qualifying TP sequence).
     """
-    ttd_seconds = []
-    for r in results:
-        if (
-            r["is_positive_gt"]
-            and r["is_positive_pred"]
-            and r["confirmed_timestamp"]
-            and r["first_timestamp"]
-        ):
-            t_first = datetime.fromisoformat(r["first_timestamp"])
-            t_confirmed = datetime.fromisoformat(r["confirmed_timestamp"])
-            ttd_seconds.append((t_confirmed - t_first).total_seconds())
-    return ttd_seconds
+    return [
+        r["confirmed_frame_index"]
+        for r in results
+        if r["is_positive_gt"]
+        and r["is_positive_pred"]
+        and r.get("confirmed_frame_index") is not None
+    ]
 
 
 def compute_metrics(results: list[dict]) -> dict:
@@ -61,14 +56,14 @@ def compute_metrics(results: list[dict]) -> dict:
 
     Args:
         results: List of per-sequence result dicts, each containing at least
-            ``is_positive_gt``, ``is_positive_pred``, ``confirmed_timestamp``,
-            and ``first_timestamp``.
+            ``is_positive_gt``, ``is_positive_pred``, and
+            ``confirmed_frame_index`` (0-based trigger frame index or None).
 
     Returns:
         Dict with keys: ``num_sequences``, ``num_positive_gt``,
         ``num_negative_gt``, ``tp``, ``fp``, ``fn``, ``tn``, ``precision``,
-        ``recall``, ``f1``, ``fpr``, ``mean_ttd_seconds``,
-        ``median_ttd_seconds``.  TTD values are ``None`` when there are no
+        ``recall``, ``f1``, ``fpr``, ``mean_ttd_frames``,
+        ``median_ttd_frames``.  TTD values are ``None`` when there are no
         true positives.
     """
     tp = sum(1 for r in results if r["is_positive_gt"] and r["is_positive_pred"])
@@ -90,9 +85,9 @@ def compute_metrics(results: list[dict]) -> dict:
     n_negative_gt = fp + tn
     fpr = fp / n_negative_gt if n_negative_gt > 0 else 0.0
 
-    ttd_seconds = _extract_ttd_seconds(results)
-    mean_ttd = sum(ttd_seconds) / len(ttd_seconds) if ttd_seconds else None
-    median_ttd = statistics.median(ttd_seconds) if ttd_seconds else None
+    ttd_frames = _extract_ttd_frames(results)
+    mean_ttd = sum(ttd_frames) / len(ttd_frames) if ttd_frames else None
+    median_ttd = statistics.median(ttd_frames) if ttd_frames else None
 
     def row_pct(v: int, row_total: int) -> float:
         return round(v / row_total * 100, 2) if row_total > 0 else 0.0
@@ -113,10 +108,8 @@ def compute_metrics(results: list[dict]) -> dict:
         "recall": round(recall, 4),
         "f1": round(f1, 4),
         "fpr": round(fpr, 4),
-        "mean_ttd_seconds": (round(mean_ttd, 1) if mean_ttd is not None else None),
-        "median_ttd_seconds": (
-            round(median_ttd, 1) if median_ttd is not None else None
-        ),
+        "mean_ttd_frames": (round(mean_ttd, 1) if mean_ttd is not None else None),
+        "median_ttd_frames": (round(median_ttd, 1) if median_ttd is not None else None),
     }
 
 
@@ -135,12 +128,13 @@ def compute_yolo_only_baseline(results: list[dict]) -> dict:
     """
     baseline_results = []
     for r in results:
+        is_positive = r["num_detections_total"] > 0
         baseline_results.append(
             {
                 "is_positive_gt": r["is_positive_gt"],
-                "is_positive_pred": r["num_detections_total"] > 0,
-                "confirmed_timestamp": r["first_timestamp"],
-                "first_timestamp": r["first_timestamp"],
+                "is_positive_pred": is_positive,
+                # Baseline "triggers" on frame 0 when any detection exists.
+                "confirmed_frame_index": 0 if is_positive else None,
             }
         )
     return compute_metrics(baseline_results)
@@ -183,22 +177,13 @@ def evaluate_tracker(
         is_alarm, _tracks, confirmed_idx, _frame_traces = tracker.process_sequence(
             filtered_frames
         )
-        first_ts = filtered_frames[0].timestamp if filtered_frames else None
-        confirmed_ts = (
-            filtered_frames[confirmed_idx].timestamp
-            if confirmed_idx is not None
-            else None
-        )
 
         results.append(
             {
                 "is_positive_gt": gt,
                 "is_positive_pred": is_alarm,
                 "num_detections_total": sum(len(f.detections) for f in filtered_frames),
-                "confirmed_timestamp": (
-                    confirmed_ts.isoformat() if confirmed_ts else None
-                ),
-                "first_timestamp": first_ts.isoformat() if first_ts else None,
+                "confirmed_frame_index": confirmed_idx,
             }
         )
 
@@ -312,21 +297,21 @@ def plot_ttd_histogram(results: list[dict], output_path: Path) -> None:
         output_path: Destination file path for the PNG image.
     """
     sns.set_theme(style="whitegrid")
-    ttd_seconds = _extract_ttd_seconds(results)
+    ttd_frames = _extract_ttd_frames(results)
 
-    if not ttd_seconds:
+    if not ttd_frames:
         return
 
     fig, ax = plt.subplots(figsize=(8, 5))
-    sns.histplot(ttd_seconds, bins=20, kde=True, ax=ax)
-    mean_val = sum(ttd_seconds) / len(ttd_seconds)
+    sns.histplot(ttd_frames, bins=20, kde=True, ax=ax)
+    mean_val = sum(ttd_frames) / len(ttd_frames)
     ax.axvline(
         mean_val,
         color="red",
         linestyle="--",
-        label=f"Mean: {mean_val:.0f}s",
+        label=f"Mean: {mean_val:.1f} frames",
     )
-    ax.set_xlabel("Time to Detection (seconds)")
+    ax.set_xlabel("Time to Detection (frames)")
     ax.set_ylabel("Count")
     ax.set_title("Time to Detection Distribution (True Positives)")
     ax.legend()
