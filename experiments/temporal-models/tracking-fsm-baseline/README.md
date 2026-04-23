@@ -66,22 +66,22 @@ Best parameters from sweep on train/pyronear (`conf=0.3, iou=0.1, min_consecutiv
 
 | Method | Precision | Recall | F1 | FPR | Mean TTD (frames) |
 |---|---|---|---|---|---|
-| YOLO-only | 0.775 | 0.982 | 0.866 | 0.218 | — |
-| Tracking | 0.893 | 0.964 | 0.927 | 0.088 | 4.2 |
+| YOLO-only | 0.766 | 0.976 | 0.858 | 0.233 | — |
+| Tracking | 0.926 | 0.903 | 0.914 | 0.057 | 4.8 |
 
 **Training (2,467 sequences: 1,034 WF + 1,433 FP):**
 
 | Method | Precision | Recall | F1 | FPR | Mean TTD (frames) |
 |---|---|---|---|---|---|
-| YOLO-only | 0.696 | 0.987 | 0.816 | 0.311 | — |
-| Tracking | 0.873 | 0.962 | 0.915 | 0.101 | 4.3 |
+| YOLO-only | 0.722 | 0.991 | 0.835 | 0.283 | — |
+| Tracking | 0.914 | 0.963 | 0.938 | 0.067 | 4.5 |
 
 ### ✅ Key improvements over YOLO-only (val/pyronear)
 
 - **+11.8pp precision** (0.775 → 0.893)
 - **-13.0pp FPR** (0.218 → 0.088) — 60% reduction in false alarms
 - **-1.8pp recall** (0.982 → 0.964) — minimal cost
-- **Mean TTD: 4.2 frames** (median: 4.0) on val/pyronear — consistent with the 5-consecutive-frames rule (0-indexed trigger at frame 4 = fires on the 5th detection)
+- **Mean TTD: 4.8 frames** (median: 4.0) on val/pyronear — consistent with the 5-consecutive-frames rule (0-indexed trigger at frame 4 = fires on the 5th detection)
 
 ## ⚙️ Pipeline
 

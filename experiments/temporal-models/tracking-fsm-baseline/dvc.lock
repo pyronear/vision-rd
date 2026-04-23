@@ -8,9 +8,9 @@ stages:
     deps:
     - path: data/01_raw/datasets/train
       hash: md5
-      md5: c38b9cbd0a872ee86402973d6cd8a466.dir
-      size: 4366197067
-      nfiles: 82878
+      md5: caf37d4bf513efd49b9617378fff1ffa.dir
+      size: 4776619781
+      nfiles: 89870
     - path: data/01_raw/models/best.pt
       hash: md5
       md5: fea4ddc8d904fcc5ff11ad900e040837
@@ -21,8 +21,8 @@ stages:
       size: 2810
     - path: src/tracking_fsm_baseline/data.py
       hash: md5
-      md5: a2d742dda7d7217f848e60c4e88de01a
-      size: 4782
+      md5: 0c82e294194ff5df7516425b49a85b35
+      size: 5322
     - path: src/tracking_fsm_baseline/detector.py
       hash: md5
       md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
@@ -41,9 +41,9 @@ stages:
     outs:
     - path: data/02_intermediate/train
       hash: md5
-      md5: 4c2aafa1bed0cd7c34aba1434e52aba2.dir
-      size: 15716760
-      nfiles: 2865
+      md5: 6d9c1d9f8449a8529dc908989fc54c9c.dir
+      size: 17173604
+      nfiles: 3103
   infer@val:
     cmd: uv run python scripts/infer.py --data-dir data/01_raw/datasets/val 
       --model-path data/01_raw/models/best.pt --output-dir 
@@ -52,9 +52,9 @@ stages:
     deps:
     - path: data/01_raw/datasets/val
       hash: md5
-      md5: 37bcb2b81249abab56cbec906e77fcdf.dir
-      size: 407799782
-      nfiles: 8044
+      md5: 409ed7d0573adcb3be98f7ceab63cf25.dir
+      size: 444161180
+      nfiles: 8752
     - path: data/01_raw/models/best.pt
       hash: md5
       md5: fea4ddc8d904fcc5ff11ad900e040837
@@ -65,8 +65,8 @@ stages:
       size: 2810
     - path: src/tracking_fsm_baseline/data.py
       hash: md5
-      md5: a2d742dda7d7217f848e60c4e88de01a
-      size: 4782
+      md5: 0c82e294194ff5df7516425b49a85b35
+      size: 5322
     - path: src/tracking_fsm_baseline/detector.py
       hash: md5
       md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
@@ -85,9 +85,9 @@ stages:
     outs:
     - path: data/02_intermediate/val
       hash: md5
-      md5: 73e8521489059b08c3db2659af9c3738.dir
-      size: 1510783
-      nfiles: 294
+      md5: ef6f24c8909eb39efe35466642e9ed87.dir
+      size: 1650370
+      nfiles: 318
   pad@train:
     cmd: uv run python scripts/pad_sequences.py --infer-dir 
       data/02_intermediate/train --output-dir data/03_primary/train 
@@ -95,17 +95,17 @@ stages:
     deps:
     - path: data/02_intermediate/train
       hash: md5
-      md5: 4c2aafa1bed0cd7c34aba1434e52aba2.dir
-      size: 15716760
-      nfiles: 2865
+      md5: 6d9c1d9f8449a8529dc908989fc54c9c.dir
+      size: 17173604
+      nfiles: 3103
     - path: scripts/pad_sequences.py
       hash: md5
       md5: 255890c543dedb56813ea6f40d4d491b
       size: 2320
     - path: src/tracking_fsm_baseline/data.py
       hash: md5
-      md5: a2d742dda7d7217f848e60c4e88de01a
-      size: 4782
+      md5: 0c82e294194ff5df7516425b49a85b35
+      size: 5322
     - path: src/tracking_fsm_baseline/detector.py
       hash: md5
       md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
@@ -121,9 +121,9 @@ stages:
     outs:
     - path: data/03_primary/train
       hash: md5
-      md5: dbb648f52646b9f4c219dedb6ef6ca3e.dir
-      size: 17157677
-      nfiles: 2865
+      md5: 37b4641c388ef824a96940f378c4251f.dir
+      size: 18672786
+      nfiles: 3103
   pad@val:
     cmd: uv run python scripts/pad_sequences.py --infer-dir 
       data/02_intermediate/val --output-dir data/03_primary/val 
@@ -131,17 +131,17 @@ stages:
     deps:
     - path: data/02_intermediate/val
       hash: md5
-      md5: 73e8521489059b08c3db2659af9c3738.dir
-      size: 1510783
-      nfiles: 294
+      md5: ef6f24c8909eb39efe35466642e9ed87.dir
+      size: 1650370
+      nfiles: 318
     - path: scripts/pad_sequences.py
       hash: md5
       md5: 255890c543dedb56813ea6f40d4d491b
       size: 2320
     - path: src/tracking_fsm_baseline/data.py
       hash: md5
-      md5: a2d742dda7d7217f848e60c4e88de01a
-      size: 4782
+      md5: 0c82e294194ff5df7516425b49a85b35
+      size: 5322
     - path: src/tracking_fsm_baseline/detector.py
       hash: md5
       md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
@@ -157,9 +157,9 @@ stages:
     outs:
     - path: data/03_primary/val
       hash: md5
-      md5: 244b99070721bed643e1a855a0580b64.dir
-      size: 1706098
-      nfiles: 294
+      md5: f9f97a8a84bade186095e4c8745439d1.dir
+      size: 1851373
+      nfiles: 318
   track@train:
     cmd: uv run python scripts/track.py --infer-dir data/03_primary/train 
       --data-dir data/01_raw/datasets/train --output-dir 
@@ -170,22 +170,22 @@ stages:
     deps:
     - path: data/01_raw/datasets/train
       hash: md5
-      md5: c38b9cbd0a872ee86402973d6cd8a466.dir
-      size: 4366197067
-      nfiles: 82878
+      md5: caf37d4bf513efd49b9617378fff1ffa.dir
+      size: 4776619781
+      nfiles: 89870
     - path: data/03_primary/train
       hash: md5
-      md5: dbb648f52646b9f4c219dedb6ef6ca3e.dir
-      size: 17157677
-      nfiles: 2865
+      md5: 37b4641c388ef824a96940f378c4251f.dir
+      size: 18672786
+      nfiles: 3103
     - path: scripts/track.py
       hash: md5
-      md5: ff0d43d3f6f45f40154657a3de367b79
-      size: 6478
+      md5: e56e37ae02fd20bbb2a6f869a5b7fd0e
+      size: 6575
     - path: src/tracking_fsm_baseline/data.py
       hash: md5
-      md5: a2d742dda7d7217f848e60c4e88de01a
-      size: 4782
+      md5: 0c82e294194ff5df7516425b49a85b35
+      size: 5322
     - path: src/tracking_fsm_baseline/detector.py
       hash: md5
       md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
@@ -213,8 +213,8 @@ stages:
     outs:
     - path: data/07_model_output/train
       hash: md5
-      md5: f945946c547f388851565e71e33cf72d.dir
-      size: 959216
+      md5: 5e2eb1e7ee801cbf5a77e03b7d8355cf.dir
+      size: 1038707
       nfiles: 1
   track@val:
     cmd: uv run python scripts/track.py --infer-dir data/03_primary/val 
@@ -226,22 +226,22 @@ stages:
     deps:
     - path: data/01_raw/datasets/val
       hash: md5
-      md5: 37bcb2b81249abab56cbec906e77fcdf.dir
-      size: 407799782
-      nfiles: 8044
+      md5: 409ed7d0573adcb3be98f7ceab63cf25.dir
+      size: 444161180
+      nfiles: 8752
     - path: data/03_primary/val
       hash: md5
-      md5: 244b99070721bed643e1a855a0580b64.dir
-      size: 1706098
-      nfiles: 294
+      md5: f9f97a8a84bade186095e4c8745439d1.dir
+      size: 1851373
+      nfiles: 318
     - path: scripts/track.py
       hash: md5
-      md5: ff0d43d3f6f45f40154657a3de367b79
-      size: 6478
+      md5: e56e37ae02fd20bbb2a6f869a5b7fd0e
+      size: 6575
     - path: src/tracking_fsm_baseline/data.py
       hash: md5
-      md5: a2d742dda7d7217f848e60c4e88de01a
-      size: 4782
+      md5: 0c82e294194ff5df7516425b49a85b35
+      size: 5322
     - path: src/tracking_fsm_baseline/detector.py
       hash: md5
       md5: 795fdf3a1b7ac06f0d59cdacf3143cf5
@@ -269,8 +269,8 @@ stages:
     outs:
     - path: data/07_model_output/val
       hash: md5
-      md5: 575b968e686a22193ce701a756e32e3f.dir
-      size: 98326
+      md5: e52a77ba3e857bf6c8d1efa110c11896.dir
+      size: 106287
       nfiles: 1
   evaluate@train_all:
     cmd: 'uv run python scripts/evaluate.py --track-dir data/07_model_output/train
@@ -278,8 +278,8 @@ stages:
     deps:
     - path: data/07_model_output/train
       hash: md5
-      md5: 22ee23beff0e96143fc2a56c92c4c6e7.dir
-      size: 959209
+      md5: 5e2eb1e7ee801cbf5a77e03b7d8355cf.dir
+      size: 1038707
       nfiles: 1
     - path: scripts/evaluate.py
       hash: md5
@@ -292,12 +292,12 @@ stages:
     outs:
     - path: data/08_reporting/train/all/metrics.json
       hash: md5
-      md5: 79e1b996aca464d202aadb484afc883c
-      size: 781
+      md5: 73b0876a08c49f488eb25fac6e7a0f38
+      size: 782
     - path: data/08_reporting/train/all/plots
       hash: md5
-      md5: f65398612117b08958192dabadcfc936.dir
-      size: 100819
+      md5: e3b0b900ecc207805d9d6bcc665b29a7.dir
+      size: 100803
       nfiles: 4
   evaluate@val_all:
     cmd: 'uv run python scripts/evaluate.py --track-dir data/07_model_output/val --output-dir
@@ -305,8 +305,8 @@ stages:
     deps:
     - path: data/07_model_output/val
       hash: md5
-      md5: 225d89caa75a94c2e56554137dd8138b.dir
-      size: 98447
+      md5: e52a77ba3e857bf6c8d1efa110c11896.dir
+      size: 106287
       nfiles: 1
     - path: scripts/evaluate.py
       hash: md5
@@ -319,12 +319,12 @@ stages:
     outs:
     - path: data/08_reporting/val/all/metrics.json
       hash: md5
-      md5: d8de6a84dff7af7074c53890cf96fc1a
-      size: 763
+      md5: 9922a5ccb2a4e9ec238ffe39c74d6b74
+      size: 771
     - path: data/08_reporting/val/all/plots
       hash: md5
-      md5: 368e6990e0fc75c3657f21745a2b569a.dir
-      size: 95966
+      md5: 648c157e3f061c1bdf693bcd915913bf.dir
+      size: 97136
       nfiles: 4
   evaluate@train_pyronear:
     cmd: uv run python scripts/evaluate.py --track-dir 
@@ -333,8 +333,8 @@ stages:
     deps:
     - path: data/07_model_output/train
       hash: md5
-      md5: 22ee23beff0e96143fc2a56c92c4c6e7.dir
-      size: 959209
+      md5: 5e2eb1e7ee801cbf5a77e03b7d8355cf.dir
+      size: 1038707
       nfiles: 1
     - path: scripts/evaluate.py
       hash: md5
@@ -347,12 +347,12 @@ stages:
     outs:
     - path: data/08_reporting/train/pyronear/metrics.json
       hash: md5
-      md5: c1fdf8e2a14922aa24bd1ead775f026a
-      size: 781
+      md5: 03fc829ef6ea837478c797bfeb7d73d2
+      size: 777
     - path: data/08_reporting/train/pyronear/plots
       hash: md5
-      md5: 347032a765eb9eb319f19cbb5e09335d.dir
-      size: 97653
+      md5: 05e46223efe1fd17c9aeb435420801da.dir
+      size: 97677
       nfiles: 4
   evaluate@val_pyronear:
     cmd: uv run python scripts/evaluate.py --track-dir data/07_model_output/val 
@@ -360,8 +360,8 @@ stages:
     deps:
     - path: data/07_model_output/val
       hash: md5
-      md5: 225d89caa75a94c2e56554137dd8138b.dir
-      size: 98447
+      md5: e52a77ba3e857bf6c8d1efa110c11896.dir
+      size: 106287
       nfiles: 1
     - path: scripts/evaluate.py
       hash: md5
@@ -374,12 +374,12 @@ stages:
     outs:
     - path: data/08_reporting/val/pyronear/metrics.json
       hash: md5
-      md5: f3029fb1d3403b3ca4ceee51e232a64c
-      size: 769
+      md5: 6cd7e0e866ee5a8e3eee99cc469456e1
+      size: 768
     - path: data/08_reporting/val/pyronear/plots
       hash: md5
-      md5: f7d3fbacff5cfb0c6ea5e049d5603665.dir
-      size: 92805
+      md5: 29e03fb7f6d5332829b963c7276e2549.dir
+      size: 96347
       nfiles: 4
   sweep@train_all:
     cmd: 'uv run python scripts/sweep.py --infer-dir data/03_primary/train --data-dir
@@ -387,22 +387,22 @@ stages:
     deps:
     - path: data/01_raw/datasets/train
       hash: md5
-      md5: c38b9cbd0a872ee86402973d6cd8a466.dir
-      size: 4366197067
-      nfiles: 82878
+      md5: caf37d4bf513efd49b9617378fff1ffa.dir
+      size: 4776619781
+      nfiles: 89870
     - path: data/03_primary/train
       hash: md5
-      md5: 4286f42a6719937a2283859d1d651646.dir
-      size: 16322405
-      nfiles: 2865
+      md5: 37b4641c388ef824a96940f378c4251f.dir
+      size: 18672786
+      nfiles: 3103
     - path: scripts/sweep.py
       hash: md5
-      md5: bb12d1376ee4b8ac885d25b8e725831c
-      size: 8224
+      md5: eacdf6acd93170c0b5804db211dea5b6
+      size: 8320
     - path: src/tracking_fsm_baseline/evaluator.py
       hash: md5
-      md5: d6d71058fa05ff818a3da0e9e017cadc
-      size: 11034
+      md5: 8f86cc97015cc2e70dcb2c2beac902ef
+      size: 10482
     - path: src/tracking_fsm_baseline/tracker.py
       hash: md5
       md5: 27d2515c26f5bc414e8bc1063a57069f
@@ -414,8 +414,8 @@ stages:
     outs:
     - path: data/08_reporting/sweep/train/all
       hash: md5
-      md5: 60eb24ee3f075de1b015d2f0b603683a.dir
-      size: 3405864
+      md5: 7c3b39965abc19e2e23987ead25a8e92.dir
+      size: 3297756
       nfiles: 1
   sweep@val_all:
     cmd: 'uv run python scripts/sweep.py --infer-dir data/03_primary/val --data-dir
@@ -423,22 +423,22 @@ stages:
     deps:
     - path: data/01_raw/datasets/val
       hash: md5
-      md5: 37bcb2b81249abab56cbec906e77fcdf.dir
-      size: 407799782
-      nfiles: 8044
+      md5: 409ed7d0573adcb3be98f7ceab63cf25.dir
+      size: 444161180
+      nfiles: 8752
     - path: data/03_primary/val
       hash: md5
-      md5: d4d95d41701a8a5babbb894e7fcbacf4.dir
-      size: 1574908
-      nfiles: 294
+      md5: f9f97a8a84bade186095e4c8745439d1.dir
+      size: 1851373
+      nfiles: 318
     - path: scripts/sweep.py
       hash: md5
-      md5: bb12d1376ee4b8ac885d25b8e725831c
-      size: 8224
+      md5: eacdf6acd93170c0b5804db211dea5b6
+      size: 8320
     - path: src/tracking_fsm_baseline/evaluator.py
       hash: md5
-      md5: d6d71058fa05ff818a3da0e9e017cadc
-      size: 11034
+      md5: 8f86cc97015cc2e70dcb2c2beac902ef
+      size: 10482
     - path: src/tracking_fsm_baseline/tracker.py
       hash: md5
       md5: 27d2515c26f5bc414e8bc1063a57069f
@@ -450,8 +450,8 @@ stages:
     outs:
     - path: data/08_reporting/sweep/val/all
       hash: md5
-      md5: 542f8b1605391f67eee193e78edeabfa.dir
-      size: 3174837
+      md5: e4113241fc723700abe1bad14a71318d.dir
+      size: 3087638
       nfiles: 1
   sweep@train_pyronear:
     cmd: uv run python scripts/sweep.py --infer-dir data/03_primary/train 
@@ -461,22 +461,22 @@ stages:
     deps:
     - path: data/01_raw/datasets/train
       hash: md5
-      md5: c38b9cbd0a872ee86402973d6cd8a466.dir
-      size: 4366197067
-      nfiles: 82878
+      md5: caf37d4bf513efd49b9617378fff1ffa.dir
+      size: 4776619781
+      nfiles: 89870
     - path: data/03_primary/train
       hash: md5
-      md5: 4286f42a6719937a2283859d1d651646.dir
-      size: 16322405
-      nfiles: 2865
+      md5: 37b4641c388ef824a96940f378c4251f.dir
+      size: 18672786
+      nfiles: 3103
     - path: scripts/sweep.py
       hash: md5
-      md5: bb12d1376ee4b8ac885d25b8e725831c
-      size: 8224
+      md5: eacdf6acd93170c0b5804db211dea5b6
+      size: 8320
     - path: src/tracking_fsm_baseline/evaluator.py
       hash: md5
-      md5: d6d71058fa05ff818a3da0e9e017cadc
-      size: 11034
+      md5: 8f86cc97015cc2e70dcb2c2beac902ef
+      size: 10482
     - path: src/tracking_fsm_baseline/tracker.py
       hash: md5
       md5: 27d2515c26f5bc414e8bc1063a57069f
@@ -488,8 +488,8 @@ stages:
     outs:
     - path: data/08_reporting/sweep/train/pyronear
       hash: md5
-      md5: b361fadc9d28ba5b0bcdfca74ca18464.dir
-      size: 3369553
+      md5: 2e0910bfe48ac9191d5dadff4242a6ab.dir
+      size: 3274201
       nfiles: 1
   sweep@val_pyronear:
     cmd: uv run python scripts/sweep.py --infer-dir data/03_primary/val 
@@ -499,22 +499,22 @@ stages:
     deps:
     - path: data/01_raw/datasets/val
       hash: md5
-      md5: 37bcb2b81249abab56cbec906e77fcdf.dir
-      size: 407799782
-      nfiles: 8044
+      md5: 409ed7d0573adcb3be98f7ceab63cf25.dir
+      size: 444161180
+      nfiles: 8752
     - path: data/03_primary/val
       hash: md5
-      md5: d4d95d41701a8a5babbb894e7fcbacf4.dir
-      size: 1574908
-      nfiles: 294
+      md5: f9f97a8a84bade186095e4c8745439d1.dir
+      size: 1851373
+      nfiles: 318
     - path: scripts/sweep.py
       hash: md5
-      md5: bb12d1376ee4b8ac885d25b8e725831c
-      size: 8224
+      md5: eacdf6acd93170c0b5804db211dea5b6
+      size: 8320
     - path: src/tracking_fsm_baseline/evaluator.py
       hash: md5
-      md5: d6d71058fa05ff818a3da0e9e017cadc
-      size: 11034
+      md5: 8f86cc97015cc2e70dcb2c2beac902ef
+      size: 10482
     - path: src/tracking_fsm_baseline/tracker.py
       hash: md5
       md5: 27d2515c26f5bc414e8bc1063a57069f
@@ -526,8 +526,8 @@ stages:
     outs:
     - path: data/08_reporting/sweep/val/pyronear
       hash: md5
-      md5: 007a6ff3ddfe07227087f66f3687653e.dir
-      size: 3130441
+      md5: 891dad996fbdde8f1adf7c29d356f599.dir
+      size: 3064531
       nfiles: 1
   ablation@train_all:
     cmd: uv run python scripts/ablation.py --infer-dir data/03_primary/train 
@@ -538,22 +538,22 @@ stages:
     deps:
     - path: data/01_raw/datasets/train
       hash: md5
-      md5: c38b9cbd0a872ee86402973d6cd8a466.dir
-      size: 4366197067
-      nfiles: 82878
+      md5: caf37d4bf513efd49b9617378fff1ffa.dir
+      size: 4776619781
+      nfiles: 89870
     - path: data/03_primary/train
       hash: md5
-      md5: 4286f42a6719937a2283859d1d651646.dir
-      size: 16322405
-      nfiles: 2865
+      md5: 37b4641c388ef824a96940f378c4251f.dir
+      size: 18672786
+      nfiles: 3103
     - path: scripts/ablation.py
       hash: md5
-      md5: 218e4577c22bf0901d5d9567502b2275
-      size: 5481
+      md5: 3ea2a71f0bee5b3fc8b9ffa2076b4fef
+      size: 5576
     - path: src/tracking_fsm_baseline/evaluator.py
       hash: md5
-      md5: d6d71058fa05ff818a3da0e9e017cadc
-      size: 11034
+      md5: 8f86cc97015cc2e70dcb2c2beac902ef
+      size: 10482
     - path: src/tracking_fsm_baseline/tracker.py
       hash: md5
       md5: 27d2515c26f5bc414e8bc1063a57069f
@@ -575,8 +575,8 @@ stages:
     outs:
     - path: data/08_reporting/ablation/train/all
       hash: md5
-      md5: de0d688e1f6794521d3860065fe66df0.dir
-      size: 1023
+      md5: 8c34a7ca9940701f4a67ee4c8a7ae0d1.dir
+      size: 981
       nfiles: 1
   ablation@val_all:
     cmd: uv run python scripts/ablation.py --infer-dir data/03_primary/val 
@@ -587,22 +587,22 @@ stages:
     deps:
     - path: data/01_raw/datasets/val
       hash: md5
-      md5: 37bcb2b81249abab56cbec906e77fcdf.dir
-      size: 407799782
-      nfiles: 8044
+      md5: 409ed7d0573adcb3be98f7ceab63cf25.dir
+      size: 444161180
+      nfiles: 8752
     - path: data/03_primary/val
       hash: md5
-      md5: d4d95d41701a8a5babbb894e7fcbacf4.dir
-      size: 1574908
-      nfiles: 294
+      md5: f9f97a8a84bade186095e4c8745439d1.dir
+      size: 1851373
+      nfiles: 318
     - path: scripts/ablation.py
       hash: md5
-      md5: 218e4577c22bf0901d5d9567502b2275
-      size: 5481
+      md5: 3ea2a71f0bee5b3fc8b9ffa2076b4fef
+      size: 5576
     - path: src/tracking_fsm_baseline/evaluator.py
       hash: md5
-      md5: d6d71058fa05ff818a3da0e9e017cadc
-      size: 11034
+      md5: 8f86cc97015cc2e70dcb2c2beac902ef
+      size: 10482
     - path: src/tracking_fsm_baseline/tracker.py
       hash: md5
       md5: 27d2515c26f5bc414e8bc1063a57069f
@@ -624,8 +624,8 @@ stages:
     outs:
     - path: data/08_reporting/ablation/val/all
       hash: md5
-      md5: 1fb9715d3acce5f76ef0323daeba863c.dir
-      size: 964
+      md5: 41972150ca5a98127d71896070599ea5.dir
+      size: 934
       nfiles: 1
   ablation@train_pyronear:
     cmd: uv run python scripts/ablation.py --infer-dir data/03_primary/train 
@@ -637,22 +637,22 @@ stages:
     deps:
     - path: data/01_raw/datasets/train
       hash: md5
-      md5: c38b9cbd0a872ee86402973d6cd8a466.dir
-      size: 4366197067
-      nfiles: 82878
+      md5: caf37d4bf513efd49b9617378fff1ffa.dir
+      size: 4776619781
+      nfiles: 89870
     - path: data/03_primary/train
       hash: md5
-      md5: 4286f42a6719937a2283859d1d651646.dir
-      size: 16322405
-      nfiles: 2865
+      md5: 37b4641c388ef824a96940f378c4251f.dir
+      size: 18672786
+      nfiles: 3103
     - path: scripts/ablation.py
       hash: md5
-      md5: 218e4577c22bf0901d5d9567502b2275
-      size: 5481
+      md5: 3ea2a71f0bee5b3fc8b9ffa2076b4fef
+      size: 5576
     - path: src/tracking_fsm_baseline/evaluator.py
       hash: md5
-      md5: d6d71058fa05ff818a3da0e9e017cadc
-      size: 11034
+      md5: 8f86cc97015cc2e70dcb2c2beac902ef
+      size: 10482
     - path: src/tracking_fsm_baseline/tracker.py
       hash: md5
       md5: 27d2515c26f5bc414e8bc1063a57069f
@@ -674,8 +674,8 @@ stages:
     outs:
     - path: data/08_reporting/ablation/train/pyronear
       hash: md5
-      md5: 44cb1e1075c6d2850017a774bfcf183c.dir
-      size: 1012
+      md5: 8782e745ea90bc505b7b2cb9f7ab5d7d.dir
+      size: 975
       nfiles: 1
   ablation@val_pyronear:
     cmd: uv run python scripts/ablation.py --infer-dir data/03_primary/val 
@@ -687,22 +687,22 @@ stages:
     deps:
     - path: data/01_raw/datasets/val
       hash: md5
-      md5: 37bcb2b81249abab56cbec906e77fcdf.dir
-      size: 407799782
-      nfiles: 8044
+      md5: 409ed7d0573adcb3be98f7ceab63cf25.dir
+      size: 444161180
+      nfiles: 8752
     - path: data/03_primary/val
       hash: md5
-      md5: d4d95d41701a8a5babbb894e7fcbacf4.dir
-      size: 1574908
-      nfiles: 294
+      md5: f9f97a8a84bade186095e4c8745439d1.dir
+      size: 1851373
+      nfiles: 318
     - path: scripts/ablation.py
       hash: md5
-      md5: 218e4577c22bf0901d5d9567502b2275
-      size: 5481
+      md5: 3ea2a71f0bee5b3fc8b9ffa2076b4fef
+      size: 5576
     - path: src/tracking_fsm_baseline/evaluator.py
       hash: md5
-      md5: d6d71058fa05ff818a3da0e9e017cadc
-      size: 11034
+      md5: 8f86cc97015cc2e70dcb2c2beac902ef
+      size: 10482
     - path: src/tracking_fsm_baseline/tracker.py
       hash: md5
       md5: 27d2515c26f5bc414e8bc1063a57069f
@@ -724,22 +724,22 @@ stages:
     outs:
     - path: data/08_reporting/ablation/val/pyronear
       hash: md5
-      md5: c2c84386af6dd7e77348f73e3827735d.dir
-      size: 955
+      md5: 8a8d2ba994c008bcd14ec27c6c778aba.dir
+      size: 924
       nfiles: 1
   package:
     cmd: uv run python scripts/package.py --weights-path 
-      data/01_raw/models/yolo11s_mighty-mongoose_v5.1.0.pt --params-path 
-      params.yaml --output-path data/06_models/model.zip
+      data/01_raw/models/best.pt --params-path params.yaml --output-path 
+      data/06_models/model.zip
     deps:
-    - path: data/01_raw/models/yolo11s_mighty-mongoose_v5.1.0.pt
+    - path: data/01_raw/models/best.pt
       hash: md5
-      md5: 4657163d63ae9873728cf5bbf2c918f7
-      size: 19259923
+      md5: fea4ddc8d904fcc5ff11ad900e040837
+      size: 19225626
     - path: scripts/package.py
       hash: md5
-      md5: c8189478e3cb59929ab1924b7c0ecd76
-      size: 1653
+      md5: f6b69c93e035b61d6a87ab62379877d8
+      size: 1627
     - path: src/tracking_fsm_baseline/package.py
       hash: md5
       md5: 25c07e1c18186af2b08f1f55f8b62515
@@ -750,7 +750,7 @@ stages:
           confidence_threshold: 0.01
           iou_nms: 0.2
           image_size: 1024
-        prepare.model_filename: yolo11s_mighty-mongoose_v5.1.0.pt
+        prepare.model_filename: best.pt
         track:
           confidence_threshold: 0.3
           iou_threshold: 0.1
@@ -764,5 +764,51 @@ stages:
     outs:
     - path: data/06_models/model.zip
       hash: md5
-      md5: b42e37943c7441b5f52b8b7cbc67b095
-      size: 19260646
+      md5: f118736601571424762b0b0aad13cfdb
+      size: 19226349
+  truncate@train:
+    cmd: uv run python scripts/truncate_sequences.py --input-dir 
+      data/01_raw/datasets_full/train --output-dir data/01_raw/datasets/train 
+      --max-frames 20
+    deps:
+    - path: data/01_raw/datasets_full/train
+      hash: md5
+      md5: f02174099bc4dc115dad2b69d3b4e78e.dir
+      size: 7543045856
+      nfiles: 142052
+    - path: scripts/truncate_sequences.py
+      hash: md5
+      md5: 50ac7865933889df116cf61d7f35bc63
+      size: 2495
+    params:
+      params.yaml:
+        truncate.max_frames: 20
+    outs:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: caf37d4bf513efd49b9617378fff1ffa.dir
+      size: 4776619781
+      nfiles: 89870
+  truncate@val:
+    cmd: uv run python scripts/truncate_sequences.py --input-dir 
+      data/01_raw/datasets_full/val --output-dir data/01_raw/datasets/val 
+      --max-frames 20
+    deps:
+    - path: data/01_raw/datasets_full/val
+      hash: md5
+      md5: b58404e2160d272fd736fad3aa561223.dir
+      size: 668383256
+      nfiles: 13044
+    - path: scripts/truncate_sequences.py
+      hash: md5
+      md5: 50ac7865933889df116cf61d7f35bc63
+      size: 2495
+    params:
+      params.yaml:
+        truncate.max_frames: 20
+    outs:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: 409ed7d0573adcb3be98f7ceab63cf25.dir
+      size: 444161180
+      nfiles: 8752
