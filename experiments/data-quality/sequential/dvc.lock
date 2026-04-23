@@ -84,3 +84,172 @@ stages:
       md5: 26de738f03545bbe5eb7e44a46c15981.dir
       size: 305
       nfiles: 1
+  predict_bbox_tube_temporal_vit_dinov2_finetune@train:
+    cmd: uv run python scripts/predict.py --model-name 
+      bbox-tube-temporal-vit-dinov2-finetune --model-type bbox-tube-temporal 
+      --model-package 
+      data/01_raw/models/bbox-tube-temporal-vit-dinov2-finetune.zip --split-dir 
+      data/01_raw/datasets/train --split train --output-dir 
+      data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune/train
+    deps:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: f02174099bc4dc115dad2b69d3b4e78e.dir
+      size: 7543045856
+      nfiles: 142052
+    - path: data/01_raw/models/bbox-tube-temporal-vit-dinov2-finetune.zip
+      hash: md5
+      md5: 061f2954e6a36d5553dc0615a0ed5e16
+      size: 162765093
+    - path: scripts/predict.py
+      hash: md5
+      md5: 7134fb9ecf3a29cefcfb8683fc232136
+      size: 2462
+    - path: src/data_quality_sequential
+      hash: md5
+      md5: 68b75f42c6d24e42a314cd4a01bc79c2.dir
+      size: 16264
+      nfiles: 8
+    outs:
+    - path: data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune/train
+      hash: md5
+      md5: 074fc96528eb584d1d28e645475c1070.dir
+      size: 425858
+      nfiles: 1
+  predict_bbox_tube_temporal_vit_dinov2_finetune@test:
+    cmd: uv run python scripts/predict.py --model-name 
+      bbox-tube-temporal-vit-dinov2-finetune --model-type bbox-tube-temporal 
+      --model-package 
+      data/01_raw/models/bbox-tube-temporal-vit-dinov2-finetune.zip --split-dir 
+      data/01_raw/datasets/test --split test --output-dir 
+      data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune/test
+    deps:
+    - path: data/01_raw/datasets/test
+      hash: md5
+      md5: 59e3595893f34ae2d439ced6bf39b3bb.dir
+      size: 802254456
+      nfiles: 16408
+    - path: data/01_raw/models/bbox-tube-temporal-vit-dinov2-finetune.zip
+      hash: md5
+      md5: 061f2954e6a36d5553dc0615a0ed5e16
+      size: 162765093
+    - path: scripts/predict.py
+      hash: md5
+      md5: 7134fb9ecf3a29cefcfb8683fc232136
+      size: 2462
+    - path: src/data_quality_sequential
+      hash: md5
+      md5: 68b75f42c6d24e42a314cd4a01bc79c2.dir
+      size: 16264
+      nfiles: 8
+    outs:
+    - path: data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune/test
+      hash: md5
+      md5: 4577c4f2331447815c75d1ab51cba163.dir
+      size: 41548
+      nfiles: 1
+  build_review_sets_bbox_tube_temporal_vit_dinov2_finetune@train:
+    cmd: uv run python scripts/build_review_sets.py --model-name 
+      bbox-tube-temporal-vit-dinov2-finetune --split train --split-dir 
+      data/01_raw/datasets/train --predictions-path 
+      data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune/train/predictions.json
+      --output-dir 
+      data/08_reporting/bbox-tube-temporal-vit-dinov2-finetune/train
+    deps:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: f02174099bc4dc115dad2b69d3b4e78e.dir
+      size: 7543045856
+      nfiles: 142052
+    - path: 
+        data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune/train/predictions.json
+      hash: md5
+      md5: f67110005adc89fcae192465ca2b3d50
+      size: 425858
+    - path: scripts/build_review_sets.py
+      hash: md5
+      md5: a18ef09713c1cd7f9ee31cddb072fdac
+      size: 4286
+    - path: src/data_quality_sequential
+      hash: md5
+      md5: 68b75f42c6d24e42a314cd4a01bc79c2.dir
+      size: 16264
+      nfiles: 8
+    outs:
+    - path: data/08_reporting/bbox-tube-temporal-vit-dinov2-finetune/train
+      hash: md5
+      md5: 9b2ac84cc0949bc96459ea9cebfbe98b.dir
+      size: 50602
+      nfiles: 4
+  build_review_sets_bbox_tube_temporal_vit_dinov2_finetune@test:
+    cmd: uv run python scripts/build_review_sets.py --model-name 
+      bbox-tube-temporal-vit-dinov2-finetune --split test --split-dir 
+      data/01_raw/datasets/test --predictions-path 
+      data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune/test/predictions.json
+      --output-dir data/08_reporting/bbox-tube-temporal-vit-dinov2-finetune/test
+    deps:
+    - path: data/01_raw/datasets/test
+      hash: md5
+      md5: 59e3595893f34ae2d439ced6bf39b3bb.dir
+      size: 802254456
+      nfiles: 16408
+    - path: 
+        data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune/test/predictions.json
+      hash: md5
+      md5: ce4b986de31e63d54f2504f38bf1f1ae
+      size: 41548
+    - path: scripts/build_review_sets.py
+      hash: md5
+      md5: a18ef09713c1cd7f9ee31cddb072fdac
+      size: 4286
+    - path: src/data_quality_sequential
+      hash: md5
+      md5: 68b75f42c6d24e42a314cd4a01bc79c2.dir
+      size: 16264
+      nfiles: 8
+    outs:
+    - path: data/08_reporting/bbox-tube-temporal-vit-dinov2-finetune/test
+      hash: md5
+      md5: f9da87db7223ff6a9728ceda6dfeab24.dir
+      size: 4197
+      nfiles: 4
+  build_fiftyone_bbox_tube_temporal_vit_dinov2_finetune@train:
+    cmd: uv run --group explore python scripts/build_fiftyone.py --manifest-path
+      data/08_reporting/bbox-tube-temporal-vit-dinov2-finetune/train/review_manifest.json
+      --output-dir data/fiftyone/bbox-tube-temporal-vit-dinov2-finetune/train
+    deps:
+    - path: 
+        data/08_reporting/bbox-tube-temporal-vit-dinov2-finetune/train/review_manifest.json
+      hash: md5
+      md5: 9d3f43caa50aa4cbc0496aa06562579a
+      size: 35446
+    - path: scripts/build_fiftyone.py
+      hash: md5
+      md5: 92122130a5e41a07aab18a17a5ad8649
+      size: 3570
+    outs:
+    - path: data/fiftyone/bbox-tube-temporal-vit-dinov2-finetune/train
+      hash: md5
+      md5: 783d5831f2ea87b976602cefa44eb3a0.dir
+      size: 316
+      nfiles: 1
+  build_fiftyone_bbox_tube_temporal_vit_dinov2_finetune@test:
+    cmd: uv run --group explore python scripts/build_fiftyone.py --manifest-path
+      data/08_reporting/bbox-tube-temporal-vit-dinov2-finetune/test/review_manifest.json
+      --output-dir data/fiftyone/bbox-tube-temporal-vit-dinov2-finetune/test
+    deps:
+    - path: 
+        data/08_reporting/bbox-tube-temporal-vit-dinov2-finetune/test/review_manifest.json
+      hash: md5
+      md5: 1d9d050cf5baa662b6564c2799a87320
+      size: 2749
+    - path: scripts/build_fiftyone.py
+      hash: md5
+      md5: 92122130a5e41a07aab18a17a5ad8649
+      size: 3570
+    outs:
+    - path: data/fiftyone/bbox-tube-temporal-vit-dinov2-finetune/test
+      hash: md5
+      md5: 418832d77c74bf767041998e4e47bb9e.dir
+      size: 307
+      nfiles: 1
