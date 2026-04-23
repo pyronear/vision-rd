@@ -215,10 +215,15 @@ def build_dataset(
 
         record_path = predictions_dir / entry["json_path"]
         record = json.loads(record_path.read_text())
+        subcategory = record.get("subcategory")
+        assert subcategory is not None, (
+            f"Error-entry records must carry a non-None subcategory "
+            f"(got {record['sequence_id']!r})"
+        )
         seq_dir = (
             export_dir
             / LABEL_FOLDER[record["label"]]
-            / record["subcategory"]
+            / subcategory
             / record["sequence_id"]
         )
         samples.extend(
