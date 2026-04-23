@@ -86,14 +86,16 @@ pipeline, ruff config).
   - FP: `predicted_positive ∧ ¬ground_truth`
   - FN: `¬predicted_positive ∧ ground_truth`
 
-  Ranks within each set, "most confidently wrong first" (by convention
-  `details["score"]` is interpreted as the model's P(positive) in [0, 1]):
-  - **FP** (predicted positive): sort by `score` **descending** — highest
-    positive-probability first. Fallback if `score` absent:
-    `trigger_frame_index` ascending (earliest false alarm first).
-  - **FN** (predicted negative): sort by `score` **ascending** — lowest
-    positive-probability first (model was least tempted to fire). Fallback
-    if `score` absent: stable order by sequence name.
+  Ranks within each set:
+  - **FP** (predicted positive): `trigger_frame_index` ascending —
+    earliest false alarm first (model fired immediately on a sequence
+    labelled `fp/` is a strong "label probably wrong" signal).
+  - **FN** (predicted negative): stable alphabetical order by sequence
+    name. No better signal available from the bare
+    `TemporalModelOutput` today.
+
+  No score-based ranking. Scored ranking can be added later once models
+  agree on a scoring convention.
 
   Returns `ReviewSet` dataclasses consumed by the CSV + FiftyOne scripts.
 
@@ -249,18 +251,16 @@ filename on disk must equal `<model_name>.zip`.
   of `wildfire/` and `fp/` sequences, `SequenceRef` iteration returns the
   correct ground-truth booleans and sorted frame paths.
 - `tests/test_review.py` — hand-crafted ground-truth + prediction pairs:
-  FP/FN selection is correct, ranking uses `details["score"]` when present
-  and falls back deterministically otherwise.
+  FP/FN selection is correct and ranking (FP by `trigger_frame_index`
+  ascending, FN by sequence name) is deterministic.
 
 End-to-end validation is via `dvc repro` on real data — not a unit test.
 
 ## 8. Conventions recap
 
-- **Ranking score** (non-breaking convention): `TemporalModel`
-  implementations may set `TemporalModelOutput.details["score"]` to a float
-  in `[0, 1]` interpreted as `P(positive)`. Absent = fall back to
-  `trigger_frame_index` (for FP) or stable alpha order (for FN). No change
-  to the `pyrocore` ABC.
+- **Ranking**: FP ranked by `trigger_frame_index` ascending, FN by stable
+  alphabetical order by sequence name. No score-based ranking; may be
+  revisited once there is a cross-model scoring convention.
 - **Naming**: `model_name` follows the packaged-variant naming already
   used by `temporal-model-leaderboard` (e.g.
   `bbox-tube-temporal-vit-dinov2-finetune`). `model_type` is the registry
@@ -276,6 +276,7 @@ End-to-end validation is via `dvc repro` on real data — not a unit test.
 - Whether to export the FiftyOne dataset to a portable format (e.g.
   `fiftyone.core.dataset.Dataset.export`) in addition to the mongo-backed
   form, for sharing review sets across machines.
-- Backfilling `details["score"]` on `BboxTubeTemporalModel` if it isn't
-  already present — the ABC change is none, but the model wrapper may
-  need a small tweak.
+- If FN review by sequence name turns out to be too low-signal in
+  practice, introduce a cross-model scoring convention (e.g. top-level
+  `details["score"]` interpreted as `P(positive)`) and revisit the
+  ranking rules.
