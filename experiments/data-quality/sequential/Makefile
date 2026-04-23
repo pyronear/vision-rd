@@ -19,5 +19,5 @@ test: ## Run tests with pytest
 notebook: ## Launch JupyterLab for notebooks
 	uv run jupyter lab notebooks/
 
-fiftyone: ## Launch FiftyOne app (use sidebar to switch between dq-seq_* FP/FN review datasets)
-	uv run --group explore fiftyone app launch
+fiftyone: ## Launch FiftyOne app on localhost:5151 (sidebar switches between dq-seq_* review datasets)
+	uv run --group explore python scripts/launch_fiftyone.py
