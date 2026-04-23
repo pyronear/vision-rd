@@ -14,49 +14,16 @@ Usage:
 
 import argparse
 import dataclasses
-import importlib
 import json
 import logging
 from pathlib import Path
 
-from pyrocore import TemporalModel
-
 from temporal_model_leaderboard.metrics import compute_metrics
+from temporal_model_leaderboard.registry import MODEL_REGISTRY, load_model
 from temporal_model_leaderboard.runner import evaluate_model
-
-MODEL_REGISTRY: dict[str, tuple[str, str]] = {
-    "fsm-tracking-baseline": (
-        "tracking_fsm_baseline.model",
-        "FsmTrackingModel",
-    ),
-    "mtb-change-detection": (
-        "mtb_change_detection.model",
-        "MtbChangeDetectionModel",
-    ),
-    "pyro-detector-baseline": (
-        "pyro_detector_baseline.model",
-        "PyroDetectorModel",
-    ),
-    "bbox-tube-temporal": (
-        "bbox_tube_temporal.model",
-        "BboxTubeTemporalModel",
-    ),
-}
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
-
-
-def _load_model(model_type: str, package_path: Path) -> TemporalModel:
-    """Instantiate a TemporalModel by looking up *model_type* in the registry."""
-    if model_type not in MODEL_REGISTRY:
-        raise ValueError(
-            f"Unknown model type {model_type!r}. Available: {sorted(MODEL_REGISTRY)}"
-        )
-    module_path, class_name = MODEL_REGISTRY[model_type]
-    module = importlib.import_module(module_path)
-    cls = getattr(module, class_name)
-    return cls.from_package(package_path)
 
 
 def main() -> None:
@@ -99,7 +66,7 @@ def main() -> None:
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     logger.info("Loading model %s from %s", args.model_type, args.model_package)
-    model = _load_model(args.model_type, args.model_package)
+    model = load_model(args.model_type, args.model_package)
 
     logger.info("Evaluating on %s", args.test_dir)
     results = evaluate_model(model, args.test_dir)
