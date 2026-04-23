@@ -1,0 +1,43 @@
+[project]
+name = "data-quality-sequential"
+version = "0.1.0"
+description = "Use TemporalModel oracles to surface mis-labeled sequences in the pyro-dataset"
+requires-python = ">=3.11"
+dependencies = [
+    "pyrocore",
+    "bbox-tube-temporal",
+    "tqdm>=4.67.3",
+]
+
+[tool.uv.sources]
+pyrocore = { path = "../../../lib/pyrocore" }
+bbox-tube-temporal = { path = "../../temporal-models/bbox-tube-temporal" }
+
+[dependency-groups]
+dev = [
+    "dvc[s3]>=3.56",
+    "nbqa>=1.9",
+    "nbstripout>=0.8",
+    "pytest>=8.0",
+    "ruff>=0.9",
+]
+explore = [
+    "fiftyone>=1.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/data_quality_sequential"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B", "SIM", "PLC0415"]
+
+[tool.ruff.format]
+quote-style = "double"
