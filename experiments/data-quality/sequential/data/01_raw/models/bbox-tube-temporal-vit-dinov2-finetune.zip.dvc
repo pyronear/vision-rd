@@ -1,0 +1,14 @@
+md5: 57f9ba335c6abfd62a2c4dad3bc3adec
+frozen: true
+deps:
+- path: 
+    experiments/temporal-models/bbox-tube-temporal/data/06_models/vit_dinov2_finetune/model.zip
+  repo:
+    url: git@github.com:pyronear/vision-rd.git
+    rev: main
+    rev_lock: 1908147addcc13733d0ddbfc6eacfe0ba4f09f4e
+outs:
+- md5: 061f2954e6a36d5553dc0615a0ed5e16
+  size: 162765093
+  hash: md5
+  path: bbox-tube-temporal-vit-dinov2-finetune.zip
