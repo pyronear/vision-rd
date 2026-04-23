@@ -74,12 +74,15 @@ pipeline, ruff config).
       split: str                 # "train" | "val" | "test"
       ground_truth: bool         # True iff parent dir == "wildfire"
       frame_paths: list[Path]    # sorted by filename
-      camera: str | None         # parsed from sequence name if possible
   ```
 
   Ground truth is inferred from the `wildfire/` vs `fp/` parent directory.
   Frame discovery mirrors `pyro_detector_baseline.data` and
   `temporal_model_leaderboard.dataset` — likely copied near-verbatim.
+
+  (The initially-planned `camera: str | None` field was dropped at
+  implementation time — reviewers can read the camera off `sequence_name`
+  directly, and no downstream consumer needs it structured.)
 
 - **`review.py`** — disagreement extraction. Given ground truth refs + a
   model's `predictions.json` for one split:
@@ -221,20 +224,17 @@ the leaderboard's `dvc.yaml` is the reference.
 
 ## 6. `params.yaml`
 
-```yaml
-splits:
-  - train
-  - val
-  - test
+Initially planned as a registration point for models/splits. At
+implementation time this was dropped: the neighboring
+`temporal-model-leaderboard` uses per-model stage blocks with no
+`params.yaml`, and copying that convention keeps adding a model as one
+block of `dvc.yaml` edits + one registry entry (no hidden wiring
+between `params.yaml` and `dvc.yaml`).
 
-models:
-  bbox-tube-temporal-vit-dinov2-finetune:
-    model_type: bbox-tube-temporal
-```
-
-Adding another model variant = one entry in `models:` (`model_name` →
-registry `model_type`) and one new `dvc import` for its `.zip`. The zip
-filename on disk must equal `<model_name>.zip`.
+Adding another model variant today: `dvc import` its `.zip`, add one
+`MODEL_REGISTRY` entry if needed, and copy-paste the three stage blocks
+in `dvc.yaml` with the new model-name substituted. See the experiment's
+`README.md` § "Adding another model".
 
 ## 7. Testing
 

@@ -23,9 +23,9 @@ stages:
       size: 2462
     - path: src/data_quality_sequential
       hash: md5
-      md5: 68b75f42c6d24e42a314cd4a01bc79c2.dir
-      size: 16264
-      nfiles: 8
+      md5: 6d584797e371e24752bd9b34ebe03f79.dir
+      size: 6074
+      nfiles: 4
     outs:
     - path: data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune/val
       hash: md5
@@ -55,9 +55,9 @@ stages:
       size: 4286
     - path: src/data_quality_sequential
       hash: md5
-      md5: 68b75f42c6d24e42a314cd4a01bc79c2.dir
-      size: 16264
-      nfiles: 8
+      md5: 6d584797e371e24752bd9b34ebe03f79.dir
+      size: 6074
+      nfiles: 4
     outs:
     - path: data/08_reporting/bbox-tube-temporal-vit-dinov2-finetune/val
       hash: md5
@@ -107,9 +107,9 @@ stages:
       size: 2462
     - path: src/data_quality_sequential
       hash: md5
-      md5: 68b75f42c6d24e42a314cd4a01bc79c2.dir
-      size: 16264
-      nfiles: 8
+      md5: 6d584797e371e24752bd9b34ebe03f79.dir
+      size: 6074
+      nfiles: 4
     outs:
     - path: data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune/train
       hash: md5
@@ -139,9 +139,9 @@ stages:
       size: 2462
     - path: src/data_quality_sequential
       hash: md5
-      md5: 68b75f42c6d24e42a314cd4a01bc79c2.dir
-      size: 16264
-      nfiles: 8
+      md5: 6d584797e371e24752bd9b34ebe03f79.dir
+      size: 6074
+      nfiles: 4
     outs:
     - path: data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune/test
       hash: md5
@@ -172,9 +172,9 @@ stages:
       size: 4286
     - path: src/data_quality_sequential
       hash: md5
-      md5: 68b75f42c6d24e42a314cd4a01bc79c2.dir
-      size: 16264
-      nfiles: 8
+      md5: 6d584797e371e24752bd9b34ebe03f79.dir
+      size: 6074
+      nfiles: 4
     outs:
     - path: data/08_reporting/bbox-tube-temporal-vit-dinov2-finetune/train
       hash: md5
@@ -204,9 +204,9 @@ stages:
       size: 4286
     - path: src/data_quality_sequential
       hash: md5
-      md5: 68b75f42c6d24e42a314cd4a01bc79c2.dir
-      size: 16264
-      nfiles: 8
+      md5: 6d584797e371e24752bd9b34ebe03f79.dir
+      size: 6074
+      nfiles: 4
     outs:
     - path: data/08_reporting/bbox-tube-temporal-vit-dinov2-finetune/test
       hash: md5

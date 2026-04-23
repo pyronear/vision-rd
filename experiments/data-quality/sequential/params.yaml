@@ -1,8 +1,0 @@
-splits:
-  - train
-  - val
-  - test
-
-models:
-  bbox-tube-temporal-vit-dinov2-finetune:
-    model_type: bbox-tube-temporal

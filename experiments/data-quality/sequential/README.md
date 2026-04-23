@@ -31,8 +31,7 @@ Adding a new model variant: see "Adding another model" below.
 cd experiments/data-quality/sequential
 make install
 
-# Fetch the imported dataset + model zip:
-uv run dvc pull
+# Fetch the imported dataset + model zip via your usual `dvc pull` workflow.
 
 # Full pipeline (train + val + test × all models):
 uv run dvc repro
@@ -83,20 +82,25 @@ uv run dvc import git@github.com:pyronear/vision-rd.git \
 ## Adding another model
 
 1. `dvc import` its packaged `.zip` into `data/01_raw/models/<model-name>.zip`
-   (filename must equal the model-name key used below).
-2. Add to `params.yaml`:
+   (the filename must equal the model-name used in pipeline paths).
+2. If the model's registry key isn't already in
+   `src/data_quality_sequential/registry.py::MODEL_REGISTRY`, add it (one line
+   — see the leaderboard's `temporal_model_leaderboard.registry` for the
+   shape). The class must expose `classmethod from_package(path)`.
+3. Append three new stage blocks to `dvc.yaml` (copy the existing triple,
+   replace the model-name everywhere). This mirrors the leaderboard's
+   per-model stage-block convention.
+4. `uv run dvc repro` — only the new model's stages run.
 
-   ```yaml
-   models:
-     <model-name>:
-       model_type: <registry-key-from-src/data_quality_sequential/registry.py>
-   ```
+## Caveats
 
-3. If `<registry-key>` isn't already in `MODEL_REGISTRY`, add it (one line)
-   and verify the model class has a `classmethod from_package`.
-4. Append three new stage blocks to `dvc.yaml` (copy the existing triple,
-   replace the model-name everywhere).
-5. `uv run dvc repro` — only the new model's stages run.
+- Frames are sorted by filename in `dataset.iter_sequences`. This gives
+  the correct temporal order only because pyro-dataset frames end in a
+  zero-padded `YYYY-MM-DDTHH-MM-SS.jpg` stamp. The glob is also
+  case-sensitive and `.jpg`-only. If a future dataset revision changes
+  the filename convention or extension, switch to timestamp-aware sort
+  (see `pyrocore.model._try_parse_timestamp`) before trusting
+  `trigger_frame_index` values.
 
 ## Layout
 
