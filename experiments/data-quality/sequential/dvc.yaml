@@ -1,93 +1,64 @@
-# stages:
-#   # --- Truncate imported dataset (optional) ---
-#   # Use this stage if your experiment needs to preprocess the raw dataset
-#   # imported via `dvc import` (e.g. truncate sequences to N frames).
-#   # Import to data/01_raw/datasets_full/ and truncate to data/01_raw/datasets/.
-#   truncate:
-#     foreach:
-#       - train
-#       - val
-#     do:
-#       cmd: >-
-#         uv run python scripts/truncate_sequences.py
-#         --input-dir data/01_raw/datasets_full/${item}
-#         --output-dir data/01_raw/datasets/${item}
-#         --max-frames ${truncate.max_frames}
-#       deps:
-#         - scripts/truncate_sequences.py
-#         - data/01_raw/datasets_full/${item}
-#       params:
-#         - truncate.max_frames
-#       outs:
-#         - data/01_raw/datasets/${item}
-#
-#   prepare:
-#     cmd: >-
-#       uv run python scripts/prepare.py
-#       --input-dir data/01_raw
-#       --output-dir data/02_intermediate
-#     deps:
-#       - scripts/prepare.py
-#       - data/01_raw
-#     outs:
-#       - data/02_intermediate
-#
-#   split:
-#     cmd: >-
-#       uv run python scripts/split.py
-#       --input-dir data/02_intermediate
-#       --output-dir data/05_model_input
-#       --seed ${split.seed}
-#       --test-size ${split.test_size}
-#       --val-size ${split.val_size}
-#     deps:
-#       - scripts/split.py
-#       - data/02_intermediate
-#     params:
-#       - split.seed
-#       - split.test_size
-#       - split.val_size
-#     outs:
-#       - data/05_model_input/train
-#       - data/05_model_input/val
-#       - data/05_model_input/test
-#
-#   train:
-#     cmd: >-
-#       uv run python scripts/train.py
-#       --train-dir data/05_model_input/train
-#       --val-dir data/05_model_input/val
-#       --output-dir data/06_models
-#       --seed ${train.seed}
-#       --epochs ${train.epochs}
-#       --batch-size ${train.batch_size}
-#       --learning-rate ${train.learning_rate}
-#     deps:
-#       - scripts/train.py
-#       - src/project_name
-#       - data/05_model_input/train
-#       - data/05_model_input/val
-#     params:
-#       - train.seed
-#       - train.epochs
-#       - train.batch_size
-#       - train.learning_rate
-#     outs:
-#       - data/06_models/model.pt
-#
-#   evaluate:
-#     cmd: >-
-#       uv run python scripts/evaluate.py
-#       --model-path data/06_models/model.pt
-#       --test-dir data/05_model_input/test
-#       --output-dir data/08_reporting
-#     deps:
-#       - scripts/evaluate.py
-#       - src/project_name
-#       - data/06_models/model.pt
-#       - data/05_model_input/test
-#     metrics:
-#       - data/08_reporting/metrics.json:
-#           cache: false
-#     plots:
-#       - data/08_reporting/plots
+stages:
+  # ---- bbox-tube-temporal-vit-dinov2-finetune ----
+
+  predict_bbox_tube_temporal_vit_dinov2_finetune:
+    foreach:
+      - train
+      - val
+      - test
+    do:
+      desc: "Run bbox-tube-temporal (dinov2 finetune) on ${item}"
+      cmd: >-
+        uv run python scripts/predict.py
+        --model-name bbox-tube-temporal-vit-dinov2-finetune
+        --model-type bbox-tube-temporal
+        --model-package data/01_raw/models/bbox-tube-temporal-vit-dinov2-finetune.zip
+        --split-dir data/01_raw/datasets/${item}
+        --split ${item}
+        --output-dir data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune/${item}
+      deps:
+        - scripts/predict.py
+        - src/data_quality_sequential
+        - data/01_raw/datasets/${item}
+        - data/01_raw/models/bbox-tube-temporal-vit-dinov2-finetune.zip
+      outs:
+        - data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune/${item}
+
+  build_review_sets_bbox_tube_temporal_vit_dinov2_finetune:
+    foreach:
+      - train
+      - val
+      - test
+    do:
+      desc: "Extract FP/FN review sets for bbox-tube-temporal (dinov2 finetune) on ${item}"
+      cmd: >-
+        uv run python scripts/build_review_sets.py
+        --model-name bbox-tube-temporal-vit-dinov2-finetune
+        --split ${item}
+        --split-dir data/01_raw/datasets/${item}
+        --predictions-path data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune/${item}/predictions.json
+        --output-dir data/08_reporting/bbox-tube-temporal-vit-dinov2-finetune/${item}
+      deps:
+        - scripts/build_review_sets.py
+        - src/data_quality_sequential
+        - data/01_raw/datasets/${item}
+        - data/07_model_output/bbox-tube-temporal-vit-dinov2-finetune/${item}/predictions.json
+      outs:
+        - data/08_reporting/bbox-tube-temporal-vit-dinov2-finetune/${item}
+
+  build_fiftyone_bbox_tube_temporal_vit_dinov2_finetune:
+    foreach:
+      - train
+      - val
+      - test
+    do:
+      desc: "Build FiftyOne FP/FN datasets for bbox-tube-temporal (dinov2 finetune) on ${item}"
+      cmd: >-
+        uv run --group explore python scripts/build_fiftyone.py
+        --manifest-path data/08_reporting/bbox-tube-temporal-vit-dinov2-finetune/${item}/review_manifest.json
+        --output-dir data/fiftyone/bbox-tube-temporal-vit-dinov2-finetune/${item}
+      deps:
+        - scripts/build_fiftyone.py
+        - data/08_reporting/bbox-tube-temporal-vit-dinov2-finetune/${item}/review_manifest.json
+      outs:
+        - data/fiftyone/bbox-tube-temporal-vit-dinov2-finetune/${item}
