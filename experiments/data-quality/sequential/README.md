@@ -41,14 +41,18 @@ Reports land in `data/08_reporting/<model>/<split>/`; FiftyOne datasets
 named `dq-seq_<model>_<split>_fp` and `dq-seq_<model>_<split>_fn` are
 created in the local FiftyOne mongo store.
 
-Browse a review set:
+Browse the review sets:
 
 ```bash
-uv run --group explore python -c '
-import fiftyone as fo
-session = fo.launch_app(fo.load_dataset("dq-seq_bbox-tube-temporal-vit-dinov2-finetune_val_fp"))
-session.wait()
-'
+make fiftyone
+```
+
+Opens the FiftyOne app (default: http://localhost:5151). Use the
+sidebar to switch between `dq-seq_<model>_<split>_{fp,fn}` datasets.
+To load a specific dataset directly:
+
+```bash
+uv run --group explore fiftyone app launch dq-seq_bbox-tube-temporal-vit-dinov2-finetune_val_fp
 ```
 
 ## Data imports

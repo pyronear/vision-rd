@@ -1,4 +1,4 @@
-.PHONY: install lint format test help notebook
+.PHONY: install lint format test help notebook fiftyone
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -18,3 +18,6 @@ test: ## Run tests with pytest
 
 notebook: ## Launch JupyterLab for notebooks
 	uv run jupyter lab notebooks/
+
+fiftyone: ## Launch FiftyOne app (use sidebar to switch between dq-seq_* FP/FN review datasets)
+	uv run --group explore fiftyone app launch
