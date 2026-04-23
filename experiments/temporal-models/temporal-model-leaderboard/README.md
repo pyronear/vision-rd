@@ -44,11 +44,42 @@ uv run dvc pull            # pull test set + model packages from S3
 uv run dvc repro           # run evaluation pipeline
 ```
 
+## 🔍 Manual Error Exploration (FiftyOne)
+
+Browse model errors on the pyro-annotator `sdis-77-new_model` export using [FiftyOne](https://docs.voxel51.com/). Three scripts, composed manually (no DVC stage):
+
+1. **Evaluate** any registered model on the export. Writes per-sequence JSONs + `index.json` + `metrics.json` under `data/08_reporting/pyro_annotator/<model-name>/`:
+
+   ```bash
+   uv run --group explore python scripts/evaluate_pyro_annotator_export.py \
+     --model-type bbox-tube-temporal \
+     --model-package data/01_raw/models/bbox-tube-temporal-vit-dinov2-finetune.zip \
+     --export-dir data/01_raw/pyro_annotator_exports/sdis-77-new_model/sdis-77 \
+     --output-dir data/08_reporting/pyro_annotator/vit-dinov2-finetune \
+     --model-name bbox-tube-temporal-vit-dinov2-finetune
+   ```
+
+2. **Build a FiftyOne dataset** of misclassified sequences (false negatives + false positives), one sample per frame. For bbox-tube models, kept-tube boxes are rendered in red; YOLO edge-detector priors in purple:
+
+   ```bash
+   uv run --group explore python scripts/build_fiftyone_errors.py \
+     --predictions-dir data/08_reporting/pyro_annotator/vit-dinov2-finetune \
+     --export-dir data/01_raw/pyro_annotator_exports/sdis-77-new_model/sdis-77
+   ```
+
+3. **Launch the FiftyOne web UI** on port 5151 loading all persisted `leaderboard-pyro-annotator-*` datasets:
+
+   ```bash
+   uv run --group explore python scripts/launch_fiftyone.py
+   ```
+
+Install FiftyOne once with `uv sync --group explore`. Non-bbox-tube models run through the same pipeline but produce sparser samples (no tube overlays) unless their `TemporalModelOutput.details` is extended to carry per-frame detection metadata.
+
 ## ➕ Adding a New Model
 
 1. Implement `TemporalModel` in a new experiment under `experiments/temporal-models/`
 2. Package the model (see [tracking-fsm-baseline](../tracking-fsm-baseline/) for the zip format)
 3. Add a `dvc add` for the model package in `data/01_raw/models/`
-4. Register the model in `MODEL_REGISTRY` in `scripts/evaluate.py`
+4. Register the model in `MODEL_REGISTRY` in `src/temporal_model_leaderboard/registry.py`
 5. Add an `evaluate_<name>` stage in `dvc.yaml` (with `--model-type <registry-key>`)
 6. Run `uv run dvc repro`
