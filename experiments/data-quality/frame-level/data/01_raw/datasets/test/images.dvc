@@ -1,0 +1,14 @@
+md5: 386392cb91056dc91a0acd1963fccf9b
+frozen: true
+deps:
+- path: data/processed/yolo_test/images/test
+  repo:
+    url: https://github.com/pyronear/pyro-dataset
+    rev: v3.0.0
+    rev_lock: ca2a1b0a47163feefaeb02ba43b239eb64898362
+outs:
+- md5: 20a4c8a3694dcd1cee36dbd1650b7d35.dir
+  size: 271913880
+  nfiles: 2640
+  hash: md5
+  path: images

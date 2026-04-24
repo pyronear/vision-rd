@@ -1,0 +1,39 @@
+[project]
+name = "data-quality-frame-level"
+version = "0.1.0"
+description = "Use YOLO as a single-frame oracle to surface frame-level label errors in pyro-dataset"
+requires-python = ">=3.11"
+dependencies = [
+    "huggingface-hub>=0.24",
+    "ultralytics>=8.3",
+    "tqdm>=4.67",
+]
+
+[dependency-groups]
+dev = [
+    "dvc[s3]>=3.56",
+    "nbqa>=1.9",
+    "nbstripout>=0.8",
+    "pytest>=8.0",
+    "ruff>=0.9",
+]
+explore = [
+    "fiftyone>=1.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/data_quality_frame_level"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B", "SIM", "PLC0415"]
+
+[tool.ruff.format]
+quote-style = "double"

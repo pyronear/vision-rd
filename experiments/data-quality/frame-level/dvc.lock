@@ -1,0 +1,261 @@
+schema: '2.0'
+stages:
+  prepare@yolo11s-nimble-narwhal:
+    cmd: uv run python scripts/prepare.py --hf-repo 
+      pyronear/yolo11s_nimble-narwhal_v6.0.0 --hf-filename best.pt --output 
+      data/01_raw/models/yolo11s-nimble-narwhal.pt
+    deps:
+    - path: scripts/prepare.py
+      hash: md5
+      md5: ccfa241bbfdfa06ddb79b2fa5679a8cc
+      size: 1517
+    params:
+      params.yaml:
+        models.yolo11s-nimble-narwhal.hf_filename: best.pt
+        models.yolo11s-nimble-narwhal.hf_repo: 
+          pyronear/yolo11s_nimble-narwhal_v6.0.0
+    outs:
+    - path: data/01_raw/models/yolo11s-nimble-narwhal.pt
+      hash: md5
+      md5: fea4ddc8d904fcc5ff11ad900e040837
+      size: 19225626
+  predict_train@yolo11s-nimble-narwhal:
+    cmd: uv run python scripts/predict.py --model-name yolo11s-nimble-narwhal 
+      --model-path data/01_raw/models/yolo11s-nimble-narwhal.pt --split-dir 
+      data/01_raw/datasets/train --conf-thresh 0.05 --output-dir 
+      data/07_model_output/yolo11s-nimble-narwhal/train
+    deps:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: 654706cef46e66537a2110294273984d.dir
+      size: 1751424303
+      nfiles: 29537
+    - path: data/01_raw/models/yolo11s-nimble-narwhal.pt
+      hash: md5
+      md5: fea4ddc8d904fcc5ff11ad900e040837
+      size: 19225626
+    - path: scripts/predict.py
+      hash: md5
+      md5: a46427c9e72fa76f67f92fb95d22aaf9
+      size: 2904
+    - path: src/data_quality_frame_level/__init__.py
+      hash: md5
+      md5: 645bffbe7c42c4c1695711e213a9ce25
+      size: 85
+    - path: src/data_quality_frame_level/dataset.py
+      hash: md5
+      md5: 6ccf84503932b3f78e481fb32a3edddc
+      size: 3319
+    - path: src/data_quality_frame_level/inference.py
+      hash: md5
+      md5: 482b40c0d4af438759000c3f7ec64376
+      size: 2283
+    params:
+      params.yaml:
+        models.yolo11s-nimble-narwhal.conf_thresh: 0.05
+    outs:
+    - path: data/07_model_output/yolo11s-nimble-narwhal/train
+      hash: md5
+      md5: 58f829ccaa0223a7ec992df76087d18e.dir
+      size: 6524018
+      nfiles: 1
+  predict_val@yolo11s-nimble-narwhal:
+    cmd: uv run python scripts/predict.py --model-name yolo11s-nimble-narwhal 
+      --model-path data/01_raw/models/yolo11s-nimble-narwhal.pt --split-dir 
+      data/01_raw/datasets/val --conf-thresh 0.05 --output-dir 
+      data/07_model_output/yolo11s-nimble-narwhal/val
+    deps:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: b2da618e9b0656ec90997948c84f4737.dir
+      size: 161388482
+      nfiles: 2855
+    - path: data/01_raw/models/yolo11s-nimble-narwhal.pt
+      hash: md5
+      md5: fea4ddc8d904fcc5ff11ad900e040837
+      size: 19225626
+    - path: scripts/predict.py
+      hash: md5
+      md5: a46427c9e72fa76f67f92fb95d22aaf9
+      size: 2904
+    - path: src/data_quality_frame_level/__init__.py
+      hash: md5
+      md5: 645bffbe7c42c4c1695711e213a9ce25
+      size: 85
+    - path: src/data_quality_frame_level/dataset.py
+      hash: md5
+      md5: 6ccf84503932b3f78e481fb32a3edddc
+      size: 3319
+    - path: src/data_quality_frame_level/inference.py
+      hash: md5
+      md5: 482b40c0d4af438759000c3f7ec64376
+      size: 2283
+    params:
+      params.yaml:
+        models.yolo11s-nimble-narwhal.conf_thresh: 0.05
+    outs:
+    - path: data/07_model_output/yolo11s-nimble-narwhal/val
+      hash: md5
+      md5: 2ec65bc2dd57b385356fd5867a5e8810.dir
+      size: 642956
+      nfiles: 1
+  predict_test@yolo11s-nimble-narwhal:
+    cmd: uv run python scripts/predict.py --model-name yolo11s-nimble-narwhal 
+      --model-path data/01_raw/models/yolo11s-nimble-narwhal.pt --split-dir 
+      data/01_raw/datasets/test --conf-thresh 0.05 --output-dir 
+      data/07_model_output/yolo11s-nimble-narwhal/test
+    deps:
+    - path: data/01_raw/datasets/test
+      hash: md5
+      md5: f659a96edceb9db05cdd332359ce4b58.dir
+      size: 272010928
+      nfiles: 5283
+    - path: data/01_raw/models/yolo11s-nimble-narwhal.pt
+      hash: md5
+      md5: fea4ddc8d904fcc5ff11ad900e040837
+      size: 19225626
+    - path: scripts/predict.py
+      hash: md5
+      md5: a46427c9e72fa76f67f92fb95d22aaf9
+      size: 2904
+    - path: src/data_quality_frame_level/__init__.py
+      hash: md5
+      md5: 645bffbe7c42c4c1695711e213a9ce25
+      size: 85
+    - path: src/data_quality_frame_level/dataset.py
+      hash: md5
+      md5: 6ccf84503932b3f78e481fb32a3edddc
+      size: 3319
+    - path: src/data_quality_frame_level/inference.py
+      hash: md5
+      md5: 482b40c0d4af438759000c3f7ec64376
+      size: 2283
+    params:
+      params.yaml:
+        models.yolo11s-nimble-narwhal.conf_thresh: 0.05
+    outs:
+    - path: data/07_model_output/yolo11s-nimble-narwhal/test
+      hash: md5
+      md5: e3213251e4572c88d6111a05796e6d28.dir
+      size: 901804
+      nfiles: 1
+  build_fiftyone_train@yolo11s-nimble-narwhal:
+    cmd: uv run --group explore python scripts/build_fiftyone.py --dataset-name 
+      dq-frame_yolo11s-nimble-narwhal_train --split-dir 
+      data/01_raw/datasets/train --predictions 
+      data/07_model_output/yolo11s-nimble-narwhal/train/predictions.json 
+      --iou-thresh 0.05 --review-conf-thresh 0.35 --sentinel 
+      data/fiftyone/yolo11s-nimble-narwhal/train/dataset.json --summary 
+      data/08_reporting/yolo11s-nimble-narwhal/train/summary.json
+    deps:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: 654706cef46e66537a2110294273984d.dir
+      size: 1751424303
+      nfiles: 29537
+    - path: data/07_model_output/yolo11s-nimble-narwhal/train/predictions.json
+      hash: md5
+      md5: 451b0e8c0a59e90361f0d15f3f1b125b
+      size: 6524018
+    - path: scripts/build_fiftyone.py
+      hash: md5
+      md5: bd8b91d0bc98c6ace435bafb439a2b0d
+      size: 3061
+    - path: src/data_quality_frame_level
+      hash: md5
+      md5: cb8f77823beedf3f4b588ac3bd86e213.dir
+      size: 44689
+      nfiles: 10
+    params:
+      params.yaml:
+        models.yolo11s-nimble-narwhal.iou_thresh: 0.05
+        models.yolo11s-nimble-narwhal.review_conf_thresh: 0.35
+    outs:
+    - path: data/08_reporting/yolo11s-nimble-narwhal/train/summary.json
+      hash: md5
+      md5: 9a0686102be24aa1fe161a3123634f41
+      size: 303
+    - path: data/fiftyone/yolo11s-nimble-narwhal/train/dataset.json
+      hash: md5
+      md5: 1f5b76d37937d9a79203c2bc259ea88b
+      size: 85
+  build_fiftyone_val@yolo11s-nimble-narwhal:
+    cmd: uv run --group explore python scripts/build_fiftyone.py --dataset-name 
+      dq-frame_yolo11s-nimble-narwhal_val --split-dir data/01_raw/datasets/val 
+      --predictions 
+      data/07_model_output/yolo11s-nimble-narwhal/val/predictions.json 
+      --iou-thresh 0.05 --review-conf-thresh 0.35 --sentinel 
+      data/fiftyone/yolo11s-nimble-narwhal/val/dataset.json --summary 
+      data/08_reporting/yolo11s-nimble-narwhal/val/summary.json
+    deps:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: b2da618e9b0656ec90997948c84f4737.dir
+      size: 161388482
+      nfiles: 2855
+    - path: data/07_model_output/yolo11s-nimble-narwhal/val/predictions.json
+      hash: md5
+      md5: 83f5fccfc7b13cc5b0e5066dea0112f1
+      size: 642956
+    - path: scripts/build_fiftyone.py
+      hash: md5
+      md5: bd8b91d0bc98c6ace435bafb439a2b0d
+      size: 3061
+    - path: src/data_quality_frame_level
+      hash: md5
+      md5: cb8f77823beedf3f4b588ac3bd86e213.dir
+      size: 44689
+      nfiles: 10
+    params:
+      params.yaml:
+        models.yolo11s-nimble-narwhal.iou_thresh: 0.05
+        models.yolo11s-nimble-narwhal.review_conf_thresh: 0.35
+    outs:
+    - path: data/08_reporting/yolo11s-nimble-narwhal/val/summary.json
+      hash: md5
+      md5: e22c18508f921f0303572c7ea0408583
+      size: 298
+    - path: data/fiftyone/yolo11s-nimble-narwhal/val/dataset.json
+      hash: md5
+      md5: bd89ae650a83cec81557b19ca172ede2
+      size: 82
+  build_fiftyone_test@yolo11s-nimble-narwhal:
+    cmd: uv run --group explore python scripts/build_fiftyone.py --dataset-name 
+      dq-frame_yolo11s-nimble-narwhal_test --split-dir data/01_raw/datasets/test
+      --predictions 
+      data/07_model_output/yolo11s-nimble-narwhal/test/predictions.json 
+      --iou-thresh 0.05 --review-conf-thresh 0.35 --sentinel 
+      data/fiftyone/yolo11s-nimble-narwhal/test/dataset.json --summary 
+      data/08_reporting/yolo11s-nimble-narwhal/test/summary.json
+    deps:
+    - path: data/01_raw/datasets/test
+      hash: md5
+      md5: f659a96edceb9db05cdd332359ce4b58.dir
+      size: 272010928
+      nfiles: 5283
+    - path: data/07_model_output/yolo11s-nimble-narwhal/test/predictions.json
+      hash: md5
+      md5: 3c43fe42917efd721b6635783e6c9434
+      size: 901804
+    - path: scripts/build_fiftyone.py
+      hash: md5
+      md5: bd8b91d0bc98c6ace435bafb439a2b0d
+      size: 3061
+    - path: src/data_quality_frame_level
+      hash: md5
+      md5: cb8f77823beedf3f4b588ac3bd86e213.dir
+      size: 44689
+      nfiles: 10
+    params:
+      params.yaml:
+        models.yolo11s-nimble-narwhal.iou_thresh: 0.05
+        models.yolo11s-nimble-narwhal.review_conf_thresh: 0.35
+    outs:
+    - path: data/08_reporting/yolo11s-nimble-narwhal/test/summary.json
+      hash: md5
+      md5: 0cf316165055be613b0887301b94f8bb
+      size: 298
+    - path: data/fiftyone/yolo11s-nimble-narwhal/test/dataset.json
+      hash: md5
+      md5: 48791ddb9d5af8c6a556e594819fa5db
+      size: 83

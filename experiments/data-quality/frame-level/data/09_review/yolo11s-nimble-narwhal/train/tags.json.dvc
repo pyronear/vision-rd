@@ -1,0 +1,5 @@
+outs:
+- md5: 835db061926a770ddfa987e1a382ae0e
+  size: 100
+  hash: md5
+  path: tags.json

@@ -1,0 +1,7 @@
+models:
+  yolo11s-nimble-narwhal:
+    hf_repo: pyronear/yolo11s_nimble-narwhal_v6.0.0
+    hf_filename: best.pt
+    conf_thresh: 0.05         # YOLO per-detection threshold — keep all candidates (matches production)
+    review_conf_thresh: 0.35  # Review-time FP queue confidence floor (tunable in FiftyOne sidebar)
+    iou_thresh: 0.05          # FiftyOne evaluate_detections match IoU (lenient — this is a label audit)
