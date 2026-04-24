@@ -19,5 +19,6 @@ test: ## Run tests with pytest
 notebook: ## Launch JupyterLab for notebooks
 	uv run jupyter lab notebooks/
 
-fiftyone: ## Launch FiftyOne app on localhost:5151 (sidebar switches between dq-frame_* datasets)
+fiftyone: ## Launch FiftyOne app on localhost:5151 (defaults to FP review on val, sorted by confidence)
 	uv run --group explore python scripts/launch_fiftyone.py
+
