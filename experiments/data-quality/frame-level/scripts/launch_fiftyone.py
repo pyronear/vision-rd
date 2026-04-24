@@ -96,7 +96,17 @@ def main() -> None:
     all_datasets = fo.list_datasets(glob_patt="dq-frame_*")
     print(f"Available datasets: {', '.join(sorted(all_datasets))}")
 
-    session = fo.launch_app(view, port=args.port)
+    # Force label + confidence to render as persistent overlays on every
+    # bbox (in grid and expanded views). FiftyOne's defaults are True but
+    # user-level configs can override them; set them on the session to be
+    # certain.
+    app_config = fo.app_config.copy()
+    app_config.show_confidence = True
+    app_config.show_label = True
+    app_config.show_index = False
+    app_config.show_tooltip = True
+
+    session = fo.launch_app(view, port=args.port, config=app_config)
 
     def _shutdown(signum, _frame):
         print("\nShutting down FiftyOne...")
