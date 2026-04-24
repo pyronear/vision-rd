@@ -206,10 +206,14 @@ def main() -> None:
 
     signal.signal(signal.SIGINT, _shutdown)
     signal.signal(signal.SIGTERM, _shutdown)
-    # wait(-1) blocks indefinitely regardless of browser-side state;
-    # wait() alone can return immediately when the app opens in a
-    # pre-existing browser window, which tears down the server.
-    session.wait(-1)
+    # Block the process until Ctrl-C regardless of FiftyOne session
+    # state. ``session.wait()`` and even ``session.wait(-1)`` can return
+    # immediately on some FiftyOne versions when the app opens in a
+    # pre-existing browser tab (no fresh client connection registered),
+    # tearing down the server. ``signal.pause()`` blocks until a signal
+    # (our SIGINT/SIGTERM handler) fires, which is the behaviour we
+    # actually want.
+    signal.pause()
 
 
 if __name__ == "__main__":
