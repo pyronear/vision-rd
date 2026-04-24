@@ -66,7 +66,8 @@ def parse_yolo_label(label_path: Path) -> list[BBox]:
         if not line:
             continue
         parts = line.split()
-        class_id = int(parts[0])
+        # Some label files encode class_id as a float (e.g. "0.0"); accept both.
+        class_id = int(float(parts[0]))
         cx, cy, w, h = (float(p) for p in parts[1:5])
         bboxes.append(BBox(class_id=class_id, cx=cx, cy=cy, w=w, h=h))
     return bboxes

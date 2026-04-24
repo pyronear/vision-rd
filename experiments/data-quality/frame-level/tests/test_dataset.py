@@ -65,6 +65,14 @@ def test_parse_yolo_label_ignores_blank_lines(tmp_path: Path):
     assert parse_yolo_label(label) == [BBox(0, 0.5, 0.5, 0.2, 0.2)]
 
 
+def test_parse_yolo_label_accepts_float_class_id(tmp_path: Path):
+    # Some pyro-dataset labels encode class_id as "0.0" instead of "0".
+    label = tmp_path / "lbl.txt"
+    label.write_text("0.0 0.5 0.5 0.2 0.2\n")
+
+    assert parse_yolo_label(label) == [BBox(0, 0.5, 0.5, 0.2, 0.2)]
+
+
 def test_iter_frames_yields_all_images_in_sorted_order(split_dir: Path):
     frames = list(iter_frames(split_dir))
 
