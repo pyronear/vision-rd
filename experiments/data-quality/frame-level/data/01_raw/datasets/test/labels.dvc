@@ -1,13 +1,13 @@
-md5: 7c84e84ee683de3e9639bfe35ef1772d
+md5: 209cde7430a8ab29bc8f5ece78738df5
 frozen: true
 deps:
-- path: data/processed/yolo_test/labels
+- path: data/processed/yolo_test/labels/test
   repo:
     url: https://github.com/pyronear/pyro-dataset
     rev: v3.0.0
     rev_lock: ca2a1b0a47163feefaeb02ba43b239eb64898362
 outs:
-- md5: b355a87862043e7f938c4c157262cb31.dir
+- md5: e1968a1821593f1b8c78580c0f9fb306.dir
   size: 96354
   nfiles: 2640
   hash: md5
