@@ -1,0 +1,6 @@
+models:
+  yolo11s-nimble-narwhal:
+    hf_repo: pyronear/yolo11s_nimble-narwhal_v6.0.0
+    hf_filename: best.pt
+    conf_thresh: 0.35       # per-detection YOLO confidence
+    iou_thresh: 0.5         # FiftyOne evaluate_detections match IoU
