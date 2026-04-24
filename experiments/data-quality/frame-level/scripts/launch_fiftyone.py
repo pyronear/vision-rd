@@ -139,13 +139,9 @@ def _import_persisted_tags(dataset: fo.Dataset, tag_file: Path) -> int:
 def _print_vocab() -> None:
     """Log the review vocabulary on launch so reviewers can copy exact strings."""
     vocab_line = ", ".join(REVIEW_VOCAB)
-    logger.info(
-        "Review tag vocabulary (autocomplete trains after first exact match):"
-    )
+    logger.info("Review tag vocabulary (autocomplete trains after first exact match):")
     logger.info("  %s", vocab_line)
-    logger.info(
-        "  plus %s<handle> for attribution (free-form).", REVIEWER_TAG_PREFIX
-    )
+    logger.info("  plus %s<handle> for attribution (free-form).", REVIEWER_TAG_PREFIX)
     logger.info("Run 'make review-check' mid-session to catch typos early.")
 
 

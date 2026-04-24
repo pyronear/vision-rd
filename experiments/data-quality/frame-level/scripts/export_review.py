@@ -129,8 +129,7 @@ def main() -> None:
     if reports:
         raise SystemExit(
             "Review export refused: found invalid reviewer tags. "
-            "Fix them in the FiftyOne app and re-run.\n\n"
-            + "\n\n".join(reports)
+            "Fix them in the FiftyOne app and re-run.\n\n" + "\n\n".join(reports)
         )
 
     # Phase 2: everything clean, write every file atomically.

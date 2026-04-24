@@ -30,11 +30,11 @@ LABEL_TAG_PREFIX = "label:"
 # Seeded on a neutral sample by :func:`fiftyone_build._seed_tag_vocab`
 # so the tag popover autocompletes these as the reviewer types.
 REVIEW_VOCAB: tuple[str, ...] = (
-    "label:add-smoke",   # YOLO found real smoke; GT has no bbox. Add to annotations.
-    "label:remove-gt",   # GT bbox is not smoke (cloud/dust/glare). Remove.
-    "label:fix-bbox",    # Smoke is present but bbox is mispositioned. Reposition.
-    "label:ok",          # Flag is a genuine model error, not a label issue.
-    "status:unclear",    # Ambiguous — revisit or ask a second reviewer.
+    "label:add-smoke",  # YOLO found real smoke; GT has no bbox. Add to annotations.
+    "label:remove-gt",  # GT bbox is not smoke (cloud/dust/glare). Remove.
+    "label:fix-bbox",  # Smoke is present but bbox is mispositioned. Reposition.
+    "label:ok",  # Flag is a genuine model error, not a label issue.
+    "status:unclear",  # Ambiguous — revisit or ask a second reviewer.
 )
 
 # Marker tag applied alongside REVIEW_VOCAB on the vocab-seed sample.

@@ -170,10 +170,10 @@ def test_is_reviewed_true_iff_any_label_tag():
 
 def test_count_reviewed_aggregates_over_stem_tags():
     stem_tags = {
-        "a": ["label:add-smoke"],                # reviewed
-        "b": ["reviewer:arthur", "label:ok"],   # reviewed
-        "c": ["status:unclear"],                # not reviewed
-        "d": [],                                # not reviewed
+        "a": ["label:add-smoke"],  # reviewed
+        "b": ["reviewer:arthur", "label:ok"],  # reviewed
+        "c": ["status:unclear"],  # not reviewed
+        "d": [],  # not reviewed
     }
 
     assert count_reviewed(stem_tags) == (2, 4)
