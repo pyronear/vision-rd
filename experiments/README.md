@@ -7,10 +7,22 @@ Experiments are organized by category:
 ```
 experiments/
 ├── template/                          # Starter template (copy to create new experiments)
-└── temporal-models/                   # Temporal smoke detection models
-    ├── tracking-fsm-baseline/         # YOLO + IoU FSM tracker baseline
-    └── temporal-model-leaderboard/    # Evaluation & ranking of temporal models
+├── temporal-models/                   # Temporal smoke detection models
+│   ├── tracking-fsm-baseline/         # YOLO + IoU FSM tracker baseline
+│   └── temporal-model-leaderboard/    # Evaluation & ranking of temporal models
+└── data-quality/                      # Label-error audits on the pyro-dataset
+    ├── sequential/                    # Sequence-level audit (TemporalModel oracle)
+    └── frame-level/                   # Frame-level audit (YOLO oracle + FiftyOne)
 ```
+
+### Categories
+
+- **`temporal-models/`** — new candidate models for the server-side temporal
+  verification stage (bbox tubes, FSM tracking, change detection, …).
+- **`data-quality/`** — use an existing model as an *oracle* against the
+  pyro-dataset ground truth and surface disagreements as FiftyOne review
+  sets. `sequential/` audits per-sequence labels (`wildfire/` vs `fp/`);
+  `frame-level/` audits per-frame bboxes in the flat YOLO split.
 
 ## 🚀 Starting a New Experiment
 
