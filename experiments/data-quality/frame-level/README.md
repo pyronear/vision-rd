@@ -56,13 +56,13 @@ Opens the FiftyOne app (default: http://localhost:5151). Use the
 dataset selector in the sidebar to switch splits, and the Evaluation
 panel to filter by FP/FN.
 
-## Results (narwhal @ conf=0.35, IoU=0.1)
+## Results (narwhal @ conf=0.35, IoU=0.05)
 
 | Split | Samples | TP | FP | FN | Precision | Recall |
 |-------|---------|----|----|----|-----------|--------|
-| train | 14,767  | 12,655 | 1,012 | 2,005 | 0.926 | 0.863 |
-| val   | 1,426   | 1,016  |   144 |   386 | 0.876 | 0.725 |
-| test  | 2,640   | 1,293  |   244 |   271 | 0.841 | 0.827 |
+| train | 14,767  | 12,696 |   971 | 1,964 | 0.929 | 0.866 |
+| val   | 1,426   | 1,036  |   124 |   366 | 0.893 | 0.739 |
+| test  | 2,640   | 1,304  |   233 |   260 | 0.848 | 0.834 |
 
 IoU threshold is deliberately lenient (0.1 vs. the COCO-standard 0.5) — this is a label-quality audit, not a detection-evaluation benchmark. Partial-but-clearly-same-object overlaps count as TP so reviewers are only shown frames where the model and GT genuinely disagree about the *existence* of smoke.
 

@@ -144,7 +144,7 @@ stages:
       dq-frame_yolo11s-nimble-narwhal_train --split-dir 
       data/01_raw/datasets/train --predictions 
       data/07_model_output/yolo11s-nimble-narwhal/train/predictions.json 
-      --iou-thresh 0.1 --sentinel 
+      --iou-thresh 0.05 --sentinel 
       data/fiftyone/yolo11s-nimble-narwhal/train/dataset.json --summary 
       data/08_reporting/yolo11s-nimble-narwhal/train/summary.json
     deps:
@@ -168,11 +168,11 @@ stages:
       nfiles: 8
     params:
       params.yaml:
-        models.yolo11s-nimble-narwhal.iou_thresh: 0.1
+        models.yolo11s-nimble-narwhal.iou_thresh: 0.05
     outs:
     - path: data/08_reporting/yolo11s-nimble-narwhal/train/summary.json
       hash: md5
-      md5: 24010ac90ece33f724671dd5b9e81828
+      md5: 565e0306eb82d6001c359312854e2375
       size: 216
     - path: data/fiftyone/yolo11s-nimble-narwhal/train/dataset.json
       hash: md5
@@ -183,7 +183,7 @@ stages:
       dq-frame_yolo11s-nimble-narwhal_val --split-dir data/01_raw/datasets/val 
       --predictions 
       data/07_model_output/yolo11s-nimble-narwhal/val/predictions.json 
-      --iou-thresh 0.1 --sentinel 
+      --iou-thresh 0.05 --sentinel 
       data/fiftyone/yolo11s-nimble-narwhal/val/dataset.json --summary 
       data/08_reporting/yolo11s-nimble-narwhal/val/summary.json
     deps:
@@ -207,12 +207,12 @@ stages:
       nfiles: 8
     params:
       params.yaml:
-        models.yolo11s-nimble-narwhal.iou_thresh: 0.1
+        models.yolo11s-nimble-narwhal.iou_thresh: 0.05
     outs:
     - path: data/08_reporting/yolo11s-nimble-narwhal/val/summary.json
       hash: md5
-      md5: 117edb7b183d10358b91f8036c1357cf
-      size: 209
+      md5: 02d20064a5c84cff27041f2f09d9194b
+      size: 210
     - path: data/fiftyone/yolo11s-nimble-narwhal/val/dataset.json
       hash: md5
       md5: bd89ae650a83cec81557b19ca172ede2
@@ -222,7 +222,7 @@ stages:
       dq-frame_yolo11s-nimble-narwhal_test --split-dir data/01_raw/datasets/test
       --predictions 
       data/07_model_output/yolo11s-nimble-narwhal/test/predictions.json 
-      --iou-thresh 0.1 --sentinel 
+      --iou-thresh 0.05 --sentinel 
       data/fiftyone/yolo11s-nimble-narwhal/test/dataset.json --summary 
       data/08_reporting/yolo11s-nimble-narwhal/test/summary.json
     deps:
@@ -246,12 +246,12 @@ stages:
       nfiles: 8
     params:
       params.yaml:
-        models.yolo11s-nimble-narwhal.iou_thresh: 0.1
+        models.yolo11s-nimble-narwhal.iou_thresh: 0.05
     outs:
     - path: data/08_reporting/yolo11s-nimble-narwhal/test/summary.json
       hash: md5
-      md5: ebb95d4de9df6a97039ec0a9bba11cbe
-      size: 210
+      md5: 7d4ddfb2f2e622ba9a33ed50ff1071cd
+      size: 212
     - path: data/fiftyone/yolo11s-nimble-narwhal/test/dataset.json
       hash: md5
       md5: 48791ddb9d5af8c6a556e594819fa5db

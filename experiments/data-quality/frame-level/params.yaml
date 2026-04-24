@@ -3,4 +3,4 @@ models:
     hf_repo: pyronear/yolo11s_nimble-narwhal_v6.0.0
     hf_filename: best.pt
     conf_thresh: 0.35        # per-detection YOLO confidence
-    iou_thresh: 0.1          # FiftyOne evaluate_detections match IoU (lenient — this is a label audit, not detection eval)
+    iou_thresh: 0.05         # FiftyOne evaluate_detections match IoU (very lenient — this is a label audit, not detection eval)
