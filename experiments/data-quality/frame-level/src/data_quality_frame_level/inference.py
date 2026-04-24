@@ -25,17 +25,16 @@ class PredBBox:
     conf: float
 
 
-def load_model(model_path: Path, device: str = "0") -> YOLO:
+def load_model(model_path: Path) -> YOLO:
     """Load a YOLO model from a local ``.pt`` file.
 
-    Args:
-        model_path: Path to the ``.pt`` checkpoint.
-        device: ultralytics device string (``"0"`` for first CUDA GPU,
-            ``"cpu"`` to force CPU).
+    Device placement is handled by :func:`predict_images` via
+    ``YOLO.predict(device=...)`` — no explicit ``.to(device)`` here
+    because torch rejects ultralytics' bare numeric device strings
+    (e.g. ``"0"``) while ultralytics accepts them and maps them to
+    ``cuda:0`` internally.
     """
-    model = YOLO(str(model_path))
-    model.to(device)
-    return model
+    return YOLO(str(model_path))
 
 
 def predict_images(

@@ -59,7 +59,7 @@ def main() -> None:
     frames = list(iter_frames(args.split_dir))
     logger.info("Discovered %d frames in %s", len(frames), args.split_dir)
 
-    model = load_model(args.model_path, device=args.device)
+    model = load_model(args.model_path)
 
     frames_out: dict[str, dict] = {}
     for batch in tqdm(list(_chunks(frames, args.batch_size)), desc="YOLO inference"):
