@@ -13,6 +13,30 @@ Every YOLO detection above the production per-detection threshold
 (`0.05`) is retained, so reviewers can dynamically tune the confidence
 filter live in the FiftyOne sidebar without rebuilding anything.
 
+## Quickstart — review session
+
+```bash
+cd experiments/data-quality/frame-level
+make install                  # once per checkout
+
+# Build (or rebuild) the review datasets from predictions + GT:
+uv run dvc repro
+
+# Start / resume a review session:
+make review-pull              # fetch any existing review state from DVC
+make fiftyone-fp              # FP queue, highest-confidence first — tag in the app
+make fiftyone-fn              # then missed annotations
+make review-check             # validate tags against REVIEW_VOCAB (run periodically)
+
+# End of session:
+make review-save              # validates + writes data/09_review/<model>/<split>/tags.json
+uv run dvc add data/09_review && uv run dvc push
+git add data/09_review.dvc data/.gitignore && git commit -m "review: update tags"
+```
+
+Full walkthrough below — see **How to review the errors** and
+**Recording decisions: tag → validate → save**.
+
 ## Design
 
 See [`docs/specs/2026-04-24-frame-level-label-audit-design.md`](docs/specs/2026-04-24-frame-level-label-audit-design.md).
@@ -110,23 +134,31 @@ uv run dvc repro
 ### Workflow summary
 
 ```
-dvc repro             # generate datasets + saved views (one-time, or after param changes)
-  ↓
-make fiftyone-fp      # open FP queue, walk highest-confidence first
-  ↓
-sidebar: switch split → pick 'fp-by-confidence' saved view
-  ↓
-sidebar: slide confidence range / filter by eval to tune
-  ↓
-make fiftyone-fn      # same flow for missed annotations
+uv run dvc repro                 # build datasets + saved views (one-time / after param changes)
+        ↓
+make review-pull                 # fetch existing reviewer tags from DVC (skip on first run)
+        ↓
+make fiftyone-fp                 # open FP queue, walk highest-confidence first
+        ↓                            ↘
+tag each sample in the app       sidebar: switch split / slide confidence / filter eval
+        ↓                            ↙
+make review-check                # validate REVIEW_VOCAB (run periodically — exit 1 with "did you mean")
+        ↓
+make fiftyone-fn                 # same flow for missed annotations
+        ↓
+make review-save                 # validate once more + write data/09_review/<model>/<split>/tags.json
+        ↓
+uv run dvc add data/09_review && uv run dvc push && git commit
+        ↓
+# next session: git pull → make review-pull → make fiftyone-fp resumes at the tagged state
 ```
 
-### Persisting review decisions (resumable across sessions)
+### Recording decisions: tag → validate → save
 
-FiftyOne's native **sample tags** record per-image review decisions.
-Tags live in the local mongo store, so a small export/import bridge
-persists them to disk (DVC-tracked) so progress survives machine
-changes and can be shared.
+Review decisions are recorded as FiftyOne **sample tags** (per-image).
+Tags live in the local mongo store; a small export/import bridge
+persists them to disk under `data/09_review/`, which is DVC-tracked so
+progress survives machine changes and can be shared across reviewers.
 
 **Tag vocabulary** — any reviewer tag must be one of these
 (`REVIEW_VOCAB` in `src/data_quality_frame_level/review.py`) or a
@@ -151,25 +183,32 @@ have the exact strings handy.
 2. Click the **tag icon** in the modal's top toolbar (FiftyOne 1.x has no keyboard shortcut for this; press `?` in-app to see the shortcuts available on your build).
 3. Make sure the popover target is **"Sample"** (not "Labels") — tags we persist and export are sample-level.
 4. Type the exact vocab string the first time (e.g. `label:add-smoke`) and press **Enter**. After one exact match in a given view, autocomplete suggests the value for subsequent samples in that view.
-5. Press **→** to advance. Repeat.
+5. Press **→** to advance. Every ~20 samples, switch to a terminal and run `make review-check` to catch typos immediately (see **Validation** below).
 
 ≈ 2–3 seconds per sample once autocomplete kicks in. For single-key-per-tag
 shortcuts (e.g. `1` → `label:add-smoke`), install the
 [Voxel51 tagger plugin](https://github.com/voxel51/fiftyone-plugins/tree/main/plugins/tagger).
 
-**Typo protection** — `make review-check` (and `make review-save` at
-export time) validate every sample's tags against `REVIEW_VOCAB`
-and refuse to proceed if any tag is unknown. The error report lists
-each offending sample and suggests the closest vocab entry
-(`lable:add-smoke` → "did you mean `label:add-smoke`?"). Run
-`make review-check` between tagging passes so typos surface quickly
-and can be fixed in the app before they propagate.
+#### Validation (hard gate against typos)
 
-**Resumable workflow:**
+`make review-check` and `make review-save` both validate every sample's
+tags against `REVIEW_VOCAB` (+ the free-form `reviewer:<handle>`
+prefix) and refuse to proceed if any tag is unknown. The error report
+lists each offending sample and suggests the closest vocab entry:
+
+```
+[dq-frame_yolo11s-nimble-narwhal_val] 1 invalid tag(s) across 1 sample(s):
+  hpwren-figlib_abc_001_2023-01-01T12-00-00: 'lable:add-smoke'  (did you mean 'label:add-smoke'?)
+```
+
+Fix the tag in the FiftyOne app and re-run. `make review-save` is also
+transactional — if any dataset has an invalid tag, **no** `tags.json`
+files are written, so your persisted review state never contains typos.
+
+#### Persistence (save, push, pull, resume)
 
 ```bash
-# First-time setup (once per repo checkout): fetch any existing review
-# state from DVC remote.
+# First-time setup (once per repo checkout): fetch existing review state.
 make review-pull               # dvc pull data/09_review
 
 # Review session:
@@ -177,16 +216,13 @@ make fiftyone-fp               # auto-imports data/09_review/<model>/<split>/tag
                                # into the dataset before opening the app;
                                # previously-tagged samples already carry their tags.
 
-# (Walk FP queue, tag samples via the sidebar. Switch splits, switch to FN queue,
-#  continue tagging.)
-
-# Anytime mid-session: sanity-check that tags are valid.
-make review-check              # exits 0 clean, exits 1 with suggestions on typos
+# (Walk FP queue, tag samples. Switch splits, switch to FN queue, continue tagging.
+#  Run make review-check every ~20 samples.)
 
 # When done (or taking a break):
-make review-save               # validates all tags then dumps mongo → data/09_review/<model>/<split>/tags.json
+make review-save               # validates all tags then dumps mongo → data/09_review/
 uv run dvc add data/09_review  # track the refreshed directory
-uv run dvc push                # push to S3 (optional, for sharing)
+uv run dvc push                # push to S3 (for sharing)
 git add data/09_review.dvc data/.gitignore
 git commit -m "review: update tags"
 
