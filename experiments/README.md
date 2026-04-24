@@ -8,8 +8,11 @@ Experiments are organized by category:
 experiments/
 ├── template/                          # Starter template (copy to create new experiments)
 ├── temporal-models/                   # Temporal smoke detection models
+│   ├── bbox-tube-temporal/            # Bbox-tube temporal classifier (timm backbone + temporal head)
+│   ├── mtb-change-detection/          # YOLO + pixel-wise change detection (SlowFastMTB)
+│   ├── pyro-detector-baseline/        # Production pyro-predictor wrapped as a TemporalModel baseline
 │   ├── tracking-fsm-baseline/         # YOLO + IoU FSM tracker baseline
-│   └── temporal-model-leaderboard/    # Evaluation & ranking of temporal models
+│   └── temporal-model-leaderboard/    # Evaluation & ranking of temporal models on pyro-dataset v3.0.0
 └── data-quality/                      # Label-error audits on the pyro-dataset
     ├── sequential/                    # Sequence-level audit (TemporalModel oracle)
     └── frame-level/                   # Frame-level audit (YOLO oracle + FiftyOne)
