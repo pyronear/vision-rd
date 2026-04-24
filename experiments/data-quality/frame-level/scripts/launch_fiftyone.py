@@ -67,17 +67,32 @@ def _pick_dataset(requested: str | None) -> str:
 
 
 def _build_view(dataset: fo.Dataset, kind: str):
+    """Return a view of samples containing ≥1 FP/FN bbox, sorted appropriately.
+
+    We intentionally do NOT filter individual bboxes — ``evaluate_detections``
+    can mark one prediction as TP and another as FP on the same image, and
+    hiding the TP matched pair makes the visible overlay misleading
+    (you see an unmatched FP next to a GT that actually matched a hidden TP).
+    Instead we narrow the sample set and let the reviewer read each bbox's
+    ``eval`` attribute in the sidebar.
+    """
     if kind == "fp":
-        return dataset.filter_labels(
-            "predictions", F("eval") == "fp", only_matches=True
-        ).sort_by(F("predictions.detections.confidence").max(), reverse=True)
+        # Sort by the highest-confidence FP bbox in each sample.
+        return dataset.match(F("eval_fp") > 0).sort_by(
+            F("predictions.detections")
+            .filter(F("eval") == "fp")
+            .map(F("confidence"))
+            .max(),
+            reverse=True,
+        )
     if kind == "fn":
-        # No confidence on GT bboxes — sort by area (width * height) so
+        # No confidence on GT bboxes — sort by the largest FN bbox area so
         # visually prominent missed annotations surface first.
-        return dataset.filter_labels(
-            "ground_truth", F("eval") == "fn", only_matches=True
-        ).sort_by(
-            F("ground_truth.detections.bounding_box").map(F()[2] * F()[3]).max(),
+        return dataset.match(F("eval_fn") > 0).sort_by(
+            F("ground_truth.detections")
+            .filter(F("eval") == "fn")
+            .map(F("bounding_box")[2] * F("bounding_box")[3])
+            .max(),
             reverse=True,
         )
     return dataset.view()
