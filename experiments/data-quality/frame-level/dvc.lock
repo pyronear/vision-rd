@@ -163,8 +163,8 @@ stages:
       size: 3061
     - path: src/data_quality_frame_level
       hash: md5
-      md5: dd9cb925fb953faddf9439588684ff4c.dir
-      size: 40370
+      md5: cb8f77823beedf3f4b588ac3bd86e213.dir
+      size: 44689
       nfiles: 10
     params:
       params.yaml:
@@ -203,8 +203,8 @@ stages:
       size: 3061
     - path: src/data_quality_frame_level
       hash: md5
-      md5: dd9cb925fb953faddf9439588684ff4c.dir
-      size: 40370
+      md5: cb8f77823beedf3f4b588ac3bd86e213.dir
+      size: 44689
       nfiles: 10
     params:
       params.yaml:
@@ -243,8 +243,8 @@ stages:
       size: 3061
     - path: src/data_quality_frame_level
       hash: md5
-      md5: dd9cb925fb953faddf9439588684ff4c.dir
-      size: 40370
+      md5: cb8f77823beedf3f4b588ac3bd86e213.dir
+      size: 44689
       nfiles: 10
     params:
       params.yaml:

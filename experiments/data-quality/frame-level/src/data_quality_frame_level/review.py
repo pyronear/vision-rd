@@ -18,7 +18,12 @@ module stays pure so it's trivially unit-testable without a live mongo.
 
 from __future__ import annotations
 
+import difflib
+from collections.abc import Iterable
+
 PAYLOAD_VERSION = 1
+
+REVIEWER_TAG_PREFIX = "reviewer:"
 
 # Controlled vocabulary for sample tags in the FiftyOne review workflow.
 # Seeded on a neutral sample by :func:`fiftyone_build._seed_tag_vocab`
@@ -40,6 +45,70 @@ VOCAB_SEED_TAG = "system:vocab-seed"
 def is_vocab_seed(tags: list[str]) -> bool:
     """True iff ``tags`` carry the vocab-seed marker."""
     return VOCAB_SEED_TAG in tags
+
+
+def is_valid_tag(tag: str) -> bool:
+    """True iff ``tag`` is an accepted review tag.
+
+    Accepts exact :data:`REVIEW_VOCAB` entries, the
+    :data:`VOCAB_SEED_TAG` marker, and any ``reviewer:<handle>``
+    attribution (free-form handle after the prefix). Everything else —
+    including typos, wrong case, and trailing whitespace — is rejected.
+    """
+    return (
+        tag in REVIEW_VOCAB
+        or tag == VOCAB_SEED_TAG
+        or tag.startswith(REVIEWER_TAG_PREFIX)
+    )
+
+
+def invalid_tags(tags: Iterable[str]) -> list[str]:
+    """Return the subset of ``tags`` rejected by :func:`is_valid_tag`."""
+    return [t for t in tags if not is_valid_tag(t)]
+
+
+def suggest_tag(tag: str) -> str | None:
+    """Return the closest :data:`REVIEW_VOCAB` entry to ``tag``, or None.
+
+    Uses stdlib :func:`difflib.get_close_matches` with a relatively
+    lenient cutoff so reviewers get a hint for typos like
+    ``lable:add-smoke`` → ``label:add-smoke``. Returns ``None`` when
+    no candidate is within the cutoff (input is too far from any
+    vocab entry to guess confidently).
+    """
+    matches = difflib.get_close_matches(tag, REVIEW_VOCAB, n=1, cutoff=0.7)
+    return matches[0] if matches else None
+
+
+def scan_invalid(stem_tags: dict[str, list[str]]) -> dict[str, list[str]]:
+    """Return ``{stem: [bad_tags]}`` for every stem with invalid tags.
+
+    Pure wrapper around :func:`invalid_tags` over a stem→tags mapping;
+    stems whose tags are fully valid are omitted from the result.
+    Used by both :mod:`scripts.export_review` and
+    :mod:`scripts.validate_review` to share the validation body.
+    """
+    return {
+        stem: bad for stem, tags in stem_tags.items() if (bad := invalid_tags(tags))
+    }
+
+
+def format_invalid_report(
+    dataset_name: str, stem_to_invalid: dict[str, list[str]]
+) -> str:
+    """Format a human-readable report of invalid tags with suggestions."""
+    total = sum(len(v) for v in stem_to_invalid.values())
+    header = (
+        f"[{dataset_name}] {total} invalid tag(s) "
+        f"across {len(stem_to_invalid)} sample(s):"
+    )
+    lines = [header]
+    for stem in sorted(stem_to_invalid):
+        for tag in sorted(stem_to_invalid[stem]):
+            suggestion = suggest_tag(tag)
+            hint = f"  (did you mean '{suggestion}'?)" if suggestion else ""
+            lines.append(f"  {stem}: '{tag}'{hint}")
+    return "\n".join(lines)
 
 
 def payload_from_stem_tags(dataset_name: str, stem_tags: dict[str, list[str]]) -> dict:

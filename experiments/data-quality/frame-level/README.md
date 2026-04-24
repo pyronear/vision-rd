@@ -128,9 +128,10 @@ Tags live in the local mongo store, so a small export/import bridge
 persists them to disk (DVC-tracked) so progress survives machine
 changes and can be shared.
 
-**Tag vocabulary** — `build_dataset` seeds these on one neutral
-sample (no FP, no FN, so it never appears in either review view) so
-FiftyOne's tag popover autocompletes them as you type:
+**Tag vocabulary** — any reviewer tag must be one of these
+(`REVIEW_VOCAB` in `src/data_quality_frame_level/review.py`) or a
+free-form `reviewer:<handle>` attribution. Anything else is rejected
+at export time — see "Typo protection" below.
 
 | Tag | Meaning |
 |---|---|
@@ -141,17 +142,28 @@ FiftyOne's tag popover autocompletes them as you type:
 | `status:unclear` | Ambiguous — revisit or discuss with a second reviewer. |
 | `reviewer:<handle>` | Optional — attribute the decision (e.g. `reviewer:arthur`). Free-form. |
 
-**Fast tagging loop:**
+`make fiftyone-*` prints the vocabulary to the terminal on launch so you
+have the exact strings handy.
 
-1. Click a sample thumbnail in the grid → opens the modal (single-sample view).
+**Tagging loop:**
+
+1. Click a sample thumbnail → opens the modal (single-sample view).
 2. Click the **tag icon** in the modal's top toolbar (FiftyOne 1.x has no keyboard shortcut for this; press `?` in-app to see the shortcuts available on your build).
 3. Make sure the popover target is **"Sample"** (not "Labels") — tags we persist and export are sample-level.
-4. Type a few letters (e.g. `lab`) → autocomplete suggests the matching vocab entry — click or arrow+**Enter** to apply.
-5. Press **→** to advance to the next sample. Repeat.
+4. Type the exact vocab string the first time (e.g. `label:add-smoke`) and press **Enter**. After one exact match in a given view, autocomplete suggests the value for subsequent samples in that view.
+5. Press **→** to advance. Repeat.
 
-≈ 2–3 seconds per sample once you're in the rhythm. For single-key-per-tag
+≈ 2–3 seconds per sample once autocomplete kicks in. For single-key-per-tag
 shortcuts (e.g. `1` → `label:add-smoke`), install the
 [Voxel51 tagger plugin](https://github.com/voxel51/fiftyone-plugins/tree/main/plugins/tagger).
+
+**Typo protection** — `make review-check` (and `make review-save` at
+export time) validate every sample's tags against `REVIEW_VOCAB`
+and refuse to proceed if any tag is unknown. The error report lists
+each offending sample and suggests the closest vocab entry
+(`lable:add-smoke` → "did you mean `label:add-smoke`?"). Run
+`make review-check` between tagging passes so typos surface quickly
+and can be fixed in the app before they propagate.
 
 **Resumable workflow:**
 
@@ -168,8 +180,11 @@ make fiftyone-fp               # auto-imports data/09_review/<model>/<split>/tag
 # (Walk FP queue, tag samples via the sidebar. Switch splits, switch to FN queue,
 #  continue tagging.)
 
+# Anytime mid-session: sanity-check that tags are valid.
+make review-check              # exits 0 clean, exits 1 with suggestions on typos
+
 # When done (or taking a break):
-make review-save               # dumps mongo tags → data/09_review/<model>/<split>/tags.json
+make review-save               # validates all tags then dumps mongo → data/09_review/<model>/<split>/tags.json
 uv run dvc add data/09_review  # track the refreshed directory
 uv run dvc push                # push to S3 (optional, for sharing)
 git add data/09_review.dvc data/.gitignore

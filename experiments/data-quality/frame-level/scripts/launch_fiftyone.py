@@ -34,7 +34,9 @@ import fiftyone as fo
 
 from data_quality_frame_level.fiftyone_build import FN_VIEW_NAME, FP_VIEW_NAME
 from data_quality_frame_level.review import (
-    VOCAB_SEED_TAG,
+    REVIEW_VOCAB,
+    REVIEWER_TAG_PREFIX,
+    invalid_tags,
     merge_tags,
     stem_tags_from_payload,
 )
@@ -98,7 +100,13 @@ def _tag_file_for(review_root: Path, dataset_name: str) -> Path | None:
 
 
 def _import_persisted_tags(dataset: fo.Dataset, tag_file: Path) -> int:
-    """Merge tags from ``tag_file`` into ``dataset``; return samples touched."""
+    """Merge tags from ``tag_file`` into ``dataset``; return samples touched.
+
+    Defensively strips any tag outside the review vocabulary before
+    merging — covers stale seed markers, hand-edited tags.json files,
+    and tags from a future vocab extension. A WARNING is logged per
+    affected stem so reviewers can see what was dropped.
+    """
     payload = json.loads(tag_file.read_text())
     stem_to_tags = stem_tags_from_payload(payload)
     if not stem_to_tags:
@@ -109,15 +117,36 @@ def _import_persisted_tags(dataset: fo.Dataset, tag_file: Path) -> int:
         incoming = stem_to_tags.get(stem)
         if not incoming:
             continue
-        # Never let the seed marker leak into reviewer-decided tags via
-        # an old or hand-edited tags.json.
-        incoming = [t for t in incoming if t != VOCAB_SEED_TAG]
+        stripped = invalid_tags(incoming)
+        if stripped:
+            logger.warning(
+                "Stripping unknown tag(s) on '%s' while importing %s: %s",
+                stem,
+                tag_file,
+                stripped,
+            )
+            incoming = [t for t in incoming if t not in stripped]
+        if not incoming:
+            continue
         merged = merge_tags(list(sample.tags), incoming)
         if merged != list(sample.tags):
             sample.tags = merged
             sample.save()
             touched += 1
     return touched
+
+
+def _print_vocab() -> None:
+    """Log the review vocabulary on launch so reviewers can copy exact strings."""
+    vocab_line = ", ".join(REVIEW_VOCAB)
+    logger.info(
+        "Review tag vocabulary (autocomplete trains after first exact match):"
+    )
+    logger.info("  %s", vocab_line)
+    logger.info(
+        "  plus %s<handle> for attribution (free-form).", REVIEWER_TAG_PREFIX
+    )
+    logger.info("Run 'make review-check' mid-session to catch typos early.")
 
 
 def _build_view(dataset: fo.Dataset, kind: str):
@@ -138,6 +167,7 @@ def _build_view(dataset: fo.Dataset, kind: str):
 
 def main() -> None:
     args = _parse_args()
+    _print_vocab()
     dataset_name = _pick_dataset(args.dataset)
     dataset = fo.load_dataset(dataset_name)
 

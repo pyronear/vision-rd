@@ -22,7 +22,6 @@ from data_quality_frame_level.dataset import (
     yolo_to_fiftyone_xywh,
 )
 from data_quality_frame_level.inference import PredBBox
-from data_quality_frame_level.review import REVIEW_VOCAB, VOCAB_SEED_TAG
 
 logger = logging.getLogger(__name__)
 
@@ -61,25 +60,6 @@ def preds_to_detections(preds: Sequence[PredBBox]) -> fo.Detections:
             )
         )
     return fo.Detections(detections=detections)
-
-
-def _seed_tag_vocab(dataset: fo.Dataset) -> None:
-    """Seed the review vocabulary on a neutral sample for autocomplete.
-
-    FiftyOne's tag popover autocompletes from the set of tags currently
-    present on any ``Sample.tags`` in the dataset — there is no
-    dataset-level vocabulary primitive. To enable autocomplete without
-    distracting reviewers, we apply all vocab entries to one sample that
-    will never appear in either review view (no FP and no FN), so the
-    tags exist in the dataset but don't pollute the review queues.
-    """
-    neutral = dataset.match((F("eval_fp") == 0) & (F("eval_fn") == 0)).first()
-    if neutral is None:
-        # Fallback: every sample has FP/FN (unlikely but possible). Pick
-        # the first sample — it'll carry the vocab but also be reviewable.
-        neutral = dataset.first()
-    neutral.tags = [*REVIEW_VOCAB, VOCAB_SEED_TAG]
-    neutral.save()
 
 
 def _save_review_views(dataset: fo.Dataset, review_conf_thresh: float) -> None:
@@ -170,7 +150,6 @@ def build_dataset(
     )
 
     _save_review_views(dataset, review_conf_thresh=review_conf_thresh)
-    _seed_tag_vocab(dataset)
 
     tp = sum(s.eval_tp for s in dataset)
     fp = sum(s.eval_fp for s in dataset)

@@ -1,13 +1,15 @@
 """Dump FiftyOne sample tags to disk for persistence + DVC tracking.
 
-Walks every ``dq-frame_*`` dataset and writes one ``tags.json`` per
+Walks every ``dq-frame_*`` dataset, validates that every reviewer-applied
+tag is in :data:`data_quality_frame_level.review.REVIEW_VOCAB` (or a
+``reviewer:<handle>`` attribution), and writes one ``tags.json`` per
 (model, split) under ``data/09_review/<model>/<split>/``. Stems whose
 tag list is empty are omitted so the file only records actual review
 decisions.
 
-The output structure mirrors the rest of the pipeline
-(``<model>/<split>/``) so reviewers can spot which datasets already
-have recorded decisions by listing ``data/09_review/``.
+**Hard gate**: if any sample carries an unknown tag (typo, wrong case,
+rogue prefix), no files are written — the script prints a report with
+suggestions and exits non-zero. Fix the tags in the FiftyOne UI and re-run.
 
 Usage::
 
@@ -26,7 +28,12 @@ from pathlib import Path
 
 import fiftyone as fo
 
-from data_quality_frame_level.review import is_vocab_seed, payload_from_stem_tags
+from data_quality_frame_level.review import (
+    format_invalid_report,
+    is_vocab_seed,
+    payload_from_stem_tags,
+    scan_invalid,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -63,18 +70,23 @@ def _resolve_target_path(output_root: Path, dataset_name: str) -> Path:
     return output_root / model / split / "tags.json"
 
 
-def _export_one(dataset_name: str, output_root: Path) -> int:
+def collect_stem_tags(dataset_name: str) -> dict[str, list[str]]:
+    """Return ``{stem: [tags]}`` for every non-seed sample in the dataset."""
     dataset = fo.load_dataset(dataset_name)
     stem_tags: dict[str, list[str]] = {}
     for sample in dataset:
         tags = list(sample.tags)
-        # Skip the vocab-seed sample — its tags are autocomplete scaffolding,
-        # not a reviewer decision.
         if is_vocab_seed(tags):
+            # Stale state from an earlier seeding experiment — skip it.
             continue
         stem = Path(sample.filepath).stem
         stem_tags[stem] = tags
+    return stem_tags
 
+
+def _write_one(
+    dataset_name: str, stem_tags: dict[str, list[str]], output_root: Path
+) -> int:
     payload = payload_from_stem_tags(dataset_name, stem_tags)
     target = _resolve_target_path(output_root, dataset_name)
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -93,9 +105,27 @@ def main() -> None:
     if not names:
         raise SystemExit("No dq-frame_* datasets found. Run 'dvc repro' first.")
 
-    total = 0
+    # Phase 1: scan all datasets and validate. No files written yet.
+    scanned: dict[str, dict[str, list[str]]] = {}
+    reports: list[str] = []
     for name in sorted(names):
-        total += _export_one(name, args.output_root)
+        stem_tags = collect_stem_tags(name)
+        scanned[name] = stem_tags
+        bad = scan_invalid(stem_tags)
+        if bad:
+            reports.append(format_invalid_report(name, bad))
+
+    if reports:
+        raise SystemExit(
+            "Review export refused: found invalid reviewer tags. "
+            "Fix them in the FiftyOne app and re-run.\n\n"
+            + "\n\n".join(reports)
+        )
+
+    # Phase 2: everything clean, write every file atomically.
+    total = 0
+    for name in sorted(scanned):
+        total += _write_one(name, scanned[name], args.output_root)
     logger.info("Total tagged samples across %d dataset(s): %d", len(names), total)
 
 

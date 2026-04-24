@@ -1,4 +1,4 @@
-.PHONY: install lint format test help notebook fiftyone fiftyone-fp fiftyone-fn review-save review-pull
+.PHONY: install lint format test help notebook fiftyone fiftyone-fp fiftyone-fn review-save review-pull review-check
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -26,6 +26,9 @@ fiftyone-fp: ## Launch FiftyOne on the FP queue (val split), sorted by predicted
 
 fiftyone-fn: ## Launch FiftyOne on the FN queue (val split), sorted by GT bbox area desc
 	uv run --group explore python scripts/launch_fiftyone.py --kind fn
+
+review-check: ## Validate reviewer tags against REVIEW_VOCAB without writing files
+	uv run --group explore python scripts/validate_review.py
 
 review-save: ## Dump FiftyOne sample tags into data/09_review/ for persistence + DVC
 	uv run --group explore python scripts/export_review.py
