@@ -33,7 +33,11 @@ from pathlib import Path
 import fiftyone as fo
 
 from data_quality_frame_level.fiftyone_build import FN_VIEW_NAME, FP_VIEW_NAME
-from data_quality_frame_level.review import merge_tags, stem_tags_from_payload
+from data_quality_frame_level.review import (
+    VOCAB_SEED_TAG,
+    merge_tags,
+    stem_tags_from_payload,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -105,6 +109,9 @@ def _import_persisted_tags(dataset: fo.Dataset, tag_file: Path) -> int:
         incoming = stem_to_tags.get(stem)
         if not incoming:
             continue
+        # Never let the seed marker leak into reviewer-decided tags via
+        # an old or hand-edited tags.json.
+        incoming = [t for t in incoming if t != VOCAB_SEED_TAG]
         merged = merge_tags(list(sample.tags), incoming)
         if merged != list(sample.tags):
             sample.tags = merged

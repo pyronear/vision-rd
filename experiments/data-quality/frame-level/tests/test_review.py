@@ -1,6 +1,9 @@
 """Tests for the pure helpers in data_quality_frame_level.review."""
 
 from data_quality_frame_level.review import (
+    REVIEW_VOCAB,
+    VOCAB_SEED_TAG,
+    is_vocab_seed,
     merge_tags,
     payload_from_stem_tags,
     stem_tags_from_payload,
@@ -63,3 +66,9 @@ def test_merge_tags_preserves_existing_when_incoming_is_empty():
 
 def test_merge_tags_is_sorted():
     assert merge_tags(["z"], ["a", "m"]) == ["a", "m", "z"]
+
+
+def test_is_vocab_seed_detects_marker():
+    assert is_vocab_seed([VOCAB_SEED_TAG, *REVIEW_VOCAB]) is True
+    assert is_vocab_seed(["label:add-smoke"]) is False
+    assert is_vocab_seed([]) is False

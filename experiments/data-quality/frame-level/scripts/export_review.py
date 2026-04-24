@@ -26,7 +26,7 @@ from pathlib import Path
 
 import fiftyone as fo
 
-from data_quality_frame_level.review import payload_from_stem_tags
+from data_quality_frame_level.review import is_vocab_seed, payload_from_stem_tags
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -67,8 +67,13 @@ def _export_one(dataset_name: str, output_root: Path) -> int:
     dataset = fo.load_dataset(dataset_name)
     stem_tags: dict[str, list[str]] = {}
     for sample in dataset:
+        tags = list(sample.tags)
+        # Skip the vocab-seed sample — its tags are autocomplete scaffolding,
+        # not a reviewer decision.
+        if is_vocab_seed(tags):
+            continue
         stem = Path(sample.filepath).stem
-        stem_tags[stem] = list(sample.tags)
+        stem_tags[stem] = tags
 
     payload = payload_from_stem_tags(dataset_name, stem_tags)
     target = _resolve_target_path(output_root, dataset_name)

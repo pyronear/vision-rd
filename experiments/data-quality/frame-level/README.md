@@ -128,8 +128,9 @@ Tags live in the local mongo store, so a small export/import bridge
 persists them to disk (DVC-tracked) so progress survives machine
 changes and can be shared.
 
-**Tag vocabulary** — `build_dataset` pre-populates these on
-`Dataset.tags` so the tag popover autocompletes them as you type:
+**Tag vocabulary** — `build_dataset` seeds these on one neutral
+sample (no FP, no FN, so it never appears in either review view) so
+FiftyOne's tag popover autocompletes them as you type:
 
 | Tag | Meaning |
 |---|---|
@@ -140,15 +141,15 @@ changes and can be shared.
 | `status:unclear` | Ambiguous — revisit or discuss with a second reviewer. |
 | `reviewer:<handle>` | Optional — attribute the decision (e.g. `reviewer:arthur`). Free-form. |
 
-**Fast keystroke loop for tagging:**
+**Fast tagging loop:**
 
 1. Click a sample thumbnail in the grid → opens the modal (single-sample view).
-2. Press **`t`** → tag popover opens with the vocabulary listed.
-3. Type a few letters (e.g. `lab`) → autocomplete narrows to matching vocab entries.
-4. Arrow-key + **Enter** to apply the highlighted tag.
+2. Click the **tag icon** in the modal's top toolbar (FiftyOne 1.x has no keyboard shortcut for this; press `?` in-app to see the shortcuts available on your build).
+3. Make sure the popover target is **"Sample"** (not "Labels") — tags we persist and export are sample-level.
+4. Type a few letters (e.g. `lab`) → autocomplete suggests the matching vocab entry — click or arrow+**Enter** to apply.
 5. Press **→** to advance to the next sample. Repeat.
 
-≈ 1–2 seconds per sample once you're in the rhythm. For single-key-per-tag
+≈ 2–3 seconds per sample once you're in the rhythm. For single-key-per-tag
 shortcuts (e.g. `1` → `label:add-smoke`), install the
 [Voxel51 tagger plugin](https://github.com/voxel51/fiftyone-plugins/tree/main/plugins/tagger).
 

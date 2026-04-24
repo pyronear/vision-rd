@@ -21,7 +21,7 @@ from __future__ import annotations
 PAYLOAD_VERSION = 1
 
 # Controlled vocabulary for sample tags in the FiftyOne review workflow.
-# Populated on ``Dataset.tags`` by :func:`fiftyone_build.build_dataset`
+# Seeded on a neutral sample by :func:`fiftyone_build._seed_tag_vocab`
 # so the tag popover autocompletes these as the reviewer types.
 REVIEW_VOCAB: tuple[str, ...] = (
     "label:add-smoke",   # YOLO found real smoke; GT has no bbox. Add to annotations.
@@ -30,6 +30,16 @@ REVIEW_VOCAB: tuple[str, ...] = (
     "label:ok",          # Flag is a genuine model error, not a label issue.
     "status:unclear",    # Ambiguous — revisit or ask a second reviewer.
 )
+
+# Marker tag applied alongside REVIEW_VOCAB on the vocab-seed sample.
+# Presence of this tag means "this sample's tags are the autocomplete
+# seed, not a review decision" — export/import should skip it.
+VOCAB_SEED_TAG = "system:vocab-seed"
+
+
+def is_vocab_seed(tags: list[str]) -> bool:
+    """True iff ``tags`` carry the vocab-seed marker."""
+    return VOCAB_SEED_TAG in tags
 
 
 def payload_from_stem_tags(dataset_name: str, stem_tags: dict[str, list[str]]) -> dict:
