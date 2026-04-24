@@ -1,4 +1,4 @@
-.PHONY: install lint format test help notebook fiftyone
+.PHONY: install lint format test help notebook fiftyone fiftyone-fp fiftyone-fn
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -19,6 +19,11 @@ test: ## Run tests with pytest
 notebook: ## Launch JupyterLab for notebooks
 	uv run jupyter lab notebooks/
 
-fiftyone: ## Launch FiftyOne app on localhost:5151 (defaults to FP review on val, sorted by confidence)
-	uv run --group explore python scripts/launch_fiftyone.py
+fiftyone: fiftyone-fp ## Alias for fiftyone-fp (FP review queue on val, sorted by confidence)
+
+fiftyone-fp: ## Launch FiftyOne on the FP queue (val split), sorted by predicted confidence desc
+	uv run --group explore python scripts/launch_fiftyone.py --kind fp
+
+fiftyone-fn: ## Launch FiftyOne on the FN queue (val split), sorted by GT bbox area desc
+	uv run --group explore python scripts/launch_fiftyone.py --kind fn
 
