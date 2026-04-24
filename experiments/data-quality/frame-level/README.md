@@ -17,7 +17,7 @@ through flagged frames.
 
 ## Design
 
-See [`../../../docs/specs/2026-04-24-frame-level-label-audit-design.md`](../../../docs/specs/2026-04-24-frame-level-label-audit-design.md).
+See [`docs/specs/2026-04-24-frame-level-label-audit-design.md`](docs/specs/2026-04-24-frame-level-label-audit-design.md).
 
 ## Pipeline
 
