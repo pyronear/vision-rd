@@ -1,63 +1,156 @@
 stages:
   prepare:
-    matrix:
-      model: ${models}
-    desc: "Download ${item.model.name} .pt from HuggingFace"
-    cmd: >-
-      uv run python scripts/prepare.py
-      --hf-repo ${item.model.hf_repo}
-      --hf-filename ${item.model.hf_filename}
-      --output data/01_raw/models/${item.model.name}.pt
-    deps:
-      - scripts/prepare.py
-    params:
-      - models
-    outs:
-      - data/01_raw/models/${item.model.name}.pt:
-          cache: false
+    foreach: ${models}
+    do:
+      desc: "Download ${key} .pt from HuggingFace"
+      cmd: >-
+        uv run python scripts/prepare.py
+        --hf-repo ${item.hf_repo}
+        --hf-filename ${item.hf_filename}
+        --output data/01_raw/models/${key}.pt
+      deps:
+        - scripts/prepare.py
+      params:
+        - models.${key}.hf_repo
+        - models.${key}.hf_filename
+      outs:
+        - data/01_raw/models/${key}.pt:
+            cache: false
 
-  predict:
-    matrix:
-      model: ${models}
-      split: [train, val, test]
-    desc: "Run YOLO inference with ${item.model.name} on ${item.split}"
-    cmd: >-
-      uv run python scripts/predict.py
-      --model-name ${item.model.name}
-      --model-path data/01_raw/models/${item.model.name}.pt
-      --split-dir data/01_raw/datasets/${item.split}
-      --conf-thresh ${item.model.conf_thresh}
-      --output-dir data/07_model_output/${item.model.name}/${item.split}
-    deps:
-      - scripts/predict.py
-      - src/data_quality_frame_level
-      - data/01_raw/datasets/${item.split}
-      - data/01_raw/models/${item.model.name}.pt
-    params:
-      - models
-    outs:
-      - data/07_model_output/${item.model.name}/${item.split}
+  predict_train:
+    foreach: ${models}
+    do:
+      desc: "Run YOLO inference with ${key} on train"
+      cmd: >-
+        uv run python scripts/predict.py
+        --model-name ${key}
+        --model-path data/01_raw/models/${key}.pt
+        --split-dir data/01_raw/datasets/train
+        --conf-thresh ${item.conf_thresh}
+        --output-dir data/07_model_output/${key}/train
+      deps:
+        - scripts/predict.py
+        - src/data_quality_frame_level/__init__.py
+        - src/data_quality_frame_level/dataset.py
+        - src/data_quality_frame_level/inference.py
+        - data/01_raw/datasets/train
+        - data/01_raw/models/${key}.pt
+      params:
+        - models.${key}.conf_thresh
+      outs:
+        - data/07_model_output/${key}/train
 
-  build_fiftyone:
-    matrix:
-      model: ${models}
-      split: [train, val, test]
-    desc: "Build FiftyOne review dataset for ${item.model.name} on ${item.split}"
-    cmd: >-
-      uv run --group explore python scripts/build_fiftyone.py
-      --dataset-name dq-frame_${item.model.name}_${item.split}
-      --split-dir data/01_raw/datasets/${item.split}
-      --predictions data/07_model_output/${item.model.name}/${item.split}/predictions.json
-      --iou-thresh ${item.model.iou_thresh}
-      --sentinel data/fiftyone/${item.model.name}/${item.split}/dataset.json
-      --summary data/08_reporting/${item.model.name}/${item.split}/summary.json
-    deps:
-      - scripts/build_fiftyone.py
-      - src/data_quality_frame_level
-      - data/01_raw/datasets/${item.split}
-      - data/07_model_output/${item.model.name}/${item.split}/predictions.json
-    params:
-      - models
-    outs:
-      - data/fiftyone/${item.model.name}/${item.split}/dataset.json
-      - data/08_reporting/${item.model.name}/${item.split}/summary.json
+  predict_val:
+    foreach: ${models}
+    do:
+      desc: "Run YOLO inference with ${key} on val"
+      cmd: >-
+        uv run python scripts/predict.py
+        --model-name ${key}
+        --model-path data/01_raw/models/${key}.pt
+        --split-dir data/01_raw/datasets/val
+        --conf-thresh ${item.conf_thresh}
+        --output-dir data/07_model_output/${key}/val
+      deps:
+        - scripts/predict.py
+        - src/data_quality_frame_level/__init__.py
+        - src/data_quality_frame_level/dataset.py
+        - src/data_quality_frame_level/inference.py
+        - data/01_raw/datasets/val
+        - data/01_raw/models/${key}.pt
+      params:
+        - models.${key}.conf_thresh
+      outs:
+        - data/07_model_output/${key}/val
+
+  predict_test:
+    foreach: ${models}
+    do:
+      desc: "Run YOLO inference with ${key} on test"
+      cmd: >-
+        uv run python scripts/predict.py
+        --model-name ${key}
+        --model-path data/01_raw/models/${key}.pt
+        --split-dir data/01_raw/datasets/test
+        --conf-thresh ${item.conf_thresh}
+        --output-dir data/07_model_output/${key}/test
+      deps:
+        - scripts/predict.py
+        - src/data_quality_frame_level/__init__.py
+        - src/data_quality_frame_level/dataset.py
+        - src/data_quality_frame_level/inference.py
+        - data/01_raw/datasets/test
+        - data/01_raw/models/${key}.pt
+      params:
+        - models.${key}.conf_thresh
+      outs:
+        - data/07_model_output/${key}/test
+
+  build_fiftyone_train:
+    foreach: ${models}
+    do:
+      desc: "Build FiftyOne review dataset for ${key} on train"
+      cmd: >-
+        uv run --group explore python scripts/build_fiftyone.py
+        --dataset-name dq-frame_${key}_train
+        --split-dir data/01_raw/datasets/train
+        --predictions data/07_model_output/${key}/train/predictions.json
+        --iou-thresh ${item.iou_thresh}
+        --sentinel data/fiftyone/${key}/train/dataset.json
+        --summary data/08_reporting/${key}/train/summary.json
+      deps:
+        - scripts/build_fiftyone.py
+        - src/data_quality_frame_level
+        - data/01_raw/datasets/train
+        - data/07_model_output/${key}/train/predictions.json
+      params:
+        - models.${key}.iou_thresh
+      outs:
+        - data/fiftyone/${key}/train/dataset.json
+        - data/08_reporting/${key}/train/summary.json
+
+  build_fiftyone_val:
+    foreach: ${models}
+    do:
+      desc: "Build FiftyOne review dataset for ${key} on val"
+      cmd: >-
+        uv run --group explore python scripts/build_fiftyone.py
+        --dataset-name dq-frame_${key}_val
+        --split-dir data/01_raw/datasets/val
+        --predictions data/07_model_output/${key}/val/predictions.json
+        --iou-thresh ${item.iou_thresh}
+        --sentinel data/fiftyone/${key}/val/dataset.json
+        --summary data/08_reporting/${key}/val/summary.json
+      deps:
+        - scripts/build_fiftyone.py
+        - src/data_quality_frame_level
+        - data/01_raw/datasets/val
+        - data/07_model_output/${key}/val/predictions.json
+      params:
+        - models.${key}.iou_thresh
+      outs:
+        - data/fiftyone/${key}/val/dataset.json
+        - data/08_reporting/${key}/val/summary.json
+
+  build_fiftyone_test:
+    foreach: ${models}
+    do:
+      desc: "Build FiftyOne review dataset for ${key} on test"
+      cmd: >-
+        uv run --group explore python scripts/build_fiftyone.py
+        --dataset-name dq-frame_${key}_test
+        --split-dir data/01_raw/datasets/test
+        --predictions data/07_model_output/${key}/test/predictions.json
+        --iou-thresh ${item.iou_thresh}
+        --sentinel data/fiftyone/${key}/test/dataset.json
+        --summary data/08_reporting/${key}/test/summary.json
+      deps:
+        - scripts/build_fiftyone.py
+        - src/data_quality_frame_level
+        - data/01_raw/datasets/test
+        - data/07_model_output/${key}/test/predictions.json
+      params:
+        - models.${key}.iou_thresh
+      outs:
+        - data/fiftyone/${key}/test/dataset.json
+        - data/08_reporting/${key}/test/summary.json

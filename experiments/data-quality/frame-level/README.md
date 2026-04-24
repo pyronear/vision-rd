@@ -101,26 +101,29 @@ stage — not tracked by DVC.
 
 ## Adding another YOLO variant
 
-1. Append a block to `models:` in `params.yaml`:
+1. Add an entry keyed by the model name to `models:` in `params.yaml`:
 
    ```yaml
    models:
-     - name: yolo11s-nimble-narwhal
+     yolo11s-nimble-narwhal:
        hf_repo: pyronear/yolo11s_nimble-narwhal_v6.0.0
        hf_filename: best.pt
        conf_thresh: 0.35
        iou_thresh: 0.5
-     - name: <new-model-name>
+     <new-model-name>:
        hf_repo: <hf-org/new-model-repo>
        hf_filename: <pt-filename-in-repo>
        conf_thresh: 0.35
        iou_thresh: 0.5
    ```
 
-2. `uv run dvc repro` — only the new model's stages run (the matrix
-   expands to one set of stages per entry).
+2. `uv run dvc repro` — only the new model's stages run (each DVC stage
+   is `foreach`-expanded over `models:`, producing per-model stages
+   named `<stage>@<model-name>`).
 
-No changes to `dvc.yaml` needed.
+No changes to `dvc.yaml` needed. Because stages are keyed by model
+name (not positional index), reordering entries in `params.yaml` does
+not invalidate existing stages.
 
 ## Caveats
 
