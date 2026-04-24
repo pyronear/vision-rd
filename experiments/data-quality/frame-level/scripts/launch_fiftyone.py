@@ -206,7 +206,10 @@ def main() -> None:
 
     signal.signal(signal.SIGINT, _shutdown)
     signal.signal(signal.SIGTERM, _shutdown)
-    session.wait()
+    # wait(-1) blocks indefinitely regardless of browser-side state;
+    # wait() alone can return immediately when the app opens in a
+    # pre-existing browser window, which tears down the server.
+    session.wait(-1)
 
 
 if __name__ == "__main__":
