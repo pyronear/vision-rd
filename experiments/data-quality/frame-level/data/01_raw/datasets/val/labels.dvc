@@ -1,0 +1,14 @@
+md5: a9eba5ce11abe56b7c064b9c51278022
+frozen: true
+deps:
+- path: data/processed/yolo_train_val/labels/val
+  repo:
+    url: https://github.com/pyronear/pyro-dataset
+    rev: v3.0.0
+    rev_lock: ca2a1b0a47163feefaeb02ba43b239eb64898362
+outs:
+- md5: 3ea1b0a53f08b4508d010c5c95d3c850.dir
+  size: 84113
+  nfiles: 1426
+  hash: md5
+  path: labels
