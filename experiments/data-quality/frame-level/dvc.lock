@@ -163,9 +163,9 @@ stages:
       size: 3061
     - path: src/data_quality_frame_level
       hash: md5
-      md5: a2cf249347d6ebd8d502d86afb8e721d.dir
-      size: 31407
-      nfiles: 8
+      md5: cd3a1f7c45819c0f2af9bc7b04bda680.dir
+      size: 37983
+      nfiles: 10
     params:
       params.yaml:
         models.yolo11s-nimble-narwhal.iou_thresh: 0.05
@@ -203,9 +203,9 @@ stages:
       size: 3061
     - path: src/data_quality_frame_level
       hash: md5
-      md5: a2cf249347d6ebd8d502d86afb8e721d.dir
-      size: 31407
-      nfiles: 8
+      md5: cd3a1f7c45819c0f2af9bc7b04bda680.dir
+      size: 37983
+      nfiles: 10
     params:
       params.yaml:
         models.yolo11s-nimble-narwhal.iou_thresh: 0.05
@@ -243,9 +243,9 @@ stages:
       size: 3061
     - path: src/data_quality_frame_level
       hash: md5
-      md5: a2cf249347d6ebd8d502d86afb8e721d.dir
-      size: 31407
-      nfiles: 8
+      md5: cd3a1f7c45819c0f2af9bc7b04bda680.dir
+      size: 37983
+      nfiles: 10
     params:
       params.yaml:
         models.yolo11s-nimble-narwhal.iou_thresh: 0.05

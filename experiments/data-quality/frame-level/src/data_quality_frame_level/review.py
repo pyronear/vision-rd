@@ -20,6 +20,17 @@ from __future__ import annotations
 
 PAYLOAD_VERSION = 1
 
+# Controlled vocabulary for sample tags in the FiftyOne review workflow.
+# Populated on ``Dataset.tags`` by :func:`fiftyone_build.build_dataset`
+# so the tag popover autocompletes these as the reviewer types.
+REVIEW_VOCAB: tuple[str, ...] = (
+    "label:add-smoke",   # YOLO found real smoke; GT has no bbox. Add to annotations.
+    "label:remove-gt",   # GT bbox is not smoke (cloud/dust/glare). Remove.
+    "label:fix-bbox",    # Smoke is present but bbox is mispositioned. Reposition.
+    "label:ok",          # Flag is a genuine model error, not a label issue.
+    "status:unclear",    # Ambiguous — revisit or ask a second reviewer.
+)
+
 
 def payload_from_stem_tags(dataset_name: str, stem_tags: dict[str, list[str]]) -> dict:
     """Build a JSON-serializable payload from a ``{stem: [tags]}`` map.

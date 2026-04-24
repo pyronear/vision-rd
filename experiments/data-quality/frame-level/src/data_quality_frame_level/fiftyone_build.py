@@ -22,6 +22,7 @@ from data_quality_frame_level.dataset import (
     yolo_to_fiftyone_xywh,
 )
 from data_quality_frame_level.inference import PredBBox
+from data_quality_frame_level.review import REVIEW_VOCAB
 
 logger = logging.getLogger(__name__)
 
@@ -150,6 +151,12 @@ def build_dataset(
     )
 
     _save_review_views(dataset, review_conf_thresh=review_conf_thresh)
+
+    # Seed the dataset-level tag vocabulary so the FiftyOne tag popover
+    # autocompletes the review vocabulary ("label:add-smoke" etc.) as
+    # the reviewer types — no need to retype the full tag every time.
+    dataset.tags = list(REVIEW_VOCAB)
+    dataset.save()
 
     tp = sum(s.eval_tp for s in dataset)
     fp = sum(s.eval_fp for s in dataset)

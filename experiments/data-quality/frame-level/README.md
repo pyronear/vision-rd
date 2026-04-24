@@ -128,8 +128,8 @@ Tags live in the local mongo store, so a small export/import bridge
 persists them to disk (DVC-tracked) so progress survives machine
 changes and can be shared.
 
-**Tag vocabulary** — use these strings in the FiftyOne "Tags" sidebar
-on each sample:
+**Tag vocabulary** — `build_dataset` pre-populates these on
+`Dataset.tags` so the tag popover autocompletes them as you type:
 
 | Tag | Meaning |
 |---|---|
@@ -138,7 +138,19 @@ on each sample:
 | `label:fix-bbox` | Smoke is present but GT bbox is mispositioned. Reposition. |
 | `label:ok` | Flag is a genuine narwhal error, not a label issue. No change. |
 | `status:unclear` | Ambiguous — revisit or discuss with a second reviewer. |
-| `reviewer:<handle>` | Optional — attribute the decision (e.g. `reviewer:arthur`). |
+| `reviewer:<handle>` | Optional — attribute the decision (e.g. `reviewer:arthur`). Free-form. |
+
+**Fast keystroke loop for tagging:**
+
+1. Click a sample thumbnail in the grid → opens the modal (single-sample view).
+2. Press **`t`** → tag popover opens with the vocabulary listed.
+3. Type a few letters (e.g. `lab`) → autocomplete narrows to matching vocab entries.
+4. Arrow-key + **Enter** to apply the highlighted tag.
+5. Press **→** to advance to the next sample. Repeat.
+
+≈ 1–2 seconds per sample once you're in the rhythm. For single-key-per-tag
+shortcuts (e.g. `1` → `label:add-smoke`), install the
+[Voxel51 tagger plugin](https://github.com/voxel51/fiftyone-plugins/tree/main/plugins/tagger).
 
 **Resumable workflow:**
 
