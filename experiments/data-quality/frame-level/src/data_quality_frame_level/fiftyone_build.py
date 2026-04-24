@@ -62,24 +62,29 @@ def preds_to_detections(preds: Sequence[PredBBox]) -> fo.Detections:
     return fo.Detections(detections=detections)
 
 
-def _save_review_views(dataset: fo.Dataset) -> None:
+def _save_review_views(dataset: fo.Dataset, review_conf_thresh: float) -> None:
     """Persist the FP and FN review views on the dataset.
+
+    YOLO emits every detection above its low per-detection threshold (e.g.
+    0.05) so we retain all candidates for interactive review. The FP
+    saved view narrows to detections at or above ``review_conf_thresh``
+    — reviewers can still slide the confidence filter in the FiftyOne
+    sidebar to see lower-confidence FPs without rebuilding the dataset.
 
     The views are saved with fixed names (:data:`FP_VIEW_NAME`,
     :data:`FN_VIEW_NAME`) so that switching datasets in the FiftyOne UI
-    preserves the review workflow — reviewers pick the same saved view
-    on train / val / test and get a consistent filter + sort.
+    preserves the review workflow.
 
-    - FP view: samples with any FP prediction, sorted by the highest
-      FP-flagged confidence descending.
+    - FP view: samples with any FP prediction at conf ≥ review_conf_thresh,
+      sorted by the highest qualifying FP confidence descending.
     - FN view: samples with any missed GT bbox, sorted by the largest
       FN-flagged bbox area descending (GTs have no confidence).
     """
-    fp_view = dataset.match(F("eval_fp") > 0).sort_by(
-        F("predictions.detections")
-        .filter(F("eval") == "fp")
-        .map(F("confidence"))
-        .max(),
+    qualifying_fp = F("predictions.detections").filter(
+        (F("eval") == "fp") & (F("confidence") >= review_conf_thresh)
+    )
+    fp_view = dataset.match(qualifying_fp.length() > 0).sort_by(
+        qualifying_fp.map(F("confidence")).max(),
         reverse=True,
     )
     fn_view = dataset.match(F("eval_fn") > 0).sort_by(
@@ -98,6 +103,7 @@ def build_dataset(
     frames: Sequence[FrameRef],
     predictions_by_stem: dict[str, list[PredBBox]],
     iou_thresh: float,
+    review_conf_thresh: float,
 ) -> tuple[fo.Dataset, dict]:
     """Create (or overwrite) a persistent FiftyOne dataset and evaluate it.
 
@@ -109,6 +115,10 @@ def build_dataset(
             predicted bboxes. Stems with no entry are treated as having
             no predictions.
         iou_thresh: Match threshold passed to ``evaluate_detections``.
+        review_conf_thresh: Confidence floor used by the saved FP review
+            view. Lower values surface more low-confidence flags;
+            reviewers can further adjust live in the FiftyOne sidebar
+            without rebuilding.
 
     Returns:
         A tuple ``(dataset, summary)`` where ``summary`` is a dict of
@@ -139,22 +149,34 @@ def build_dataset(
         compute_mAP=False,
     )
 
-    _save_review_views(dataset)
+    _save_review_views(dataset, review_conf_thresh=review_conf_thresh)
 
     tp = sum(s.eval_tp for s in dataset)
     fp = sum(s.eval_fp for s in dataset)
     fn = sum(s.eval_fn for s in dataset)
+    fp_review_samples = len(dataset.load_saved_view(FP_VIEW_NAME))
+    fn_review_samples = len(dataset.load_saved_view(FN_VIEW_NAME))
     logger.info(
-        "Saved views on %s: %s, %s", dataset.name, FP_VIEW_NAME, FN_VIEW_NAME
+        "Saved views on %s: %s (%d samples), %s (%d samples)",
+        dataset.name,
+        FP_VIEW_NAME,
+        fp_review_samples,
+        FN_VIEW_NAME,
+        fn_review_samples,
     )
     summary = {
         "dataset_name": dataset_name,
         "num_samples": len(dataset),
         "iou_thresh": iou_thresh,
+        "review_conf_thresh": review_conf_thresh,
+        # Raw bbox-level counts across all detections ≥ the YOLO conf_thresh.
         "tp": tp,
         "fp": fp,
         "fn": fn,
         "precision": tp / (tp + fp) if (tp + fp) else 0.0,
         "recall": tp / (tp + fn) if (tp + fn) else 0.0,
+        # Sample-level review-queue sizes — what reviewers actually walk through.
+        "fp_review_samples": fp_review_samples,
+        "fn_review_samples": fn_review_samples,
     }
     return dataset, summary

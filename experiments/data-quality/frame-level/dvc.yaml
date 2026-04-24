@@ -96,6 +96,7 @@ stages:
         --split-dir data/01_raw/datasets/train
         --predictions data/07_model_output/${key}/train/predictions.json
         --iou-thresh ${item.iou_thresh}
+        --review-conf-thresh ${item.review_conf_thresh}
         --sentinel data/fiftyone/${key}/train/dataset.json
         --summary data/08_reporting/${key}/train/summary.json
       deps:
@@ -105,6 +106,7 @@ stages:
         - data/07_model_output/${key}/train/predictions.json
       params:
         - models.${key}.iou_thresh
+        - models.${key}.review_conf_thresh
       outs:
         - data/fiftyone/${key}/train/dataset.json
         - data/08_reporting/${key}/train/summary.json
@@ -119,6 +121,7 @@ stages:
         --split-dir data/01_raw/datasets/val
         --predictions data/07_model_output/${key}/val/predictions.json
         --iou-thresh ${item.iou_thresh}
+        --review-conf-thresh ${item.review_conf_thresh}
         --sentinel data/fiftyone/${key}/val/dataset.json
         --summary data/08_reporting/${key}/val/summary.json
       deps:
@@ -128,6 +131,7 @@ stages:
         - data/07_model_output/${key}/val/predictions.json
       params:
         - models.${key}.iou_thresh
+        - models.${key}.review_conf_thresh
       outs:
         - data/fiftyone/${key}/val/dataset.json
         - data/08_reporting/${key}/val/summary.json
@@ -142,6 +146,7 @@ stages:
         --split-dir data/01_raw/datasets/test
         --predictions data/07_model_output/${key}/test/predictions.json
         --iou-thresh ${item.iou_thresh}
+        --review-conf-thresh ${item.review_conf_thresh}
         --sentinel data/fiftyone/${key}/test/dataset.json
         --summary data/08_reporting/${key}/test/summary.json
       deps:
@@ -151,6 +156,7 @@ stages:
         - data/07_model_output/${key}/test/predictions.json
       params:
         - models.${key}.iou_thresh
+        - models.${key}.review_conf_thresh
       outs:
         - data/fiftyone/${key}/test/dataset.json
         - data/08_reporting/${key}/test/summary.json

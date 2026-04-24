@@ -34,6 +34,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--split-dir", required=True, type=Path)
     parser.add_argument("--predictions", required=True, type=Path)
     parser.add_argument("--iou-thresh", required=True, type=float)
+    parser.add_argument("--review-conf-thresh", required=True, type=float)
     parser.add_argument("--sentinel", required=True, type=Path)
     parser.add_argument("--summary", required=True, type=Path)
     return parser.parse_args()
@@ -66,6 +67,7 @@ def main() -> None:
         frames=frames,
         predictions_by_stem=predictions,
         iou_thresh=args.iou_thresh,
+        review_conf_thresh=args.review_conf_thresh,
     )
 
     args.sentinel.write_text(
