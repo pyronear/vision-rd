@@ -21,18 +21,14 @@ from __future__ import annotations
 PAYLOAD_VERSION = 1
 
 
-def payload_from_stem_tags(
-    dataset_name: str, stem_tags: dict[str, list[str]]
-) -> dict:
+def payload_from_stem_tags(dataset_name: str, stem_tags: dict[str, list[str]]) -> dict:
     """Build a JSON-serializable payload from a ``{stem: [tags]}`` map.
 
     Stems whose tag list is empty are dropped — only carry decisions
     that were actually made. Tag lists are sorted for stable diffs.
     """
     filtered = {
-        stem: sorted(set(tags))
-        for stem, tags in sorted(stem_tags.items())
-        if tags
+        stem: sorted(set(tags)) for stem, tags in sorted(stem_tags.items()) if tags
     }
     return {
         "version": PAYLOAD_VERSION,

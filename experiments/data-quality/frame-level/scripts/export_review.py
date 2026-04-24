@@ -91,9 +91,7 @@ def main() -> None:
     total = 0
     for name in sorted(names):
         total += _export_one(name, args.output_root)
-    logger.info(
-        "Total tagged samples across %d dataset(s): %d", len(names), total
-    )
+    logger.info("Total tagged samples across %d dataset(s): %d", len(names), total)
 
 
 if __name__ == "__main__":

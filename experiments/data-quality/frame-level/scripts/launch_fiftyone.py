@@ -80,9 +80,7 @@ def _pick_dataset(requested: str | None) -> str:
     if requested is not None:
         if requested not in datasets:
             available = ", ".join(sorted(datasets))
-            raise SystemExit(
-                f"Dataset '{requested}' not found. Available: {available}"
-            )
+            raise SystemExit(f"Dataset '{requested}' not found. Available: {available}")
         return requested
     # Default: first _val dataset (usually the most useful starting point).
     return next((d for d in sorted(datasets) if d.endswith("_val")), datasets[0])
