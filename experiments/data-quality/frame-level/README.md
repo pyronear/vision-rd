@@ -121,6 +121,73 @@ sidebar: slide confidence range / filter by eval to tune
 make fiftyone-fn      # same flow for missed annotations
 ```
 
+### Persisting review decisions (resumable across sessions)
+
+FiftyOne's native **sample tags** record per-image review decisions.
+Tags live in the local mongo store, so a small export/import bridge
+persists them to disk (DVC-tracked) so progress survives machine
+changes and can be shared.
+
+**Tag vocabulary** — use these strings in the FiftyOne "Tags" sidebar
+on each sample:
+
+| Tag | Meaning |
+|---|---|
+| `label:add-smoke` | YOLO found real smoke; GT `.txt` has no matching bbox. Add to annotations. |
+| `label:remove-gt` | GT bbox is not smoke (cloud / dust / sensor glare). Remove from annotations. |
+| `label:fix-bbox` | Smoke is present but GT bbox is mispositioned. Reposition. |
+| `label:ok` | Flag is a genuine narwhal error, not a label issue. No change. |
+| `status:unclear` | Ambiguous — revisit or discuss with a second reviewer. |
+| `reviewer:<handle>` | Optional — attribute the decision (e.g. `reviewer:arthur`). |
+
+**Resumable workflow:**
+
+```bash
+# First-time setup (once per repo checkout): fetch any existing review
+# state from DVC remote.
+make review-pull               # dvc pull data/09_review
+
+# Review session:
+make fiftyone-fp               # auto-imports data/09_review/<model>/<split>/tags.json
+                               # into the dataset before opening the app;
+                               # previously-tagged samples already carry their tags.
+
+# (Walk FP queue, tag samples via the sidebar. Switch splits, switch to FN queue,
+#  continue tagging.)
+
+# When done (or taking a break):
+make review-save               # dumps mongo tags → data/09_review/<model>/<split>/tags.json
+uv run dvc add data/09_review  # track the refreshed directory
+uv run dvc push                # push to S3 (optional, for sharing)
+git add data/09_review.dvc data/.gitignore
+git commit -m "review: update tags"
+
+# Next session (same machine OR different machine):
+#   git pull && make review-pull && make fiftyone-fp  →  picks up where you left off.
+```
+
+**How the import works:** `make fiftyone-*` calls
+``scripts/launch_fiftyone.py``, which — before opening the view — reads
+``data/09_review/<model>/<split>/tags.json`` (if present) and merges
+each stem's tags into the matching sample via
+:func:`data_quality_frame_level.review.merge_tags`. Merging (not
+overwriting) means fresh mongo-side tags from an interrupted session
+are preserved alongside any tags pulled from DVC.
+
+**Exporting per-decision reports** — the tags file is JSON, one entry
+per tagged image, so downstream scripts (e.g. a patch generator for
+`pyro-dataset`) can read it directly:
+
+```json
+{
+  "version": 1,
+  "dataset_name": "dq-frame_yolo11s-nimble-narwhal_val",
+  "tags_by_stem": {
+    "hpwren-figlib_abc_001_2023-01-01T12-00-00": ["label:add-smoke", "reviewer:arthur"]
+  }
+}
+```
+
 ## Results
 
 Config: `conf_thresh=0.05` (per-detection YOLO threshold), `iou_thresh=0.05`, `review_conf_thresh=0.35` (FP queue default).
@@ -234,4 +301,6 @@ data/
     summary.json
   fiftyone/<model-name>/<split>/
     dataset.json                                    # sentinel; actual dataset in mongo
+  09_review/<model-name>/<split>/
+    tags.json                                       # persisted review tags (DVC-tracked)
 ```

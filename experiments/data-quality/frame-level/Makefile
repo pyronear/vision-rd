@@ -1,4 +1,4 @@
-.PHONY: install lint format test help notebook fiftyone fiftyone-fp fiftyone-fn
+.PHONY: install lint format test help notebook fiftyone fiftyone-fp fiftyone-fn review-save review-pull
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -26,4 +26,14 @@ fiftyone-fp: ## Launch FiftyOne on the FP queue (val split), sorted by predicted
 
 fiftyone-fn: ## Launch FiftyOne on the FN queue (val split), sorted by GT bbox area desc
 	uv run --group explore python scripts/launch_fiftyone.py --kind fn
+
+review-save: ## Dump FiftyOne sample tags into data/09_review/ for persistence + DVC
+	uv run --group explore python scripts/export_review.py
+	@echo ""
+	@echo "Next steps to share the review:"
+	@echo "  uv run dvc add data/09_review && uv run dvc push"
+	@echo "  git add data/09_review.dvc data/.gitignore && git commit -m 'review: update tags'"
+
+review-pull: ## Fetch persisted review tags from the DVC remote
+	uv run dvc pull data/09_review
 

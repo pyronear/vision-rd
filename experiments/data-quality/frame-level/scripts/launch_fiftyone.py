@@ -23,12 +23,23 @@ Usage::
 """
 
 import argparse
+import json
+import logging
+import re
 import signal
 import sys
+from pathlib import Path
 
 import fiftyone as fo
 
 from data_quality_frame_level.fiftyone_build import FN_VIEW_NAME, FP_VIEW_NAME
+from data_quality_frame_level.review import merge_tags, stem_tags_from_payload
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+logger = logging.getLogger(__name__)
+
+DQ_FRAME_PATTERN = re.compile(r"^dq-frame_(?P<model>.+)_(?P<split>train|val|test)$")
+DEFAULT_REVIEW_ROOT = Path("data/09_review")
 
 
 def _parse_args() -> argparse.Namespace:
@@ -46,6 +57,16 @@ def _parse_args() -> argparse.Namespace:
         help="Pin a specific dq-frame_* dataset (default: first *_val found).",
     )
     parser.add_argument("--port", type=int, default=5151)
+    parser.add_argument(
+        "--review-root",
+        type=Path,
+        default=DEFAULT_REVIEW_ROOT,
+        help=(
+            "Root directory of persisted review tags; tags.json files under "
+            "<review-root>/<model>/<split>/ are auto-imported into the "
+            "dataset before launch. Pass a missing path to skip."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -65,6 +86,33 @@ def _pick_dataset(requested: str | None) -> str:
         return requested
     # Default: first _val dataset (usually the most useful starting point).
     return next((d for d in sorted(datasets) if d.endswith("_val")), datasets[0])
+
+
+def _tag_file_for(review_root: Path, dataset_name: str) -> Path | None:
+    match = DQ_FRAME_PATTERN.match(dataset_name)
+    if not match:
+        return None
+    return review_root / match.group("model") / match.group("split") / "tags.json"
+
+
+def _import_persisted_tags(dataset: fo.Dataset, tag_file: Path) -> int:
+    """Merge tags from ``tag_file`` into ``dataset``; return samples touched."""
+    payload = json.loads(tag_file.read_text())
+    stem_to_tags = stem_tags_from_payload(payload)
+    if not stem_to_tags:
+        return 0
+    touched = 0
+    for sample in dataset:
+        stem = Path(sample.filepath).stem
+        incoming = stem_to_tags.get(stem)
+        if not incoming:
+            continue
+        merged = merge_tags(list(sample.tags), incoming)
+        if merged != list(sample.tags):
+            sample.tags = merged
+            sample.save()
+            touched += 1
+    return touched
 
 
 def _build_view(dataset: fo.Dataset, kind: str):
@@ -87,6 +135,14 @@ def main() -> None:
     args = _parse_args()
     dataset_name = _pick_dataset(args.dataset)
     dataset = fo.load_dataset(dataset_name)
+
+    tag_file = _tag_file_for(args.review_root, dataset_name)
+    if tag_file is not None and tag_file.is_file():
+        touched = _import_persisted_tags(dataset, tag_file)
+        logger.info(
+            "Imported review tags from %s (%d samples updated)", tag_file, touched
+        )
+
     view = _build_view(dataset, args.kind)
 
     print(
