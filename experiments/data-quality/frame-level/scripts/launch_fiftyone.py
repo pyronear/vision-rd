@@ -27,7 +27,8 @@ import signal
 import sys
 
 import fiftyone as fo
-from fiftyone import ViewField as F
+
+from data_quality_frame_level.fiftyone_build import FN_VIEW_NAME, FP_VIEW_NAME
 
 
 def _parse_args() -> argparse.Namespace:
@@ -67,34 +68,18 @@ def _pick_dataset(requested: str | None) -> str:
 
 
 def _build_view(dataset: fo.Dataset, kind: str):
-    """Return a view of samples containing ≥1 FP/FN bbox, sorted appropriately.
+    """Return the FP / FN review view, loaded from the dataset's saved views.
 
-    We intentionally do NOT filter individual bboxes — ``evaluate_detections``
-    can mark one prediction as TP and another as FP on the same image, and
-    hiding the TP matched pair makes the visible overlay misleading
-    (you see an unmatched FP next to a GT that actually matched a hidden TP).
-    Instead we narrow the sample set and let the reviewer read each bbox's
-    ``eval`` attribute in the sidebar.
+    The ``fp-by-confidence`` and ``fn-by-area`` saved views are persisted
+    by :func:`data_quality_frame_level.fiftyone_build.build_dataset` at
+    DVC-repro time. Using saved views (rather than rebuilding the view
+    here) means the view is also available in the FiftyOne sidebar's
+    "Saved views" dropdown when switching datasets.
     """
     if kind == "fp":
-        # Sort by the highest-confidence FP bbox in each sample.
-        return dataset.match(F("eval_fp") > 0).sort_by(
-            F("predictions.detections")
-            .filter(F("eval") == "fp")
-            .map(F("confidence"))
-            .max(),
-            reverse=True,
-        )
+        return dataset.load_saved_view(FP_VIEW_NAME)
     if kind == "fn":
-        # No confidence on GT bboxes — sort by the largest FN bbox area so
-        # visually prominent missed annotations surface first.
-        return dataset.match(F("eval_fn") > 0).sort_by(
-            F("ground_truth.detections")
-            .filter(F("eval") == "fn")
-            .map(F("bounding_box")[2] * F("bounding_box")[3])
-            .max(),
-            reverse=True,
-        )
+        return dataset.load_saved_view(FN_VIEW_NAME)
     return dataset.view()
 
 

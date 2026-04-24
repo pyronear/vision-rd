@@ -14,6 +14,7 @@ import logging
 from collections.abc import Sequence
 
 import fiftyone as fo
+from fiftyone import ViewField as F
 
 from data_quality_frame_level.dataset import (
     BBox,
@@ -25,6 +26,12 @@ from data_quality_frame_level.inference import PredBBox
 logger = logging.getLogger(__name__)
 
 SMOKE_LABEL = "smoke"
+
+# Names of the saved views persisted on every dataset. Using identical
+# names across train/val/test lets reviewers keep the same view when
+# switching datasets via the FiftyOne UI sidebar.
+FP_VIEW_NAME = "fp-by-confidence"
+FN_VIEW_NAME = "fn-by-area"
 
 
 def gt_to_detections(bboxes: Sequence[BBox]) -> fo.Detections:
@@ -53,6 +60,37 @@ def preds_to_detections(preds: Sequence[PredBBox]) -> fo.Detections:
             )
         )
     return fo.Detections(detections=detections)
+
+
+def _save_review_views(dataset: fo.Dataset) -> None:
+    """Persist the FP and FN review views on the dataset.
+
+    The views are saved with fixed names (:data:`FP_VIEW_NAME`,
+    :data:`FN_VIEW_NAME`) so that switching datasets in the FiftyOne UI
+    preserves the review workflow — reviewers pick the same saved view
+    on train / val / test and get a consistent filter + sort.
+
+    - FP view: samples with any FP prediction, sorted by the highest
+      FP-flagged confidence descending.
+    - FN view: samples with any missed GT bbox, sorted by the largest
+      FN-flagged bbox area descending (GTs have no confidence).
+    """
+    fp_view = dataset.match(F("eval_fp") > 0).sort_by(
+        F("predictions.detections")
+        .filter(F("eval") == "fp")
+        .map(F("confidence"))
+        .max(),
+        reverse=True,
+    )
+    fn_view = dataset.match(F("eval_fn") > 0).sort_by(
+        F("ground_truth.detections")
+        .filter(F("eval") == "fn")
+        .map(F("bounding_box")[2] * F("bounding_box")[3])
+        .max(),
+        reverse=True,
+    )
+    dataset.save_view(FP_VIEW_NAME, fp_view, overwrite=True)
+    dataset.save_view(FN_VIEW_NAME, fn_view, overwrite=True)
 
 
 def build_dataset(
@@ -101,9 +139,14 @@ def build_dataset(
         compute_mAP=False,
     )
 
+    _save_review_views(dataset)
+
     tp = sum(s.eval_tp for s in dataset)
     fp = sum(s.eval_fp for s in dataset)
     fn = sum(s.eval_fn for s in dataset)
+    logger.info(
+        "Saved views on %s: %s, %s", dataset.name, FP_VIEW_NAME, FN_VIEW_NAME
+    )
     summary = {
         "dataset_name": dataset_name,
         "num_samples": len(dataset),
