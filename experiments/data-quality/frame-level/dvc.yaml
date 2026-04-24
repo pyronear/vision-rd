@@ -1,93 +1,63 @@
-# stages:
-#   # --- Truncate imported dataset (optional) ---
-#   # Use this stage if your experiment needs to preprocess the raw dataset
-#   # imported via `dvc import` (e.g. truncate sequences to N frames).
-#   # Import to data/01_raw/datasets_full/ and truncate to data/01_raw/datasets/.
-#   truncate:
-#     foreach:
-#       - train
-#       - val
-#     do:
-#       cmd: >-
-#         uv run python scripts/truncate_sequences.py
-#         --input-dir data/01_raw/datasets_full/${item}
-#         --output-dir data/01_raw/datasets/${item}
-#         --max-frames ${truncate.max_frames}
-#       deps:
-#         - scripts/truncate_sequences.py
-#         - data/01_raw/datasets_full/${item}
-#       params:
-#         - truncate.max_frames
-#       outs:
-#         - data/01_raw/datasets/${item}
-#
-#   prepare:
-#     cmd: >-
-#       uv run python scripts/prepare.py
-#       --input-dir data/01_raw
-#       --output-dir data/02_intermediate
-#     deps:
-#       - scripts/prepare.py
-#       - data/01_raw
-#     outs:
-#       - data/02_intermediate
-#
-#   split:
-#     cmd: >-
-#       uv run python scripts/split.py
-#       --input-dir data/02_intermediate
-#       --output-dir data/05_model_input
-#       --seed ${split.seed}
-#       --test-size ${split.test_size}
-#       --val-size ${split.val_size}
-#     deps:
-#       - scripts/split.py
-#       - data/02_intermediate
-#     params:
-#       - split.seed
-#       - split.test_size
-#       - split.val_size
-#     outs:
-#       - data/05_model_input/train
-#       - data/05_model_input/val
-#       - data/05_model_input/test
-#
-#   train:
-#     cmd: >-
-#       uv run python scripts/train.py
-#       --train-dir data/05_model_input/train
-#       --val-dir data/05_model_input/val
-#       --output-dir data/06_models
-#       --seed ${train.seed}
-#       --epochs ${train.epochs}
-#       --batch-size ${train.batch_size}
-#       --learning-rate ${train.learning_rate}
-#     deps:
-#       - scripts/train.py
-#       - src/project_name
-#       - data/05_model_input/train
-#       - data/05_model_input/val
-#     params:
-#       - train.seed
-#       - train.epochs
-#       - train.batch_size
-#       - train.learning_rate
-#     outs:
-#       - data/06_models/model.pt
-#
-#   evaluate:
-#     cmd: >-
-#       uv run python scripts/evaluate.py
-#       --model-path data/06_models/model.pt
-#       --test-dir data/05_model_input/test
-#       --output-dir data/08_reporting
-#     deps:
-#       - scripts/evaluate.py
-#       - src/project_name
-#       - data/06_models/model.pt
-#       - data/05_model_input/test
-#     metrics:
-#       - data/08_reporting/metrics.json:
-#           cache: false
-#     plots:
-#       - data/08_reporting/plots
+stages:
+  prepare:
+    matrix:
+      model: ${models}
+    desc: "Download ${item.model.name} .pt from HuggingFace"
+    cmd: >-
+      uv run python scripts/prepare.py
+      --hf-repo ${item.model.hf_repo}
+      --hf-filename ${item.model.hf_filename}
+      --output data/01_raw/models/${item.model.name}.pt
+    deps:
+      - scripts/prepare.py
+    params:
+      - models
+    outs:
+      - data/01_raw/models/${item.model.name}.pt:
+          cache: false
+
+  predict:
+    matrix:
+      model: ${models}
+      split: [train, val, test]
+    desc: "Run YOLO inference with ${item.model.name} on ${item.split}"
+    cmd: >-
+      uv run python scripts/predict.py
+      --model-name ${item.model.name}
+      --model-path data/01_raw/models/${item.model.name}.pt
+      --split-dir data/01_raw/datasets/${item.split}
+      --conf-thresh ${item.model.conf_thresh}
+      --output-dir data/07_model_output/${item.model.name}/${item.split}
+    deps:
+      - scripts/predict.py
+      - src/data_quality_frame_level
+      - data/01_raw/datasets/${item.split}
+      - data/01_raw/models/${item.model.name}.pt
+    params:
+      - models
+    outs:
+      - data/07_model_output/${item.model.name}/${item.split}
+
+  build_fiftyone:
+    matrix:
+      model: ${models}
+      split: [train, val, test]
+    desc: "Build FiftyOne review dataset for ${item.model.name} on ${item.split}"
+    cmd: >-
+      uv run --group explore python scripts/build_fiftyone.py
+      --dataset-name dq-frame_${item.model.name}_${item.split}
+      --split-dir data/01_raw/datasets/${item.split}
+      --predictions data/07_model_output/${item.model.name}/${item.split}/predictions.json
+      --iou-thresh ${item.model.iou_thresh}
+      --sentinel data/fiftyone/${item.model.name}/${item.split}/dataset.json
+      --summary data/08_reporting/${item.model.name}/${item.split}/summary.json
+    deps:
+      - scripts/build_fiftyone.py
+      - src/data_quality_frame_level
+      - data/01_raw/datasets/${item.split}
+      - data/07_model_output/${item.model.name}/${item.split}/predictions.json
+    params:
+      - models
+    outs:
+      - data/fiftyone/${item.model.name}/${item.split}/dataset.json
+      - data/08_reporting/${item.model.name}/${item.split}/summary.json
