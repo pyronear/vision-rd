@@ -12,10 +12,6 @@ and flags disagreements against folder-based ground truth
 Reviewers browse the FiftyOne datasets and decide whether each flag is
 a real label error or a true model mistake.
 
-## Design
-
-See [`../../../docs/specs/2026-04-23-sequential-label-audit-design.md`](../../../docs/specs/2026-04-23-sequential-label-audit-design.md).
-
 ## Pipeline
 
 ```
