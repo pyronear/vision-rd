@@ -3,8 +3,11 @@
 from data_quality_frame_level.review import (
     REVIEW_VOCAB,
     VOCAB_SEED_TAG,
+    count_reviewed,
     format_invalid_report,
+    format_progress_line,
     invalid_tags,
+    is_reviewed,
     is_valid_tag,
     is_vocab_seed,
     merge_tags,
@@ -155,3 +158,45 @@ def test_format_invalid_report_lists_every_bad_tag():
     # "3 invalid tag(s)" summary across "2 sample(s)"
     assert "3 invalid" in report
     assert "2 sample" in report
+
+
+def test_is_reviewed_true_iff_any_label_tag():
+    assert is_reviewed(["label:add-smoke"]) is True
+    assert is_reviewed(["reviewer:arthur", "label:ok"]) is True
+    assert is_reviewed(["status:unclear"]) is False
+    assert is_reviewed(["reviewer:arthur"]) is False
+    assert is_reviewed([]) is False
+
+
+def test_count_reviewed_aggregates_over_stem_tags():
+    stem_tags = {
+        "a": ["label:add-smoke"],                # reviewed
+        "b": ["reviewer:arthur", "label:ok"],   # reviewed
+        "c": ["status:unclear"],                # not reviewed
+        "d": [],                                # not reviewed
+    }
+
+    assert count_reviewed(stem_tags) == (2, 4)
+
+
+def test_count_reviewed_empty_returns_zero_zero():
+    assert count_reviewed({}) == (0, 0)
+
+
+def test_format_progress_line_shape():
+    line = format_progress_line("fp", reviewed=12, total=100, bar_width=10)
+
+    # Reviewed + total rendered; percentage rounded; bar reflects ratio.
+    assert "12" in line
+    assert "100" in line
+    assert "12.0%" in line
+    # 12/100 * 10 = 1.2 → 1 filled char
+    assert "[#---------]" in line
+
+
+def test_format_progress_line_handles_zero_total():
+    # Division-by-zero guard: empty view renders 0.0% with an empty bar.
+    line = format_progress_line("fn", reviewed=0, total=0, bar_width=8)
+
+    assert "0.0%" in line
+    assert "[--------]" in line

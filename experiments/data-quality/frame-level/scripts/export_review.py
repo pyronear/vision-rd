@@ -28,8 +28,11 @@ from pathlib import Path
 
 import fiftyone as fo
 
+from data_quality_frame_level.fiftyone_build import FN_VIEW_NAME, FP_VIEW_NAME
 from data_quality_frame_level.review import (
+    count_reviewed,
     format_invalid_report,
+    format_progress_line,
     is_vocab_seed,
     payload_from_stem_tags,
     scan_invalid,
@@ -70,11 +73,14 @@ def _resolve_target_path(output_root: Path, dataset_name: str) -> Path:
     return output_root / model / split / "tags.json"
 
 
-def collect_stem_tags(dataset_name: str) -> dict[str, list[str]]:
-    """Return ``{stem: [tags]}`` for every non-seed sample in the dataset."""
-    dataset = fo.load_dataset(dataset_name)
+def iter_stem_tags(samples) -> dict[str, list[str]]:
+    """Return ``{stem: [tags]}`` for every non-seed sample in ``samples``.
+
+    Accepts any iterable of :class:`fiftyone.core.sample.SampleView` —
+    a full dataset, a saved view, or a custom match() view.
+    """
     stem_tags: dict[str, list[str]] = {}
-    for sample in dataset:
+    for sample in samples:
         tags = list(sample.tags)
         if is_vocab_seed(tags):
             # Stale state from an earlier seeding experiment — skip it.
@@ -82,6 +88,11 @@ def collect_stem_tags(dataset_name: str) -> dict[str, list[str]]:
         stem = Path(sample.filepath).stem
         stem_tags[stem] = tags
     return stem_tags
+
+
+def collect_stem_tags(dataset_name: str) -> dict[str, list[str]]:
+    """Return ``{stem: [tags]}`` for every non-seed sample in the dataset."""
+    return iter_stem_tags(fo.load_dataset(dataset_name))
 
 
 def _write_one(
@@ -127,6 +138,16 @@ def main() -> None:
     for name in sorted(scanned):
         total += _write_one(name, scanned[name], args.output_root)
     logger.info("Total tagged samples across %d dataset(s): %d", len(names), total)
+
+    # Phase 3: per-view progress summary so the reviewer sees how much is left.
+    print()
+    for name in sorted(scanned):
+        dataset = fo.load_dataset(name)
+        print(name)
+        for kind, view_name in (("fp", FP_VIEW_NAME), ("fn", FN_VIEW_NAME)):
+            view_stem_tags = iter_stem_tags(dataset.load_saved_view(view_name))
+            reviewed, view_total = count_reviewed(view_stem_tags)
+            print("  " + format_progress_line(kind, reviewed, view_total))
 
 
 if __name__ == "__main__":

@@ -24,6 +24,7 @@ from collections.abc import Iterable
 PAYLOAD_VERSION = 1
 
 REVIEWER_TAG_PREFIX = "reviewer:"
+LABEL_TAG_PREFIX = "label:"
 
 # Controlled vocabulary for sample tags in the FiftyOne review workflow.
 # Seeded on a neutral sample by :func:`fiftyone_build._seed_tag_vocab`
@@ -91,6 +92,36 @@ def scan_invalid(stem_tags: dict[str, list[str]]) -> dict[str, list[str]]:
     return {
         stem: bad for stem, tags in stem_tags.items() if (bad := invalid_tags(tags))
     }
+
+
+def is_reviewed(tags: Iterable[str]) -> bool:
+    """True iff ``tags`` include at least one ``label:`` decision tag.
+
+    Samples tagged only with ``status:unclear`` or ``reviewer:<handle>``
+    are considered in-progress, not reviewed. This is deliberate: a
+    reviewer lists someone's name on a sample they've *started* looking
+    at, but 'reviewed' means they've made a label decision.
+    """
+    return any(t.startswith(LABEL_TAG_PREFIX) for t in tags)
+
+
+def count_reviewed(stem_tags: dict[str, list[str]]) -> tuple[int, int]:
+    """Return ``(reviewed, total)`` counts over a stem→tags map."""
+    reviewed = sum(1 for tags in stem_tags.values() if is_reviewed(tags))
+    return reviewed, len(stem_tags)
+
+
+def format_progress_line(
+    name: str, reviewed: int, total: int, bar_width: int = 20
+) -> str:
+    """Format a single progress line with counts, percentage, and ASCII bar."""
+    ratio = reviewed / total if total else 0.0
+    filled = int(round(ratio * bar_width))
+    bar = "#" * filled + "-" * (bar_width - filled)
+    return (
+        f"{name} {total:>4} samples: {reviewed:>4} reviewed "
+        f"({ratio * 100:>4.1f}%) [{bar}]"
+    )
 
 
 def format_invalid_report(

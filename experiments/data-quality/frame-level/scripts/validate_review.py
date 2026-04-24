@@ -1,9 +1,9 @@
 """Validate reviewer-applied tags in FiftyOne without touching disk.
 
 Mid-session sanity check: walks every ``dq-frame_*`` dataset (or a
-specified one), runs the same validator that :mod:`scripts.export_review`
-would enforce at export time, and prints a report grouped by
-(dataset, sample stem). Exits 0 on clean input, 1 on any invalid tag.
+specified one), prints per-view review progress, and runs the same
+validator that :mod:`scripts.export_review` would enforce at export
+time. Exits 0 on clean input, 1 on any invalid tag.
 
 Usage::
 
@@ -19,12 +19,15 @@ import logging
 import sys
 
 import fiftyone as fo
+from export_review import collect_stem_tags, iter_stem_tags
 
-# Reuse the FiftyOne-touching scan helper from the export script so the
-# two commands can't drift.
-from export_review import collect_stem_tags
-
-from data_quality_frame_level.review import format_invalid_report, scan_invalid
+from data_quality_frame_level.fiftyone_build import FN_VIEW_NAME, FP_VIEW_NAME
+from data_quality_frame_level.review import (
+    count_reviewed,
+    format_invalid_report,
+    format_progress_line,
+    scan_invalid,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -41,6 +44,17 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _print_progress(dataset_name: str) -> None:
+    """Print per-view progress lines for one dataset."""
+    dataset = fo.load_dataset(dataset_name)
+    print(dataset_name)
+    for kind, view_name in (("fp", FP_VIEW_NAME), ("fn", FN_VIEW_NAME)):
+        view = dataset.load_saved_view(view_name)
+        stem_tags = iter_stem_tags(view)
+        reviewed, total = count_reviewed(stem_tags)
+        print("  " + format_progress_line(kind, reviewed, total))
+
+
 def main() -> None:
     args = _parse_args()
     if args.dataset is not None:
@@ -49,6 +63,11 @@ def main() -> None:
         names = fo.list_datasets(glob_patt="dq-frame_*")
     if not names:
         raise SystemExit("No dq-frame_* datasets found. Run 'dvc repro' first.")
+
+    # Progress first — useful even when there are no typos.
+    for name in sorted(names):
+        _print_progress(name)
+    print()
 
     reports: list[str] = []
     for name in sorted(names):
