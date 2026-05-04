@@ -1,0 +1,26 @@
+prepare:
+  model_repo: "pyronear/yolo11s_mighty-mongoose_v5.1.0"
+  model_filename: "yolo11s_mighty-mongoose_v5.1.0.pt"
+
+infer:
+  confidence_threshold: 0.01
+  iou_nms: 0.2
+  image_size: 1024
+
+pad:
+  min_sequence_length: 10
+
+tube:
+  crop_size: 64
+  max_tube_length: 50
+  confidence_threshold: 0.3
+  max_detection_area: 0.05
+  iou_threshold: 0.1
+
+features:
+  method: "tabular"
+
+classifier:
+  n_estimators: 120
+  max_depth: 20
+  random_state: 42
