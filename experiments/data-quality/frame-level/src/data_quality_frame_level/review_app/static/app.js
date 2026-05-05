@@ -311,19 +311,9 @@ async function loadSample(stem, opts = {}) {
 
 function setSaveBar() {
   const b = document.getElementById('save-bar');
-  if (state.dirty && !state.sample?.status) {
-    b.textContent = 'unsaved · pick a status (r / u / Space) to save';
-    b.classList.add('dirty');
-  } else if (state.dirty) {
-    b.textContent = 'unsaved…';
-    b.classList.add('dirty');
-  } else if (state.sample?.reviewed_at) {
-    b.textContent = `✓ saved at ${state.sample.reviewed_at}`;
-    b.classList.remove('dirty');
-  } else {
-    b.textContent = '— no edits —';
-    b.classList.remove('dirty');
-  }
+  if (state.dirty) { b.textContent = 'unsaved…'; b.classList.add('dirty'); }
+  else if (state.sample?.reviewed_at) { b.textContent = `✓ saved at ${state.sample.reviewed_at}`; b.classList.remove('dirty'); }
+  else { b.textContent = '— no edits —'; b.classList.remove('dirty'); }
 }
 
 function bboxToRect(b, W, H) {
@@ -612,7 +602,21 @@ cnv.addEventListener('wheel', e => {
   paint();
 }, { passive: false });
 
-function markDirty() { state.dirty = true; setSaveBar(); scheduleSave(); }
+function updateStatusButtons() {
+  document.querySelectorAll('#status-pane button[data-status]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.status === state.sample?.status);
+  });
+}
+
+function markDirty() {
+  state.dirty = true;
+  if (state.sample && !state.sample.status) {
+    state.sample.status = 'reviewed';
+    updateStatusButtons();
+  }
+  setSaveBar();
+  scheduleSave();
+}
 
 let saveTimer = null;
 function scheduleSave() {
@@ -621,8 +625,7 @@ function scheduleSave() {
 }
 
 async function persistSample() {
-  if (!state.dirty || !state.sample) return;
-  if (!state.sample.status) { setSaveBar(); return; }
+  if (!state.dirty || !state.sample || !state.sample.status) return;
   const r = await api.save({
     model: state.model, split: state.split,
     body: {
@@ -698,13 +701,13 @@ function renderRight() {
     root.appendChild(row);
   });
   document.querySelectorAll('#status-pane button[data-status]').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.status === state.sample.status);
     btn.onclick = () => {
       state.sample.status = btn.dataset.status;
       markDirty();
-      document.querySelectorAll('#status-pane button[data-status]').forEach(b => b.classList.toggle('active', b === btn));
+      updateStatusButtons();
     };
   });
+  updateStatusButtons();
   const note = document.getElementById('note');
   note.value = state.sample.note || '';
   note.oninput = () => { state.sample.note = note.value || null; markDirty(); };
