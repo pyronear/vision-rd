@@ -56,6 +56,7 @@ def app_tree(tmp_path: Path) -> tuple[TestClient, Paths]:
         contexts={("m", "val"): paths},
         models=["m"],
         splits=["val"],
+        repo_root=tmp_path,
     )
     return TestClient(app), paths
 

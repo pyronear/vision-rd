@@ -18,6 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from data_quality_frame_level.dataset import BBox
+from data_quality_frame_level.review_app.export_runner import export_one
 from data_quality_frame_level.review_app.matching import evaluate_frame
 from data_quality_frame_level.review_app.persistence import dvc_warning_for_review
 from data_quality_frame_level.review_app.queue import build_queue
@@ -46,6 +47,7 @@ def create_app(
     contexts: dict[tuple[str, str], Paths],
     models: list[str],
     splits: list[str],
+    repo_root: Path,
 ) -> FastAPI:
     cache: dict[tuple[str, str], AppState] = {}
 
@@ -179,6 +181,18 @@ def create_app(
             note=body.note,
         )
         return {"saved_at": sample.reviewed_at}
+
+    @app.post("/api/export")
+    def post_export(model: str, split: str) -> dict:
+        if (model, split) not in contexts:
+            raise HTTPException(404, f"unknown context: ({model}, {split})")
+        manifest = export_one(repo_root=repo_root, model=model, split=split)
+        if manifest is None:
+            raise HTTPException(
+                400,
+                "nothing to export — review.json or predictions.json missing",
+            )
+        return manifest
 
     @app.get("/image")
     def get_image(model: str, split: str, stem: str) -> FileResponse:

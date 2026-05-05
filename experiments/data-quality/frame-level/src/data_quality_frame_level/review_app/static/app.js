@@ -149,7 +149,51 @@ async function init() {
   document.getElementById('help-btn').addEventListener('click', toggleHelp);
   document.getElementById('help-close').addEventListener('click', () => { helpPane.hidden = true; });
 
+  document.getElementById('export-btn').addEventListener('click', doExport);
+
   await reloadQueue();
+}
+
+async function doExport() {
+  const btn = document.getElementById('export-btn');
+  if (btn.disabled) return;
+  await flushPending();
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '📦 Exporting…';
+  try {
+    const r = await fetch(
+      `/api/export?model=${encodeURIComponent(state.model)}&split=${encodeURIComponent(state.split)}`,
+      { method: 'POST' }
+    );
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      showToast('error', `Export failed: ${err.detail || r.status}`);
+      return;
+    }
+    const m = await r.json();
+    const t = m.totals || {};
+    const contrib = m.contributors?.length ? ` · ${m.contributors.join(', ')}` : '';
+    showToast(
+      'success',
+      `✓ Exported ${t.changed || 0} changed (${state.split})${contrib} → data/10_export/${state.model}/${state.split}/`
+    );
+  } catch (e) {
+    showToast('error', `Export failed: ${e.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+}
+
+function showToast(kind, message) {
+  const host = document.getElementById('toast-host');
+  const div = document.createElement('div');
+  div.className = `toast toast-${kind}`;
+  div.textContent = message;
+  host.appendChild(div);
+  setTimeout(() => div.classList.add('opacity-0'), 4000);
+  setTimeout(() => div.remove(), 4500);
 }
 
 let reloadTimer = null;

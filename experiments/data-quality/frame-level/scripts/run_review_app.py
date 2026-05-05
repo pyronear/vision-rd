@@ -57,7 +57,9 @@ def main() -> None:
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     args = parser.parse_args()
     contexts, models, splits = _discover_paths(args.repo_root)
-    app = create_app(contexts=contexts, models=models, splits=splits)
+    app = create_app(
+        contexts=contexts, models=models, splits=splits, repo_root=args.repo_root
+    )
     uvicorn.run(app, host=args.host, port=args.port)
 
 
