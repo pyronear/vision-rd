@@ -4,10 +4,12 @@ from pathlib import Path
 from data_quality_frame_level.dataset import BBox
 from data_quality_frame_level.review_app.export import (
     DiffCounts,
+    ProvenanceInput,
     compute_diff,
     export_corrections,
     write_manifest_and_labels,
     write_pending,
+    write_provenance,
 )
 from data_quality_frame_level.review_app.persistence import (
     ReviewState,
@@ -120,3 +122,29 @@ def test_export_pending_empty_when_no_unclear(tmp_path: Path):
     write_pending(review=review, out_dir=out)
     pending = json.loads((out / "pending.json").read_text())
     assert pending["pending"] == []
+
+
+def test_export_provenance_writes_all_fields(tmp_path: Path):
+    prov = ProvenanceInput(
+        audit_repo="pyronear/vision-rd",
+        audit_commit="abc1234",
+        audit_branch="arthur/feature",
+        experiment="experiments/data-quality/frame-level",
+        thresholds={"conf": 0.05, "iou": 0.05, "review_conf": 0.35},
+        predictions_path="data/07_model_output/m/val/predictions.json",
+        predictions_md5="deadbeefcafe",
+    )
+    out = tmp_path / "10_export" / "m" / "val"
+    write_provenance(prov=prov, model="m", split="val", out_dir=out)
+    payload = json.loads((out / "provenance.json").read_text())
+    assert payload["version"] == 1
+    assert payload["audit_repo"] == "pyronear/vision-rd"
+    assert payload["audit_commit"] == "abc1234"
+    assert payload["audit_branch"] == "arthur/feature"
+    assert payload["experiment"] == "experiments/data-quality/frame-level"
+    assert payload["model"] == "m"
+    assert payload["split"] == "val"
+    assert payload["thresholds"] == {"conf": 0.05, "iou": 0.05, "review_conf": 0.35}
+    assert payload["predictions_path"] == "data/07_model_output/m/val/predictions.json"
+    assert payload["predictions_md5"] == "deadbeefcafe"
+    assert "exported_at" in payload
