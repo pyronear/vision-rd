@@ -29,11 +29,53 @@ let imgLoaded = false;
 let selected = null;
 let drag = null;
 
+function ensureReviewer() {
+  if (state.reviewer) {
+    updateReviewerDisplay();
+    return Promise.resolve();
+  }
+  return promptReviewer();
+}
+
+function updateReviewerDisplay() {
+  document.getElementById('reviewer-display').textContent = state.reviewer
+    ? `\u{1F464} ${state.reviewer}`
+    : '— set handle —';
+}
+
+function promptReviewer() {
+  return new Promise(resolve => {
+    const modal = document.getElementById('reviewer-modal');
+    const input = document.getElementById('reviewer-input');
+    const submit = document.getElementById('reviewer-submit');
+    input.value = state.reviewer || '';
+    submit.disabled = !input.value.trim();
+    modal.hidden = false;
+    setTimeout(() => input.focus(), 0);
+    const onInput = () => { submit.disabled = !input.value.trim(); };
+    const close = () => {
+      const v = input.value.trim();
+      if (!v) return;
+      state.reviewer = v;
+      localStorage.setItem('reviewer', v);
+      modal.hidden = true;
+      submit.removeEventListener('click', close);
+      input.removeEventListener('input', onInput);
+      input.removeEventListener('keydown', onKey);
+      updateReviewerDisplay();
+      resolve();
+    };
+    const onKey = e => { if (e.key === 'Enter') close(); };
+    submit.addEventListener('click', close);
+    input.addEventListener('input', onInput);
+    input.addEventListener('keydown', onKey);
+  });
+}
+
 async function init() {
-  document.getElementById('reviewer').value = state.reviewer;
-  document.getElementById('reviewer').addEventListener('input', e => {
-    state.reviewer = e.target.value;
-    localStorage.setItem('reviewer', state.reviewer);
+  await ensureReviewer();
+  document.getElementById('reviewer-display').addEventListener('click', () => {
+    promptReviewer();
   });
 
   const ctxs = await api.contexts();
@@ -57,9 +99,14 @@ async function init() {
       if (id === 'conf') state.conf = v;
       else if (id === 'iou') state.iou = v;
       else state.reviewConf = v;
+      updateFilterSummary();
       debounceReload();
     });
   });
+  document.getElementById('filter-toggle').addEventListener('click', () => {
+    document.getElementById('filters').classList.toggle('collapsed');
+  });
+  updateFilterSummary();
   document.querySelectorAll('#view-chips button').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('#view-chips button').forEach(b => b.classList.remove('active'));
@@ -104,8 +151,16 @@ async function reloadQueue() {
 
 function renderProgress() {
   const reviewed = state.queue.filter(i => i.status === 'reviewed').length;
-  document.getElementById('progress').textContent =
-    `${reviewed} / ${state.queue.length} reviewed`;
+  const total = state.queue.length;
+  const pct = total > 0 ? (reviewed / total) * 100 : 0;
+  const root = document.getElementById('progress');
+  root.querySelector('.fill').style.width = `${pct}%`;
+  root.querySelector('.label').textContent = `${reviewed} / ${total}`;
+}
+
+function updateFilterSummary() {
+  const txt = `conf ${state.conf.toFixed(2)} · IoU ${state.iou.toFixed(2)} · review ${state.reviewConf.toFixed(2)}`;
+  document.getElementById('filter-summary').textContent = txt;
 }
 
 function renderQueue() {

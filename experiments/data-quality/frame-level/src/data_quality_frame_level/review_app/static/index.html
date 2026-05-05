@@ -14,17 +14,28 @@
       <span class="chips" id="view-chips">
         <button data-view="fp" class="active">FP</button>
         <button data-view="fn">FN</button>
-        <button data-view="all">All</button>
       </span>
     </label>
+    <div id="progress" title="Reviewed / total in current queue">
+      <div class="bar"><div class="fill"></div></div>
+      <span class="label">0 / 0</span>
+    </div>
     <span class="grow"></span>
-    <label>reviewer <input id="reviewer" placeholder="handle"></label>
-    <span id="progress"></span>
+    <button id="reviewer-display" title="Click to change reviewer handle">—</button>
     <button id="help-btn" title="Keyboard shortcuts (?)">?</button>
   </header>
 
+  <div id="reviewer-modal" hidden>
+    <div class="modal-card">
+      <h2>Welcome</h2>
+      <p>Enter your reviewer handle. It's stored with each review so other reviewers can see who made each decision.</p>
+      <input id="reviewer-input" placeholder="e.g. arthur" autocomplete="off">
+      <button id="reviewer-submit">Start reviewing</button>
+    </div>
+  </div>
+
   <div id="help-modal" hidden>
-    <div class="help-card">
+    <div class="modal-card help-card">
       <header>
         <strong>Keyboard shortcuts</strong>
         <button id="help-close" title="Close">✕</button>
@@ -52,11 +63,16 @@
 
   <main id="body">
     <aside id="left">
-      <section id="filters">
-        <h4>FILTERS</h4>
-        <div class="slider-row"><span>conf ≥</span><input type="range" id="conf" min="0.05" max="1" step="0.01" value="0.05"><span class="val" id="conf-v">0.05</span></div>
-        <div class="slider-row"><span>IoU ≥</span><input type="range" id="iou" min="0" max="1" step="0.01" value="0.05"><span class="val" id="iou-v">0.05</span></div>
-        <div class="slider-row"><span>review ≥</span><input type="range" id="review-conf" min="0" max="1" step="0.01" value="0.35"><span class="val" id="review-conf-v">0.35</span></div>
+      <section id="filters" class="collapsed">
+        <button id="filter-toggle" type="button">
+          <span class="caret">▸</span> filters
+          <span id="filter-summary" class="summary"></span>
+        </button>
+        <div id="filter-body">
+          <div class="slider-row"><span>conf ≥</span><input type="range" id="conf" min="0.05" max="1" step="0.01" value="0.05"><span class="val" id="conf-v">0.05</span></div>
+          <div class="slider-row"><span>IoU ≥</span><input type="range" id="iou" min="0" max="1" step="0.01" value="0.05"><span class="val" id="iou-v">0.05</span></div>
+          <div class="slider-row"><span>review ≥</span><input type="range" id="review-conf" min="0" max="1" step="0.01" value="0.35"><span class="val" id="review-conf-v">0.35</span></div>
+        </div>
       </section>
       <section id="queue"></section>
     </aside>
