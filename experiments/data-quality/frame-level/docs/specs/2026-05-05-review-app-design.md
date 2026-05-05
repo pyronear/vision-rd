@@ -128,9 +128,25 @@ manifest.json                    # which stems changed and a summary diff
 ```
 
 `labels/<stem>.txt` is a YOLO-format file (`class cx cy w h`, one box
-per line) carrying the **corrected** bboxes. It mirrors the layout of
-`pyro-dataset`'s `processed/yolo_train_val/labels/<split>/<stem>.txt`
-so applying the patch is a copy.
+per line) carrying the **corrected** bboxes — flat (no split subdir),
+one file per changed stem.
+
+**Apply target — upstream, not merged outputs.**
+`pyro-dataset`'s `dvc.yaml` regenerates `processed/yolo_train_val/` and
+`processed/yolo_test/` on each `dvc repro` by `merge_yolo_dataset.py`,
+which `shutil.copy2`s files from upstream `processed/wildfire_yolo/` and
+`processed/fp_yolo/` (both flat, no split subdir). Patches dropped into
+`yolo_train_val/labels/<split>/` would be overwritten on the next
+`dvc repro`. The correct apply target is whichever upstream the stem
+came from — `wildfire_yolo/labels/<stem>.txt` or
+`fp_yolo/labels/<stem>.txt` — followed by a `dvc repro` to propagate.
+
+Stems are unique across the two upstreams (a given stem appears in
+exactly one of `wildfire_yolo` or `fp_yolo`), so the apply step can
+route each patch by checking which upstream contains the stem. The
+apply step itself is **out of scope for this spec** (lives on the
+`pyro-dataset` side as a separate script consuming our `manifest.json`).
+Our export only emits the corrected `.txt` files plus the manifest.
 
 `manifest.json`:
 
@@ -419,11 +435,10 @@ A migration script (out of scope for this spec) can later replay
 - **Bbox class.** Production has `class_id = 0` (smoke). The editor
   defaults new boxes to class 0. If multi-class arrives, the bbox row
   will need a class selector. For now: hard-coded.
-- **Sequence detection from stems.** Stems look like
-  `<source>_<camera>_<sequence_id>_<timestamp>`. We split on the last
-  `_` to extract the timestamp; everything before is the sequence id.
-  This needs a small unit test against pyro-dataset's actual stems —
-  there are some that do not perfectly match the pattern (e.g.
-  `hpwren-figlib_*_2019-07-16T00-18-24` — `2019-07-16T00-18-24` is the
-  timestamp, the rest is sequence id). The implementation plan should
-  validate this on the real `01_raw` tree.
+- **Sequence detection from stems.** Validated against the live
+  `data/01_raw/datasets/{train,val,test}/labels/` tree (18,833 files):
+  every stem has exactly four `_`-separated fields:
+  `<source>_<camera>_<sequence_id>_<timestamp>`. Sources may contain
+  hyphens (`awf-axis`, `pyronear-force-06`) but never underscores.
+  `rsplit('_', 1)` reliably yields `(sequence_id, timestamp)` for every
+  stem in every split. No edge cases.
