@@ -2,7 +2,7 @@
 <html lang="en" class="h-full">
 <head>
   <meta charset="utf-8">
-  <title>Frame-level review</title>
+  <title>🔥 Label audit</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -109,15 +109,20 @@
       .dvc-banner .msg { @apply flex-1; }
       .dvc-banner .ctx { @apply font-mono text-xs text-amber-700; }
       .dvc-banner button { @apply rounded border border-amber-300 bg-white px-2 py-0.5 text-xs text-amber-700 transition hover:bg-amber-100; }
+
+      .toast { @apply pointer-events-auto rounded-md px-4 py-2 text-sm shadow-lg transition-opacity duration-500; }
+      .toast-success { @apply bg-emerald-600 text-white; }
+      .toast-error { @apply bg-rose-600 text-white; }
     }
   </style>
 </head>
 <body class="h-full">
 
   <div id="dvc-banner-host" class="flex flex-col"></div>
+  <div id="toast-host" class="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center gap-2 pointer-events-none"></div>
 
   <header class="flex h-12 items-center gap-3 border-b border-slate-200 bg-white px-4 shadow-sm">
-    <strong class="text-sm font-semibold tracking-tight text-slate-900">label-review</strong>
+    <strong class="text-sm font-semibold tracking-tight text-slate-900">🔥 Label audit</strong>
     <span class="flex-1"></span>
     <label class="flex items-center gap-1.5 text-xs text-slate-500">model
       <select id="sel-model" class="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 shadow-sm focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"></select>
@@ -137,6 +142,7 @@
     </div>
     <span class="flex-1"></span>
     <button id="reviewer-display" title="Click to change reviewer handle" class="pill">—</button>
+    <button id="export-btn" title="Export current (model, split) to data/10_export/" class="pill">📦 Export</button>
     <button id="help-btn" title="Reference (?)" class="icon-btn font-semibold">?</button>
   </header>
 
