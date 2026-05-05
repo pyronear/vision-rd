@@ -48,27 +48,36 @@ function promptReviewer() {
     const modal = document.getElementById('reviewer-modal');
     const input = document.getElementById('reviewer-input');
     const submit = document.getElementById('reviewer-submit');
-    input.value = state.reviewer || '';
-    submit.disabled = !input.value.trim();
+    const presets = document.querySelectorAll('#reviewer-presets .preset');
+    input.value = '';
+    submit.disabled = true;
     modal.hidden = false;
     setTimeout(() => input.focus(), 0);
-    const onInput = () => { submit.disabled = !input.value.trim(); };
-    const close = () => {
-      const v = input.value.trim();
-      if (!v) return;
-      state.reviewer = v;
-      localStorage.setItem('reviewer', v);
+    const cleanup = () => {
       modal.hidden = true;
-      submit.removeEventListener('click', close);
+      submit.removeEventListener('click', onSubmit);
       input.removeEventListener('input', onInput);
       input.removeEventListener('keydown', onKey);
+      presets.forEach(b => b.removeEventListener('click', onPreset));
+    };
+    const finish = handle => {
+      state.reviewer = handle;
+      localStorage.setItem('reviewer', handle);
+      cleanup();
       updateReviewerDisplay();
       resolve();
     };
-    const onKey = e => { if (e.key === 'Enter') close(); };
-    submit.addEventListener('click', close);
+    const onSubmit = () => {
+      const v = input.value.trim();
+      if (v) finish(v);
+    };
+    const onInput = () => { submit.disabled = !input.value.trim(); };
+    const onKey = e => { if (e.key === 'Enter') onSubmit(); };
+    const onPreset = e => finish(e.currentTarget.dataset.handle);
+    submit.addEventListener('click', onSubmit);
     input.addEventListener('input', onInput);
     input.addEventListener('keydown', onKey);
+    presets.forEach(b => b.addEventListener('click', onPreset));
   });
 }
 

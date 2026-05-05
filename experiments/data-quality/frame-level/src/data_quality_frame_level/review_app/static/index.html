@@ -28,8 +28,14 @@
   <div id="reviewer-modal" hidden>
     <div class="modal-card">
       <h2>Welcome</h2>
-      <p>Enter your reviewer handle. It's stored with each review so other reviewers can see who made each decision.</p>
-      <input id="reviewer-input" placeholder="e.g. arthur" autocomplete="off">
+      <p>Pick your handle. It's stored with each review so other reviewers can see who made each decision.</p>
+      <div id="reviewer-presets">
+        <button class="preset" data-handle="arthur">arthur</button>
+        <button class="preset" data-handle="mateo">mateo</button>
+        <button class="preset" data-handle="felix">felix</button>
+      </div>
+      <p class="hint">Or enter another handle:</p>
+      <input id="reviewer-input" placeholder="e.g. someone-else" autocomplete="off">
       <button id="reviewer-submit">Start reviewing</button>
     </div>
   </div>
