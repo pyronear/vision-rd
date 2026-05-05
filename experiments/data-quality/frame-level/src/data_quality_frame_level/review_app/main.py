@@ -5,6 +5,7 @@ Routes:
   GET  /api/queue?model&split&view&conf&iou&review_conf  — ordered queue
   GET  /api/sample?model&split&stem&conf&iou&review_conf — layers + neighbors
   POST /api/sample?model&split  (body: SaveBody)     — save corrected GT
+  POST /api/export?model&split&conf&iou&review_conf  — write data/10_export
   GET  /image?model&split&stem                       — JPEG bytes
   GET  /                                             — static index.html
 """
@@ -183,10 +184,23 @@ def create_app(
         return {"saved_at": sample.reviewed_at}
 
     @app.post("/api/export")
-    def post_export(model: str, split: str) -> dict:
+    def post_export(
+        model: str,
+        split: str,
+        conf: float,
+        iou: float,
+        review_conf: float,
+    ) -> dict:
         if (model, split) not in contexts:
             raise HTTPException(404, f"unknown context: ({model}, {split})")
-        manifest = export_one(repo_root=repo_root, model=model, split=split)
+        manifest = export_one(
+            repo_root=repo_root,
+            model=model,
+            split=split,
+            conf=conf,
+            iou=iou,
+            review_conf=review_conf,
+        )
         if manifest is None:
             raise HTTPException(
                 400,

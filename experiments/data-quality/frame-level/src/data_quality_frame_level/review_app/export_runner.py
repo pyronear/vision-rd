@@ -11,8 +11,6 @@ import hashlib
 import subprocess
 from pathlib import Path
 
-import yaml
-
 from data_quality_frame_level.dataset import iter_frames
 from data_quality_frame_level.review_app.export import (
     ProvenanceInput,
@@ -74,8 +72,19 @@ def md5_of_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def export_one(*, repo_root: Path, model: str, split: str) -> dict | None:
+def export_one(
+    *,
+    repo_root: Path,
+    model: str,
+    split: str,
+    conf: float,
+    iou: float,
+    review_conf: float,
+) -> dict | None:
     """Export one (model, split) to ``data/10_export/<model>/<split>/``.
+
+    ``conf``/``iou``/``review_conf`` are the review-time thresholds the
+    reviewer was using; they're recorded in provenance, not used to filter.
 
     Returns the manifest payload, or ``None`` if there's no review.json
     or no predictions.json for the context.
@@ -89,13 +98,7 @@ def export_one(*, repo_root: Path, model: str, split: str) -> dict | None:
     if not predictions_path.is_file():
         return None
     split_dir = repo_root / "data" / "01_raw" / "datasets" / split
-    params = yaml.safe_load((repo_root / "params.yaml").read_text())
-    model_params = params["models"][model]
-    thresholds = {
-        "conf": float(model_params["conf_thresh"]),
-        "iou": float(model_params["iou_thresh"]),
-        "review_conf": float(model_params["review_conf_thresh"]),
-    }
+    thresholds = {"conf": conf, "iou": iou, "review_conf": review_conf}
     audit_repo, audit_commit, audit_branch = audit_git_state(repo_root)
     state = read_review_state(review_path, model=model, split=split)
     originals = {f.stem: f.gt_bboxes for f in iter_frames(split_dir)}

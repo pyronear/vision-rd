@@ -163,7 +163,7 @@ async function doExport() {
   btn.textContent = '📦 Exporting…';
   try {
     const r = await fetch(
-      `/api/export?model=${encodeURIComponent(state.model)}&split=${encodeURIComponent(state.split)}`,
+      `/api/export?model=${encodeURIComponent(state.model)}&split=${encodeURIComponent(state.split)}&conf=${state.conf}&iou=${state.iou}&review_conf=${state.reviewConf}`,
       { method: 'POST' }
     );
     if (!r.ok) {
