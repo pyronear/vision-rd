@@ -5,10 +5,13 @@ a sibling ``.tmp`` + ``os.replace`` so partial writes can never be
 observed. Reads of missing files return an empty :class:`ReviewState`.
 """
 
+import hashlib
 import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
+
+import yaml
 
 from data_quality_frame_level.dataset import BBox
 
@@ -103,3 +106,60 @@ def write_review_state(path: Path, state: ReviewState) -> None:
     with open(tmp, "rb") as fh:
         os.fsync(fh.fileno())
     os.replace(tmp, path)
+
+
+def _md5_of_file(path: Path) -> str:
+    h = hashlib.md5()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _tracked_md5(dvc_path: Path, target_filename: str) -> str | None:
+    """Read the md5 for ``target_filename`` from a single-file ``.dvc``."""
+    payload = yaml.safe_load(dvc_path.read_text())
+    for out in payload.get("outs", []):
+        if out.get("path") == target_filename and out.get("hash", "md5") == "md5":
+            return out.get("md5")
+    return None
+
+
+def dvc_warning_for_review(review_path: Path) -> dict | None:
+    """Compare local review.json md5 with the .dvc-tracked md5.
+
+    Returns a warning dict if the local file is stale or missing relative
+    to the tracked version. Returns None when:
+
+    - There is no sibling ``.dvc`` file (untracked / first session).
+    - The local file matches the tracked md5.
+    """
+    dvc_path = review_path.with_suffix(review_path.suffix + ".dvc")
+    if not dvc_path.is_file():
+        return None
+    tracked = _tracked_md5(dvc_path, review_path.name)
+    if tracked is None:
+        return None
+    if not review_path.is_file():
+        return {
+            "kind": "missing_local",
+            "tracked_md5": tracked,
+            "local_md5": None,
+            "message": (
+                f"DVC tracks {review_path.name} but the local file is missing. "
+                "Run `make review-pull` before reviewing."
+            ),
+        }
+    local = _md5_of_file(review_path)
+    if local == tracked:
+        return None
+    return {
+        "kind": "stale_local",
+        "tracked_md5": tracked,
+        "local_md5": local,
+        "message": (
+            f"Local {review_path.name} differs from the DVC-tracked version. "
+            "Run `make review-pull` before reviewing — your saves may "
+            "overwrite a peer's work."
+        ),
+    }
