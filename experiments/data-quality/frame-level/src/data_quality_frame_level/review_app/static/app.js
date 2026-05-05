@@ -74,6 +74,10 @@ async function init() {
   document.getElementById('show-pred').addEventListener('change', e => {
     state.showPred = e.target.checked; paint();
   });
+  const helpModal = document.getElementById('help-modal');
+  document.getElementById('help-btn').addEventListener('click', () => { helpModal.hidden = false; });
+  document.getElementById('help-close').addEventListener('click', () => { helpModal.hidden = true; });
+  helpModal.addEventListener('click', e => { if (e.target === helpModal) helpModal.hidden = true; });
 
   await reloadQueue();
 }
@@ -466,6 +470,10 @@ function renderTimeline() {
 
 window.addEventListener('keydown', async e => {
   if (e.target.matches('input, textarea, select')) return;
+  const helpModal = document.getElementById('help-modal');
+  if (e.key === '?') { e.preventDefault(); helpModal.hidden = !helpModal.hidden; return; }
+  if (e.key === 'Escape' && !helpModal.hidden) { helpModal.hidden = true; return; }
+  if (!helpModal.hidden) return;
   if (e.key === 'ArrowLeft' && e.ctrlKey) { e.preventDefault(); return jumpSequence(-1); }
   if (e.key === 'ArrowRight' && e.ctrlKey) { e.preventDefault(); return jumpSequence(+1); }
   if (e.key === 'ArrowLeft') { e.preventDefault(); return seqStep(-1); }
