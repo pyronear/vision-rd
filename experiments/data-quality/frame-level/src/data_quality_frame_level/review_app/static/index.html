@@ -71,10 +71,19 @@
     <aside id="right">
       <section id="help-pane" hidden>
         <header>
-          <strong>Keyboard shortcuts</strong>
+          <strong>Reference</strong>
           <button id="help-close" title="Close (?)">✕</button>
         </header>
         <table>
+          <tr><th colspan="2">Bbox layers (canvas)</th></tr>
+          <tr><td><span class="sw" style="background:#58a6ff;border-color:#58a6ff"></span></td><td>Original GT — read-only reference</td></tr>
+          <tr><td><span class="sw dashed" style="border-color:#f85149"></span></td><td>Prediction — read-only reference (dashed)</td></tr>
+          <tr><td><span class="sw" style="background:#3fb950;border-color:#3fb950"></span></td><td>Corrected GT — editable, exported</td></tr>
+          <tr><th colspan="2">Queue / timeline</th></tr>
+          <tr><td><span class="sw flat" style="background:#f85149"></span></td><td>FP — model flagged but no GT</td></tr>
+          <tr><td><span class="sw flat" style="background:#d29922"></span></td><td>FN — GT but model missed</td></tr>
+          <tr><td><span class="sw flat" style="background:#3fb950"></span></td><td>Reviewed — decision saved</td></tr>
+          <tr><td>dim row / thumbnail</td><td>Unflagged sibling (context only)</td></tr>
           <tr><th colspan="2">Navigation</th></tr>
           <tr><td><kbd>←</kbd> / <kbd>→</kbd></td><td>Walk timeline; flow into adjacent sequence</td></tr>
           <tr><td><kbd>Ctrl</kbd>+<kbd>←</kbd>/<kbd>→</kbd></td><td>Jump to prev / next sequence</td></tr>

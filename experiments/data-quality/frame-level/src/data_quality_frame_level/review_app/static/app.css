@@ -40,6 +40,9 @@ body { margin: 0; font: 13px/1.4 ui-sans-serif, system-ui, sans-serif; color: #1
 #help-pane td:first-child { white-space: nowrap; color: #1f2328; }
 #help-pane kbd { background: #f6f8fa; border: 1px solid #d0d7de; border-bottom-width: 2px; border-radius: 3px; padding: 0 5px; font-family: ui-monospace, monospace; font-size: 10px; }
 #help-pane em { color: #1a7f37; font-style: normal; font-weight: 600; }
+#help-pane .sw { display: inline-block; width: 22px; height: 12px; border: 2px solid; border-radius: 2px; vertical-align: middle; }
+#help-pane .sw.flat { width: 12px; height: 12px; border: none; border-radius: 50%; }
+#help-pane .sw.dashed { border-style: dashed; background: transparent; }
 
 #body { display: flex; height: calc(100vh - 41px); }
 
