@@ -83,6 +83,7 @@ Files are emitted by `make review-export` (and the equivalent
   "model": "yolo11s-nimble-narwhal",
   "split": "val",
   "exported_at": "2026-05-05T14:30:00Z",
+  "contributors": ["arthur", "mateo", "felix"],
   "changed": [
     {
       "stem": "hpwren-figlib_rmwmoboc_999_2018-07-29T00-19-06",
@@ -99,6 +100,10 @@ Files are emitted by `make review-export` (and the equivalent
 
 Properties:
 
+- `contributors` is the sorted unique set of `reviewer` handles
+  appearing across `changed[]` (and skipping null/missing values).
+  Useful for crediting reviewers in PR descriptions without scanning
+  the whole `changed` list.
 - `changed` is sorted by `stem` for stable diffs.
 - Every entry's `stem` corresponds to a sibling
   `labels/<stem>.txt` file in the export directory. The presence of
@@ -205,7 +210,60 @@ That script's responsibility is to:
 The above is not part of this spec — it's documented here to make the
 contract concrete. Implementation lives entirely in `pyro-dataset`.
 
-## 7. Implementation changes
+## 7. Stale-state safety check
+
+Sequential hand-off via DVC ("Mateo reviews → push; Felix pulls →
+continues") works with the existing single-file `review.json` model
+**iff** Felix runs `dvc pull` before starting. If he forgets — having
+pulled the git repo (which carries an updated `review.json.dvc`) but
+not the actual data file — his local `review.json` is older than what
+the DVC remote tracks. New saves overwrite Mateo's work silently.
+
+The app detects this at launch with a passive warning (no auto-pull —
+DVC sync stays manual):
+
+1. On app start, the backend reads `data/09_review/<model>/<split>/review.json.dvc`
+   (if present) and extracts the tracked MD5.
+2. It computes the MD5 of the local `review.json` file (empty file =
+   md5 of empty content; missing file = special case "never synced").
+3. The two MD5s are compared. Per-context status is exposed via a new
+   field on `GET /api/contexts`:
+
+   ```json
+   {
+     "models": ["yolo11s-nimble-narwhal"],
+     "splits": ["train", "val", "test"],
+     "dvc_warnings": [
+       {
+         "model": "yolo11s-nimble-narwhal",
+         "split": "val",
+         "kind": "stale_local",
+         "tracked_md5": "abc...",
+         "local_md5": "def...",
+         "message": "Local review.json differs from DVC-tracked version. Run `make review-pull` before reviewing."
+       }
+     ]
+   }
+   ```
+
+   Possible `kind` values: `stale_local` (md5 mismatch), `missing_local`
+   (`.dvc` file present, `review.json` absent), `untracked_local`
+   (`review.json` exists but no `.dvc` file — first-ever session,
+   benign).
+
+4. The frontend renders any non-benign warning as a dismissible banner
+   above the header. The reviewer can dismiss the banner per session;
+   it does not block any other action.
+
+Decision rationale: warn-only (not block) keeps the pre-launch UX
+fast and matches the existing "DVC sync is manual" stance. If silent
+overwrites turn out to happen in practice anyway, we can promote to
+"refuse to save until reconciled" without spec changes.
+
+The check is per-`(model, split)` so a stale `train` doesn't block
+`val` work.
+
+## 8. Implementation changes
 
 This spec requires modifying the existing exporter in
 `src/data_quality_frame_level/review_app/export.py` and the CLI in
@@ -220,6 +278,12 @@ This spec requires modifying the existing exporter in
   file.
 - Update the top-level `export_corrections` orchestrator (called from
   the CLI) to write all three files.
+- Backend: add a `dvc_warning_for_review` helper in
+  `review_app/persistence.py` that compares the local `review.json`
+  MD5 against the tracked MD5 in `review.json.dvc`. Wire it into
+  `GET /api/contexts`.
+- Frontend: render the banner above the header when the `dvc_warnings`
+  array is non-empty; dismissible per session.
 - Replace the old single-file `manifest.json` with the three-file
   layout described in §4. Each new file carries its own
   `"version": 1` marker. Existing exports under `data/10_export/`
@@ -233,11 +297,14 @@ Test additions:
 - `test_export_pending_excludes_reviewed_and_untouched`
 - `test_export_provenance_captures_git_and_predictions_md5`
 - `test_export_provenance_marks_dirty_when_working_tree_unclean`
+- `test_export_manifest_contributors_is_sorted_unique_reviewers`
+- `test_dvc_warning_when_local_md5_differs_from_dvc_md5`
+- `test_dvc_warning_absent_when_no_dvc_file_yet`
 
 The CLI in `scripts/export_review_app.py` keeps the same surface
 (`make review-export`, no flags) — it just emits more files.
 
-## 8. Open questions
+## 9. Open questions
 
 None blocking. The hand-off mechanism (reviewers running the apply
 script in a sibling `pyro-dataset` checkout) is the simplest possible
