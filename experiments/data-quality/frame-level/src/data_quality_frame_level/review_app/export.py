@@ -13,6 +13,7 @@ and feeds it in.
 """
 
 import json
+import shutil
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -91,6 +92,8 @@ def write_manifest_and_labels(
 ) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
     labels_dir = out_dir / "labels"
+    if labels_dir.exists():
+        shutil.rmtree(labels_dir)
     changed: list[dict] = []
     totals = {"changed": 0, "added": 0, "removed": 0, "modified": 0}
     for stem in sorted(review.samples):

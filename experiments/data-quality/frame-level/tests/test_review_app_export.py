@@ -124,6 +124,24 @@ def test_export_pending_empty_when_no_unclear(tmp_path: Path):
     assert pending["pending"] == []
 
 
+def test_export_wipes_stale_labels(tmp_path: Path):
+    out = tmp_path / "10_export" / "m" / "val"
+    stale = out / "labels" / "stale_stem.txt"
+    stale.parent.mkdir(parents=True)
+    stale.write_text("0 0.5 0.5 0.1 0.1\n")
+    review = ReviewState(
+        model="m",
+        split="val",
+        samples={
+            "fresh_stem": SampleReview(status="reviewed", bboxes=[_bb(0.6, 0.6)]),
+        },
+    )
+    originals = {"fresh_stem": [_bb(0.5, 0.5)]}
+    write_manifest_and_labels(review=review, originals=originals, out_dir=out)
+    assert (out / "labels" / "fresh_stem.txt").exists()
+    assert not stale.exists()
+
+
 def test_export_provenance_writes_all_fields(tmp_path: Path):
     prov = ProvenanceInput(
         audit_repo="pyronear/vision-rd",
