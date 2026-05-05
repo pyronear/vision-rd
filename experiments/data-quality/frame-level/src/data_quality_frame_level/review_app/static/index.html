@@ -96,6 +96,30 @@
     </section>
 
     <aside id="right">
+      <section id="help-pane" hidden>
+        <header>
+          <strong>Keyboard shortcuts</strong>
+          <button id="help-close" title="Close (?)">✕</button>
+        </header>
+        <table>
+          <tr><th colspan="2">Navigation</th></tr>
+          <tr><td><kbd>←</kbd> / <kbd>→</kbd></td><td>Walk timeline; flow into adjacent sequence</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>←</kbd>/<kbd>→</kbd></td><td>Jump to prev / next sequence</td></tr>
+          <tr><th colspan="2">Status</th></tr>
+          <tr><td><kbd>Space</kbd></td><td>Mark <em>reviewed</em> + advance</td></tr>
+          <tr><td><kbd>r</kbd></td><td>Mark <em>reviewed</em> (stay)</td></tr>
+          <tr><td><kbd>u</kbd></td><td>Mark <em>unclear</em></td></tr>
+          <tr><th colspan="2">Bbox editing</th></tr>
+          <tr><td><kbd>Del</kbd> / <kbd>Backspace</kbd></td><td>Delete selected corrected bbox</td></tr>
+          <tr><td><kbd>Esc</kbd></td><td>Clear bbox selection</td></tr>
+          <tr><td>double-click empty</td><td>Draw a new corrected bbox</td></tr>
+          <tr><td>click on original GT</td><td>Copy into corrected layer</td></tr>
+          <tr><th colspan="2">View</th></tr>
+          <tr><td><kbd>o</kbd></td><td>Toggle original GT layer</td></tr>
+          <tr><td><kbd>p</kbd></td><td>Toggle predictions layer</td></tr>
+          <tr><td><kbd>?</kbd></td><td>Toggle this panel</td></tr>
+        </table>
+      </section>
       <section id="bbox-list"></section>
       <section id="status-pane">
         <h4>STATUS</h4>
