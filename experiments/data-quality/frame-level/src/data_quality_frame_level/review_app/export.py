@@ -1,9 +1,15 @@
-"""Export corrected GT to a YOLO-format patch + manifest.
+"""Export corrected GT to a YOLO-format patch + manifest + provenance.
 
-Only stems whose corrected bboxes differ from the on-disk original are
-written. Emits a flat ``labels/<stem>.txt`` tree (no split subdir) and
-a ``manifest.json`` summarizing what changed. ``unclear`` samples are
-excluded — they are open questions, not decisions.
+The export directory contains four siblings:
+
+  labels/<stem>.txt     # corrected YOLO labels (only-changed frames)
+  manifest.json         # apply contract — pyro-dataset reads this
+  pending.json          # unclear-status frames for second-opinion review
+  provenance.json       # audit-side context for reproducibility
+
+Each writer here is a pure function over its inputs; the CLI
+(``scripts/export_review_app.py``) gathers the git/DVC/params context
+and feeds it in.
 """
 
 import json
@@ -27,6 +33,17 @@ class DiffCounts:
     @property
     def is_change(self) -> bool:
         return self.added + self.removed + self.modified > 0
+
+
+@dataclass(frozen=True)
+class ProvenanceInput:
+    audit_repo: str
+    audit_commit: str
+    audit_branch: str
+    experiment: str
+    thresholds: dict[str, float]
+    predictions_path: str
+    predictions_md5: str
 
 
 def compute_diff(*, original: list[BBox], corrected: list[BBox]) -> DiffCounts:
@@ -62,7 +79,11 @@ def _write_yolo_txt(path: Path, bboxes: list[BBox]) -> None:
     path.write_text("\n".join(lines) + ("\n" if lines else ""))
 
 
-def export_corrections(
+def _now_iso() -> str:
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def write_manifest_and_labels(
     *,
     review: ReviewState,
     originals: dict[str, list[BBox]],
@@ -95,13 +116,81 @@ def export_corrections(
         totals["added"] += diff.added
         totals["removed"] += diff.removed
         totals["modified"] += diff.modified
+    contributors = sorted({c["reviewer"] for c in changed if c["reviewer"]})
     manifest = {
         "version": 1,
-        "model_name": review.model,
+        "model": review.model,
         "split": review.split,
-        "exported_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "exported_at": _now_iso(),
+        "contributors": contributors,
         "changed": changed,
         "totals": totals,
     }
     (out_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    return manifest
+
+
+def write_pending(*, review: ReviewState, out_dir: Path) -> dict:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    pending = [
+        {
+            "stem": stem,
+            "reviewer": sample.reviewer,
+            "note": sample.note,
+        }
+        for stem, sample in sorted(review.samples.items())
+        if sample.status == "unclear"
+    ]
+    payload = {
+        "version": 1,
+        "model": review.model,
+        "split": review.split,
+        "exported_at": _now_iso(),
+        "pending": pending,
+    }
+    (out_dir / "pending.json").write_text(json.dumps(payload, indent=2) + "\n")
+    return payload
+
+
+def write_provenance(
+    *,
+    prov: ProvenanceInput,
+    model: str,
+    split: str,
+    out_dir: Path,
+) -> dict:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "version": 1,
+        "audit_repo": prov.audit_repo,
+        "audit_commit": prov.audit_commit,
+        "audit_branch": prov.audit_branch,
+        "experiment": prov.experiment,
+        "model": model,
+        "split": split,
+        "thresholds": prov.thresholds,
+        "predictions_path": prov.predictions_path,
+        "predictions_md5": prov.predictions_md5,
+        "exported_at": _now_iso(),
+    }
+    (out_dir / "provenance.json").write_text(json.dumps(payload, indent=2) + "\n")
+    return payload
+
+
+def export_corrections(
+    *,
+    review: ReviewState,
+    originals: dict[str, list[BBox]],
+    out_dir: Path,
+    provenance: ProvenanceInput | None = None,
+) -> dict:
+    """Orchestrator: write all four files. Returns the manifest payload."""
+    manifest = write_manifest_and_labels(
+        review=review, originals=originals, out_dir=out_dir
+    )
+    write_pending(review=review, out_dir=out_dir)
+    if provenance is not None:
+        write_provenance(
+            prov=provenance, model=review.model, split=review.split, out_dir=out_dir
+        )
     return manifest

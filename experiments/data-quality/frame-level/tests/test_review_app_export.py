@@ -6,6 +6,7 @@ from data_quality_frame_level.review_app.export import (
     DiffCounts,
     compute_diff,
     export_corrections,
+    write_manifest_and_labels,
 )
 from data_quality_frame_level.review_app.persistence import (
     ReviewState,
@@ -55,3 +56,27 @@ def test_export_writes_only_changed(tmp_path: Path):
     manifest = json.loads((out / "manifest.json").read_text())
     assert manifest["totals"]["changed"] == 1
     assert [c["stem"] for c in manifest["changed"]] == ["stem_b"]
+
+
+def test_export_manifest_contributors_is_sorted_unique_reviewers(tmp_path: Path):
+    review = ReviewState(
+        model="m",
+        split="val",
+        samples={
+            "stem_a": SampleReview(
+                status="reviewed", bboxes=[_bb(0.6, 0.6)], reviewer="mateo"
+            ),
+            "stem_b": SampleReview(
+                status="reviewed", bboxes=[_bb(0.7, 0.7)], reviewer="arthur"
+            ),
+            "stem_c": SampleReview(
+                status="reviewed", bboxes=[_bb(0.8, 0.8)], reviewer="arthur"
+            ),
+            "stem_d": SampleReview(status="reviewed", bboxes=[_bb(0.9, 0.9)]),
+        },
+    )
+    originals = {st: [] for st in review.samples}
+    out = tmp_path / "10_export" / "m" / "val"
+    write_manifest_and_labels(review=review, originals=originals, out_dir=out)
+    manifest = json.loads((out / "manifest.json").read_text())
+    assert manifest["contributors"] == ["arthur", "mateo"]
