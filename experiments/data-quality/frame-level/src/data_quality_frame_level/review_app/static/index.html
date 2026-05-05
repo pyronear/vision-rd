@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Frame-level review</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header id="hdr">
+    <strong>label-review</strong>
+    <label>model <select id="sel-model"></select></label>
+    <label>split <select id="sel-split"></select></label>
+    <label>view
+      <span class="chips" id="view-chips">
+        <button data-view="fp" class="active">FP</button>
+        <button data-view="fn">FN</button>
+        <button data-view="all">All</button>
+      </span>
+    </label>
+    <span class="grow"></span>
+    <label>reviewer <input id="reviewer" placeholder="handle"></label>
+    <span id="progress"></span>
+  </header>
+
+  <main id="body">
+    <aside id="left">
+      <section id="filters">
+        <h4>FILTERS</h4>
+        <div class="slider-row"><span>conf ≥</span><input type="range" id="conf" min="0.05" max="1" step="0.01" value="0.05"><span class="val" id="conf-v">0.05</span></div>
+        <div class="slider-row"><span>IoU ≥</span><input type="range" id="iou" min="0" max="1" step="0.01" value="0.05"><span class="val" id="iou-v">0.05</span></div>
+        <div class="slider-row"><span>review ≥</span><input type="range" id="review-conf" min="0" max="1" step="0.01" value="0.35"><span class="val" id="review-conf-v">0.35</span></div>
+      </section>
+      <section id="queue"></section>
+    </aside>
+
+    <section id="center">
+      <div id="canvas-wrap">
+        <canvas id="cnv"></canvas>
+        <div id="layer-toggles">
+          <label><input type="checkbox" id="show-orig" checked> O original</label>
+          <label><input type="checkbox" id="show-pred" checked> P predictions</label>
+        </div>
+      </div>
+      <div id="timeline"></div>
+    </section>
+
+    <aside id="right">
+      <section id="bbox-list"></section>
+      <section id="status-pane">
+        <h4>STATUS</h4>
+        <div class="opts">
+          <button data-status="reviewed" class="active">reviewed</button>
+          <button data-status="unclear">unclear</button>
+        </div>
+      </section>
+      <section id="note-pane">
+        <h4>NOTE</h4>
+        <textarea id="note" rows="3"></textarea>
+      </section>
+      <div id="save-bar">— no edits —</div>
+    </aside>
+  </main>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>
