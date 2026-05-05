@@ -32,6 +32,9 @@ git add data/09_review.dvc data/10_export.dvc data/.gitignore
 git commit -m "review: bbox corrections + export"
 ```
 
+<img width="1651" height="1044" alt="image" src="https://github.com/user-attachments/assets/89317d03-a8e1-49a5-8175-300a6d9f94b5" />
+
+
 ## Pipeline
 
 ```
