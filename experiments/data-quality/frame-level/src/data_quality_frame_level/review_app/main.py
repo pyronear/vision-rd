@@ -72,7 +72,7 @@ def create_app(
         review_conf: float,
     ) -> dict:
         s = _state(model, split)
-        items = build_queue(
+        flagged = build_queue(
             predictions=s.predictions,
             gt=s.gt,
             review_status={k: v.status for k, v in s.review.samples.items()},
@@ -81,7 +81,34 @@ def create_app(
             iou_thresh=iou,
             review_conf_thresh=review_conf,
         )
-        return {"items": [asdict(i) for i in items]}
+        flagged_stems = {it.stem for it in flagged}
+        flagged_seq_ids = {it.sequence_id for it in flagged}
+        seq_max: dict[str, float] = {}
+        for it in flagged:
+            if it.severity > seq_max.get(it.sequence_id, 0.0):
+                seq_max[it.sequence_id] = it.severity
+        expanded = [asdict(i) for i in flagged]
+        for stem in s.gt.keys() | s.predictions.keys():
+            if stem in flagged_stems:
+                continue
+            seq_id, ts = parse_stem(stem)
+            if seq_id not in flagged_seq_ids:
+                continue
+            sample = s.review.samples.get(stem)
+            expanded.append(
+                {
+                    "stem": stem,
+                    "sequence_id": seq_id,
+                    "timestamp": ts,
+                    "kind": "none",
+                    "severity": 0.0,
+                    "status": sample.status if sample else None,
+                }
+            )
+        expanded.sort(
+            key=lambda i: (-seq_max[i["sequence_id"]], i["sequence_id"], i["timestamp"])
+        )
+        return {"items": expanded}
 
     @app.get("/api/sample")
     def get_sample(

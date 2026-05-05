@@ -116,11 +116,14 @@ function renderQueue() {
       root.appendChild(h);
       lastSeq = it.sequence_id;
     }
+    const flagged = it.kind && it.kind !== 'none';
     const row = document.createElement('div');
-    row.className = 'queue-item' + (idx === state.queueIndex ? ' active' : '');
+    row.className = 'queue-item'
+      + (idx === state.queueIndex ? ' active' : '')
+      + (flagged ? ` kind-${it.kind}` : ' unflagged');
     row.innerHTML = `
       <span class="stem">${escapeHtml(it.timestamp)}</span>
-      <span class="kind">${it.kind}</span>
+      <span class="kind">${flagged ? it.kind : '·'}</span>
       <span class="dot ${it.status || ''}"></span>`;
     row.addEventListener('click', () => navigateTo(idx));
     root.appendChild(row);
@@ -434,16 +437,25 @@ function renderTimeline() {
   const root = document.getElementById('timeline');
   root.innerHTML = '';
   if (!state.sample) return;
+  const queueByStem = new Map(state.queue.map(it => [it.stem, it]));
   const neighbors = state.sample.sequence_neighbors;
   const currentIdx = neighbors.findIndex(n => n.stem === state.sample.stem);
   const start = Math.max(0, currentIdx - 5);
   const end = Math.min(neighbors.length, currentIdx + 6);
   for (let i = start; i < end; i++) {
     const n = neighbors[i];
+    const q = queueByStem.get(n.stem);
+    const flagged = q && q.kind && q.kind !== 'none';
     const f = document.createElement('div');
-    f.className = 'tl-frame' + (n.stem === state.sample.stem ? ' current' : '');
+    f.className = 'tl-frame'
+      + (n.stem === state.sample.stem ? ' current' : '')
+      + (flagged ? ` kind-${q.kind}` : ' unflagged');
+    const dotClass = q?.status === 'reviewed' ? 'reviewed'
+      : q?.status === 'unclear' ? 'unclear'
+      : flagged ? `flagged-${q.kind}` : 'none';
     f.innerHTML = `
       <img class="tl-img" src="/image?model=${encodeURIComponent(state.model)}&split=${encodeURIComponent(state.split)}&stem=${encodeURIComponent(n.stem)}" alt="">
+      <div class="tl-status ${dotClass}"></div>
       <div class="tl-time">${escapeHtml(n.timestamp)}</div>`;
     f.addEventListener('click', () => loadSample(n.stem));
     root.appendChild(f);

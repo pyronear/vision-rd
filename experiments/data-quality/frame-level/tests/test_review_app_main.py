@@ -84,7 +84,13 @@ def test_get_queue_fp(app_tree):
     )
     assert r.status_code == 200
     items = r.json()["items"]
-    assert [i["stem"] for i in items] == ["s_2024-01-01T00-00-00"]
+    by_stem = {i["stem"]: i for i in items}
+    assert by_stem["s_2024-01-01T00-00-00"]["kind"] == "fp"
+    assert by_stem["s_2024-01-01T00-00-30"]["kind"] == "none"
+    assert [i["stem"] for i in items] == [
+        "s_2024-01-01T00-00-00",
+        "s_2024-01-01T00-00-30",
+    ]
 
 
 def test_get_sample_returns_layers_and_neighbors(app_tree):
