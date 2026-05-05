@@ -6,7 +6,7 @@ Constructed once per context and cached by the FastAPI layer.
 
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from data_quality_frame_level.dataset import BBox, iter_frames
@@ -82,7 +82,7 @@ class AppState:
             bboxes=list(bboxes),
             reviewer=reviewer,
             note=note,
-            reviewed_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            reviewed_at=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         )
         self.review.samples[stem] = sample
         write_review_state(self.paths.review_path, self.review)

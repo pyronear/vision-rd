@@ -95,8 +95,7 @@ def write_review_state(path: Path, state: ReviewState) -> None:
         "model_name": state.model,
         "split": state.split,
         "samples": {
-            stem: _sample_to_dict(state.samples[stem])
-            for stem in sorted(state.samples)
+            stem: _sample_to_dict(state.samples[stem]) for stem in sorted(state.samples)
         },
     }
     tmp = path.with_suffix(path.suffix + ".tmp")

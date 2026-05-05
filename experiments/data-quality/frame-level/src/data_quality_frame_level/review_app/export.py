@@ -8,7 +8,7 @@ excluded — they are open questions, not decisions.
 
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from data_quality_frame_level.dataset import BBox
@@ -99,7 +99,7 @@ def export_corrections(
         "version": 1,
         "model_name": review.model,
         "split": review.split,
-        "exported_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "exported_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "changed": changed,
         "totals": totals,
     }

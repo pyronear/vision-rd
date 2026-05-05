@@ -118,9 +118,7 @@ def test_post_sample_persists(app_tree):
         json={
             "stem": "s_2024-01-01T00-00-00",
             "status": "reviewed",
-            "bboxes": [
-                {"class_id": 0, "cx": 0.4, "cy": 0.4, "w": 0.2, "h": 0.2}
-            ],
+            "bboxes": [{"class_id": 0, "cx": 0.4, "cy": 0.4, "w": 0.2, "h": 0.2}],
             "reviewer": "arthur",
             "note": "fixed",
         },

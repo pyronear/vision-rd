@@ -60,9 +60,5 @@ def evaluate_frame(
         matched_pred.add(pj)
         matches.append((gi, pj, score))
     gt_status = ["tp" if i in matched_gt else "fn" for i in range(len(gt))]
-    pred_status = [
-        "tp" if j in matched_pred else "fp" for j in range(len(predictions))
-    ]
-    return EvaluatedFrame(
-        gt_status=gt_status, pred_status=pred_status, matches=matches
-    )
+    pred_status = ["tp" if j in matched_pred else "fp" for j in range(len(predictions))]
+    return EvaluatedFrame(gt_status=gt_status, pred_status=pred_status, matches=matches)
