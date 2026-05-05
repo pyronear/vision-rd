@@ -188,7 +188,7 @@ function renderQueue() {
     if (it.sequence_id !== lastSeq) {
       const h = document.createElement('div');
       h.className = 'queue-seq';
-      h.innerHTML = `<span>${escapeHtml(it.sequence_id)}</span><span></span>`;
+      h.innerHTML = `<span class="min-w-0 flex-1 truncate" title="${escapeHtml(it.sequence_id)}">${escapeHtml(it.sequence_id)}</span><span></span>`;
       root.appendChild(h);
       lastSeq = it.sequence_id;
     }
