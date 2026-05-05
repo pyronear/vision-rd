@@ -21,6 +21,9 @@ log = logging.getLogger(__name__)
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
+    parser.add_argument("--conf", type=float, default=0.05)
+    parser.add_argument("--iou", type=float, default=0.05)
+    parser.add_argument("--review-conf", type=float, default=0.35)
     args = parser.parse_args()
     repo = args.repo_root
     params = yaml.safe_load((repo / "params.yaml").read_text())
@@ -30,7 +33,14 @@ def main() -> None:
 
     for model in models:
         for split in splits:
-            manifest = export_one(repo_root=repo, model=model, split=split)
+            manifest = export_one(
+                repo_root=repo,
+                model=model,
+                split=split,
+                conf=args.conf,
+                iou=args.iou,
+                review_conf=args.review_conf,
+            )
             if manifest is None:
                 log.info("skip: no review.json or predictions for %s/%s", model, split)
                 continue

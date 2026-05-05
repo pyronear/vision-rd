@@ -161,3 +161,67 @@ def test_get_contexts_includes_dvc_warnings(app_tree):
     assert w["model"] == "m"
     assert w["split"] == "val"
     assert w["kind"] == "stale_local"
+
+
+def test_post_export_writes_manifest(tmp_path):
+    data = tmp_path / "data"
+    split = data / "01_raw" / "datasets" / "val"
+    (split / "images").mkdir(parents=True)
+    (split / "labels").mkdir(parents=True)
+    stem = "s_2024-01-01T00-00-00"
+    (split / "images" / f"{stem}.jpg").write_bytes(b"jpeg")
+    (split / "labels" / f"{stem}.txt").write_text("0 0.5 0.5 0.1 0.1\n")
+    pred_path = data / "07_model_output" / "m" / "val" / "predictions.json"
+    pred_path.parent.mkdir(parents=True)
+    pred_path.write_text(
+        json.dumps(
+            {
+                "model_name": "m",
+                "split_dir": "data/01_raw/datasets/val",
+                "conf_thresh": 0.05,
+                "frames": {
+                    stem: {
+                        "image_path": f"images/{stem}.jpg",
+                        "predictions": [],
+                    },
+                },
+            }
+        )
+    )
+    paths = Paths(
+        split_dir=split,
+        predictions_path=pred_path,
+        review_path=data / "09_review" / "m" / "val" / "review.json",
+    )
+    app = create_app(
+        contexts={("m", "val"): paths},
+        models=["m"],
+        splits=["val"],
+        repo_root=tmp_path,
+    )
+    client = TestClient(app)
+    client.post(
+        "/api/sample",
+        params={"model": "m", "split": "val"},
+        json={
+            "stem": stem,
+            "status": "reviewed",
+            "bboxes": [{"class_id": 0, "cx": 0.4, "cy": 0.4, "w": 0.2, "h": 0.2}],
+            "reviewer": "arthur",
+        },
+    )
+    r = client.post(
+        "/api/export",
+        params={
+            "model": "m",
+            "split": "val",
+            "conf": 0.05,
+            "iou": 0.05,
+            "review_conf": 0.35,
+        },
+    )
+    assert r.status_code == 200, r.text
+    out = data / "10_export" / "m" / "val"
+    assert (out / "manifest.json").is_file()
+    prov = json.loads((out / "provenance.json").read_text())
+    assert prov["thresholds"] == {"conf": 0.05, "iou": 0.05, "review_conf": 0.35}
