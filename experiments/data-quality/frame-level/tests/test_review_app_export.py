@@ -7,6 +7,7 @@ from data_quality_frame_level.review_app.export import (
     compute_diff,
     export_corrections,
     write_manifest_and_labels,
+    write_pending,
 )
 from data_quality_frame_level.review_app.persistence import (
     ReviewState,
@@ -80,3 +81,42 @@ def test_export_manifest_contributors_is_sorted_unique_reviewers(tmp_path: Path)
     write_manifest_and_labels(review=review, originals=originals, out_dir=out)
     manifest = json.loads((out / "manifest.json").read_text())
     assert manifest["contributors"] == ["arthur", "mateo"]
+
+
+def test_export_pending_includes_only_unclear(tmp_path: Path):
+    review = ReviewState(
+        model="m",
+        split="val",
+        samples={
+            "stem_a": SampleReview(status="reviewed", bboxes=[_bb(0.5, 0.5)]),
+            "stem_b": SampleReview(
+                status="unclear", bboxes=[], reviewer="arthur", note="check this"
+            ),
+            "stem_c": SampleReview(status="unclear", bboxes=[], reviewer="mateo"),
+        },
+    )
+    out = tmp_path / "10_export" / "m" / "val"
+    write_pending(review=review, out_dir=out)
+    pending = json.loads((out / "pending.json").read_text())
+    assert pending["version"] == 1
+    assert pending["model"] == "m"
+    assert pending["split"] == "val"
+    assert [p["stem"] for p in pending["pending"]] == ["stem_b", "stem_c"]
+    by_stem = {p["stem"]: p for p in pending["pending"]}
+    assert by_stem["stem_b"]["reviewer"] == "arthur"
+    assert by_stem["stem_b"]["note"] == "check this"
+    assert by_stem["stem_c"]["reviewer"] == "mateo"
+
+
+def test_export_pending_empty_when_no_unclear(tmp_path: Path):
+    review = ReviewState(
+        model="m",
+        split="val",
+        samples={
+            "stem_a": SampleReview(status="reviewed", bboxes=[_bb(0.5, 0.5)]),
+        },
+    )
+    out = tmp_path / "10_export" / "m" / "val"
+    write_pending(review=review, out_dir=out)
+    pending = json.loads((out / "pending.json").read_text())
+    assert pending["pending"] == []
