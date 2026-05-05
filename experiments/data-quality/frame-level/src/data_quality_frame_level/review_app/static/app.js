@@ -112,6 +112,7 @@ function renderQueue() {
   const root = document.getElementById('queue');
   root.innerHTML = '';
   let lastSeq = null;
+  let activeRow = null;
   state.queue.forEach((it, idx) => {
     if (it.sequence_id !== lastSeq) {
       const h = document.createElement('div');
@@ -121,9 +122,10 @@ function renderQueue() {
       lastSeq = it.sequence_id;
     }
     const flagged = it.kind && it.kind !== 'none';
+    const isActive = idx === state.queueIndex;
     const row = document.createElement('div');
     row.className = 'queue-item'
-      + (idx === state.queueIndex ? ' active' : '')
+      + (isActive ? ' active' : '')
       + (flagged ? ` kind-${it.kind}` : ' unflagged');
     row.innerHTML = `
       <span class="stem">${escapeHtml(it.timestamp)}</span>
@@ -131,7 +133,9 @@ function renderQueue() {
       <span class="dot ${it.status || ''}"></span>`;
     row.addEventListener('click', () => navigateTo(idx));
     root.appendChild(row);
+    if (isActive) activeRow = row;
   });
+  if (activeRow) activeRow.scrollIntoView({ block: 'nearest' });
 }
 
 function escapeHtml(s) {
