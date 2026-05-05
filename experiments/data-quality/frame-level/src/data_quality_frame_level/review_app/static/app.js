@@ -490,7 +490,28 @@ async function seqStep(d) {
   const ns = state.sample.sequence_neighbors;
   const i = ns.findIndex(n => n.stem === state.sample.stem);
   const target = ns[i + d];
-  if (target) await loadSample(target.stem);
+  if (target) return loadSample(target.stem);
+  // At the edge of the current sequence: flow into the adjacent one in queue order.
+  // → goes to the first frame of the next sequence; ← goes to the last frame of the previous.
+  const q = state.queue;
+  if (q.length === 0) return;
+  const currentSeq = state.sample.sequence_id;
+  if (d > 0) {
+    const start = state.queueIndex >= 0 ? state.queueIndex + 1 : 0;
+    for (let j = start; j < q.length; j++) {
+      if (q[j].sequence_id !== currentSeq) return loadSample(q[j].stem);
+    }
+  } else {
+    const start = state.queueIndex >= 0 ? state.queueIndex - 1 : q.length - 1;
+    for (let j = start; j >= 0; j--) {
+      if (q[j].sequence_id !== currentSeq) {
+        const targetSeq = q[j].sequence_id;
+        let last = j;
+        while (last + 1 < q.length && q[last + 1].sequence_id === targetSeq) last++;
+        return loadSample(q[last].stem);
+      }
+    }
+  }
 }
 
 async function jumpSequence(d) {
