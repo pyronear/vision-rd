@@ -1,4 +1,4 @@
-.PHONY: install lint format test help notebook fiftyone fiftyone-fp fiftyone-fn review-save review-pull review-check
+.PHONY: install lint format test help notebook fiftyone fiftyone-fp fiftyone-fn review-save review-pull review-check review-app
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -39,4 +39,7 @@ review-save: ## Dump FiftyOne sample tags into data/09_review/ for persistence +
 
 review-pull: ## Fetch persisted review tags from the DVC remote
 	uv run dvc pull data/09_review
+
+review-app: ## Launch the bbox-editing review app on http://localhost:8000
+	uv run --group review-app python scripts/run_review_app.py
 
