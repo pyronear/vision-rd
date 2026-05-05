@@ -364,9 +364,10 @@ queue (sequence-level navigation).
 
 ### 6.7 Keyboard shortcuts
 
-- **← / →** step through global queue.
-- **Ctrl ← / Ctrl →** step through sibling frames in the current
-  sequence (queue-irrelevant; flagged or not).
+- **← / →** step through sibling frames in the current sequence
+  (timeline-strip order; flagged or not).
+- **Ctrl ← / Ctrl →** jump to the first flagged frame of the previous
+  / next sequence in the queue.
 - **Delete** delete selected bbox (corrected: removes from list;
   original: marks as removed for export).
 - **Esc** clear bbox selection.
