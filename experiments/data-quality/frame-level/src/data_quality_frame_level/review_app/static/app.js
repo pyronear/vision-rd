@@ -115,6 +115,19 @@ async function init() {
   document.getElementById('filter-toggle').addEventListener('click', () => {
     document.getElementById('filters').classList.toggle('collapsed');
   });
+  document.getElementById('filter-reset').addEventListener('click', () => {
+    state.conf = 0.05;
+    state.iou = 0.05;
+    state.reviewConf = 0.35;
+    document.getElementById('conf').value = '0.05';
+    document.getElementById('iou').value = '0.05';
+    document.getElementById('review-conf').value = '0.35';
+    document.getElementById('conf-v').textContent = '0.05';
+    document.getElementById('iou-v').textContent = '0.05';
+    document.getElementById('review-conf-v').textContent = '0.35';
+    updateFilterSummary();
+    reloadQueue();
+  });
   updateFilterSummary();
   document.querySelectorAll('#view-chips button').forEach(btn => {
     btn.addEventListener('click', () => {

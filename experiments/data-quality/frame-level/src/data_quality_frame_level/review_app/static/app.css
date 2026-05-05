@@ -54,6 +54,8 @@ body { margin: 0; font: 13px/1.4 ui-sans-serif, system-ui, sans-serif; color: #1
 #filters.collapsed #filter-body { display: none; }
 .slider-row { display: grid; grid-template-columns: 60px 1fr 36px; gap: 6px; align-items: center; margin-bottom: 6px; font-size: 11px; }
 .slider-row .val { color: #0969da; font-variant-numeric: tabular-nums; text-align: right; }
+#filter-reset { width: 100%; margin-top: 4px; padding: 5px; font: inherit; font-size: 11px; border: 1px solid #d0d7de; border-radius: 4px; background: white; cursor: pointer; color: #57606a; }
+#filter-reset:hover { background: #ddf4ff; border-color: #54aeff; color: #0969da; }
 #queue { flex: 1; overflow: auto; }
 .queue-seq { padding: 5px 12px; font-size: 10px; font-weight: 600; color: #57606a; background: #eaeef2; border-bottom: 1px solid #d0d7de; display: flex; justify-content: space-between; position: sticky; top: 0; }
 .queue-item { display: flex; gap: 8px; align-items: center; padding: 6px 12px; border-bottom: 1px solid #eaeef2; cursor: pointer; border-left: 3px solid transparent; }
