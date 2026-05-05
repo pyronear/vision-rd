@@ -19,6 +19,7 @@ from pydantic import BaseModel, Field
 
 from data_quality_frame_level.dataset import BBox
 from data_quality_frame_level.review_app.matching import evaluate_frame
+from data_quality_frame_level.review_app.persistence import dvc_warning_for_review
 from data_quality_frame_level.review_app.queue import build_queue
 from data_quality_frame_level.review_app.sequence import parse_stem
 from data_quality_frame_level.review_app.state import AppState, Paths
@@ -60,7 +61,12 @@ def create_app(
 
     @app.get("/api/contexts")
     def get_contexts() -> dict:
-        return {"models": models, "splits": splits}
+        warnings: list[dict] = []
+        for (m, s), paths in contexts.items():
+            w = dvc_warning_for_review(paths.review_path)
+            if w is not None:
+                warnings.append({**w, "model": m, "split": s})
+        return {"models": models, "splits": splits, "dvc_warnings": warnings}
 
     @app.get("/api/queue")
     def get_queue(

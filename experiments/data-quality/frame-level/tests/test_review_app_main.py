@@ -134,3 +134,29 @@ def test_post_sample_persists(app_tree):
     sample = payload["samples"]["s_2024-01-01T00-00-00"]
     assert sample["status"] == "reviewed"
     assert sample["bboxes"][0]["cx"] == 0.4
+
+
+def test_get_contexts_includes_dvc_warnings(app_tree):
+    client, paths = app_tree
+    dvc_path = paths.review_path.with_suffix(paths.review_path.suffix + ".dvc")
+    dvc_path.parent.mkdir(parents=True, exist_ok=True)
+    dvc_path.write_text(
+        "outs:\n- md5: ffeeddccbbaa\n  size: 0\n  hash: md5\n  path: review.json\n"
+    )
+    client.post(
+        "/api/sample",
+        params={"model": "m", "split": "val"},
+        json={
+            "stem": "s_2024-01-01T00-00-00",
+            "status": "reviewed",
+            "bboxes": [],
+            "reviewer": "arthur",
+        },
+    )
+    body = client.get("/api/contexts").json()
+    assert "dvc_warnings" in body
+    assert len(body["dvc_warnings"]) == 1
+    w = body["dvc_warnings"][0]
+    assert w["model"] == "m"
+    assert w["split"] == "val"
+    assert w["kind"] == "stale_local"
