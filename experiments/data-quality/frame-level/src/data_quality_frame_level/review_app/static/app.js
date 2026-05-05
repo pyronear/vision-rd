@@ -29,6 +29,8 @@ let imgLoaded = false;
 let selected = null;
 let drag = null;
 let hovered = null;
+let zoom = 1, panX = 0, panY = 0;
+let imgNaturalW = 0, imgNaturalH = 0;
 
 function ensureReviewer() {
   if (state.reviewer) {
@@ -290,18 +292,43 @@ function renderCanvas() {
   const url = `/image?model=${encodeURIComponent(state.model)}&split=${encodeURIComponent(state.split)}&stem=${encodeURIComponent(state.sample.stem)}`;
   if (img.src !== location.origin + url) {
     imgLoaded = false;
-    img.onload = () => { imgLoaded = true; sizeCanvas(); paint(); };
+    img.onload = () => {
+      imgLoaded = true;
+      imgNaturalW = img.naturalWidth;
+      imgNaturalH = img.naturalHeight;
+      sizeCanvas();
+      resetView();
+      paint();
+    };
     img.src = url;
-  } else if (imgLoaded) { sizeCanvas(); paint(); }
+  } else if (imgLoaded) { sizeCanvas(); resetView(); paint(); }
 }
 
 function sizeCanvas() {
   const wrap = document.getElementById('canvas-wrap');
-  const maxW = wrap.clientWidth - 32, maxH = wrap.clientHeight - 32;
-  const ar = img.naturalWidth / img.naturalHeight || 16 / 9;
-  let w = maxW, h = maxW / ar;
-  if (h > maxH) { h = maxH; w = maxH * ar; }
-  cnv.width = w; cnv.height = h;
+  cnv.width = wrap.clientWidth - 32;
+  cnv.height = wrap.clientHeight - 32;
+}
+
+function resetView() {
+  if (!imgNaturalW || !imgNaturalH || !cnv.width || !cnv.height) return;
+  zoom = Math.min(cnv.width / imgNaturalW, cnv.height / imgNaturalH);
+  panX = (cnv.width - imgNaturalW * zoom) / 2;
+  panY = (cnv.height - imgNaturalH * zoom) / 2;
+}
+
+function clampPan() {
+  const w = imgNaturalW * zoom, h = imgNaturalH * zoom;
+  panX = Math.min(cnv.width - 50, Math.max(50 - w, panX));
+  panY = Math.min(cnv.height - 50, Math.max(50 - h, panY));
+}
+
+function screenToWorld(clientX, clientY) {
+  const rect = cnv.getBoundingClientRect();
+  return {
+    x: (clientX - rect.left - panX) / zoom,
+    y: (clientY - rect.top - panY) / zoom,
+  };
 }
 
 function paint() {
@@ -310,7 +337,10 @@ function paint() {
     return;
   }
   ctx2d.clearRect(0, 0, cnv.width, cnv.height);
-  ctx2d.drawImage(img, 0, 0, cnv.width, cnv.height);
+  ctx2d.save();
+  ctx2d.translate(panX, panY);
+  ctx2d.scale(zoom, zoom);
+  ctx2d.drawImage(img, 0, 0);
   const corrected = state.sample.corrected_gt;
   const dimming = hovered !== null;
   const setAlpha = isHov => { ctx2d.globalAlpha = (dimming && !isHov) ? 0.25 : 1.0; };
@@ -336,10 +366,11 @@ function paint() {
     drawBox(b, { stroke: '#3fb950', fill: 'rgba(63,185,80,.10)', fillHover: 'rgba(63,185,80,.25)', dashed: false, label: 'GT (corr)', selected: selected?.layer === 'corr' && selected.idx === i, highlighted: isHov, handles: true });
   });
   ctx2d.globalAlpha = 1.0;
+  ctx2d.restore();
 }
 
 function drawBox(b, { stroke, fill, fillHover, dashed, label, selected: sel = false, highlighted = false, handles = false }) {
-  const r = bboxToRect(b, cnv.width, cnv.height);
+  const r = bboxToRect(b, imgNaturalW, imgNaturalH);
   ctx2d.lineWidth = highlighted ? 4 : (sel ? 3 : 2);
   ctx2d.strokeStyle = stroke;
   ctx2d.fillStyle = highlighted && fillHover ? fillHover : fill;
@@ -364,7 +395,7 @@ function drawBox(b, { stroke, fill, fillHover, dashed, label, selected: sel = fa
 
 function hit(x, y) {
   for (let i = state.sample.corrected_gt.length - 1; i >= 0; i--) {
-    const r = bboxToRect(state.sample.corrected_gt[i], cnv.width, cnv.height);
+    const r = bboxToRect(state.sample.corrected_gt[i], imgNaturalW, imgNaturalH);
     const handle = handleAt(r, x, y);
     if (handle) return { layer: 'corr', idx: i, handle };
     if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h)
@@ -372,7 +403,7 @@ function hit(x, y) {
   }
   if (state.showOrig) {
     for (let i = state.sample.original_gt.length - 1; i >= 0; i--) {
-      const r = bboxToRect(state.sample.original_gt[i], cnv.width, cnv.height);
+      const r = bboxToRect(state.sample.original_gt[i], imgNaturalW, imgNaturalH);
       if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h)
         return { layer: 'orig', idx: i, handle: 'click' };
     }
@@ -381,7 +412,7 @@ function hit(x, y) {
 }
 
 function handleAt(r, x, y) {
-  const tol = 6;
+  const tol = 6 / zoom;
   if (Math.abs(x - r.x) < tol && Math.abs(y - r.y) < tol) return 'tl';
   if (Math.abs(x - (r.x + r.w)) < tol && Math.abs(y - r.y) < tol) return 'tr';
   if (Math.abs(x - r.x) < tol && Math.abs(y - (r.y + r.h)) < tol) return 'bl';
@@ -389,10 +420,28 @@ function handleAt(r, x, y) {
   return null;
 }
 
+function updateCursor(e) {
+  if (drag?.kind === 'pan') cnv.style.cursor = 'grabbing';
+  else if (drag) cnv.style.cursor = '';
+  else if (e?.shiftKey) cnv.style.cursor = 'grab';
+  else cnv.style.cursor = '';
+}
+
+window.addEventListener('keydown', e => { if (e.key === 'Shift') updateCursor(e); });
+window.addEventListener('keyup', e => { if (e.key === 'Shift') updateCursor(e); });
+
 cnv.addEventListener('mousedown', e => {
   if (!state.sample || !imgLoaded) return;
-  const rect = cnv.getBoundingClientRect();
-  const x = e.clientX - rect.left, y = e.clientY - rect.top;
+  if (e.shiftKey) {
+    drag = {
+      kind: 'pan',
+      startScreen: { x: e.clientX, y: e.clientY },
+      startPan: { x: panX, y: panY },
+    };
+    updateCursor(e);
+    return;
+  }
+  const { x, y } = screenToWorld(e.clientX, e.clientY);
   const h = hit(x, y);
   if (h?.layer === 'orig') {
     const o = state.sample.original_gt[h.idx];
@@ -412,14 +461,24 @@ cnv.addEventListener('mousedown', e => {
 
 cnv.addEventListener('mousemove', e => {
   if (!drag || !imgLoaded) return;
-  const rect = cnv.getBoundingClientRect();
-  const x = e.clientX - rect.left, y = e.clientY - rect.top;
-  const W = cnv.width, H = cnv.height;
+  if (drag.kind === 'pan') {
+    panX = drag.startPan.x + (e.clientX - drag.startScreen.x);
+    panY = drag.startPan.y + (e.clientY - drag.startScreen.y);
+    clampPan();
+    paint();
+    return;
+  }
+  const { x, y } = screenToWorld(e.clientX, e.clientY);
+  const W = imgNaturalW, H = imgNaturalH;
   if (drag.kind === 'draw') {
     paint();
+    ctx2d.save();
+    ctx2d.translate(panX, panY);
+    ctx2d.scale(zoom, zoom);
     ctx2d.strokeStyle = '#3fb950'; ctx2d.lineWidth = 2; ctx2d.setLineDash([4, 4]);
     ctx2d.strokeRect(Math.min(drag.start.x, x), Math.min(drag.start.y, y), Math.abs(x - drag.start.x), Math.abs(y - drag.start.y));
     ctx2d.setLineDash([]);
+    ctx2d.restore();
     return;
   }
   if (drag.kind === 'move') {
@@ -440,10 +499,10 @@ cnv.addEventListener('mousemove', e => {
 
 cnv.addEventListener('mouseup', e => {
   if (!drag) return;
+  if (drag.kind === 'pan') { drag = null; updateCursor(e); return; }
   if (drag.kind === 'draw') {
-    const rect = cnv.getBoundingClientRect();
-    const x = e.clientX - rect.left, y = e.clientY - rect.top;
-    const W = cnv.width, H = cnv.height;
+    const { x, y } = screenToWorld(e.clientX, e.clientY);
+    const W = imgNaturalW, H = imgNaturalH;
     const r = { x: Math.min(drag.start.x, x), y: Math.min(drag.start.y, y), w: Math.abs(x - drag.start.x), h: Math.abs(y - drag.start.y) };
     if (r.w >= 4 && r.h >= 4) {
       state.sample.corrected_gt.push(clampBbox(rectToBbox(r, W, H)));
@@ -457,6 +516,21 @@ cnv.addEventListener('mouseup', e => {
   paint();
   renderRight();
 });
+
+cnv.addEventListener('wheel', e => {
+  if (!imgLoaded) return;
+  e.preventDefault();
+  const rect = cnv.getBoundingClientRect();
+  const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+  const factor = Math.exp(-e.deltaY * 0.005);
+  const newZoom = Math.max(0.25, Math.min(8, zoom * factor));
+  const wx = (sx - panX) / zoom, wy = (sy - panY) / zoom;
+  panX = sx - wx * newZoom;
+  panY = sy - wy * newZoom;
+  zoom = newZoom;
+  clampPan();
+  paint();
+}, { passive: false });
 
 function markDirty() { state.dirty = true; setSaveBar(); scheduleSave(); }
 
@@ -621,6 +695,7 @@ window.addEventListener('keydown', async e => {
     state.showPred = !state.showPred;
     document.getElementById('show-pred').checked = state.showPred; paint();
   }
+  if (e.key === '0') { resetView(); paint(); }
 });
 
 async function seqStep(d) {
@@ -712,7 +787,7 @@ async function setStatusAndAdvance(s) {
 }
 
 window.addEventListener('resize', () => {
-  if (imgLoaded && state.sample) { sizeCanvas(); paint(); }
+  if (imgLoaded && state.sample) { sizeCanvas(); clampPan(); paint(); }
 });
 
 window.addEventListener('DOMContentLoaded', init);
