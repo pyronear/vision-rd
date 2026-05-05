@@ -32,9 +32,7 @@ def main() -> None:
         for split in splits:
             manifest = export_one(repo_root=repo, model=model, split=split)
             if manifest is None:
-                log.info(
-                    "skip: no review.json or predictions for %s/%s", model, split
-                )
+                log.info("skip: no review.json or predictions for %s/%s", model, split)
                 continue
             log.info(
                 "%s/%s: %d changed, %d added, %d removed, %d modified",
