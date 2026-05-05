@@ -387,7 +387,7 @@ function renderRight() {
     return row;
   };
   state.sample.original_gt.forEach((b, i) => {
-    const row = make('orig', `GT #${i}`, `${b.cx.toFixed(2)} ${b.cy.toFixed(2)} · ${b.status}`, `<button data-act="promote-orig" data-i="${i}">→ correct</button>`);
+    const row = make('orig', `GT #${i}`, `${b.cx.toFixed(2)} ${b.cy.toFixed(2)} · ${b.status}`, `<button data-act="promote-orig" data-i="${i}">Use as GT</button>`);
     root.appendChild(row);
   });
   state.sample.corrected_gt.forEach((b, i) => {
@@ -395,7 +395,7 @@ function renderRight() {
     root.appendChild(row);
   });
   state.sample.predictions.forEach((p, i) => {
-    const row = make('pred', 'pred', `${p.cx.toFixed(2)} ${p.cy.toFixed(2)} · ${p.status} · ${p.conf.toFixed(2)}`, `<button data-act="promote-pred" data-i="${i}">→ correct</button>`);
+    const row = make('pred', 'pred', `${p.cx.toFixed(2)} ${p.cy.toFixed(2)} · ${p.status} · ${p.conf.toFixed(2)}`, `<button data-act="promote-pred" data-i="${i}">Use as GT</button>`);
     root.appendChild(row);
   });
   document.querySelectorAll('#status-pane button[data-status]').forEach(btn => {

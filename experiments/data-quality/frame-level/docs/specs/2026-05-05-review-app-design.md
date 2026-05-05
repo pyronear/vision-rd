@@ -343,14 +343,14 @@ queue (sequence-level navigation).
 
 - **Bbox list** — three sections matching the canvas layers:
   1. **Original GT** rows (blue) — read-only, show source + normalized
-     coords + TP/FP/FN status. Each row has a `→ correct` action that
+     coords + TP/FP/FN status. Each row has a `Use as GT` action that
      copies the original into the corrected list (same as clicking the
      box on canvas).
   2. **Corrected GT** rows (green) — edit / delete affordances. Rows
      that override an original show a small "→ #N" indicator linking
      them to the original they correct.
   3. **Predictions** rows (red) — read-only, show confidence and
-     TP/FP/FN status. Each row has a one-click `→ correct` action that
+     TP/FP/FN status. Each row has a one-click `Use as GT` action that
      promotes the prediction's geometry to a new corrected GT box (the
      former `label:add-smoke` workflow).
 - **Add GT box** button — same as double-clicking empty canvas;
