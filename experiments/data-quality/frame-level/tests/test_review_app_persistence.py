@@ -100,7 +100,8 @@ def test_dvc_warning_in_sync(tmp_path: Path):
     review.write_bytes(content)
     dvc_file = tmp_path / "review.json.dvc"
     dvc_file.write_text(
-        f"outs:\n- md5: {_md5(content)}\n  size: {len(content)}\n  hash: md5\n  path: review.json\n"
+        f"outs:\n- md5: {_md5(content)}\n"
+        f"  size: {len(content)}\n  hash: md5\n  path: review.json\n"
     )
     assert dvc_warning_for_review(review) is None
 

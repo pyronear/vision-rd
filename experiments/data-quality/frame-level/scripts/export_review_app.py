@@ -7,6 +7,7 @@ Existing exports are overwritten.
 """
 
 import argparse
+import contextlib
 import hashlib
 import logging
 import subprocess
@@ -52,10 +53,8 @@ def _audit_git_state(repo_root: Path) -> tuple[str, str, str]:
     status = _git(["status", "--porcelain"], cwd=git_root)
     is_dirty = bool(status.strip())
     remote = ""
-    try:
+    with contextlib.suppress(subprocess.CalledProcessError):
         remote = _git(["remote", "get-url", "origin"], cwd=git_root)
-    except subprocess.CalledProcessError:
-        pass
     audit_repo = _audit_repo_from_remote(remote)
     return audit_repo, commit + ("+dirty" if is_dirty else ""), branch
 
