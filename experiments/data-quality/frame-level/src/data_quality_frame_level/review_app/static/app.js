@@ -169,8 +169,9 @@ async function reloadQueue() {
 }
 
 function renderProgress() {
-  const reviewed = state.queue.filter(i => i.status === 'reviewed').length;
-  const total = state.queue.length;
+  const flagged = state.queue.filter(i => i.kind && i.kind !== 'none');
+  const reviewed = flagged.filter(i => i.status === 'reviewed').length;
+  const total = flagged.length;
   const pct = total > 0 ? (reviewed / total) * 100 : 0;
   const root = document.getElementById('progress');
   root.querySelector('.fill').style.width = `${pct}%`;
