@@ -44,9 +44,13 @@ def test_export_writes_only_changed(tmp_path: Path):
         model="m",
         split="val",
         samples={
-            "stem_a": SampleReview(status="reviewed", bboxes=[_bb(0.5, 0.5)]),
-            "stem_b": SampleReview(status="reviewed", bboxes=[_bb(0.6, 0.6)]),
-            "stem_c": SampleReview(status="unclear", bboxes=[_bb(0.5, 0.5)]),
+            "stem_a": SampleReview(status="reviewed", bboxes=[]),
+            "stem_b": SampleReview(
+                status="reviewed",
+                bboxes=[_bb(0.6, 0.6)],
+                spurious_originals=[_bb(0.5, 0.5)],
+            ),
+            "stem_c": SampleReview(status="unclear", bboxes=[]),
         },
     )
     out = tmp_path / "10_export" / "m" / "val"
@@ -59,6 +63,48 @@ def test_export_writes_only_changed(tmp_path: Path):
     manifest = json.loads((out / "manifest.json").read_text())
     assert manifest["totals"]["changed"] == 1
     assert [c["stem"] for c in manifest["changed"]] == ["stem_b"]
+
+
+def test_export_spurious_only_writes_empty_labels(tmp_path: Path):
+    originals = {"stem_x": [_bb(0.5, 0.5)]}
+    review = ReviewState(
+        model="m",
+        split="val",
+        samples={
+            "stem_x": SampleReview(
+                status="reviewed", bboxes=[], spurious_originals=[_bb(0.5, 0.5)]
+            ),
+        },
+    )
+    out = tmp_path / "10_export" / "m" / "val"
+    write_manifest_and_labels(review=review, originals=originals, out_dir=out)
+    label = (out / "labels" / "stem_x.txt").read_text()
+    assert label == ""
+    manifest = json.loads((out / "manifest.json").read_text())
+    assert manifest["totals"] == {
+        "changed": 1,
+        "added": 0,
+        "removed": 1,
+        "modified": 0,
+    }
+
+
+def test_export_bboxes_replace_originals_when_set(tmp_path: Path):
+    """bboxes is the explicit final list; non-empty bboxes drops origs."""
+    originals = {"stem_x": [_bb(0.1, 0.1), _bb(0.5, 0.5)]}
+    review = ReviewState(
+        model="m",
+        split="val",
+        samples={
+            "stem_x": SampleReview(
+                status="reviewed", bboxes=[_bb(0.9, 0.9)], spurious_originals=[]
+            ),
+        },
+    )
+    out = tmp_path / "10_export" / "m" / "val"
+    write_manifest_and_labels(review=review, originals=originals, out_dir=out)
+    lines = (out / "labels" / "stem_x.txt").read_text().strip().splitlines()
+    assert lines == ["0 0.9 0.9 0.1 0.1"]
 
 
 def test_export_manifest_contributors_is_sorted_unique_reviewers(tmp_path: Path):

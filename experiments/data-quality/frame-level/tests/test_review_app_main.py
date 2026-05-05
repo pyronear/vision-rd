@@ -117,6 +117,56 @@ def test_get_sample_returns_layers_and_neighbors(app_tree):
     }
 
 
+def test_get_sample_unreviewed_has_empty_verified_and_spurious(app_tree):
+    client, _ = app_tree
+    r = client.get(
+        "/api/sample",
+        params={
+            "model": "m",
+            "split": "val",
+            "stem": "s_2024-01-01T00-00-00",
+            "conf": 0.05,
+            "iou": 0.05,
+            "review_conf": 0.5,
+        },
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert body["verified_gt"] == []
+    assert body["spurious_originals"] == []
+
+
+def test_post_sample_with_spurious_persists_and_round_trips(app_tree):
+    client, paths = app_tree
+    spurious_box = {"class_id": 0, "cx": 0.5, "cy": 0.5, "w": 0.1, "h": 0.1}
+    client.post(
+        "/api/sample",
+        params={"model": "m", "split": "val"},
+        json={
+            "stem": "s_2024-01-01T00-00-00",
+            "status": "reviewed",
+            "bboxes": [],
+            "spurious_originals": [spurious_box],
+            "reviewer": "arthur",
+        },
+    )
+    payload = json.loads(paths.review_path.read_text())
+    saved = payload["samples"]["s_2024-01-01T00-00-00"]
+    assert saved["spurious_originals"] == [spurious_box]
+    body = client.get(
+        "/api/sample",
+        params={
+            "model": "m",
+            "split": "val",
+            "stem": "s_2024-01-01T00-00-00",
+            "conf": 0.05,
+            "iou": 0.05,
+            "review_conf": 0.5,
+        },
+    ).json()
+    assert body["spurious_originals"] == [spurious_box]
+
+
 def test_post_sample_persists(app_tree):
     client, paths = app_tree
     r = client.post(

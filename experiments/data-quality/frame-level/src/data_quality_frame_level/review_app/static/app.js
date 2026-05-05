@@ -2,7 +2,7 @@ const state = {
   model: null, split: null,
   view: 'fp',
   conf: 0.05, iou: 0.05, reviewConf: 0.35,
-  showOrig: true, showPred: true,
+  showOrig: true, showPred: true, showOnlyVerified: false,
   reviewer: localStorage.getItem('reviewer') || '',
   queue: [], queueIndex: -1,
   sample: null,
@@ -143,6 +143,9 @@ async function init() {
   });
   document.getElementById('show-pred').addEventListener('change', e => {
     state.showPred = e.target.checked; paint();
+  });
+  document.getElementById('show-only-verified').addEventListener('change', e => {
+    state.showOnlyVerified = e.target.checked; paint();
   });
   const helpPane = document.getElementById('help-pane');
   const toggleHelp = () => { helpPane.hidden = !helpPane.hidden; };
@@ -308,9 +311,19 @@ async function loadSample(stem, opts = {}) {
 
 function setSaveBar() {
   const b = document.getElementById('save-bar');
-  if (state.dirty) { b.textContent = 'unsaved…'; b.classList.add('dirty'); }
-  else if (state.sample?.reviewed_at) { b.textContent = `✓ saved at ${state.sample.reviewed_at}`; b.classList.remove('dirty'); }
-  else { b.textContent = '— no edits —'; b.classList.remove('dirty'); }
+  if (state.dirty && !state.sample?.status) {
+    b.textContent = 'unsaved · pick a status (r / u / Space) to save';
+    b.classList.add('dirty');
+  } else if (state.dirty) {
+    b.textContent = 'unsaved…';
+    b.classList.add('dirty');
+  } else if (state.sample?.reviewed_at) {
+    b.textContent = `✓ saved at ${state.sample.reviewed_at}`;
+    b.classList.remove('dirty');
+  } else {
+    b.textContent = '— no edits —';
+    b.classList.remove('dirty');
+  }
 }
 
 function bboxToRect(b, W, H) {
@@ -329,6 +342,13 @@ function clampBbox(b) {
 function bboxClose(a, b) {
   return Math.abs(a.cx - b.cx) < 1e-6 && Math.abs(a.cy - b.cy) < 1e-6
       && Math.abs(a.w - b.w) < 1e-6 && Math.abs(a.h - b.h) < 1e-6;
+}
+function bboxIou(a, b) {
+  const ix = Math.max(0, Math.min(a.cx + a.w/2, b.cx + b.w/2) - Math.max(a.cx - a.w/2, b.cx - b.w/2));
+  const iy = Math.max(0, Math.min(a.cy + a.h/2, b.cy + b.h/2) - Math.max(a.cy - a.h/2, b.cy - b.h/2));
+  const inter = ix * iy;
+  const union = a.w * a.h + b.w * b.h - inter;
+  return union > 0 ? inter / union : 0;
 }
 
 function renderCanvas(opts = {}) {
@@ -390,29 +410,40 @@ function paint() {
   ctx2d.translate(panX, panY);
   ctx2d.scale(zoom, zoom);
   ctx2d.drawImage(img, 0, 0);
-  const corrected = state.sample.corrected_gt;
+  const verified = state.sample.verified_gt;
+  const isReviewed = state.sample.status === 'reviewed';
+  const previewMode = state.showOnlyVerified;
+  const showOrigsAsKept = isReviewed && verified.length === 0;
   const dimming = hovered !== null;
   const setAlpha = isHov => { ctx2d.globalAlpha = (dimming && !isHov) ? 0.25 : 1.0; };
   if (state.showOrig) {
+    const spurious = state.sample.spurious_originals || [];
     state.sample.original_gt.forEach((b, i) => {
-      const overridden = corrected.some(c => bboxClose(c, b));
+      const overridden = verified.some(c => bboxClose(c, b));
       if (overridden) return;
+      const isSp = spurious.some(s => bboxClose(s, b));
+      if (previewMode && (isSp || verified.length > 0 || !isReviewed)) return;
       const isHov = hovered?.layer === 'orig' && hovered.idx === i;
       setAlpha(isHov);
-      drawBox(b, { stroke: '#58a6ff', fill: 'rgba(88,166,255,.10)', fillHover: 'rgba(88,166,255,.25)', dashed: false, label: `GT (orig) · ${b.status}`, selected: selected?.layer === 'orig' && selected.idx === i, highlighted: isHov });
+      const style = isSp
+        ? { stroke: '#d97706', fill: 'rgba(217,119,6,.08)', fillHover: 'rgba(217,119,6,.20)', dashed: true, label: `GT (orig) · spurious` }
+        : showOrigsAsKept
+          ? { stroke: '#3fb950', fill: 'rgba(63,185,80,.10)', fillHover: 'rgba(63,185,80,.25)', dashed: false, label: 'GT (verified)' }
+          : { stroke: '#58a6ff', fill: 'rgba(88,166,255,.10)', fillHover: 'rgba(88,166,255,.25)', dashed: false, label: `GT (orig) · ${b.status}` };
+      drawBox(b, { ...style, selected: selected?.layer === 'orig' && selected.idx === i, highlighted: isHov });
     });
   }
-  if (state.showPred) {
+  if (state.showPred && !previewMode) {
     state.sample.predictions.forEach((p, i) => {
       const isHov = hovered?.layer === 'pred' && hovered.idx === i;
       setAlpha(isHov);
       drawBox(p, { stroke: '#f85149', fill: 'transparent', fillHover: 'rgba(248,81,73,.20)', dashed: true, label: `pred · ${p.status} · ${p.conf.toFixed(2)}`, highlighted: isHov });
     });
   }
-  corrected.forEach((b, i) => {
-    const isHov = hovered?.layer === 'corr' && hovered.idx === i;
+  verified.forEach((b, i) => {
+    const isHov = hovered?.layer === 'verified' && hovered.idx === i;
     setAlpha(isHov);
-    drawBox(b, { stroke: '#3fb950', fill: 'rgba(63,185,80,.10)', fillHover: 'rgba(63,185,80,.25)', dashed: false, label: 'GT (corr)', selected: selected?.layer === 'corr' && selected.idx === i, highlighted: isHov, handles: true });
+    drawBox(b, { stroke: '#3fb950', fill: 'rgba(63,185,80,.10)', fillHover: 'rgba(63,185,80,.25)', dashed: false, label: 'GT (verified)', selected: selected?.layer === 'verified' && selected.idx === i, highlighted: isHov, handles: true });
   });
   ctx2d.globalAlpha = 1.0;
   ctx2d.restore();
@@ -443,12 +474,12 @@ function drawBox(b, { stroke, fill, fillHover, dashed, label, selected: sel = fa
 }
 
 function hit(x, y) {
-  for (let i = state.sample.corrected_gt.length - 1; i >= 0; i--) {
-    const r = bboxToRect(state.sample.corrected_gt[i], imgNaturalW, imgNaturalH);
+  for (let i = state.sample.verified_gt.length - 1; i >= 0; i--) {
+    const r = bboxToRect(state.sample.verified_gt[i], imgNaturalW, imgNaturalH);
     const handle = handleAt(r, x, y);
-    if (handle) return { layer: 'corr', idx: i, handle };
+    if (handle) return { layer: 'verified', idx: i, handle };
     if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h)
-      return { layer: 'corr', idx: i, handle: 'move' };
+      return { layer: 'verified', idx: i, handle: 'move' };
   }
   if (state.showOrig) {
     for (let i = state.sample.original_gt.length - 1; i >= 0; i--) {
@@ -494,13 +525,13 @@ cnv.addEventListener('mousedown', e => {
   const h = hit(x, y);
   if (h?.layer === 'orig') {
     const o = state.sample.original_gt[h.idx];
-    state.sample.corrected_gt.push({ class_id: 0, cx: o.cx, cy: o.cy, w: o.w, h: o.h });
-    selected = { layer: 'corr', idx: state.sample.corrected_gt.length - 1 };
+    state.sample.verified_gt.push({ class_id: 0, cx: o.cx, cy: o.cy, w: o.w, h: o.h });
+    selected = { layer: 'verified', idx: state.sample.verified_gt.length - 1 };
     markDirty(); paint(); renderRight(); return;
   }
-  if (h?.layer === 'corr') {
-    selected = { layer: 'corr', idx: h.idx };
-    drag = { kind: h.handle, start: { x, y }, ref: { ...state.sample.corrected_gt[h.idx] } };
+  if (h?.layer === 'verified') {
+    selected = { layer: 'verified', idx: h.idx };
+    drag = { kind: h.handle, start: { x, y }, ref: { ...state.sample.verified_gt[h.idx] } };
     paint(); return;
   }
   selected = null;
@@ -532,7 +563,7 @@ cnv.addEventListener('mousemove', e => {
   }
   if (drag.kind === 'move') {
     const dx = (x - drag.start.x) / W, dy = (y - drag.start.y) / H;
-    state.sample.corrected_gt[selected.idx] = clampBbox({ ...drag.ref, cx: drag.ref.cx + dx, cy: drag.ref.cy + dy });
+    state.sample.verified_gt[selected.idx] = clampBbox({ ...drag.ref, cx: drag.ref.cx + dx, cy: drag.ref.cy + dy });
     paint(); return;
   }
   const r0 = bboxToRect(drag.ref, W, H);
@@ -542,7 +573,7 @@ cnv.addEventListener('mousemove', e => {
   if (drag.kind === 'bl') { nw = r0.x + r0.w - x; nh = y - r0.y; nx = x; }
   if (drag.kind === 'br') { nw = x - r0.x; nh = y - r0.y; }
   if (nw < 4 || nh < 4) return;
-  state.sample.corrected_gt[selected.idx] = clampBbox(rectToBbox({ x: nx, y: ny, w: nw, h: nh }, W, H));
+  state.sample.verified_gt[selected.idx] = clampBbox(rectToBbox({ x: nx, y: ny, w: nw, h: nh }, W, H));
   paint();
 });
 
@@ -554,8 +585,8 @@ cnv.addEventListener('mouseup', e => {
     const W = imgNaturalW, H = imgNaturalH;
     const r = { x: Math.min(drag.start.x, x), y: Math.min(drag.start.y, y), w: Math.abs(x - drag.start.x), h: Math.abs(y - drag.start.y) };
     if (r.w >= 4 && r.h >= 4) {
-      state.sample.corrected_gt.push(clampBbox(rectToBbox(r, W, H)));
-      selected = { layer: 'corr', idx: state.sample.corrected_gt.length - 1 };
+      state.sample.verified_gt.push(clampBbox(rectToBbox(r, W, H)));
+      selected = { layer: 'verified', idx: state.sample.verified_gt.length - 1 };
       markDirty();
     }
   } else {
@@ -591,18 +622,19 @@ function scheduleSave() {
 
 async function persistSample() {
   if (!state.dirty || !state.sample) return;
+  if (!state.sample.status) { setSaveBar(); return; }
   const r = await api.save({
     model: state.model, split: state.split,
     body: {
       stem: state.sample.stem,
-      status: state.sample.status || 'reviewed',
-      bboxes: state.sample.corrected_gt.map(b => ({ class_id: 0, cx: b.cx, cy: b.cy, w: b.w, h: b.h })),
+      status: state.sample.status,
+      bboxes: state.sample.verified_gt.map(b => ({ class_id: 0, cx: b.cx, cy: b.cy, w: b.w, h: b.h })),
+      spurious_originals: (state.sample.spurious_originals || []).map(b => ({ class_id: 0, cx: b.cx, cy: b.cy, w: b.w, h: b.h })),
       reviewer: state.reviewer || null,
       note: state.sample.note || null,
     },
   });
   state.dirty = false;
-  state.sample.status = state.sample.status || 'reviewed';
   state.sample.reviewed_at = r.saved_at;
   setSaveBar();
   const qi = state.queue.find(q => q.stem === state.sample.stem);
@@ -628,20 +660,45 @@ function renderRight() {
     row.innerHTML = `<span class="src">${escapeHtml(src)}</span><span class="meta-x">${escapeHtml(meta)}</span><span class="actions">${actions}</span>`;
     return row;
   };
+  const spurious = state.sample.spurious_originals || [];
+  const verified = state.sample.verified_gt;
+  const isSpurious = b => spurious.some(s => bboxClose(s, b));
+  const isInVerified = b => verified.some(v => bboxClose(v, b));
+  const isReviewed = state.sample.status === 'reviewed';
+  const showOrigsAsKept = isReviewed && verified.length === 0;
+  const droppedOrigs = verified.length > 0
+    ? state.sample.original_gt.filter(b => !isSpurious(b) && !isInVerified(b))
+    : [];
+  if (droppedOrigs.length > 0) {
+    const banner = document.createElement('div');
+    banner.id = 'drop-warn';
+    banner.className = 'mb-2 rounded-md border border-amber-300 bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900';
+    banner.innerHTML = `⚠️ <strong>${droppedOrigs.length}</strong> original bbox(es) will be dropped on save. <span class="actions ml-1"><button data-act="keep-all">Keep all</button> <button data-act="spurious-all">Mark all spurious</button></span>`;
+    root.appendChild(banner);
+  }
   state.sample.original_gt.forEach((b, i) => {
-    const row = make('orig', i, `GT #${i}`, b.status, `<button data-act="promote-orig" data-i="${i}">Use as GT</button>`);
+    if (isInVerified(b)) return;
+    const sp = isSpurious(b);
+    const cls = sp ? 'orig spurious' : (showOrigsAsKept ? 'orig kept' : 'orig');
+    const meta = sp
+      ? `${b.status} · spurious`
+      : (showOrigsAsKept ? `${b.status} · kept` : b.status);
+    const actions = sp
+      ? `<button data-act="restore-orig" data-i="${i}">↺ Restore</button>`
+      : `<button data-act="promote-orig" data-i="${i}">Use as GT</button> <button data-act="spurious-orig" data-i="${i}">🚫 Spurious</button>`;
+    const row = make(cls, i, `GT #${i}`, meta, actions);
     root.appendChild(row);
   });
   state.sample.predictions.forEach((p, i) => {
     const row = make('pred', i, 'pred', `${p.status} · ${p.conf.toFixed(2)}`, `<button data-act="promote-pred" data-i="${i}">Use as GT</button>`);
     root.appendChild(row);
   });
-  state.sample.corrected_gt.forEach((b, i) => {
-    const row = make('corr', i, `corr #${i}`, '', `<button data-act="del-corr" data-i="${i}">✕</button>`);
+  state.sample.verified_gt.forEach((b, i) => {
+    const row = make('verified', i, `verified #${i}`, '', `<button data-act="del-verified" data-i="${i}">✕</button>`);
     root.appendChild(row);
   });
   document.querySelectorAll('#status-pane button[data-status]').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.status === (state.sample.status || 'reviewed'));
+    btn.classList.toggle('active', btn.dataset.status === state.sample.status);
     btn.onclick = () => {
       state.sample.status = btn.dataset.status;
       markDirty();
@@ -675,15 +732,50 @@ document.getElementById('bbox-list').addEventListener('click', e => {
   const btn = e.target.closest('button[data-act]');
   if (!btn) return;
   const i = +btn.dataset.i;
+  state.sample.spurious_originals = state.sample.spurious_originals || [];
   if (btn.dataset.act === 'promote-orig') {
     const o = state.sample.original_gt[i];
-    state.sample.corrected_gt.push({ class_id: 0, cx: o.cx, cy: o.cy, w: o.w, h: o.h });
+    state.sample.verified_gt.push({ class_id: 0, cx: o.cx, cy: o.cy, w: o.w, h: o.h });
+    if (!state.sample.spurious_originals.some(s => bboxClose(s, o))) {
+      state.sample.spurious_originals.push({ class_id: 0, cx: o.cx, cy: o.cy, w: o.w, h: o.h });
+    }
+  } else if (btn.dataset.act === 'spurious-orig') {
+    const o = state.sample.original_gt[i];
+    if (!state.sample.spurious_originals.some(s => bboxClose(s, o))) {
+      state.sample.spurious_originals.push({ class_id: 0, cx: o.cx, cy: o.cy, w: o.w, h: o.h });
+    }
+  } else if (btn.dataset.act === 'restore-orig') {
+    const o = state.sample.original_gt[i];
+    state.sample.spurious_originals = state.sample.spurious_originals.filter(s => !bboxClose(s, o));
   } else if (btn.dataset.act === 'promote-pred') {
     const p = state.sample.predictions[i];
-    state.sample.corrected_gt.push({ class_id: 0, cx: p.cx, cy: p.cy, w: p.w, h: p.h });
-  } else if (btn.dataset.act === 'del-corr') {
-    state.sample.corrected_gt.splice(i, 1);
-    if (selected?.layer === 'corr' && selected.idx === i) selected = null;
+    state.sample.verified_gt.push({ class_id: 0, cx: p.cx, cy: p.cy, w: p.w, h: p.h });
+    const thr = state.iou ?? 0.05;
+    state.sample.original_gt.forEach(o => {
+      if (bboxIou(o, p) >= thr && !state.sample.spurious_originals.some(s => bboxClose(s, o))) {
+        state.sample.spurious_originals.push({ class_id: 0, cx: o.cx, cy: o.cy, w: o.w, h: o.h });
+      }
+    });
+  } else if (btn.dataset.act === 'del-verified') {
+    const removed = state.sample.verified_gt.splice(i, 1)[0];
+    state.sample.spurious_originals = state.sample.spurious_originals.filter(s => !bboxClose(s, removed));
+    if (selected?.layer === 'verified' && selected.idx === i) selected = null;
+  } else if (btn.dataset.act === 'keep-all') {
+    state.sample.original_gt.forEach(o => {
+      const isSp = state.sample.spurious_originals.some(s => bboxClose(s, o));
+      const inV = state.sample.verified_gt.some(v => bboxClose(v, o));
+      if (!isSp && !inV) {
+        state.sample.verified_gt.push({ class_id: 0, cx: o.cx, cy: o.cy, w: o.w, h: o.h });
+      }
+    });
+  } else if (btn.dataset.act === 'spurious-all') {
+    state.sample.original_gt.forEach(o => {
+      const inV = state.sample.verified_gt.some(v => bboxClose(v, o));
+      const already = state.sample.spurious_originals.some(s => bboxClose(s, o));
+      if (!inV && !already) {
+        state.sample.spurious_originals.push({ class_id: 0, cx: o.cx, cy: o.cy, w: o.w, h: o.h });
+      }
+    });
   }
   markDirty(); paint(); renderRight();
 });
@@ -743,6 +835,10 @@ window.addEventListener('keydown', async e => {
   if (e.key === 'p') {
     state.showPred = !state.showPred;
     document.getElementById('show-pred').checked = state.showPred; paint();
+  }
+  if (e.key === 'v') {
+    state.showOnlyVerified = !state.showOnlyVerified;
+    document.getElementById('show-only-verified').checked = state.showOnlyVerified; paint();
   }
   if (e.key === '0') { resetView(); paint(); }
 });
@@ -813,8 +909,8 @@ async function jumpSequence(d) {
 
 function deleteSelected() {
   if (!state.sample || !selected) return;
-  if (selected.layer === 'corr') {
-    state.sample.corrected_gt.splice(selected.idx, 1);
+  if (selected.layer === 'verified') {
+    state.sample.verified_gt.splice(selected.idx, 1);
     selected = null;
     markDirty(); paint(); renderRight();
   }

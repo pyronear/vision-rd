@@ -54,8 +54,11 @@
       /* Bbox rows in right panel */
       .bbox-row { @apply mb-1 flex cursor-pointer items-center gap-2 rounded-md border-l-4 px-2 py-1.5 text-xs; }
       .bbox-row.orig { @apply border-l-sky-500 bg-sky-50; }
-      .bbox-row.corr { @apply border-l-emerald-500 bg-emerald-50; }
+      .bbox-row.orig.kept { @apply border-l-emerald-500 bg-emerald-50; }
+      .bbox-row.orig.spurious { @apply border-l-amber-500 bg-amber-50 line-through text-slate-500; }
+      .bbox-row.verified { @apply border-l-emerald-500 bg-emerald-50; }
       .bbox-row.pred { @apply border-l-rose-500 bg-rose-50; }
+      #drop-warn .actions button { @apply rounded border border-amber-300 bg-white px-2 py-0.5 text-[10px] font-medium text-amber-900 transition hover:border-amber-500 hover:bg-amber-100; }
       .bbox-row .src { @apply min-w-[44px] text-[11px] font-semibold text-slate-700; }
       .bbox-row .meta-x { @apply flex-1 truncate font-mono text-[10px] text-slate-500; }
       .bbox-row .actions button { @apply rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] text-slate-600 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700; }
@@ -196,6 +199,7 @@
         <div id="layer-toggles" class="absolute right-3 top-3 flex gap-3 rounded-md bg-slate-900/70 px-3 py-1.5 text-xs text-slate-200 backdrop-blur-sm">
           <label class="flex items-center gap-1.5"><input type="checkbox" id="show-orig" checked class="accent-sky-400"> O · original ground truth</label>
           <label class="flex items-center gap-1.5"><input type="checkbox" id="show-pred" checked class="accent-rose-400"> P · predictions</label>
+          <label class="flex items-center gap-1.5"><input type="checkbox" id="show-only-verified" class="accent-emerald-400"> V · verified only (export preview)</label>
         </div>
       </div>
       <div id="timeline" class="flex min-h-[140px] gap-2 overflow-x-auto border-t border-slate-800 bg-slate-950 px-3 py-3 text-slate-400"></div>
@@ -225,13 +229,14 @@
           <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>r</kbd></td><td class="px-4 py-1 text-slate-600">Mark <em>reviewed</em> (stay)</td></tr>
           <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>u</kbd></td><td class="px-4 py-1 text-slate-600">Mark <em>unclear</em></td></tr>
           <tr><th colspan="2" class="bg-slate-50 px-4 pb-1 pt-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Bbox editing</th></tr>
-          <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>Del</kbd> / <kbd>Backspace</kbd></td><td class="px-4 py-1 text-slate-600">Delete selected corrected bbox</td></tr>
+          <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>Del</kbd> / <kbd>Backspace</kbd></td><td class="px-4 py-1 text-slate-600">Delete selected verified bbox</td></tr>
           <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>Esc</kbd></td><td class="px-4 py-1 text-slate-600">Clear bbox selection</td></tr>
-          <tr><td class="px-4 py-1">double-click empty</td><td class="px-4 py-1 text-slate-600">Draw a new corrected bbox</td></tr>
-          <tr><td class="px-4 py-1">click on original GT</td><td class="px-4 py-1 text-slate-600">Copy into corrected layer</td></tr>
+          <tr><td class="px-4 py-1">double-click empty</td><td class="px-4 py-1 text-slate-600">Draw a new verified bbox</td></tr>
+          <tr><td class="px-4 py-1">click on original GT</td><td class="px-4 py-1 text-slate-600">Copy into verified layer</td></tr>
           <tr><th colspan="2" class="bg-slate-50 px-4 pb-1 pt-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">View</th></tr>
           <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>o</kbd></td><td class="px-4 py-1 text-slate-600">Toggle original GT layer</td></tr>
           <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>p</kbd></td><td class="px-4 py-1 text-slate-600">Toggle predictions layer</td></tr>
+          <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>v</kbd></td><td class="px-4 py-1 text-slate-600">Verified-only (export preview)</td></tr>
           <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>?</kbd></td><td class="px-4 py-1 text-slate-600">Toggle this panel</td></tr>
           <tr><th colspan="2" class="bg-slate-50 px-4 pb-1 pt-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Zoom &amp; pan</th></tr>
           <tr><td class="px-4 py-1 whitespace-nowrap">wheel</td><td class="px-4 py-1 text-slate-600">Zoom in / out toward cursor</td></tr>
