@@ -28,6 +28,7 @@ let img = new Image();
 let imgLoaded = false;
 let selected = null;
 let drag = null;
+let hovered = null;
 
 function ensureReviewer() {
   if (state.reviewer) {
@@ -228,6 +229,7 @@ async function loadSample(stem) {
   state.queueIndex = state.queue.findIndex(q => q.stem === stem);
   state.dirty = false;
   selected = null;
+  hovered = null;
   setSaveBar();
   renderQueue();
   renderCanvas();
@@ -287,28 +289,37 @@ function paint() {
   ctx2d.clearRect(0, 0, cnv.width, cnv.height);
   ctx2d.drawImage(img, 0, 0, cnv.width, cnv.height);
   const corrected = state.sample.corrected_gt;
+  const dimming = hovered !== null;
+  const setAlpha = isHov => { ctx2d.globalAlpha = (dimming && !isHov) ? 0.25 : 1.0; };
   if (state.showOrig) {
     state.sample.original_gt.forEach((b, i) => {
       const overridden = corrected.some(c => bboxClose(c, b));
       if (overridden) return;
-      drawBox(b, { stroke: '#58a6ff', fill: 'rgba(88,166,255,.10)', dashed: false, label: `GT (orig) · ${b.status}`, selected: selected?.layer === 'orig' && selected.idx === i });
+      const isHov = hovered?.layer === 'orig' && hovered.idx === i;
+      setAlpha(isHov);
+      drawBox(b, { stroke: '#58a6ff', fill: 'rgba(88,166,255,.10)', fillHover: 'rgba(88,166,255,.25)', dashed: false, label: `GT (orig) · ${b.status}`, selected: selected?.layer === 'orig' && selected.idx === i, highlighted: isHov });
     });
   }
   if (state.showPred) {
-    state.sample.predictions.forEach(p => {
-      drawBox(p, { stroke: '#f85149', fill: 'transparent', dashed: true, label: `pred · ${p.status} · ${p.conf.toFixed(2)}` });
+    state.sample.predictions.forEach((p, i) => {
+      const isHov = hovered?.layer === 'pred' && hovered.idx === i;
+      setAlpha(isHov);
+      drawBox(p, { stroke: '#f85149', fill: 'transparent', fillHover: 'rgba(248,81,73,.20)', dashed: true, label: `pred · ${p.status} · ${p.conf.toFixed(2)}`, highlighted: isHov });
     });
   }
   corrected.forEach((b, i) => {
-    drawBox(b, { stroke: '#3fb950', fill: 'rgba(63,185,80,.10)', dashed: false, label: 'GT (corr)', selected: selected?.layer === 'corr' && selected.idx === i, handles: true });
+    const isHov = hovered?.layer === 'corr' && hovered.idx === i;
+    setAlpha(isHov);
+    drawBox(b, { stroke: '#3fb950', fill: 'rgba(63,185,80,.10)', fillHover: 'rgba(63,185,80,.25)', dashed: false, label: 'GT (corr)', selected: selected?.layer === 'corr' && selected.idx === i, highlighted: isHov, handles: true });
   });
+  ctx2d.globalAlpha = 1.0;
 }
 
-function drawBox(b, { stroke, fill, dashed, label, selected: sel = false, handles = false }) {
+function drawBox(b, { stroke, fill, fillHover, dashed, label, selected: sel = false, highlighted = false, handles = false }) {
   const r = bboxToRect(b, cnv.width, cnv.height);
-  ctx2d.lineWidth = sel ? 3 : 2;
+  ctx2d.lineWidth = highlighted ? 4 : (sel ? 3 : 2);
   ctx2d.strokeStyle = stroke;
-  ctx2d.fillStyle = fill;
+  ctx2d.fillStyle = highlighted && fillHover ? fillHover : fill;
   ctx2d.setLineDash(dashed ? [6, 4] : []);
   ctx2d.fillRect(r.x, r.y, r.w, r.h);
   ctx2d.strokeRect(r.x, r.y, r.w, r.h);
@@ -463,22 +474,24 @@ function renderRight() {
   const root = document.getElementById('bbox-list');
   root.innerHTML = '';
   if (!state.sample) return;
-  const make = (cls, src, meta, actions = '') => {
+  const make = (cls, idx, src, meta, actions = '') => {
     const row = document.createElement('div');
     row.className = `bbox-row ${cls}`;
+    row.dataset.layer = cls;
+    row.dataset.idx = idx;
     row.innerHTML = `<span class="src">${escapeHtml(src)}</span><span class="meta-x">${escapeHtml(meta)}</span><span class="actions">${actions}</span>`;
     return row;
   };
   state.sample.original_gt.forEach((b, i) => {
-    const row = make('orig', `GT #${i}`, `${b.cx.toFixed(2)} ${b.cy.toFixed(2)} · ${b.status}`, `<button data-act="promote-orig" data-i="${i}">Use as GT</button>`);
+    const row = make('orig', i, `GT #${i}`, b.status, `<button data-act="promote-orig" data-i="${i}">Use as GT</button>`);
     root.appendChild(row);
   });
   state.sample.predictions.forEach((p, i) => {
-    const row = make('pred', 'pred', `${p.cx.toFixed(2)} ${p.cy.toFixed(2)} · ${p.status} · ${p.conf.toFixed(2)}`, `<button data-act="promote-pred" data-i="${i}">Use as GT</button>`);
+    const row = make('pred', i, 'pred', `${p.status} · ${p.conf.toFixed(2)}`, `<button data-act="promote-pred" data-i="${i}">Use as GT</button>`);
     root.appendChild(row);
   });
   state.sample.corrected_gt.forEach((b, i) => {
-    const row = make('corr', `corr #${i}`, `${b.cx.toFixed(2)} ${b.cy.toFixed(2)}`, `<button data-act="del-corr" data-i="${i}">✕</button>`);
+    const row = make('corr', i, `corr #${i}`, '', `<button data-act="del-corr" data-i="${i}">✕</button>`);
     root.appendChild(row);
   });
   document.querySelectorAll('#status-pane button[data-status]').forEach(btn => {
@@ -494,6 +507,24 @@ function renderRight() {
   note.oninput = () => { state.sample.note = note.value || null; markDirty(); };
 }
 
+document.getElementById('bbox-list').addEventListener('mouseover', e => {
+  const row = e.target.closest('.bbox-row');
+  if (!row) return;
+  const layer = row.dataset.layer;
+  const idx = +row.dataset.idx;
+  if (hovered?.layer === layer && hovered.idx === idx) return;
+  hovered = { layer, idx };
+  paint();
+});
+document.getElementById('bbox-list').addEventListener('mouseout', e => {
+  const row = e.target.closest('.bbox-row');
+  if (!row) return;
+  if (row.contains(e.relatedTarget)) return;
+  if (e.relatedTarget?.closest?.('.bbox-row')) return;
+  if (hovered === null) return;
+  hovered = null;
+  paint();
+});
 document.getElementById('bbox-list').addEventListener('click', e => {
   const btn = e.target.closest('button[data-act]');
   if (!btn) return;
