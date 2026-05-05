@@ -101,14 +101,24 @@ Properties:
 
 - **Untouched samples are absent.** The file only carries decisions
   the reviewer made.
-- **`bboxes` is the canonical corrected GT.** Empty list = "remove all
-  GT here". Non-empty = "this is what GT should be." The original
-  `.txt` is always recoverable from
-  `data/01_raw/datasets/<split>/labels/<stem>.txt`, so the diff is
-  computable on demand.
+- **`bboxes` is the canonical corrected GT — additive, not destructive.**
+  The original GT (from `data/01_raw/datasets/<split>/labels/<stem>.txt`)
+  and the model predictions (from `predictions.json`) are **never
+  modified**. They remain on disk untouched and are rendered as
+  read-only reference layers in the UI on every load (see §6.4). The
+  `bboxes` list is a separate "corrected GT" layer the reviewer
+  authors. Empty list = "remove all GT here for export purposes."
+  Non-empty = "this is what GT should be for export." The original
+  `.txt` stays exactly as it was so the next reviewer can audit the
+  decision against the source material.
+- **Export uses `bboxes` only.** §5.2's exported `.txt` files contain
+  the corrected bboxes, not a union with the original. The original
+  stays on disk for traceability, but the patch the export emits is
+  the reviewer's final answer.
 - **`status`** carries only the two states that are not expressible as
   bbox edits: `unclear` (skip / second opinion) and `reviewed`
-  (decision made, even if "GT was already correct").
+  (decision made, even if "GT was already correct" — in that case
+  `bboxes` is a copy of the original GT).
 - **`reviewer`** and **`note`** are optional.
 - **`reviewed_at`** is ISO-8601 UTC, set by the server on each save.
 
@@ -265,20 +275,55 @@ header), kind (`FP` / `FN`) and confidence, and a status dot
 
 ### 6.4 Image + bbox editor (center)
 
-- Image fills the available space, letterboxed.
-- **GT bboxes** drawn in solid blue, with corner handles for resize and
-  body-drag for move. **Predictions** drawn in dashed red, read-only.
-  Labels above each box show source + status (`GT #0 · TP`,
-  `pred · FP · 0.58`).
-- **Double-click empty space** starts a new GT box (drag to set
-  extents, release to commit).
-- **Selected bbox** can be deleted with the Delete key.
-- The canvas is HTML5 `<canvas>`; coordinates round-trip through the
-  YOLO normalized `(cx, cy, w, h)` representation so what is saved is
-  exactly what is drawn.
+The canvas renders **three layers** simultaneously, distinguished by
+color/style. Two of the three are always read-only reference; only one
+is editable.
 
-The editor never modifies predictions. Predictions stay as the model
-emitted them; they are reference geometry only.
+| Layer            | Source                          | Style                              | Editable |
+|------------------|---------------------------------|------------------------------------|----------|
+| Original GT      | `01_raw/<split>/labels/<stem>.txt` | solid blue, semi-transparent fill, no handles | no |
+| Predictions      | `07_model_output/.../predictions.json` | dashed red, no fill, no handles | no |
+| **Corrected GT** | `09_review/<model>/<split>/review.json::samples[<stem>].bboxes` | solid green, full opacity, corner handles | **yes** |
+
+Visual rules:
+
+- Labels above each box: `GT (original) #0 · TP`, `pred · FP · 0.58`,
+  `GT (corrected) #0`.
+- An original GT that is **not** present in the corrected list (the
+  reviewer effectively removed it) is rendered with a diagonal strike
+  pattern and labeled `GT (original) · removed`.
+- An original GT that **is** present in the corrected list with
+  identical geometry is shown only in green (corrected); the original
+  is suppressed to keep the canvas clean.
+- An original GT that the reviewer moved/resized appears as **two
+  boxes**: the original (blue, semi-transparent, no handles, labeled
+  `GT (original)`) and the corrected version (green, with handles,
+  labeled `GT (corrected)`). A faint connector line joins them so the
+  override relationship is visible.
+- A new corrected GT (no original counterpart) appears in green only,
+  labeled `GT (corrected) · added`.
+- Layer toggles (top-right of canvas): `[O] original GT` and
+  `[P] predictions`. Both default on; reviewer can hide either to
+  declutter while editing. The corrected layer is always visible.
+
+Editing affordances (corrected layer only):
+
+- **Double-click empty space** starts a new corrected GT box (drag to
+  set extents, release to commit).
+- **Click an original GT** copies it into the corrected list at
+  identical geometry; subsequent drag/resize edits the corrected copy.
+  This is the "I'm fixing this box" interaction — the original stays
+  blue underneath as the reviewer's reference.
+- **Drag corner / body** of a corrected box resizes / moves it.
+- **Selected corrected box** can be deleted with the Delete key.
+- **Delete key on a selected original GT** marks it removed (drops it
+  from the corrected list if it was there; if it wasn't there, the
+  reviewer's "remove" intent is recorded by simply not adding it).
+  Visual feedback: the original switches to the struck-through style.
+
+The canvas is HTML5 `<canvas>`; coordinates round-trip through the
+YOLO normalized `(cx, cy, w, h)` representation so what is saved is
+exactly what is drawn.
 
 ### 6.5 Timeline strip (center, below image)
 
@@ -296,13 +341,20 @@ queue (sequence-level navigation).
 
 ### 6.6 Right panel — bbox list, status, note
 
-- **Bbox list** — all GT bboxes for the current frame plus all
-  predictions ≥ `conf` slider. Each row shows source, normalized
-  coords, TP/FP/FN status; predictions get a one-click `→GT` action
-  that promotes the prediction's geometry to a new GT box (the
-  former `label:add-smoke` workflow). GT rows have edit + delete
-  affordances.
-- **Add GT box** button — same as double-clicking empty canvas.
+- **Bbox list** — three sections matching the canvas layers:
+  1. **Original GT** rows (blue) — read-only, show source + normalized
+     coords + TP/FP/FN status. Each row has a `→ correct` action that
+     copies the original into the corrected list (same as clicking the
+     box on canvas).
+  2. **Corrected GT** rows (green) — edit / delete affordances. Rows
+     that override an original show a small "→ #N" indicator linking
+     them to the original they correct.
+  3. **Predictions** rows (red) — read-only, show confidence and
+     TP/FP/FN status. Each row has a one-click `→ correct` action that
+     promotes the prediction's geometry to a new corrected GT box (the
+     former `label:add-smoke` workflow).
+- **Add GT box** button — same as double-clicking empty canvas;
+  appends to the corrected list.
 - **Status** — radio-style two-button group: `reviewed` / `unclear`.
   Default is `reviewed` once any edit happens.
 - **Note** — free-text textarea, optional.
@@ -315,10 +367,13 @@ queue (sequence-level navigation).
 - **← / →** step through global queue.
 - **Ctrl ← / Ctrl →** step through sibling frames in the current
   sequence (queue-irrelevant; flagged or not).
-- **Delete** delete selected bbox.
+- **Delete** delete selected bbox (corrected: removes from list;
+  original: marks as removed for export).
 - **Esc** clear bbox selection.
 - **u** toggle status to `unclear`.
 - **r** toggle status to `reviewed`.
+- **o** toggle visibility of the original GT layer.
+- **p** toggle visibility of the predictions layer.
 
 ## 7. Persistence
 
@@ -426,9 +481,11 @@ A migration script (out of scope for this spec) can later replay
 - Multi-reviewer concurrency, locking, conflict resolution.
 - Authentication, TLS, deployment beyond `localhost`.
 - Bulk operations (e.g. "mark every frame in this sequence reviewed").
-- Diff-vs-original visual mode (showing original GT alongside corrected
-  GT). Useful, but additive; can ship later.
 - A migration that reads the old `tags.json` into `review.json`.
+- Edit history / per-edit attribution. The latest reviewer's
+  `bboxes` overwrites whatever was there; the original on-disk `.txt`
+  is the only "before" reference. Audit happens via git/DVC history of
+  `review.json`.
 
 ## 12. Open questions
 
