@@ -108,7 +108,6 @@ async function init() {
       if (id === 'conf') state.conf = v;
       else if (id === 'iou') state.iou = v;
       else state.reviewConf = v;
-      updateFilterSummary();
       debounceReload();
     });
   });
@@ -125,10 +124,8 @@ async function init() {
     document.getElementById('conf-v').textContent = '0.05';
     document.getElementById('iou-v').textContent = '0.05';
     document.getElementById('review-conf-v').textContent = '0.35';
-    updateFilterSummary();
     reloadQueue();
   });
-  updateFilterSummary();
   document.querySelectorAll('#view-chips button').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('#view-chips button').forEach(b => b.classList.remove('active'));
@@ -178,11 +175,6 @@ function renderProgress() {
   const root = document.getElementById('progress');
   root.querySelector('.fill').style.width = `${pct}%`;
   root.querySelector('.label').textContent = `${reviewed} / ${total}`;
-}
-
-function updateFilterSummary() {
-  const txt = `conf ${state.conf.toFixed(2)} · IoU ${state.iou.toFixed(2)} · review ${state.reviewConf.toFixed(2)}`;
-  document.getElementById('filter-summary').textContent = txt;
 }
 
 function renderQueue() {
