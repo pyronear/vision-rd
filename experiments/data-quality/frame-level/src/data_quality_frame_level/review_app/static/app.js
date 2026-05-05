@@ -472,6 +472,7 @@ window.addEventListener('keydown', async e => {
   if (e.key === 'ArrowRight') { e.preventDefault(); return seqStep(+1); }
   if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); return deleteSelected(); }
   if (e.key === 'Escape') { selected = null; paint(); }
+  if (e.key === ' ') { e.preventDefault(); return setStatusAndAdvance('reviewed'); }
   if (e.key === 'r') return setStatus('reviewed');
   if (e.key === 'u') return setStatus('unclear');
   if (e.key === 'o') {
@@ -562,6 +563,14 @@ function setStatus(s) {
   state.sample.status = s;
   markDirty();
   renderRight();
+}
+
+async function setStatusAndAdvance(s) {
+  if (!state.sample) return;
+  state.sample.status = s;
+  markDirty();
+  renderRight();
+  await seqStep(+1);
 }
 
 window.addEventListener('resize', () => {

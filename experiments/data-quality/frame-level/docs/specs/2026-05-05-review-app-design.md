@@ -371,8 +371,10 @@ queue (sequence-level navigation).
 - **Delete** delete selected bbox (corrected: removes from list;
   original: marks as removed for export).
 - **Esc** clear bbox selection.
-- **u** toggle status to `unclear`.
-- **r** toggle status to `reviewed`.
+- **Space** mark `reviewed` and advance to the next frame (the most
+  common per-sample action, single-key for fast review).
+- **u** toggle status to `unclear` (stay on current frame).
+- **r** toggle status to `reviewed` (stay on current frame).
 - **o** toggle visibility of the original GT layer.
 - **p** toggle visibility of the predictions layer.
 
