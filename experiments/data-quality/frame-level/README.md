@@ -32,10 +32,6 @@ git add data/09_review.dvc data/10_export.dvc data/.gitignore
 git commit -m "review: bbox corrections + export"
 ```
 
-## Design
-
-See [`docs/specs/2026-04-24-frame-level-label-audit-design.md`](docs/specs/2026-04-24-frame-level-label-audit-design.md).
-
 ## Pipeline
 
 ```
@@ -66,10 +62,7 @@ Outputs:
 
 ## Bbox-editing review app
 
-A browser-based review workflow that **edits GT bboxes inline** instead
-of just tagging frames. Specs:
-[`docs/specs/2026-05-05-review-app-design.md`](docs/specs/2026-05-05-review-app-design.md)
-and [`docs/specs/2026-05-05-export-flow-design.md`](docs/specs/2026-05-05-export-flow-design.md).
+A browser-based review workflow that **edits GT bboxes inline** instead of just tagging frames.
 
 ### Quickstart
 
