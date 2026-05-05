@@ -4,7 +4,7 @@ Routes:
   GET  /api/contexts                                 — available models + splits
   GET  /api/queue?model&split&view&conf&iou&review_conf  — ordered queue
   GET  /api/sample?model&split&stem&conf&iou&review_conf — layers + neighbors
-  POST /api/sample?model&split  (body: SaveBody)     — save corrected GT
+  POST /api/sample?model&split  (body: SaveBody)     — save verified GT
   POST /api/export?model&split&conf&iou&review_conf  — write data/10_export
   GET  /image?model&split&stem                       — JPEG bytes
   GET  /                                             — static index.html
@@ -39,6 +39,7 @@ class SaveBody(BaseModel):
     stem: str
     status: str = Field(..., pattern="^(reviewed|unclear)$")
     bboxes: list[BBoxModel]
+    spurious_originals: list[BBoxModel] = Field(default_factory=list)
     reviewer: str | None = None
     note: str | None = None
 
@@ -159,7 +160,10 @@ def create_app(
                 {**asdict(p), "status": st}
                 for p, st in zip(preds, ev.pred_status, strict=True)
             ],
-            "corrected_gt": [asdict(b) for b in (sample.bboxes if sample else [])],
+            "verified_gt": [asdict(b) for b in (sample.bboxes if sample else [])],
+            "spurious_originals": [
+                asdict(b) for b in (sample.spurious_originals if sample else [])
+            ],
             "status": sample.status if sample else None,
             "reviewer": sample.reviewer if sample else None,
             "note": sample.note if sample else None,
@@ -174,10 +178,15 @@ def create_app(
             BBox(class_id=b.class_id, cx=b.cx, cy=b.cy, w=b.w, h=b.h)
             for b in body.bboxes
         ]
+        spurious = [
+            BBox(class_id=b.class_id, cx=b.cx, cy=b.cy, w=b.w, h=b.h)
+            for b in body.spurious_originals
+        ]
         sample = s.save_sample(
             stem=body.stem,
             status=body.status,
             bboxes=bboxes,
+            spurious_originals=spurious,
             reviewer=body.reviewer,
             note=body.note,
         )

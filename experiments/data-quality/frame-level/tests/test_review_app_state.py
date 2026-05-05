@@ -68,6 +68,7 @@ def test_save_sample_writes_review_json(fake_tree: Paths):
         stem="seq_2024-01-01T00-00-00",
         status="reviewed",
         bboxes=[BBox(class_id=0, cx=0.4, cy=0.4, w=0.2, h=0.2)],
+        spurious_originals=[],
         reviewer="arthur",
         note="moved",
     )

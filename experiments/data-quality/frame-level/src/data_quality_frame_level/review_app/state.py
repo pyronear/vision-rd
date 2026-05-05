@@ -80,12 +80,14 @@ class AppState:
         stem: str,
         status: str,
         bboxes: list[BBox],
+        spurious_originals: list[BBox],
         reviewer: str | None,
         note: str | None,
     ) -> SampleReview:
         sample = SampleReview(
             status=status,
             bboxes=list(bboxes),
+            spurious_originals=list(spurious_originals),
             reviewer=reviewer,
             note=note,
             reviewed_at=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),

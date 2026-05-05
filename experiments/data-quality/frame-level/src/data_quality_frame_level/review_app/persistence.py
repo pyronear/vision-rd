@@ -23,6 +23,7 @@ ALLOWED_STATUS = ("reviewed", "unclear")
 class SampleReview:
     status: str
     bboxes: list[BBox] = field(default_factory=list)
+    spurious_originals: list[BBox] = field(default_factory=list)
     reviewer: str | None = None
     note: str | None = None
     reviewed_at: str | None = None
@@ -54,6 +55,8 @@ def _sample_to_dict(s: SampleReview) -> dict:
         "status": s.status,
         "bboxes": [_bbox_to_dict(b) for b in s.bboxes],
     }
+    if s.spurious_originals:
+        out["spurious_originals"] = [_bbox_to_dict(b) for b in s.spurious_originals]
     if s.reviewer is not None:
         out["reviewer"] = s.reviewer
     if s.note is not None:
@@ -69,6 +72,7 @@ def _dict_to_sample(d: dict) -> SampleReview:
     return SampleReview(
         status=d["status"],
         bboxes=[_dict_to_bbox(b) for b in d.get("bboxes", [])],
+        spurious_originals=[_dict_to_bbox(b) for b in d.get("spurious_originals", [])],
         reviewer=d.get("reviewer"),
         note=d.get("note"),
         reviewed_at=d.get("reviewed_at"),
