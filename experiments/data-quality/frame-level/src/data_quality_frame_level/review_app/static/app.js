@@ -333,6 +333,9 @@ function bboxClose(a, b) {
   return Math.abs(a.cx - b.cx) < 1e-6 && Math.abs(a.cy - b.cy) < 1e-6
       && Math.abs(a.w - b.w) < 1e-6 && Math.abs(a.h - b.h) < 1e-6;
 }
+function bboxCopy(b) { return { class_id: 0, cx: b.cx, cy: b.cy, w: b.w, h: b.h }; }
+function containsBbox(arr, b) { return arr.some(x => bboxClose(x, b)); }
+function withoutBbox(arr, b) { return arr.filter(x => !bboxClose(x, b)); }
 function bboxIou(a, b) {
   const ix = Math.max(0, Math.min(a.cx + a.w/2, b.cx + b.w/2) - Math.max(a.cx - a.w/2, b.cx - b.w/2));
   const iy = Math.max(0, Math.min(a.cy + a.h/2, b.cy + b.h/2) - Math.max(a.cy - a.h/2, b.cy - b.h/2));
@@ -409,9 +412,9 @@ function paint() {
   if (state.showOrig) {
     const spurious = state.sample.spurious_originals || [];
     state.sample.original_gt.forEach((b, i) => {
-      const overridden = verified.some(c => bboxClose(c, b));
+      const overridden = containsBbox(verified, b);
       if (overridden) return;
-      const isSp = spurious.some(s => bboxClose(s, b));
+      const isSp = containsBbox(spurious, b);
       if (previewMode && (isSp || verified.length > 0 || !isReviewed)) return;
       const isHov = hovered?.layer === 'orig' && hovered.idx === i;
       setAlpha(isHov);
@@ -515,7 +518,7 @@ cnv.addEventListener('mousedown', e => {
   const h = hit(x, y);
   if (h?.layer === 'orig') {
     const o = state.sample.original_gt[h.idx];
-    state.sample.verified_gt.push({ class_id: 0, cx: o.cx, cy: o.cy, w: o.w, h: o.h });
+    state.sample.verified_gt.push(bboxCopy(o));
     selected = { layer: 'verified', idx: state.sample.verified_gt.length - 1 };
     markDirty(); paint(); renderRight(); return;
   }
@@ -631,8 +634,8 @@ async function persistSample() {
     body: {
       stem: state.sample.stem,
       status: state.sample.status,
-      bboxes: state.sample.verified_gt.map(b => ({ class_id: 0, cx: b.cx, cy: b.cy, w: b.w, h: b.h })),
-      spurious_originals: (state.sample.spurious_originals || []).map(b => ({ class_id: 0, cx: b.cx, cy: b.cy, w: b.w, h: b.h })),
+      bboxes: state.sample.verified_gt.map(bboxCopy),
+      spurious_originals: (state.sample.spurious_originals || []).map(bboxCopy),
       reviewer: state.reviewer || null,
       note: state.sample.note || null,
     },
@@ -665,8 +668,8 @@ function renderRight() {
   };
   const spurious = state.sample.spurious_originals || [];
   const verified = state.sample.verified_gt;
-  const isSpurious = b => spurious.some(s => bboxClose(s, b));
-  const isInVerified = b => verified.some(v => bboxClose(v, b));
+  const isSpurious = b => containsBbox(spurious, b);
+  const isInVerified = b => containsBbox(verified, b);
   const isReviewed = state.sample.status === 'reviewed';
   const showOrigsAsKept = isReviewed && verified.length === 0;
   const droppedOrigs = verified.length > 0
@@ -736,48 +739,36 @@ document.getElementById('bbox-list').addEventListener('click', e => {
   if (!btn) return;
   const i = +btn.dataset.i;
   state.sample.spurious_originals = state.sample.spurious_originals || [];
+  const sp = state.sample.spurious_originals;
+  const verified = state.sample.verified_gt;
   if (btn.dataset.act === 'promote-orig') {
     const o = state.sample.original_gt[i];
-    state.sample.verified_gt.push({ class_id: 0, cx: o.cx, cy: o.cy, w: o.w, h: o.h });
-    if (!state.sample.spurious_originals.some(s => bboxClose(s, o))) {
-      state.sample.spurious_originals.push({ class_id: 0, cx: o.cx, cy: o.cy, w: o.w, h: o.h });
-    }
+    verified.push(bboxCopy(o));
+    if (!containsBbox(sp, o)) sp.push(bboxCopy(o));
   } else if (btn.dataset.act === 'spurious-orig') {
     const o = state.sample.original_gt[i];
-    if (!state.sample.spurious_originals.some(s => bboxClose(s, o))) {
-      state.sample.spurious_originals.push({ class_id: 0, cx: o.cx, cy: o.cy, w: o.w, h: o.h });
-    }
+    if (!containsBbox(sp, o)) sp.push(bboxCopy(o));
   } else if (btn.dataset.act === 'restore-orig') {
     const o = state.sample.original_gt[i];
-    state.sample.spurious_originals = state.sample.spurious_originals.filter(s => !bboxClose(s, o));
+    state.sample.spurious_originals = withoutBbox(sp, o);
   } else if (btn.dataset.act === 'promote-pred') {
     const p = state.sample.predictions[i];
-    state.sample.verified_gt.push({ class_id: 0, cx: p.cx, cy: p.cy, w: p.w, h: p.h });
+    verified.push(bboxCopy(p));
     const thr = state.iou ?? 0.05;
     state.sample.original_gt.forEach(o => {
-      if (bboxIou(o, p) >= thr && !state.sample.spurious_originals.some(s => bboxClose(s, o))) {
-        state.sample.spurious_originals.push({ class_id: 0, cx: o.cx, cy: o.cy, w: o.w, h: o.h });
-      }
+      if (bboxIou(o, p) >= thr && !containsBbox(sp, o)) sp.push(bboxCopy(o));
     });
   } else if (btn.dataset.act === 'del-verified') {
-    const removed = state.sample.verified_gt.splice(i, 1)[0];
-    state.sample.spurious_originals = state.sample.spurious_originals.filter(s => !bboxClose(s, removed));
+    const removed = verified.splice(i, 1)[0];
+    state.sample.spurious_originals = withoutBbox(sp, removed);
     if (selected?.layer === 'verified' && selected.idx === i) selected = null;
   } else if (btn.dataset.act === 'keep-all') {
     state.sample.original_gt.forEach(o => {
-      const isSp = state.sample.spurious_originals.some(s => bboxClose(s, o));
-      const inV = state.sample.verified_gt.some(v => bboxClose(v, o));
-      if (!isSp && !inV) {
-        state.sample.verified_gt.push({ class_id: 0, cx: o.cx, cy: o.cy, w: o.w, h: o.h });
-      }
+      if (!containsBbox(sp, o) && !containsBbox(verified, o)) verified.push(bboxCopy(o));
     });
   } else if (btn.dataset.act === 'spurious-all') {
     state.sample.original_gt.forEach(o => {
-      const inV = state.sample.verified_gt.some(v => bboxClose(v, o));
-      const already = state.sample.spurious_originals.some(s => bboxClose(s, o));
-      if (!inV && !already) {
-        state.sample.spurious_originals.push({ class_id: 0, cx: o.cx, cy: o.cy, w: o.w, h: o.h });
-      }
+      if (!containsBbox(verified, o) && !containsBbox(sp, o)) sp.push(bboxCopy(o));
     });
   }
   markDirty(); paint(); renderRight();

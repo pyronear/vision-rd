@@ -23,6 +23,7 @@ from data_quality_frame_level.review_app.matching import iou
 from data_quality_frame_level.review_app.persistence import ReviewState
 
 UNCHANGED_IOU = 0.95
+SPURIOUS_MATCH_IOU = 0.95
 
 
 @dataclass(frozen=True)
@@ -108,7 +109,7 @@ def write_manifest_and_labels(
                 o
                 for o in original
                 if not any(
-                    iou(o, s) >= UNCHANGED_IOU for s in sample.spurious_originals
+                    iou(o, s) >= SPURIOUS_MATCH_IOU for s in sample.spurious_originals
                 )
             ]
         diff = compute_diff(original=original, corrected=effective)
