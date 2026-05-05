@@ -1,6 +1,11 @@
 from data_quality_frame_level.dataset import BBox
 from data_quality_frame_level.review_app.queue import QueueItem, build_queue
+from data_quality_frame_level.review_app.sequence import assign_temporal_sequences
 from data_quality_frame_level.review_app.types import Prediction
+
+
+def _seq_map(stems):
+    return assign_temporal_sequences(stems)
 
 
 def _gt(cx=0.5, cy=0.5, w=0.1, h=0.1):
@@ -21,6 +26,7 @@ def test_fp_queue_groups_sequences_by_max_confidence():
     queue = build_queue(
         predictions=predictions,
         gt=gt,
+        sequence_id_by_stem=_seq_map(predictions.keys() | gt.keys()),
         review_status={},
         view="fp",
         conf_thresh=0.05,
@@ -37,11 +43,13 @@ def test_fp_queue_groups_sequences_by_max_confidence():
 
 
 def test_fp_queue_filters_by_review_conf():
-    predictions = {"s_t": [_pred(0.4)]}
-    gt: dict[str, list[BBox]] = {"s_t": []}
+    stem = "s_2024-01-01T00-00-00"
+    predictions = {stem: [_pred(0.4)]}
+    gt: dict[str, list[BBox]] = {stem: []}
     out = build_queue(
         predictions=predictions,
         gt=gt,
+        sequence_id_by_stem=_seq_map(predictions.keys() | gt.keys()),
         review_status={},
         view="fp",
         conf_thresh=0.05,
@@ -63,6 +71,7 @@ def test_fn_queue_sorts_by_max_gt_area():
     out = build_queue(
         predictions=predictions,
         gt=gt,
+        sequence_id_by_stem=_seq_map(predictions.keys() | gt.keys()),
         review_status={},
         view="fn",
         conf_thresh=0.05,

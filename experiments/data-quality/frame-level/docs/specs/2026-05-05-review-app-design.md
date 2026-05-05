@@ -498,5 +498,13 @@ A migration script (out of scope for this spec) can later replay
   every stem has exactly four `_`-separated fields:
   `<source>_<camera>_<sequence_id>_<timestamp>`. Sources may contain
   hyphens (`awf-axis`, `pyronear-force-06`) but never underscores.
-  `rsplit('_', 1)` reliably yields `(sequence_id, timestamp)` for every
+  `rsplit('_', 1)` reliably yields `(prefix, timestamp)` for every
   stem in every split. No edge cases.
+
+  A single prefix can recur across many disjoint detection events
+  spanning days or weeks (same camera + dataset `sequence_id`). To
+  avoid treating those as one sequence, the app additionally splits
+  on **temporal gaps**: two stems share a temporal sequence iff they
+  share a prefix AND no gap larger than 180 seconds separates two
+  consecutive frames in their cluster. Successive clusters under the
+  same prefix become `prefix#0`, `prefix#1`, … (chronological).

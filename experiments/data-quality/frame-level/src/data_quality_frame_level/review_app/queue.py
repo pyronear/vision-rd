@@ -67,6 +67,7 @@ def build_queue(
     *,
     predictions: dict[str, list[Prediction]],
     gt: dict[str, list[BBox]],
+    sequence_id_by_stem: dict[str, str],
     review_status: dict[str, str],
     view: str,
     conf_thresh: float,
@@ -85,11 +86,11 @@ def build_queue(
         )
         if kind is None:
             continue
-        seq_id, ts = parse_stem(stem)
+        _, ts = parse_stem(stem)
         items.append(
             QueueItem(
                 stem=stem,
-                sequence_id=seq_id,
+                sequence_id=sequence_id_by_stem[stem],
                 timestamp=ts,
                 kind=kind,
                 severity=severity,

@@ -75,6 +75,7 @@ def create_app(
         flagged = build_queue(
             predictions=s.predictions,
             gt=s.gt,
+            sequence_id_by_stem=s.sequence_id_by_stem,
             review_status={k: v.status for k, v in s.review.samples.items()},
             view=view,
             conf_thresh=conf,
@@ -91,9 +92,10 @@ def create_app(
         for stem in s.gt.keys() | s.predictions.keys():
             if stem in flagged_stems:
                 continue
-            seq_id, ts = parse_stem(stem)
+            seq_id = s.sequence_id_by_stem[stem]
             if seq_id not in flagged_seq_ids:
                 continue
+            _, ts = parse_stem(stem)
             sample = s.review.samples.get(stem)
             expanded.append(
                 {
@@ -126,12 +128,13 @@ def create_app(
         preds = [p for p in s.predictions.get(stem, []) if p.conf >= conf]
         ev = evaluate_frame(gt=gt, predictions=preds, iou_thresh=iou)
         sample = s.review.samples.get(stem)
-        seq_id, ts = parse_stem(stem)
+        seq_id = s.sequence_id_by_stem[stem]
+        _, ts = parse_stem(stem)
         neighbors = sorted(
             (
                 {"stem": st, "timestamp": parse_stem(st)[1]}
                 for st in s.gt.keys() | s.predictions.keys()
-                if parse_stem(st)[0] == seq_id
+                if s.sequence_id_by_stem[st] == seq_id
             ),
             key=lambda d: d["timestamp"],
         )

@@ -16,6 +16,7 @@ from data_quality_frame_level.review_app.persistence import (
     read_review_state,
     write_review_state,
 )
+from data_quality_frame_level.review_app.sequence import assign_temporal_sequences
 from data_quality_frame_level.review_app.types import Prediction
 
 
@@ -56,16 +57,21 @@ class AppState:
     predictions: dict[str, list[Prediction]]
     gt: dict[str, list[BBox]]
     review: ReviewState
+    sequence_id_by_stem: dict[str, str]
 
     @classmethod
     def load(cls, *, model: str, split: str, paths: Paths) -> "AppState":
+        predictions = _load_predictions(paths.predictions_path)
+        gt = _load_gt(paths.split_dir)
+        all_stems = predictions.keys() | gt.keys()
         return cls(
             model=model,
             split=split,
             paths=paths,
-            predictions=_load_predictions(paths.predictions_path),
-            gt=_load_gt(paths.split_dir),
+            predictions=predictions,
+            gt=gt,
             review=read_review_state(paths.review_path, model=model, split=split),
+            sequence_id_by_stem=assign_temporal_sequences(all_stems),
         )
 
     def save_sample(
