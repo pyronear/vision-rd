@@ -144,9 +144,11 @@ async function loadSample(stem) {
     model: state.model, split: state.split, stem,
     conf: state.conf, iou: state.iou, reviewConf: state.reviewConf,
   });
+  state.queueIndex = state.queue.findIndex(q => q.stem === stem);
   state.dirty = false;
   selected = null;
   setSaveBar();
+  renderQueue();
   renderCanvas();
   renderRight();
   renderTimeline();
@@ -450,10 +452,10 @@ function renderTimeline() {
 
 window.addEventListener('keydown', async e => {
   if (e.target.matches('input, textarea, select')) return;
-  if (e.key === 'ArrowLeft' && e.ctrlKey) { e.preventDefault(); return seqStep(-1); }
-  if (e.key === 'ArrowRight' && e.ctrlKey) { e.preventDefault(); return seqStep(+1); }
-  if (e.key === 'ArrowLeft') { e.preventDefault(); return navigateTo(state.queueIndex - 1); }
-  if (e.key === 'ArrowRight') { e.preventDefault(); return navigateTo(state.queueIndex + 1); }
+  if (e.key === 'ArrowLeft' && e.ctrlKey) { e.preventDefault(); return jumpSequence(-1); }
+  if (e.key === 'ArrowRight' && e.ctrlKey) { e.preventDefault(); return jumpSequence(+1); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); return seqStep(-1); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); return seqStep(+1); }
   if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); return deleteSelected(); }
   if (e.key === 'Escape') { selected = null; paint(); }
   if (e.key === 'r') return setStatus('reviewed');
@@ -475,6 +477,40 @@ async function seqStep(d) {
   const i = ns.findIndex(n => n.stem === state.sample.stem);
   const target = ns[i + d];
   if (target) await loadSample(target.stem);
+}
+
+async function jumpSequence(d) {
+  if (!state.sample || state.queue.length === 0) return;
+  await flushPending();
+  const currentSeq = state.sample.sequence_id;
+  const q = state.queue;
+  let anchor = state.queueIndex;
+  if (anchor < 0) {
+    anchor = d > 0
+      ? q.findIndex(i => i.sequence_id > currentSeq)
+      : (() => {
+          for (let i = q.length - 1; i >= 0; i--) {
+            if (q[i].sequence_id < currentSeq) return i;
+          }
+          return -1;
+        })();
+    if (anchor >= 0) return loadSample(q[anchor].stem);
+    return;
+  }
+  if (d > 0) {
+    for (let i = anchor + 1; i < q.length; i++) {
+      if (q[i].sequence_id !== currentSeq) return loadSample(q[i].stem);
+    }
+  } else {
+    for (let i = anchor - 1; i >= 0; i--) {
+      if (q[i].sequence_id !== currentSeq) {
+        const targetSeq = q[i].sequence_id;
+        let first = i;
+        while (first > 0 && q[first - 1].sequence_id === targetSeq) first--;
+        return loadSample(q[first].stem);
+      }
+    }
+  }
 }
 
 function deleteSelected() {
