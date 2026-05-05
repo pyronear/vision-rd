@@ -246,7 +246,7 @@ async function navigateTo(idx) {
   await loadSample(state.queue[idx].stem);
 }
 
-async function loadSample(stem) {
+async function loadSample(stem, opts = {}) {
   state.sample = await api.sample({
     model: state.model, split: state.split, stem,
     conf: state.conf, iou: state.iou, reviewConf: state.reviewConf,
@@ -257,7 +257,7 @@ async function loadSample(stem) {
   hovered = null;
   setSaveBar();
   renderQueue();
-  renderCanvas();
+  renderCanvas(opts);
   renderRight();
   renderTimeline();
 }
@@ -287,8 +287,9 @@ function bboxClose(a, b) {
       && Math.abs(a.w - b.w) < 1e-6 && Math.abs(a.h - b.h) < 1e-6;
 }
 
-function renderCanvas() {
+function renderCanvas(opts = {}) {
   if (!state.sample) { ctx2d.clearRect(0, 0, cnv.width, cnv.height); return; }
+  const preserve = !!opts.preserveView;
   const url = `/image?model=${encodeURIComponent(state.model)}&split=${encodeURIComponent(state.split)}&stem=${encodeURIComponent(state.sample.stem)}`;
   if (img.src !== location.origin + url) {
     imgLoaded = false;
@@ -297,11 +298,15 @@ function renderCanvas() {
       imgNaturalW = img.naturalWidth;
       imgNaturalH = img.naturalHeight;
       sizeCanvas();
-      resetView();
+      if (preserve) clampPan(); else resetView();
       paint();
     };
     img.src = url;
-  } else if (imgLoaded) { sizeCanvas(); resetView(); paint(); }
+  } else if (imgLoaded) {
+    sizeCanvas();
+    if (preserve) clampPan(); else resetView();
+    paint();
+  }
 }
 
 function sizeCanvas() {
@@ -660,7 +665,7 @@ function renderTimeline() {
       <img class="tl-img" src="/image?model=${encodeURIComponent(state.model)}&split=${encodeURIComponent(state.split)}&stem=${encodeURIComponent(n.stem)}" alt="">
       <div class="tl-status ${dotClass}"></div>
       <div class="tl-time">${escapeHtml(n.timestamp)}</div>`;
-    f.addEventListener('click', () => loadSample(n.stem));
+    f.addEventListener('click', () => loadSample(n.stem, { preserveView: true }));
     root.appendChild(f);
     if (isCurrent) currentEl = f;
   });
@@ -704,7 +709,7 @@ async function seqStep(d) {
   const ns = state.sample.sequence_neighbors;
   const i = ns.findIndex(n => n.stem === state.sample.stem);
   const target = ns[i + d];
-  if (target) return loadSample(target.stem);
+  if (target) return loadSample(target.stem, { preserveView: true });
   // At the edge of the current sequence: flow into the adjacent one in queue order.
   // → goes to the first frame of the next sequence; ← goes to the last frame of the previous.
   const q = state.queue;
