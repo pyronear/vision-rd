@@ -8,8 +8,6 @@ Walks a split directory with the layout::
 
 and emits :class:`FrameRef` records carrying the parsed ground-truth bboxes
 for each frame (empty list for frames with empty or missing label files).
-Also provides the YOLO-center -> FiftyOne-top-left bbox conversion used by
-:mod:`data_quality_frame_level.fiftyone_build`.
 """
 
 from collections.abc import Iterator
@@ -90,14 +88,3 @@ def iter_frames(split_dir: Path) -> Iterator[FrameRef]:
             label_path=label_path,
             gt_bboxes=parse_yolo_label(label_path),
         )
-
-
-def yolo_to_fiftyone_xywh(bbox: BBox) -> tuple[float, float, float, float]:
-    """Convert a YOLO normalized center bbox to FiftyOne top-left xywh.
-
-    FiftyOne ``Detection.bounding_box`` expects ``[x, y, w, h]`` with the
-    top-left corner relative to the image and ``(0, 0)`` at the top-left.
-    YOLO stores the same relative coordinates but uses the bbox center as
-    the reference point.
-    """
-    return (bbox.cx - bbox.w / 2, bbox.cy - bbox.h / 2, bbox.w, bbox.h)

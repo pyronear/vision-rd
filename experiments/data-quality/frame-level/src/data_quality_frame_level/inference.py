@@ -1,9 +1,7 @@
 """Thin wrapper around ultralytics YOLO for single-frame batched inference.
 
 Returns per-image lists of predictions in the same normalized-center
-format as :class:`data_quality_frame_level.dataset.BBox`, so downstream
-code can apply the same YOLO-center -> FiftyOne-top-left conversion to
-both GT and predicted bboxes.
+format as :class:`data_quality_frame_level.dataset.BBox`.
 """
 
 from collections.abc import Iterable

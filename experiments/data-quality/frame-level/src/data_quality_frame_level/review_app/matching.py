@@ -1,9 +1,8 @@
 """Per-frame TP / FP / FN assignment using greedy IoU matching.
 
-Mirrors FiftyOne's ``evaluate_detections`` for our single-class case so
-the app is independent of FiftyOne. Predictions and GT are matched
-greedily by descending IoU; unmatched predictions become FP, unmatched
-GT becomes FN.
+Single-class greedy matcher: predictions and GT are matched greedily
+by descending IoU; unmatched predictions become FP, unmatched GT
+becomes FN.
 """
 
 from dataclasses import dataclass

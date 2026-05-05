@@ -20,9 +20,6 @@ dev = [
     "pyyaml>=6.0",
     "ruff>=0.9",
 ]
-explore = [
-    "fiftyone>=1.0",
-]
 review-app = [
     "uvicorn[standard]>=0.32",
 ]

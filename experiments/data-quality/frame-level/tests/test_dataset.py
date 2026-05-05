@@ -9,7 +9,6 @@ from data_quality_frame_level.dataset import (
     FrameRef,
     iter_frames,
     parse_yolo_label,
-    yolo_to_fiftyone_xywh,
 )
 
 
@@ -95,27 +94,3 @@ def test_iter_frames_paths_point_at_images(split_dir: Path):
     for frame in frames:
         assert frame.image_path.parent.name == "images"
         assert frame.image_path.suffix == ".jpg"
-
-
-def test_yolo_to_fiftyone_xywh_centered():
-    # cx=cy=0.5, w=h=0.2  ->  top-left corner at (0.4, 0.4)
-    assert yolo_to_fiftyone_xywh(BBox(0, 0.5, 0.5, 0.2, 0.2)) == (0.4, 0.4, 0.2, 0.2)
-
-
-def test_yolo_to_fiftyone_xywh_corner():
-    # cx=0.1, cy=0.1, w=0.2, h=0.2  ->  top-left at (0.0, 0.0)
-    assert yolo_to_fiftyone_xywh(BBox(0, 0.1, 0.1, 0.2, 0.2)) == (
-        pytest.approx(0.0),
-        pytest.approx(0.0),
-        0.2,
-        0.2,
-    )
-
-
-def test_yolo_to_fiftyone_xywh_wide_bottom():
-    assert yolo_to_fiftyone_xywh(BBox(0, 0.5, 0.9, 1.0, 0.2)) == (
-        pytest.approx(0.0),
-        pytest.approx(0.8),
-        1.0,
-        0.2,
-    )
