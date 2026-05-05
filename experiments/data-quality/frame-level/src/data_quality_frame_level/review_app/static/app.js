@@ -89,6 +89,7 @@ async function init() {
   });
 
   const ctxs = await api.contexts();
+  renderDvcBanners(ctxs.dvc_warnings || []);
   const selModel = document.getElementById('sel-model');
   const selSplit = document.getElementById('sel-split');
   ctxs.models.forEach(m => selModel.add(new Option(m, m)));
@@ -211,6 +212,28 @@ function renderQueue() {
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+
+function renderDvcBanners(warnings) {
+  const host = document.getElementById('dvc-banner-host');
+  host.innerHTML = '';
+  const dismissed = JSON.parse(sessionStorage.getItem('dvc_dismissed') || '[]');
+  warnings.forEach(w => {
+    const key = `${w.model}/${w.split}/${w.kind}`;
+    if (dismissed.includes(key)) return;
+    const div = document.createElement('div');
+    div.className = 'dvc-banner';
+    div.innerHTML = `
+      <span class="msg">⚠️ ${escapeHtml(w.message)}</span>
+      <span class="ctx">${escapeHtml(w.model)} / ${escapeHtml(w.split)}</span>
+      <button type="button">Dismiss</button>`;
+    div.querySelector('button').addEventListener('click', () => {
+      dismissed.push(key);
+      sessionStorage.setItem('dvc_dismissed', JSON.stringify(dismissed));
+      div.remove();
+    });
+    host.appendChild(div);
+  });
 }
 
 async function navigateTo(idx) {
