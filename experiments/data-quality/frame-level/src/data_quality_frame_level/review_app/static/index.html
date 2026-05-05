@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <title>🔥 Label audit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <style type="text/tailwindcss">
+    @layer base {
+      body { @apply font-sans text-slate-700 antialiased; }
+      input[type="range"] { @apply min-w-0 w-full appearance-none bg-transparent; }
+      input[type="range"]::-webkit-slider-runnable-track { @apply h-1 rounded bg-slate-200; }
+      input[type="range"]::-moz-range-track { @apply h-1 rounded bg-slate-200; }
+      input[type="range"]::-webkit-slider-thumb { @apply appearance-none -mt-1.5 h-4 w-4 rounded-full bg-sky-600 cursor-pointer shadow ring-2 ring-white; }
+      input[type="range"]::-moz-range-thumb { @apply h-4 w-4 rounded-full bg-sky-600 cursor-pointer border-0 shadow ring-2 ring-white; }
+    }
+    @layer components {
+      .pill { @apply inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-medium text-slate-700 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700; }
+      .icon-btn { @apply inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700; }
+      .chip { @apply rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 transition hover:border-sky-300 hover:text-sky-700; }
+      .chip.active { @apply border-sky-300 bg-sky-50 text-sky-700; }
+
+      /* Queue items */
+      .queue-item { @apply flex items-center gap-2 border-b border-slate-100 border-l-2 border-l-transparent px-3 py-2 cursor-pointer transition hover:bg-slate-50; }
+      .queue-item.active { @apply border-l-sky-500 bg-sky-50; }
+      .queue-item.kind-fp { @apply border-l-rose-200; }
+      .queue-item.kind-fp.active { @apply border-l-sky-500 bg-sky-50; }
+      .queue-item.kind-fn { @apply border-l-amber-200; }
+      .queue-item.kind-fn.active { @apply border-l-sky-500 bg-sky-50; }
+      .queue-item.unflagged { @apply opacity-50; }
+      .queue-item .stem { @apply flex-1 truncate font-mono text-[11px] text-slate-700; }
+      .queue-item .kind { @apply min-w-[28px] text-right text-[10px] font-semibold uppercase tracking-wide; }
+      .queue-item.kind-fp .kind { @apply text-rose-600; }
+      .queue-item.kind-fn .kind { @apply text-amber-600; }
+      .queue-item.unflagged .kind { @apply text-slate-400; }
+      .queue-item .dot { @apply h-2 w-2 rounded-full bg-transparent; }
+      .queue-item .dot.reviewed { @apply bg-emerald-500; }
+      .queue-item .dot.unclear { @apply bg-amber-500; }
+      .queue-seq { @apply sticky top-0 z-10 flex items-center justify-between border-b border-t border-slate-200 bg-slate-100 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500; }
+
+      /* Bbox rows in right panel */
+      .bbox-row { @apply mb-1 flex cursor-pointer items-center gap-2 rounded-md border-l-4 px-2 py-1.5 text-xs; }
+      .bbox-row.orig { @apply border-l-sky-500 bg-sky-50; }
+      .bbox-row.corr { @apply border-l-emerald-500 bg-emerald-50; }
+      .bbox-row.pred { @apply border-l-rose-500 bg-rose-50; }
+      .bbox-row .src { @apply min-w-[44px] text-[11px] font-semibold text-slate-700; }
+      .bbox-row .meta-x { @apply flex-1 truncate font-mono text-[10px] text-slate-500; }
+      .bbox-row .actions button { @apply rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] text-slate-600 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700; }
+
+      /* Status buttons */
+      .status-btn { @apply flex-1 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-emerald-300 hover:bg-emerald-50; }
+      .status-btn.active { @apply border-emerald-400 bg-emerald-50 text-emerald-700; }
+
+      /* Timeline strip */
+      .tl-frame { @apply flex-shrink-0 cursor-pointer; }
+      .tl-frame.unflagged { @apply opacity-50; }
+      .tl-frame .tl-img { @apply block h-24 w-36 rounded border-2 border-transparent bg-slate-700 object-cover transition; }
+      .tl-frame.current .tl-img { @apply border-sky-400 ring-2 ring-sky-400/40; }
+      .tl-frame .tl-status { @apply mt-1 h-1 rounded bg-transparent; }
+      .tl-frame .tl-status.flagged-fp { @apply bg-rose-500; }
+      .tl-frame .tl-status.flagged-fn { @apply bg-amber-500; }
+      .tl-frame .tl-status.reviewed { @apply bg-emerald-500; }
+      .tl-frame .tl-status.unclear { @apply bg-amber-500; }
+      .tl-frame .tl-time { @apply mt-1 text-center font-mono text-[10px] text-slate-400; }
+
+      /* Save bar */
+      #save-bar { @apply border-t border-emerald-200 bg-emerald-50 px-4 py-2 text-center text-xs font-semibold text-emerald-700; }
+      #save-bar.dirty { @apply border-amber-300 bg-amber-50 text-amber-700; }
+
+      /* Filters */
+      .slider-row { @apply grid grid-cols-[56px_1fr_36px] items-center gap-2 mb-2 text-xs; }
+      .slider-row .hint { @apply cursor-help underline decoration-dotted decoration-slate-400 underline-offset-2; }
+      .slider-row .val { @apply text-right font-mono text-sky-600; }
+    }
+    @layer utilities {
+      #filters.collapsed #filter-body { display: none; }
+      #filters:not(.collapsed) #filter-toggle .caret { transform: rotate(90deg); }
+    }
+    @layer components {
+      /* spacer to keep the next block in components scope */
+      ._spacer { display: none; }
+
+      /* Modal */
+      .modal { @apply fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm; }
+      .modal[hidden] { display: none; }
+      .modal-card { @apply w-full max-w-md rounded-xl bg-white p-6 shadow-2xl; }
+
+      /* Help pane swatches */
+      #help-pane .sw { @apply inline-block h-3 w-6 rounded border-2 align-middle; }
+      #help-pane .sw.flat { @apply h-3 w-3 rounded-full border-0; }
+      #help-pane .sw.dashed { @apply border-dashed bg-transparent; }
+      #help-pane kbd { @apply inline-flex items-center rounded border border-b-2 border-slate-300 bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] text-slate-700; }
+      #help-pane em { @apply font-semibold not-italic text-emerald-600; }
+
+      .dvc-banner { @apply flex items-center gap-3 border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900; }
+      .dvc-banner .msg { @apply flex-1; }
+      .dvc-banner .ctx { @apply font-mono text-xs text-amber-700; }
+      .dvc-banner button { @apply rounded border border-amber-300 bg-white px-2 py-0.5 text-xs text-amber-700 transition hover:bg-amber-100; }
+
+      .toast { @apply pointer-events-auto rounded-md px-4 py-2 text-sm shadow-lg transition-opacity duration-500; }
+      .toast-success { @apply bg-emerald-600 text-white; }
+      .toast-error { @apply bg-rose-600 text-white; }
+    }
+  </style>
+</head>
+<body class="h-full">
+
+  <div id="dvc-banner-host" class="flex flex-col"></div>
+  <div id="toast-host" class="fixed right-4 top-14 z-50 flex flex-col items-end gap-2 pointer-events-none"></div>
+
+  <header class="flex h-12 items-center gap-3 border-b border-slate-200 bg-white px-4 shadow-sm">
+    <strong class="text-sm font-semibold tracking-tight text-slate-900">🔥 Label audit</strong>
+    <span class="flex-1"></span>
+    <label class="flex items-center gap-1.5 text-xs text-slate-500">model
+      <select id="sel-model" class="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 shadow-sm focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"></select>
+    </label>
+    <label class="flex items-center gap-1.5 text-xs text-slate-500">split
+      <select id="sel-split" class="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 shadow-sm focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"></select>
+    </label>
+    <span class="flex items-center gap-1 rounded-full bg-slate-100 p-0.5" id="view-chips">
+      <button data-view="fp" class="chip active">FP</button>
+      <button data-view="fn" class="chip">FN</button>
+    </span>
+    <div id="progress" title="Reviewed / total in current FP/FN queue" class="flex min-w-[200px] items-center gap-2">
+      <div class="bar h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+        <div class="fill h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-300" style="width: 0"></div>
+      </div>
+      <span class="label whitespace-nowrap font-mono text-xs text-slate-500">0 / 0</span>
+    </div>
+    <span class="flex-1"></span>
+    <button id="reviewer-display" title="Click to change reviewer handle" class="pill">—</button>
+    <button id="export-btn" title="Export current (model, split) to data/10_export/" class="pill">📦 Export</button>
+    <button id="help-btn" title="Reference (?)" class="icon-btn font-semibold">?</button>
+  </header>
+
+  <div id="reviewer-modal" hidden class="modal">
+    <div class="modal-card">
+      <h2 class="text-lg font-semibold text-slate-900">Welcome</h2>
+      <p class="mt-1 text-sm text-slate-500">Pick your handle. It's stored with each review so other reviewers can see who made each decision.</p>
+      <div id="reviewer-presets" class="mt-4 grid grid-cols-3 gap-2">
+        <button class="preset rounded-md border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-700 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700" data-handle="arthur">arthur</button>
+        <button class="preset rounded-md border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-700 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700" data-handle="mateo">mateo</button>
+        <button class="preset rounded-md border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-700 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700" data-handle="felix">felix</button>
+      </div>
+      <p class="mt-4 mb-1 text-xs text-slate-500">Or enter another handle:</p>
+      <input id="reviewer-input" placeholder="e.g. someone-else" autocomplete="off" class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400">
+      <button id="reviewer-submit" class="mt-3 w-full rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300">Start reviewing</button>
+    </div>
+  </div>
+
+  <main class="flex h-[calc(100vh-3rem)]">
+
+    <aside class="flex w-64 flex-col border-r border-slate-200 bg-slate-50/60">
+      <section id="filters" class="collapsed border-b border-slate-200">
+        <button id="filter-toggle" type="button" class="flex w-full items-center gap-1.5 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500 transition hover:bg-slate-100">
+          <span class="caret inline-block transition-transform">▸</span> filters
+        </button>
+        <div id="filter-body" class="px-4 pb-3">
+          <div class="slider-row">
+            <span class="hint" title="Per-detection confidence floor. Predictions below this value are hidden everywhere (canvas, bbox list, FP/FN matching). Inference floor is 0.05 — slider can't go lower.">conf ≥</span>
+            <input type="range" id="conf" min="0.05" max="1" step="0.01" value="0.05">
+            <span class="val" id="conf-v">0.05</span>
+          </div>
+          <div class="slider-row">
+            <span class="hint" title="IoU threshold for matching predictions to GT. Lower = more lenient: partial overlap still counts as TP. Affects which boxes are FP/FN.">IoU ≥</span>
+            <input type="range" id="iou" min="0" max="1" step="0.01" value="0.05">
+            <span class="val" id="iou-v">0.05</span>
+          </div>
+          <div class="slider-row">
+            <span class="hint" title="FP queue floor. A frame is in the FP queue only if its highest-confidence FP is at or above this value. Doesn't change matching — just filters which FPs are worth reviewing.">review ≥</span>
+            <input type="range" id="review-conf" min="0" max="1" step="0.01" value="0.35">
+            <span class="val" id="review-conf-v">0.35</span>
+          </div>
+          <button id="filter-reset" type="button" class="mt-2 w-full rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-500 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700">Reset to defaults</button>
+        </div>
+      </section>
+      <section id="queue" class="flex-1 overflow-y-auto"></section>
+    </aside>
+
+    <section class="flex flex-1 min-w-0 flex-col bg-slate-900">
+      <div id="canvas-wrap" class="relative flex flex-1 items-center justify-center p-4">
+        <canvas id="cnv" class="max-h-full max-w-full cursor-crosshair rounded shadow-2xl ring-1 ring-slate-800"></canvas>
+        <div id="layer-toggles" class="absolute right-3 top-3 flex gap-3 rounded-md bg-slate-900/70 px-3 py-1.5 text-xs text-slate-200 backdrop-blur-sm">
+          <label class="flex items-center gap-1.5"><input type="checkbox" id="show-orig" checked class="accent-sky-400"> O · original ground truth</label>
+          <label class="flex items-center gap-1.5"><input type="checkbox" id="show-pred" checked class="accent-rose-400"> P · predictions</label>
+        </div>
+      </div>
+      <div id="timeline" class="flex min-h-[140px] gap-2 overflow-x-auto border-t border-slate-800 bg-slate-950 px-3 py-3 text-slate-400"></div>
+    </section>
+
+    <aside class="flex w-72 flex-col border-l border-slate-200 bg-slate-50/60">
+      <section id="help-pane" hidden class="max-h-[55vh] overflow-y-auto border-b border-slate-200 bg-white">
+        <header class="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2">
+          <strong class="text-xs font-semibold text-slate-700">Reference</strong>
+          <button id="help-close" title="Close (?)" class="icon-btn h-6 w-6 text-xs">✕</button>
+        </header>
+        <table class="w-full border-collapse text-[11px]">
+          <tr><th colspan="2" class="bg-slate-50 px-4 pb-1 pt-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Bbox layers (canvas)</th></tr>
+          <tr><td class="px-4 py-1 align-middle"><span class="sw bg-sky-500 border-sky-500"></span></td><td class="px-4 py-1 text-slate-600">Original GT — read-only reference</td></tr>
+          <tr><td class="px-4 py-1 align-middle"><span class="sw dashed border-rose-500"></span></td><td class="px-4 py-1 text-slate-600">Prediction — read-only reference (dashed)</td></tr>
+          <tr><td class="px-4 py-1 align-middle"><span class="sw bg-emerald-500 border-emerald-500"></span></td><td class="px-4 py-1 text-slate-600">Corrected GT — editable, exported</td></tr>
+          <tr><th colspan="2" class="bg-slate-50 px-4 pb-1 pt-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Queue / timeline</th></tr>
+          <tr><td class="px-4 py-1 align-middle"><span class="sw flat bg-rose-500"></span></td><td class="px-4 py-1 text-slate-600">FP — model flagged but no GT</td></tr>
+          <tr><td class="px-4 py-1 align-middle"><span class="sw flat bg-amber-500"></span></td><td class="px-4 py-1 text-slate-600">FN — GT but model missed</td></tr>
+          <tr><td class="px-4 py-1 align-middle"><span class="sw flat bg-emerald-500"></span></td><td class="px-4 py-1 text-slate-600">Reviewed — decision saved</td></tr>
+          <tr><td class="px-4 py-1 text-slate-400">dim row / thumbnail</td><td class="px-4 py-1 text-slate-600">Unflagged sibling (context only)</td></tr>
+          <tr><th colspan="2" class="bg-slate-50 px-4 pb-1 pt-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Navigation</th></tr>
+          <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>←</kbd> / <kbd>→</kbd></td><td class="px-4 py-1 text-slate-600">Walk timeline; flow into adjacent sequence</td></tr>
+          <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>Ctrl</kbd>+<kbd>←</kbd>/<kbd>→</kbd></td><td class="px-4 py-1 text-slate-600">Jump to prev / next sequence</td></tr>
+          <tr><th colspan="2" class="bg-slate-50 px-4 pb-1 pt-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Status</th></tr>
+          <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>Space</kbd></td><td class="px-4 py-1 text-slate-600">Mark <em>reviewed</em> + advance</td></tr>
+          <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>r</kbd></td><td class="px-4 py-1 text-slate-600">Mark <em>reviewed</em> (stay)</td></tr>
+          <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>u</kbd></td><td class="px-4 py-1 text-slate-600">Mark <em>unclear</em></td></tr>
+          <tr><th colspan="2" class="bg-slate-50 px-4 pb-1 pt-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Bbox editing</th></tr>
+          <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>Del</kbd> / <kbd>Backspace</kbd></td><td class="px-4 py-1 text-slate-600">Delete selected corrected bbox</td></tr>
+          <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>Esc</kbd></td><td class="px-4 py-1 text-slate-600">Clear bbox selection</td></tr>
+          <tr><td class="px-4 py-1">double-click empty</td><td class="px-4 py-1 text-slate-600">Draw a new corrected bbox</td></tr>
+          <tr><td class="px-4 py-1">click on original GT</td><td class="px-4 py-1 text-slate-600">Copy into corrected layer</td></tr>
+          <tr><th colspan="2" class="bg-slate-50 px-4 pb-1 pt-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">View</th></tr>
+          <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>o</kbd></td><td class="px-4 py-1 text-slate-600">Toggle original GT layer</td></tr>
+          <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>p</kbd></td><td class="px-4 py-1 text-slate-600">Toggle predictions layer</td></tr>
+          <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>?</kbd></td><td class="px-4 py-1 text-slate-600">Toggle this panel</td></tr>
+          <tr><th colspan="2" class="bg-slate-50 px-4 pb-1 pt-2 text-left text-[9px] font-semibold uppercase tracking-wider text-slate-500">Zoom &amp; pan</th></tr>
+          <tr><td class="px-4 py-1 whitespace-nowrap">wheel</td><td class="px-4 py-1 text-slate-600">Zoom in / out toward cursor</td></tr>
+          <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>Shift</kbd>+drag</td><td class="px-4 py-1 text-slate-600">Pan the image</td></tr>
+          <tr><td class="px-4 py-1 whitespace-nowrap"><kbd>0</kbd></td><td class="px-4 py-1 text-slate-600">Reset zoom &amp; pan to fit</td></tr>
+        </table>
+      </section>
+
+      <div class="px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Bboxes (this frame)</div>
+      <section id="bbox-list" class="flex-1 overflow-y-auto px-3 pt-1 pb-4"></section>
+
+      <section id="status-pane" class="border-t border-slate-200 px-4 py-3">
+        <div class="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Status</div>
+        <div class="flex gap-2">
+          <button data-status="reviewed" class="status-btn active">reviewed</button>
+          <button data-status="unclear" class="status-btn">unclear</button>
+        </div>
+      </section>
+
+      <section id="note-pane" class="border-t border-slate-200 px-4 py-3">
+        <div class="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Note</div>
+        <textarea id="note" rows="3" class="w-full resize-y rounded-md border border-slate-200 px-2 py-1.5 text-xs focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400"></textarea>
+      </section>
+
+      <div id="save-bar">— no edits —</div>
+    </aside>
+
+  </main>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

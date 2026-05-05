@@ -37,6 +37,10 @@ git add data/09_review.dvc data/.gitignore && git commit -m "review: update tags
 Full walkthrough below — see **How to review the errors** and
 **Recording decisions: tag → validate → save**.
 
+There is also a newer **bbox-editing review app** that lets reviewers
+fix GT geometry directly in a browser instead of tagging in FiftyOne.
+See [Bbox-editing review app](#bbox-editing-review-app).
+
 ## Design
 
 See [`docs/specs/2026-04-24-frame-level-label-audit-design.md`](docs/specs/2026-04-24-frame-level-label-audit-design.md).
@@ -70,6 +74,123 @@ Outputs:
 - `data/07_model_output/<model>/<split>/predictions.json` — every YOLO detection ≥ `conf_thresh`.
 - `data/08_reporting/<model>/<split>/summary.json` — TP/FP/FN counts, precision/recall, and review-queue sample sizes.
 - Persistent FiftyOne datasets in the local mongo store, named `dq-frame_<model>_<split>`, each with two saved views (`fp-by-confidence`, `fn-by-area`).
+
+## Bbox-editing review app
+
+A browser-based review workflow that **edits GT bboxes inline**
+instead of just tagging frames. FiftyOne (below) still works and is
+unchanged; this app is an additional, parallel option.
+
+Specs: [`docs/specs/2026-05-05-review-app-design.md`](docs/specs/2026-05-05-review-app-design.md)
+and [`docs/specs/2026-05-05-export-flow-design.md`](docs/specs/2026-05-05-export-flow-design.md).
+
+### Quickstart
+
+```bash
+cd experiments/data-quality/frame-level
+make install                  # once per checkout
+uv run dvc repro              # ensures predictions.json + raw datasets exist
+make review-pull              # fetch existing review.json from DVC (skip on first run)
+
+make review-app               # starts the app on http://localhost:8000
+
+# (Review samples in the browser — see "How to use the app" below.)
+
+# End of session — emit the patch + push:
+make review-export
+uv run dvc add data/09_review data/10_export && uv run dvc push
+git add data/09_review.dvc data/10_export.dvc data/.gitignore
+git commit -m "review: bbox corrections + export"
+```
+
+### Data flow & files persisted
+
+```
+data/01_raw/datasets/<split>/labels/<stem>.txt   ← original GT (read-only)
+data/01_raw/datasets/<split>/images/<stem>.jpg   ← source images (read-only)
+data/07_model_output/<m>/<s>/predictions.json    ← YOLO predictions (read-only)
+        │
+        ▼
+   ┌────────────────────┐
+   │  review app (web)  │  reads all three; canvas shows blue=original GT,
+   └────────────────────┘  red dashed=predictions, green=corrected GT (editable)
+        │
+        ▼ (auto-save on every edit)
+data/09_review/<m>/<s>/review.json               ← reviewer's corrections
+        │
+        ▼ (make review-export)
+data/10_export/<m>/<s>/
+  ├─ labels/<stem>.txt        ← only-changed corrected labels
+  ├─ manifest.json            ← apply contract (consumed by pyro-dataset)
+  ├─ pending.json             ← unclear-status frames (second-opinion queue)
+  └─ provenance.json          ← git/threshold/predictions metadata
+```
+
+**Key invariant:** the app never modifies `01_raw/.../labels/*.txt`.
+Original GT stays on disk untouched; the reviewer's corrected layer
+lives entirely in `review.json` keyed by stem. Pre-existing FiftyOne
+state in `tags.json` is also untouched — the two review files coexist.
+
+### How to use the app
+
+1. **Pick a handle** — first launch shows a modal with preset buttons
+   (`arthur` / `mateo` / `felix`) plus a free-form input. Click one to
+   continue; the handle persists in `localStorage` and is stamped on
+   every saved sample. Click the handle in the header to change it
+   later.
+2. **Pick a context** — the header dropdowns choose model and split
+   (`val`, `train`, or `test`). View chips switch FP / FN. Filters are
+   collapsed by default; expand to tune `conf` / `IoU` / `review`
+   sliders live (queue rebuilds in 200ms).
+3. **Review samples** — the queue (left panel) shows flagged frames
+   first, with unflagged sequence siblings dimmed for context. Click a
+   thumbnail or use ←/→ to walk the timeline (which shows every frame
+   in the current sequence).
+4. **Edit bboxes** — on the canvas: drag green box corners to resize,
+   drag the body to move, double-click empty space to draw a new box,
+   click an original blue GT to copy it into the editable green layer.
+   The right panel lists all bboxes with `Use as GT` actions.
+5. **Set status** — `Space` marks reviewed and advances; `r`/`u` set
+   reviewed/unclear without moving. Auto-save fires 1s after the last
+   edit; explicit `✓ saved at <time>` indicator at the bottom right.
+6. **See keyboard shortcuts and color legend** — click the `?` icon in
+   the header (or press `?`) to toggle the reference panel.
+
+### Sequential hand-off across reviewers
+
+`review.json` is a single per-`(model, split)` file shared via DVC:
+
+```bash
+# Mateo, on his machine:
+make review-app   # reviews 50 samples, auto-saved to local review.json
+uv run dvc add data/09_review && uv run dvc push
+git add data/09_review.dvc && git commit -m "review: mateo's val pass" && git push
+
+# Felix, on his machine:
+git pull
+make review-pull              # fetches Mateo's reviewed samples
+make review-app               # Mateo's reviews show as green dots; Felix continues
+```
+
+Felix's saves are unioned into the same `review.json` (each sample
+carries its own `reviewer` field). The header shows a yellow banner if
+the local `review.json` md5 differs from the DVC-tracked md5 — your
+cue to `make review-pull` before reviewing to avoid overwriting work.
+
+### Apply the export to pyro-dataset
+
+The export's `manifest.json` is the contract; `pyro-dataset` provides
+the apply script (out of scope for this experiment). Rough usage:
+
+```bash
+cd ../pyro-dataset
+uv run python scripts/apply_audit.py \
+    /abs/path/to/vision-rd/experiments/data-quality/frame-level/data/10_export/yolo11s-nimble-narwhal/val/
+# Then dvc repro merge_yolo_dataset to propagate to yolo_train_val/yolo_test.
+```
+
+`manifest.json::contributors` lists the reviewer handles whose work is
+in the patch — useful for crediting in the resulting PR description.
 
 ## How to review the errors
 
