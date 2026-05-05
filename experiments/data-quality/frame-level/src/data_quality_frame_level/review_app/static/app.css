@@ -50,6 +50,7 @@ body { margin: 0; font: 13px/1.4 ui-sans-serif, system-ui, sans-serif; color: #1
 #filter-toggle .caret { display: inline-block; transition: transform .15s ease; }
 #filters:not(.collapsed) #filter-toggle .caret { transform: rotate(90deg); }
 #filter-toggle .summary { margin-left: auto; color: #0969da; font-variant-numeric: tabular-nums; text-transform: none; letter-spacing: 0; font-size: 11px; }
+#filters.collapsed #filter-toggle .summary { display: none; }
 #filter-body { padding: 0 12px 8px; }
 #filters.collapsed #filter-body { display: none; }
 .slider-row { display: grid; grid-template-columns: 60px 1fr 36px; gap: 6px; align-items: center; margin-bottom: 6px; font-size: 11px; }
