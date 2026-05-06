@@ -96,11 +96,12 @@ def write_manifest_and_labels(
     if labels_dir.exists():
         shutil.rmtree(labels_dir)
     changed: list[dict] = []
-    totals = {"changed": 0, "added": 0, "removed": 0, "modified": 0}
+    totals = {"reviewed": 0, "changed": 0, "added": 0, "removed": 0, "modified": 0}
     for stem in sorted(review.samples):
         sample = review.samples[stem]
         if sample.status != "reviewed":
             continue
+        totals["reviewed"] += 1
         original = originals.get(stem, [])
         if sample.bboxes:
             effective = sample.bboxes

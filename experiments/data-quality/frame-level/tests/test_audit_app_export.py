@@ -61,6 +61,7 @@ def test_export_writes_only_changed(tmp_path: Path):
     text = (out / "labels" / "stem_b.txt").read_text()
     assert text.strip().split() == ["0", "0.6", "0.6", "0.1", "0.1"]
     manifest = json.loads((out / "manifest.json").read_text())
+    assert manifest["totals"]["reviewed"] == 2
     assert manifest["totals"]["changed"] == 1
     assert [c["stem"] for c in manifest["changed"]] == ["stem_b"]
 
@@ -82,6 +83,7 @@ def test_export_spurious_only_writes_empty_labels(tmp_path: Path):
     assert label == ""
     manifest = json.loads((out / "manifest.json").read_text())
     assert manifest["totals"] == {
+        "reviewed": 1,
         "changed": 1,
         "added": 0,
         "removed": 1,

@@ -179,7 +179,7 @@ async function doExport() {
     const contrib = m.contributors?.length ? ` · ${m.contributors.join(', ')}` : '';
     showToast(
       'success',
-      `✓ Exported ${t.changed || 0} changed (${state.split})${contrib} → data/10_export/${state.model}/${state.split}/`
+      `✓ Exported ${t.reviewed || 0} reviewed, ${t.changed || 0} changed (${state.split})${contrib} → data/10_export/${state.model}/${state.split}/`
     );
   } catch (e) {
     showToast('error', `Export failed: ${e.message}`);

@@ -45,9 +45,10 @@ def main() -> None:
                 log.info("skip: no review.json or predictions for %s/%s", model, split)
                 continue
             log.info(
-                "%s/%s: %d changed, %d added, %d removed, %d modified",
+                "%s/%s: %d reviewed, %d changed, %d added, %d removed, %d modified",
                 model,
                 split,
+                manifest["totals"]["reviewed"],
                 manifest["totals"]["changed"],
                 manifest["totals"]["added"],
                 manifest["totals"]["removed"],
