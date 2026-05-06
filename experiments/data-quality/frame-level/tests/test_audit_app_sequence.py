@@ -1,4 +1,4 @@
-from data_quality_frame_level.review_app.sequence import (
+from data_quality_frame_level.audit_app.sequence import (
     assign_temporal_sequences,
     parse_stem,
 )

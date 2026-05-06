@@ -11,7 +11,7 @@ split (`yolo_train_val` + `yolo_test`):
 
 Every YOLO detection above the production per-detection threshold
 (`0.05`) is retained, so reviewers can dynamically tune the confidence
-filter live in the review app without rebuilding anything.
+filter live in the audit app without rebuilding anything.
 
 ## Quickstart — review session
 
@@ -23,10 +23,10 @@ make install                  # once per checkout
 uv run dvc repro
 
 # Start a review session:
-make review-app               # opens http://localhost:8000
+make audit-app                # opens http://localhost:8000
 
 # End of session — emit the patch + push:
-make review-export
+make audit-export
 uv run dvc add data/09_review data/10_export && uv run dvc push
 git add data/09_review.dvc data/10_export.dvc data/.gitignore
 git commit -m "review: bbox corrections + export"
@@ -63,9 +63,9 @@ Outputs:
 
 - `data/07_model_output/<model>/<split>/predictions.json` — every YOLO detection ≥ `conf_thresh`.
 
-## Bbox-editing review app
+## Bbox-editing audit app
 
-A browser-based review workflow that **edits GT bboxes inline** instead of just tagging frames.
+A browser-based audit workflow that **edits GT bboxes inline** instead of just tagging frames.
 
 ### Quickstart
 
@@ -74,12 +74,12 @@ cd experiments/data-quality/frame-level
 make install                  # once per checkout
 uv run dvc repro              # ensures predictions.json + raw datasets exist
 
-make review-app               # starts the app on http://localhost:8000
+make audit-app                # starts the app on http://localhost:8000
 
 # (Review samples in the browser — see "How to use the app" below.)
 
 # End of session — emit the patch + push:
-make review-export
+make audit-export
 uv run dvc add data/09_review data/10_export && uv run dvc push
 git add data/09_review.dvc data/10_export.dvc data/.gitignore
 git commit -m "review: bbox corrections + export"
@@ -94,13 +94,13 @@ data/07_model_output/<m>/<s>/predictions.json    ← YOLO predictions (read-only
         │
         ▼
    ┌────────────────────┐
-   │  review app (web)  │  reads all three; canvas shows blue=original GT,
+   │  audit app (web)   │  reads all three; canvas shows blue=original GT,
    └────────────────────┘  red dashed=predictions, green=corrected GT (editable)
         │
         ▼ (auto-save on every edit)
 data/09_review/<m>/<s>/review.json               ← reviewer's corrections
         │
-        ▼ (make review-export)
+        ▼ (make audit-export)
 data/10_export/<m>/<s>/
   ├─ labels/<stem>.txt        ← only-changed corrected labels
   ├─ manifest.json            ← apply contract (consumed by pyro-dataset)
@@ -143,14 +143,14 @@ lives entirely in `review.json` keyed by stem.
 
 ```bash
 # Mateo, on his machine:
-make review-app   # reviews 50 samples, auto-saved to local review.json
+make audit-app    # reviews 50 samples, auto-saved to local review.json
 uv run dvc add data/09_review && uv run dvc push
 git add data/09_review.dvc && git commit -m "review: mateo's val pass" && git push
 
 # Felix, on his machine:
 git pull
 uv run dvc pull data/09_review   # fetches Mateo's reviewed samples
-make review-app                   # Mateo's reviews show as green dots; Felix continues
+make audit-app                    # Mateo's reviews show as green dots; Felix continues
 ```
 
 Felix's saves are unioned into the same `review.json` (each sample
@@ -241,7 +241,7 @@ not invalidate existing stages.
 - **Narwhal v6.0.0 runs at `conf=0.05` per-detection and a temporal
   smoothing threshold of `0.35` in production.** Here there's no
   temporal layer, so we use `conf=0.05` at inference (retain everything)
-  and apply a confidence floor in the review app instead, which
+  and apply a confidence floor in the audit app instead, which
   approximates the production alarm gate at the single-frame level.
 
 ## Layout

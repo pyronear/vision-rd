@@ -1,7 +1,7 @@
+from data_quality_frame_level.audit_app.queue import QueueItem, build_queue
+from data_quality_frame_level.audit_app.sequence import assign_temporal_sequences
+from data_quality_frame_level.audit_app.types import Prediction
 from data_quality_frame_level.dataset import BBox
-from data_quality_frame_level.review_app.queue import QueueItem, build_queue
-from data_quality_frame_level.review_app.sequence import assign_temporal_sequences
-from data_quality_frame_level.review_app.types import Prediction
 
 
 def _seq_map(stems):

@@ -795,6 +795,9 @@ dependencies = [
 ]
 
 [package.dev-dependencies]
+audit-app = [
+    { name = "uvicorn", extra = ["standard"] },
+]
 dev = [
     { name = "dvc", extra = ["s3"] },
     { name = "fastapi" },
@@ -805,9 +808,6 @@ dev = [
     { name = "pyyaml" },
     { name = "ruff" },
 ]
-review-app = [
-    { name = "uvicorn", extra = ["standard"] },
-]
 
 [package.metadata]
 requires-dist = [
@@ -817,6 +817,7 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
+audit-app = [{ name = "uvicorn", extras = ["standard"], specifier = ">=0.32" }]
 dev = [
     { name = "dvc", extras = ["s3"], specifier = ">=3.56" },
     { name = "fastapi", specifier = ">=0.115" },
@@ -827,7 +828,6 @@ dev = [
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "ruff", specifier = ">=0.9" },
 ]
-review-app = [{ name = "uvicorn", extras = ["standard"], specifier = ">=0.32" }]
 
 [[package]]
 name = "decorator"

@@ -2,7 +2,7 @@
 
 Reads review.json + predictions.json + GT for a single ``(model, split)``,
 gathers git/params metadata, and writes the four export files. Both
-``scripts/export_review_app.py`` (the CLI) and the FastAPI ``/api/export``
+``scripts/export_audit_app.py`` (the CLI) and the FastAPI ``/api/export``
 route call :func:`export_one`.
 """
 
@@ -11,12 +11,12 @@ import hashlib
 import subprocess
 from pathlib import Path
 
-from data_quality_frame_level.dataset import iter_frames
-from data_quality_frame_level.review_app.export import (
+from data_quality_frame_level.audit_app.export import (
     ProvenanceInput,
     export_corrections,
 )
-from data_quality_frame_level.review_app.persistence import read_review_state
+from data_quality_frame_level.audit_app.persistence import read_review_state
+from data_quality_frame_level.dataset import iter_frames
 
 EXPERIMENT_DIR = "experiments/data-quality/frame-level"
 

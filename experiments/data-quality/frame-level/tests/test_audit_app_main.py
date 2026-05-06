@@ -4,8 +4,8 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from data_quality_frame_level.review_app.main import create_app
-from data_quality_frame_level.review_app.state import Paths
+from data_quality_frame_level.audit_app.main import create_app
+from data_quality_frame_level.audit_app.state import Paths
 
 
 @pytest.fixture

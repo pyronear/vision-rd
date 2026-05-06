@@ -20,7 +20,7 @@ dev = [
     "pyyaml>=6.0",
     "ruff>=0.9",
 ]
-review-app = [
+audit-app = [
     "uvicorn[standard]>=0.32",
 ]
 
