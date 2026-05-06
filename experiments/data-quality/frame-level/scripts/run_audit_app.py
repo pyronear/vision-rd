@@ -1,4 +1,4 @@
-"""Launch the frame-level review app via uvicorn.
+"""Launch the frame-level audit app via uvicorn.
 
 Discovers contexts from ``params.yaml`` (models) and the
 ``data/01_raw/datasets/`` tree (splits). Lazy-loads each context on
@@ -6,7 +6,7 @@ first request.
 
 Usage::
 
-    uv run --group review-app python scripts/run_review_app.py
+    uv run --group audit-app python scripts/run_audit_app.py
 """
 
 import argparse
@@ -15,8 +15,8 @@ from pathlib import Path
 import uvicorn
 import yaml
 
-from data_quality_frame_level.review_app.main import create_app
-from data_quality_frame_level.review_app.state import Paths
+from data_quality_frame_level.audit_app.main import create_app
+from data_quality_frame_level.audit_app.state import Paths
 
 
 def _discover_paths(

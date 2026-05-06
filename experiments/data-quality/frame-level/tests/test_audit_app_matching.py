@@ -1,12 +1,12 @@
 import pytest
 
-from data_quality_frame_level.dataset import BBox
-from data_quality_frame_level.review_app.matching import (
+from data_quality_frame_level.audit_app.matching import (
     EvaluatedFrame,
     evaluate_frame,
     iou,
 )
-from data_quality_frame_level.review_app.types import Prediction
+from data_quality_frame_level.audit_app.types import Prediction
+from data_quality_frame_level.dataset import BBox
 
 
 def _gt(cx, cy, w, h):

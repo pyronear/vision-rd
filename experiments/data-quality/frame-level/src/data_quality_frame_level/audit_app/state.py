@@ -9,15 +9,15 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
-from data_quality_frame_level.dataset import BBox, iter_frames
-from data_quality_frame_level.review_app.persistence import (
+from data_quality_frame_level.audit_app.persistence import (
     ReviewState,
     SampleReview,
     read_review_state,
     write_review_state,
 )
-from data_quality_frame_level.review_app.sequence import assign_temporal_sequences
-from data_quality_frame_level.review_app.types import Prediction
+from data_quality_frame_level.audit_app.sequence import assign_temporal_sequences
+from data_quality_frame_level.audit_app.types import Prediction
+from data_quality_frame_level.dataset import BBox, iter_frames
 
 
 @dataclass(frozen=True)

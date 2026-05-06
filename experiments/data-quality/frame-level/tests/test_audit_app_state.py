@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
+from data_quality_frame_level.audit_app.state import AppState, Paths
 from data_quality_frame_level.dataset import BBox
-from data_quality_frame_level.review_app.state import AppState, Paths
 
 
 def _write_predictions(p: Path, frames: dict) -> None:

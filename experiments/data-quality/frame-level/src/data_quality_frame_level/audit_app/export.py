@@ -8,7 +8,7 @@ The export directory contains four siblings:
   provenance.json       # audit-side context for reproducibility
 
 Each writer here is a pure function over its inputs; the CLI
-(``scripts/export_review_app.py``) gathers the git/DVC/params context
+(``scripts/export_audit_app.py``) gathers the git/DVC/params context
 and feeds it in.
 """
 
@@ -18,9 +18,9 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+from data_quality_frame_level.audit_app.matching import iou
+from data_quality_frame_level.audit_app.persistence import ReviewState
 from data_quality_frame_level.dataset import BBox
-from data_quality_frame_level.review_app.matching import iou
-from data_quality_frame_level.review_app.persistence import ReviewState
 
 UNCHANGED_IOU = 0.95
 SPURIOUS_MATCH_IOU = 0.95
@@ -96,11 +96,12 @@ def write_manifest_and_labels(
     if labels_dir.exists():
         shutil.rmtree(labels_dir)
     changed: list[dict] = []
-    totals = {"changed": 0, "added": 0, "removed": 0, "modified": 0}
+    totals = {"reviewed": 0, "changed": 0, "added": 0, "removed": 0, "modified": 0}
     for stem in sorted(review.samples):
         sample = review.samples[stem]
         if sample.status != "reviewed":
             continue
+        totals["reviewed"] += 1
         original = originals.get(stem, [])
         if sample.bboxes:
             effective = sample.bboxes

@@ -1,6 +1,6 @@
-"""Plain dataclasses for the review app.
+"""Plain dataclasses for the audit app.
 
-Defined locally so the review_app package has no dependency on
+Defined locally so the audit_app package has no dependency on
 ultralytics / YOLO runtime — that lives in
 :mod:`data_quality_frame_level.inference` and is only needed to
 *produce* predictions, not to *consume* them.

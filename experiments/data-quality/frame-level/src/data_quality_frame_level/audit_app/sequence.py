@@ -1,4 +1,4 @@
-"""Stem parsing and temporal sequence grouping for the review app.
+"""Stem parsing and temporal sequence grouping for the audit app.
 
 Stems in pyro-dataset are
 ``<source>_<camera>_<sequence_id>_<timestamp>`` where ``<timestamp>``

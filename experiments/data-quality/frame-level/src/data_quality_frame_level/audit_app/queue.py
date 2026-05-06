@@ -1,4 +1,4 @@
-"""Queue building for the review app.
+"""Queue building for the audit app.
 
 Filters and sorts the universe of ``(stem, predictions, gt)`` triples
 into a list of :class:`QueueItem` for the active view. Sort order
@@ -10,10 +10,10 @@ the active view (FP confidence, FN area, or the max of the two for
 
 from dataclasses import dataclass
 
+from data_quality_frame_level.audit_app.matching import evaluate_frame
+from data_quality_frame_level.audit_app.sequence import parse_stem
+from data_quality_frame_level.audit_app.types import Prediction
 from data_quality_frame_level.dataset import BBox
-from data_quality_frame_level.review_app.matching import evaluate_frame
-from data_quality_frame_level.review_app.sequence import parse_stem
-from data_quality_frame_level.review_app.types import Prediction
 
 
 @dataclass(frozen=True)

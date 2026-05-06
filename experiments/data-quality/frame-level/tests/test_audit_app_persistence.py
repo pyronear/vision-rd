@@ -2,14 +2,14 @@ import hashlib
 import json
 from pathlib import Path
 
-from data_quality_frame_level.dataset import BBox
-from data_quality_frame_level.review_app.persistence import (
+from data_quality_frame_level.audit_app.persistence import (
     ReviewState,
     SampleReview,
     dvc_warning_for_review,
     read_review_state,
     write_review_state,
 )
+from data_quality_frame_level.dataset import BBox
 
 
 def _md5(content: bytes) -> str:
