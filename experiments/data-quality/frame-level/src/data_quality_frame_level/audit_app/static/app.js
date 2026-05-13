@@ -874,6 +874,26 @@ window.addEventListener('keydown', async e => {
   if (e.key === '0') { resetView(); paint(); }
 });
 
+async function undoLastSave() {
+  if (state.undoStack.length === 0) return;
+  clearTimeout(saveTimer);
+  state.dirty = false;
+  const { stem, snapshot } = state.undoStack.pop();
+  if (state.sample?.stem !== stem) {
+    try {
+      await loadSample(stem, { preserveView: true });
+    } catch {
+      return;
+    }
+  }
+  applySnapshot(state.sample, snapshot);
+  state.loadedSnapshot = snapshotOf(state.sample);
+  state.dirty = true;
+  await persistSample({ recordUndo: false });
+  paint();
+  renderRight();
+}
+
 async function seqStep(d) {
   if (!state.sample) return;
   await flushPending();
