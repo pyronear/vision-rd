@@ -7,6 +7,8 @@ const state = {
   queue: [], queueIndex: -1,
   sample: null,
   dirty: false,
+  loadedSnapshot: null,
+  undoStack: [],
 };
 
 const api = {
@@ -354,6 +356,20 @@ function materializeVerifiedFromOriginals(sample) {
   for (const o of sample.original_gt) {
     if (!containsBbox(sp, o)) sample.verified_gt.push(bboxCopy(o));
   }
+}
+function snapshotOf(sample) {
+  return {
+    status: sample.status ?? null,
+    verified_gt: sample.verified_gt.map(bboxCopy),
+    spurious_originals: (sample.spurious_originals || []).map(bboxCopy),
+    note: sample.note ?? null,
+  };
+}
+function applySnapshot(sample, snapshot) {
+  sample.status = snapshot.status;
+  sample.verified_gt = snapshot.verified_gt.map(bboxCopy);
+  sample.spurious_originals = snapshot.spurious_originals.map(bboxCopy);
+  sample.note = snapshot.note;
 }
 function bboxIou(a, b) {
   const ix = Math.max(0, Math.min(a.cx + a.w/2, b.cx + b.w/2) - Math.max(a.cx - a.w/2, b.cx - b.w/2));
