@@ -77,3 +77,25 @@ def test_save_sample_writes_review_json(fake_tree: Paths):
     assert sample["status"] == "reviewed"
     assert sample["bboxes"][0]["cx"] == 0.4
     assert sample["reviewer"] == "arthur"
+
+
+def test_delete_sample_removes_entry(fake_tree: Paths):
+    state = AppState.load(model="m", split="val", paths=fake_tree)
+    state.save_sample(
+        stem="seq_2024-01-01T00-00-00",
+        status="reviewed",
+        bboxes=[],
+        spurious_originals=[],
+        reviewer=None,
+        note=None,
+    )
+    state.delete_sample(stem="seq_2024-01-01T00-00-00")
+    assert "seq_2024-01-01T00-00-00" not in state.review.samples
+    payload = json.loads(fake_tree.review_path.read_text())
+    assert "seq_2024-01-01T00-00-00" not in payload["samples"]
+
+
+def test_delete_sample_unknown_stem_is_noop(fake_tree: Paths):
+    state = AppState.load(model="m", split="val", paths=fake_tree)
+    state.delete_sample(stem="seq_2024-01-01T00-00-00")
+    assert state.review.samples == {}

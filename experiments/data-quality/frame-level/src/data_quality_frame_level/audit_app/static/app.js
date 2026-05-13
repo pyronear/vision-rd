@@ -7,6 +7,8 @@ const state = {
   queue: [], queueIndex: -1,
   sample: null,
   dirty: false,
+  loadedSnapshot: null,
+  undoStack: [],
 };
 
 const api = {
@@ -19,6 +21,10 @@ const api = {
     fetch(`/api/sample?model=${encodeURIComponent(model)}&split=${encodeURIComponent(split)}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
+    }).then(r => r.json()),
+  delete: ({ model, split, stem }) =>
+    fetch(`/api/sample?model=${encodeURIComponent(model)}&split=${encodeURIComponent(split)}&stem=${encodeURIComponent(stem)}`, {
+      method: 'DELETE',
     }).then(r => r.json()),
 };
 
@@ -314,6 +320,7 @@ async function loadSample(stem, opts = {}) {
   state.dirty = false;
   selected = null;
   hovered = null;
+  state.loadedSnapshot = snapshotOf(state.sample);
   setSaveBar();
   renderQueue();
   renderCanvas(opts);
@@ -354,6 +361,20 @@ function materializeVerifiedFromOriginals(sample) {
   for (const o of sample.original_gt) {
     if (!containsBbox(sp, o)) sample.verified_gt.push(bboxCopy(o));
   }
+}
+function snapshotOf(sample) {
+  return {
+    status: sample.status ?? null,
+    verified_gt: sample.verified_gt.map(bboxCopy),
+    spurious_originals: (sample.spurious_originals || []).map(bboxCopy),
+    note: sample.note ?? null,
+  };
+}
+function applySnapshot(sample, snapshot) {
+  sample.status = snapshot.status;
+  sample.verified_gt = snapshot.verified_gt.map(bboxCopy);
+  sample.spurious_originals = snapshot.spurious_originals.map(bboxCopy);
+  sample.note = snapshot.note;
 }
 function bboxIou(a, b) {
   const ix = Math.max(0, Math.min(a.cx + a.w/2, b.cx + b.w/2) - Math.max(a.cx - a.w/2, b.cx - b.w/2));
@@ -646,8 +667,12 @@ function scheduleSave() {
   saveTimer = setTimeout(persistSample, 1000);
 }
 
-async function persistSample() {
+async function persistSample(options = {}) {
   if (!state.dirty || !state.sample || !state.sample.status) return;
+  if (options.recordUndo !== false && state.loadedSnapshot) {
+    state.undoStack.push({ stem: state.sample.stem, snapshot: state.loadedSnapshot });
+    if (state.undoStack.length > 50) state.undoStack.shift();
+  }
   const r = await api.save({
     model: state.model, split: state.split,
     body: {
@@ -661,6 +686,7 @@ async function persistSample() {
   });
   state.dirty = false;
   state.sample.reviewed_at = r.saved_at;
+  state.loadedSnapshot = snapshotOf(state.sample);
   setSaveBar();
   const qi = state.queue.find(q => q.stem === state.sample.stem);
   if (qi) qi.status = state.sample.status;
@@ -822,6 +848,10 @@ function renderTimeline() {
 
 window.addEventListener('keydown', async e => {
   if (e.target.matches('input, textarea, select')) return;
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
+    e.preventDefault();
+    return undoLastSave();
+  }
   if (e.key === '?') {
     e.preventDefault();
     const p = document.getElementById('help-pane');
@@ -851,6 +881,38 @@ window.addEventListener('keydown', async e => {
   }
   if (e.key === '0') { resetView(); paint(); }
 });
+
+async function undoLastSave() {
+  if (state.undoStack.length === 0) return;
+  clearTimeout(saveTimer);
+  state.dirty = false;
+  const { stem, snapshot } = state.undoStack.pop();
+  if (state.sample?.stem !== stem) {
+    try {
+      await loadSample(stem, { preserveView: true });
+    } catch {
+      return;
+    }
+  }
+  applySnapshot(state.sample, snapshot);
+  state.loadedSnapshot = snapshotOf(state.sample);
+  if (snapshot.status === null) {
+    await api.delete({ model: state.model, split: state.split, stem });
+    state.sample.reviewed_at = null;
+    const qi = state.queue.find(q => q.stem === stem);
+    if (qi) qi.status = null;
+    state.dirty = false;
+    setSaveBar();
+    renderQueue();
+    renderProgress();
+  } else {
+    state.dirty = true;
+    await persistSample({ recordUndo: false });
+  }
+  paint();
+  renderRight();
+  renderTimeline();
+}
 
 async function seqStep(d) {
   if (!state.sample) return;
