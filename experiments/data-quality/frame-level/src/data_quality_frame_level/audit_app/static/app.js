@@ -663,8 +663,12 @@ function scheduleSave() {
   saveTimer = setTimeout(persistSample, 1000);
 }
 
-async function persistSample() {
+async function persistSample(options = {}) {
   if (!state.dirty || !state.sample || !state.sample.status) return;
+  if (options.recordUndo !== false && state.loadedSnapshot) {
+    state.undoStack.push({ stem: state.sample.stem, snapshot: state.loadedSnapshot });
+    if (state.undoStack.length > 50) state.undoStack.shift();
+  }
   const r = await api.save({
     model: state.model, split: state.split,
     body: {
@@ -678,6 +682,7 @@ async function persistSample() {
   });
   state.dirty = false;
   state.sample.reviewed_at = r.saved_at;
+  state.loadedSnapshot = snapshotOf(state.sample);
   setSaveBar();
   const qi = state.queue.find(q => q.stem === state.sample.stem);
   if (qi) qi.status = state.sample.status;
