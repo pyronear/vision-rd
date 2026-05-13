@@ -95,3 +95,9 @@ class AppState:
         self.review.samples[stem] = sample
         write_review_state(self.paths.review_path, self.review)
         return sample
+
+    def delete_sample(self, *, stem: str) -> None:
+        if stem not in self.review.samples:
+            return
+        del self.review.samples[stem]
+        write_review_state(self.paths.review_path, self.review)

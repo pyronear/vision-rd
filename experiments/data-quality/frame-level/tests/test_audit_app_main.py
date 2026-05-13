@@ -187,6 +187,35 @@ def test_post_sample_persists(app_tree):
     assert sample["bboxes"][0]["cx"] == 0.4
 
 
+def test_delete_sample_removes_entry(app_tree):
+    client, paths = app_tree
+    client.post(
+        "/api/sample",
+        params={"model": "m", "split": "val"},
+        json={
+            "stem": "s_2024-01-01T00-00-00",
+            "status": "reviewed",
+            "bboxes": [{"class_id": 0, "cx": 0.4, "cy": 0.4, "w": 0.2, "h": 0.2}],
+        },
+    )
+    r = client.delete(
+        "/api/sample",
+        params={"model": "m", "split": "val", "stem": "s_2024-01-01T00-00-00"},
+    )
+    assert r.status_code == 200
+    payload = json.loads(paths.review_path.read_text())
+    assert "s_2024-01-01T00-00-00" not in payload["samples"]
+
+
+def test_delete_sample_unknown_stem_is_noop(app_tree):
+    client, _ = app_tree
+    r = client.delete(
+        "/api/sample",
+        params={"model": "m", "split": "val", "stem": "missing"},
+    )
+    assert r.status_code == 200
+
+
 def test_get_contexts_includes_dvc_warnings(app_tree):
     client, paths = app_tree
     dvc_path = paths.review_path.with_suffix(paths.review_path.suffix + ".dvc")

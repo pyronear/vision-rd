@@ -200,6 +200,12 @@ def create_app(
         )
         return {"saved_at": sample.reviewed_at}
 
+    @app.delete("/api/sample")
+    def delete_sample(model: str, split: str, stem: str) -> dict:
+        s = _state(model, split)
+        s.delete_sample(stem=stem)
+        return {"ok": True}
+
     @app.post("/api/export")
     def post_export(
         model: str,
