@@ -939,10 +939,7 @@ function setStatus(s) {
 }
 
 async function setStatusAndAdvance(s) {
-  if (!state.sample) return;
-  state.sample.status = s;
-  markDirty();
-  renderRight();
+  setStatus(s);
   await seqStep(+1);
 }
 
