@@ -723,11 +723,7 @@ function renderRight() {
     root.appendChild(row);
   });
   document.querySelectorAll('#status-pane button[data-status]').forEach(btn => {
-    btn.onclick = () => {
-      state.sample.status = btn.dataset.status;
-      markDirty();
-      updateStatusButtons();
-    };
+    btn.onclick = () => setStatus(btn.dataset.status);
   });
   updateStatusButtons();
   const note = document.getElementById('note');
