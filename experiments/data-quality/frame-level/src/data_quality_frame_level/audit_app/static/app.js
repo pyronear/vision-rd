@@ -844,6 +844,10 @@ function renderTimeline() {
 
 window.addEventListener('keydown', async e => {
   if (e.target.matches('input, textarea, select')) return;
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
+    e.preventDefault();
+    return undoLastSave();
+  }
   if (e.key === '?') {
     e.preventDefault();
     const p = document.getElementById('help-pane');
