@@ -348,6 +348,13 @@ function bboxClose(a, b) {
 function bboxCopy(b) { return { class_id: 0, cx: b.cx, cy: b.cy, w: b.w, h: b.h }; }
 function containsBbox(arr, b) { return arr.some(x => bboxClose(x, b)); }
 function withoutBbox(arr, b) { return arr.filter(x => !bboxClose(x, b)); }
+function materializeVerifiedFromOriginals(sample) {
+  if (sample.verified_gt.length > 0) return;
+  const sp = sample.spurious_originals || [];
+  for (const o of sample.original_gt) {
+    if (!containsBbox(sp, o)) sample.verified_gt.push(bboxCopy(o));
+  }
+}
 function bboxIou(a, b) {
   const ix = Math.max(0, Math.min(a.cx + a.w/2, b.cx + b.w/2) - Math.max(a.cx - a.w/2, b.cx - b.w/2));
   const iy = Math.max(0, Math.min(a.cy + a.h/2, b.cy + b.h/2) - Math.max(a.cy - a.h/2, b.cy - b.h/2));
