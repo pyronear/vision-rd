@@ -316,6 +316,7 @@ async function loadSample(stem, opts = {}) {
   state.dirty = false;
   selected = null;
   hovered = null;
+  state.loadedSnapshot = snapshotOf(state.sample);
   setSaveBar();
   renderQueue();
   renderCanvas(opts);
