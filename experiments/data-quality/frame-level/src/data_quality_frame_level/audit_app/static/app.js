@@ -911,6 +911,7 @@ async function undoLastSave() {
   }
   paint();
   renderRight();
+  renderTimeline();
 }
 
 async function seqStep(d) {
