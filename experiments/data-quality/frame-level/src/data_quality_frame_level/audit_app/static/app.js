@@ -931,9 +931,11 @@ function deleteSelected() {
 
 function setStatus(s) {
   if (!state.sample) return;
+  if (s === 'reviewed') materializeVerifiedFromOriginals(state.sample);
   state.sample.status = s;
   markDirty();
   renderRight();
+  paint();
 }
 
 async function setStatusAndAdvance(s) {
