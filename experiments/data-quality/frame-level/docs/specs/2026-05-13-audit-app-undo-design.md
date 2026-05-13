@@ -58,8 +58,10 @@ auto-save means there are no unsaved edits to discard.
 - Undo across browser sessions / page reloads.
 - Undo that only touches in-memory state without re-persisting. The
   whole point is that the next export reflects the revert.
-- Changes to auto-save semantics or the persistence contract on the
-  Python side.
+- Changes to auto-save semantics on the Python side. (One additive
+  server-side change is required — see §5.4: a `DELETE /api/sample`
+  endpoint to revert a frame to the unreviewed state. The existing
+  POST save path and persistence contract are unchanged.)
 
 ## 5. Design
 
@@ -139,10 +141,19 @@ single stack entry — the granularity is "per save round-trip," not
 5. Apply `snapshot` onto `state.sample`'s four mutable fields.
 6. Set `state.loadedSnapshot = snapshotOf(state.sample)` to reflect
    the reverted baseline.
-7. Set `state.dirty = true` and call
+7. **If `snapshot.status === null`** (the frame was unreviewed when we
+   first loaded it), the persistence layer cannot represent that as a
+   save — `review.json` only stores entries with `status ∈
+   {reviewed, unclear}`. Instead, call
+   `DELETE /api/sample?model&split&stem` to remove the entry from
+   `review.json`, clear `state.sample.reviewed_at`, update the queue
+   card's `status` field, refresh the save-bar, and re-render the
+   queue/progress. Set `state.dirty = false`.
+8. **Otherwise** (status is `"reviewed"` or `"unclear"`): set
+   `state.dirty = true` and call
    `await persistSample({ recordUndo: false })` — the revert is
    persisted immediately, not via the 1 s debounce.
-8. Re-render: `paint(); renderRight(); setSaveBar();`.
+9. Re-render: `paint(); renderRight();`.
 
 ### 5.5 Stack cap
 

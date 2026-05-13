@@ -22,6 +22,10 @@ const api = {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     }).then(r => r.json()),
+  delete: ({ model, split, stem }) =>
+    fetch(`/api/sample?model=${encodeURIComponent(model)}&split=${encodeURIComponent(split)}&stem=${encodeURIComponent(stem)}`, {
+      method: 'DELETE',
+    }).then(r => r.json()),
 };
 
 const cnv = document.getElementById('cnv');
@@ -892,8 +896,19 @@ async function undoLastSave() {
   }
   applySnapshot(state.sample, snapshot);
   state.loadedSnapshot = snapshotOf(state.sample);
-  state.dirty = true;
-  await persistSample({ recordUndo: false });
+  if (snapshot.status === null) {
+    await api.delete({ model: state.model, split: state.split, stem });
+    state.sample.reviewed_at = null;
+    const qi = state.queue.find(q => q.stem === stem);
+    if (qi) qi.status = null;
+    state.dirty = false;
+    setSaveBar();
+    renderQueue();
+    renderProgress();
+  } else {
+    state.dirty = true;
+    await persistSample({ recordUndo: false });
+  }
   paint();
   renderRight();
 }
