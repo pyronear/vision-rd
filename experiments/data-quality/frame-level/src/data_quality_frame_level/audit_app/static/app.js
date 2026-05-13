@@ -92,6 +92,7 @@ async function init() {
 
   const ctxs = await api.contexts();
   renderDvcBanners(ctxs.dvc_warnings || []);
+  renderDatasetVersion(ctxs.dataset_version);
   const selModel = document.getElementById('sel-model');
   const selSplit = document.getElementById('sel-split');
   ctxs.models.forEach(m => selModel.add(new Option(m, m)));
@@ -261,6 +262,17 @@ function renderQueue() {
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+
+function renderDatasetVersion(rev) {
+  const el = document.getElementById('dataset-version');
+  if (!rev) { el.hidden = true; return; }
+  el.textContent = `dataset ${rev}`;
+  el.hidden = false;
+  if (rev.startsWith('mixed:')) {
+    el.classList.remove('border-slate-200', 'bg-slate-50', 'text-slate-600');
+    el.classList.add('border-amber-300', 'bg-amber-50', 'text-amber-800');
+  }
 }
 
 function renderDvcBanners(warnings) {
