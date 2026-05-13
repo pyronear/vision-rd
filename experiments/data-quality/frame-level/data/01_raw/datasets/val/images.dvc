@@ -1,11 +1,11 @@
-md5: d252e974cd9a4042cb4b5b7da7522198
+md5: 6292910e52e88c9fa1a5676a91bc263a
 frozen: true
 deps:
 - path: data/processed/yolo_train_val/images/val
   repo:
     url: https://github.com/pyronear/pyro-dataset
-    rev: v3.0.0
-    rev_lock: ca2a1b0a47163feefaeb02ba43b239eb64898362
+    rev: v4.0.0
+    rev_lock: 4e16c464edda7400b0ac738c4f45f8d8e50fa735
 outs:
 - md5: df4d690da139e65e9a42465ffb14693c.dir
   size: 161303667

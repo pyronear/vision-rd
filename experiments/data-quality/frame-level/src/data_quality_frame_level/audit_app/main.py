@@ -18,6 +18,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from data_quality_frame_level.audit_app.dataset_version import read_dataset_version
 from data_quality_frame_level.audit_app.export_runner import export_one
 from data_quality_frame_level.audit_app.matching import evaluate_frame
 from data_quality_frame_level.audit_app.persistence import dvc_warning_for_review
@@ -70,7 +71,14 @@ def create_app(
             w = dvc_warning_for_review(paths.review_path)
             if w is not None:
                 warnings.append({**w, "model": m, "split": s})
-        return {"models": models, "splits": splits, "dvc_warnings": warnings}
+        return {
+            "models": models,
+            "splits": splits,
+            "dvc_warnings": warnings,
+            "dataset_version": read_dataset_version(
+                repo_root / "data" / "01_raw" / "datasets"
+            ),
+        }
 
     @app.get("/api/queue")
     def get_queue(
