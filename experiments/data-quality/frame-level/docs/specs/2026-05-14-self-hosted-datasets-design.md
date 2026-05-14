@@ -160,23 +160,13 @@ To convert the current setup on this branch:
 5. Commit the new `.dvc` files, `SOURCE.json`, the DVC-managed
    `.gitignore` (if changed), and any `dvc.lock` changes.
 
-If pyro-dataset's S3 is missing v4.0.0 data (which is the case for
-`yolo_test`), step 3 will fail and we have a choice:
-
-- **(a)** Use whatever pyro-dataset version is fully on remote
-  (probably `manage_fp` or a later commit). Document in `SOURCE.json`
-  that the data is approximated, not bit-identical to the original
-  v4.0.0 import.
-- **(b)** Skip the refresh script for the initial migration and
-  instead `dvc add` directly from the data already present in the
-  workspace (which came from somewhere — likely a stale state of
-  pyro-dataset's remote). This preserves bit-identical data but breaks
-  the `SOURCE.json` invariant that the data was produced by the
-  refresh script.
-
-Recommend (b) for the initial migration with a note in `SOURCE.json`
-that this snapshot predates the refresh script. The first real refresh
-to a newer pyro-dataset version will produce a clean lineage.
+Pyro-dataset's S3 was missing some v4.0.0 blobs (notably the
+`yolo_test` parent manifest) at the time this spec was drafted; a
+colleague is pushing the missing data in parallel. The migration runs
+the refresh script as written and depends on that push completing
+first. If the refresh fails with `No file hash info found` warnings,
+that is the diagnostic signal that the upstream push is incomplete —
+do not work around it locally; report back and wait.
 
 ## 7. Testing
 
