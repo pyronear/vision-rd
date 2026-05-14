@@ -193,33 +193,23 @@ in the patch — useful for crediting in the resulting PR description.
 
 ## Data imports
 
-`train`, `val`, `test` are imported from
-[`pyro-dataset`](https://github.com/pyronear/pyro-dataset) at tag
-`v3.0.0`:
+`train`, `val`, `test` live under `data/01_raw/datasets/` and are
+self-hosted in this experiment's DVC remote (`s3://pyro-vision-rd/`).
+Each split is a single dvc-tracked directory (`train.dvc`, `val.dvc`,
+`test.dvc`) containing `images/` and `labels/`. The pyro-dataset
+version they came from is recorded in `data/01_raw/datasets/SOURCE.json`.
+
+To refresh from a new pyro-dataset version (requires AWS creds for
+both `s3://pyro-dataset-dvc-v2/` and `s3://pyro-test-datasets/`):
 
 ```bash
-# train + val come from yolo_train_val (flat under images/ and labels/)
-uv run dvc import https://github.com/pyronear/pyro-dataset \
-    data/processed/yolo_train_val/images/train \
-    -o data/01_raw/datasets/train/images --rev v3.0.0
-uv run dvc import https://github.com/pyronear/pyro-dataset \
-    data/processed/yolo_train_val/labels/train \
-    -o data/01_raw/datasets/train/labels --rev v3.0.0
-uv run dvc import https://github.com/pyronear/pyro-dataset \
-    data/processed/yolo_train_val/images/val \
-    -o data/01_raw/datasets/val/images --rev v3.0.0
-uv run dvc import https://github.com/pyronear/pyro-dataset \
-    data/processed/yolo_train_val/labels/val \
-    -o data/01_raw/datasets/val/labels --rev v3.0.0
-
-# test comes from yolo_test, which has an extra test/ level under images/ and labels/
-uv run dvc import https://github.com/pyronear/pyro-dataset \
-    data/processed/yolo_test/images/test \
-    -o data/01_raw/datasets/test/images --rev v3.0.0
-uv run dvc import https://github.com/pyronear/pyro-dataset \
-    data/processed/yolo_test/labels/test \
-    -o data/01_raw/datasets/test/labels --rev v3.0.0
+make refresh-datasets PYRO_DATASET_VERSION=v5.0.0
 ```
+
+This clones pyro-dataset shallow, `dvc pull`s, copies the split
+directories into `data/01_raw/datasets/`, runs `dvc add` + `dvc push`,
+and rewrites `SOURCE.json`. Review the resulting diff and commit the
+three `.dvc` files, `SOURCE.json`, and any `dvc.lock` updates.
 
 Model weights are downloaded fresh from Hugging Face by the `prepare`
 stage — not tracked by DVC.
@@ -252,10 +242,11 @@ not invalidate existing stages.
 
 - **Oracle was trained on this data.** Narwhal was trained on
   `yolo_train_val` (likely at an earlier pyro-dataset tag than the
-  `v3.0.0` we audit). On the training split the model will "agree" with
-  any label it memorized — including incorrect ones — so flags on train
+  one we audit; see `data/01_raw/datasets/SOURCE.json` for the current
+  version). On the training split the model will "agree" with any
+  label it memorized — including incorrect ones — so flags on train
   understate the true label-error rate. Val/test findings are more
-  trustworthy. See §10 of the design spec for details.
+  trustworthy.
 - **Narwhal v6.0.0 runs at `conf=0.05` per-detection and a temporal
   smoothing threshold of `0.35` in production.** Here there's no
   temporal layer, so we use `conf=0.05` at inference (retain everything)

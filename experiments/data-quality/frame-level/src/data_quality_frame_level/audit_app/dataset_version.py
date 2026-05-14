@@ -1,53 +1,32 @@
-"""Parse the pyro-dataset revision from the imported ``.dvc`` files.
+"""Parse the pyro-dataset revision from ``SOURCE.json``.
 
-Each ``data/01_raw/datasets/<split>/{images,labels}.dvc`` records the
-upstream ``rev`` of pyro-dataset it was imported from. We surface that
-in the audit app header so reviewers know which dataset version they
-are looking at.
+``data/01_raw/datasets/SOURCE.json`` is written by
+``scripts/refresh_datasets.py`` and records which pyro-dataset version
+the raw splits were last imported from. The audit-app header surfaces
+that version so reviewers know which dataset they are looking at.
 """
 
+import json
 from pathlib import Path
-
-import yaml
-
-_DVC_FILES = ("images.dvc", "labels.dvc")
-
-
-def _read_rev(dvc_path: Path) -> str | None:
-    payload = yaml.safe_load(dvc_path.read_text())
-    for dep in payload.get("deps", []) or []:
-        repo = dep.get("repo") or {}
-        rev = repo.get("rev")
-        if rev:
-            return str(rev)
-    return None
 
 
 def read_dataset_version(datasets_root: Path) -> str | None:
-    """Return the pyro-dataset rev pinned across all split ``.dvc`` files.
+    """Return the pyro-dataset version recorded in ``SOURCE.json``.
 
-    Walks ``datasets_root/<split>/{images,labels}.dvc`` and reads the
-    ``deps[0].repo.rev`` field of each. Returns:
-
-    - ``None`` when ``datasets_root`` is missing or no ``.dvc`` file
-      records a rev (e.g. fresh checkout, local-only data).
-    - A single rev string (e.g. ``"v4.0.0"``) when all files agree.
-    - ``"mixed: <r1>, <r2>, ..."`` when files disagree — a signal that
-      the imports drifted and should be reconciled.
+    Returns ``None`` when ``datasets_root`` is missing, ``SOURCE.json``
+    is missing, the JSON is malformed, or the ``pyro_dataset_version``
+    field is absent. Otherwise returns the version string verbatim.
     """
     if not datasets_root.is_dir():
         return None
-    revs: set[str] = set()
-    for split_dir in sorted(p for p in datasets_root.iterdir() if p.is_dir()):
-        for name in _DVC_FILES:
-            dvc_path = split_dir / name
-            if not dvc_path.is_file():
-                continue
-            rev = _read_rev(dvc_path)
-            if rev is not None:
-                revs.add(rev)
-    if not revs:
+    source_path = datasets_root / "SOURCE.json"
+    if not source_path.is_file():
         return None
-    if len(revs) == 1:
-        return next(iter(revs))
-    return "mixed: " + ", ".join(sorted(revs))
+    try:
+        payload = json.loads(source_path.read_text())
+    except json.JSONDecodeError:
+        return None
+    version = payload.get("pyro_dataset_version")
+    if not isinstance(version, str):
+        return None
+    return version
