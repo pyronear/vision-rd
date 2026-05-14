@@ -1,4 +1,4 @@
-.PHONY: install lint format test help notebook audit-app audit-export
+.PHONY: install lint format test help notebook audit-app audit-export audit-publish audit-summary
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -25,7 +25,16 @@ audit-app: ## Launch the bbox-editing audit app on http://localhost:8000
 audit-export: ## Build YOLO-format patches under data/10_export/ from review.json
 	uv run --group audit-app python scripts/export_audit_app.py
 	@echo ""
-	@echo "Next steps to share the export:"
-	@echo "  uv run dvc add data/10_export && uv run dvc push"
-	@echo "  git add data/10_export.dvc data/.gitignore && git commit -m 'export: refresh corrections'"
+	@echo "Next: make audit-publish    # detect dirty splits, push + commit per split"
+
+audit-publish: ## Push + commit review/export per dirty split (interactive). MODEL=<name> to override.
+	@bash scripts/audit_publish.sh
+
+audit-summary: ## Print per-split summary (reviewed / changed / pending / contributors). MODEL=<name> to override.
+	@MODEL="$${MODEL:-yolo11s-nimble-narwhal}"; \
+	for s in train val test; do \
+	    echo "▸ $$s"; \
+	    uv run python scripts/summarize_split.py --model "$$MODEL" --split "$$s"; \
+	    echo; \
+	done
 
