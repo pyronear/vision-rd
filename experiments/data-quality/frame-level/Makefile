@@ -1,4 +1,4 @@
-.PHONY: install lint format test help notebook audit-app audit-export audit-publish audit-summary
+.PHONY: install lint format test help notebook audit-app audit-export audit-publish audit-summary export-viewer
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -37,4 +37,7 @@ audit-summary: ## Print per-split summary (reviewed / changed / pending / contri
 	    uv run python scripts/summarize_split.py --model "$$MODEL" --split "$$s"; \
 	    echo; \
 	done
+
+export-viewer: ## Launch the read-only export viewer on http://localhost:8001
+	uv run --group audit-app python scripts/run_export_viewer.py
 
