@@ -25,12 +25,16 @@ uv run dvc repro
 # Start a review session:
 make audit-app                # opens http://localhost:8000
 
-# End of session — emit the patch + push:
-make audit-export
-uv run dvc add data/09_review data/10_export && uv run dvc push
-git add data/09_review.dvc data/10_export.dvc data/.gitignore
-git commit -m "review: bbox corrections + export"
+# End of session — emit the patch, then publish your splits:
+make audit-export             # writes data/10_export/<model>/<split>/
+make audit-publish            # interactive: per-split summary, y/N, push, commit
+git push                      # share with the team
 ```
+
+`make audit-publish` detects which splits actually changed (via `dvc
+status`), shows a summary, and prompts y/N per split — different
+reviewers can work on different splits in parallel and land independent
+commits without stepping on each other.
 
 <img width="1651" height="1044" alt="image" src="https://github.com/user-attachments/assets/89317d03-a8e1-49a5-8175-300a6d9f94b5" />
 
@@ -78,11 +82,10 @@ make audit-app                # starts the app on http://localhost:8000
 
 # (Review samples in the browser — see "How to use the app" below.)
 
-# End of session — emit the patch + push:
-make audit-export
-uv run dvc add data/09_review data/10_export && uv run dvc push
-git add data/09_review.dvc data/10_export.dvc data/.gitignore
-git commit -m "review: bbox corrections + export"
+# End of session — emit the patch + publish:
+make audit-export             # writes data/10_export/<model>/<split>/
+make audit-publish            # interactive: per-split summary, y/N, push, commit
+git push                      # share with the team
 ```
 
 ### Data flow & files persisted
@@ -137,26 +140,35 @@ lives entirely in `review.json` keyed by stem.
 6. **See keyboard shortcuts and color legend** — click the `?` icon in
    the header (or press `?`) to toggle the reference panel.
 
-### Sequential hand-off across reviewers
+### Working in parallel across reviewers
 
-`review.json` is a single per-`(model, split)` file shared via DVC:
+`data/09_review/<model>/<split>/` and `data/10_export/<model>/<split>/`
+are tracked **per split** (one `.dvc` file per split), so different
+reviewers can take different splits and land independent commits
+concurrently — no DVC or git collisions on the umbrella directory.
 
 ```bash
-# Mateo, on his machine:
-make audit-app    # reviews 50 samples, auto-saved to local review.json
-uv run dvc add data/09_review && uv run dvc push
-git add data/09_review.dvc && git commit -m "review: mateo's val pass" && git push
+# Mateo takes val:
+make audit-app                        # reviews val in the browser
+make audit-export                     # writes data/10_export/<m>/val/
+make audit-publish                    # detects val dirty, prompts, pushes,
+                                      #   commits 'review(val): bbox ...'
+git push
 
-# Felix, on his machine:
-git pull
-uv run dvc pull data/09_review   # fetches Mateo's reviewed samples
-make audit-app                    # Mateo's reviews show as green dots; Felix continues
+# Felix takes train, in parallel on his machine:
+make audit-app                        # reviews train
+make audit-export
+make audit-publish                    # detects train dirty, commits 'review(train): ...'
+git push                              # merges cleanly — disjoint .dvc files
 ```
 
-Felix's saves are unioned into the same `review.json` (each sample
-carries its own `reviewer` field). The header shows a yellow banner if
-the local `review.json` md5 differs from the DVC-tracked md5 — your
-cue to `dvc pull` before reviewing to avoid overwriting work.
+**Same split, sequential hand-off.** When two reviewers work on the
+same split, `review.json` is unioned (each sample carries its own
+`reviewer` field). The second reviewer should `git pull` and `dvc pull
+data/09_review/<m>/<s>.dvc` before starting; the app's header shows a
+yellow banner if the local `review.json` md5 differs from the
+DVC-tracked md5 — your cue that someone else's work hasn't been
+fetched yet.
 
 ### Apply the export to pyro-dataset
 
@@ -254,8 +266,10 @@ data/
       <model-name>.pt                               # downloaded; not dvc-tracked
   07_model_output/<model-name>/<split>/
     predictions.json
-  09_review/<model-name>/<split>/
-    review.json                                     # bbox corrections (DVC-tracked)
-  10_export/<model-name>/<split>/
-    labels/, manifest.json, pending.json, provenance.json
+  09_review/<model-name>/
+    <split>.dvc                                     # one .dvc per split (DVC-tracked)
+    <split>/review.json                             # bbox corrections
+  10_export/<model-name>/
+    <split>.dvc                                     # one .dvc per split (DVC-tracked)
+    <split>/labels/, manifest.json, pending.json, provenance.json
 ```
