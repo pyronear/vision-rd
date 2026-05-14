@@ -1,4 +1,4 @@
-.PHONY: install lint format test help notebook audit-app audit-export audit-publish audit-summary export-viewer
+.PHONY: install lint format test help notebook audit-app audit-export audit-publish audit-summary export-viewer refresh-datasets
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -40,4 +40,8 @@ audit-summary: ## Print per-split summary (reviewed / changed / pending / contri
 
 export-viewer: ## Launch the read-only export viewer on http://localhost:8001
 	uv run --group audit-app python scripts/run_export_viewer.py
+
+refresh-datasets: ## Refresh raw datasets from pyro-dataset. Requires PYRO_DATASET_VERSION=<tag>.
+	@test -n "$(PYRO_DATASET_VERSION)" || { echo "PYRO_DATASET_VERSION is required (e.g. make refresh-datasets PYRO_DATASET_VERSION=v4.0.0)"; exit 2; }
+	uv run python scripts/refresh_datasets.py --version "$(PYRO_DATASET_VERSION)"
 
