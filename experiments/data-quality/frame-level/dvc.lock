@@ -56,8 +56,8 @@ stages:
     outs:
     - path: data/07_model_output/yolo11s-nimble-narwhal/train
       hash: md5
-      md5: 58f829ccaa0223a7ec992df76087d18e.dir
-      size: 6524018
+      md5: 2ceccf0d2632f73a1afc8f6b89a79866.dir
+      size: 6561781
       nfiles: 1
   predict_val@yolo11s-nimble-narwhal:
     cmd: uv run python scripts/predict.py --model-name yolo11s-nimble-narwhal 
@@ -96,8 +96,8 @@ stages:
     outs:
     - path: data/07_model_output/yolo11s-nimble-narwhal/val
       hash: md5
-      md5: 2ec65bc2dd57b385356fd5867a5e8810.dir
-      size: 642956
+      md5: 1f2bd48b346db3d0c1d61717516b3e46.dir
+      size: 644787
       nfiles: 1
   predict_test@yolo11s-nimble-narwhal:
     cmd: uv run python scripts/predict.py --model-name yolo11s-nimble-narwhal 
@@ -136,6 +136,6 @@ stages:
     outs:
     - path: data/07_model_output/yolo11s-nimble-narwhal/test
       hash: md5
-      md5: e3213251e4572c88d6111a05796e6d28.dir
-      size: 901804
+      md5: 112faa9554a99c0dcc5fcdd39c9a9a00.dir
+      size: 904020
       nfiles: 1
