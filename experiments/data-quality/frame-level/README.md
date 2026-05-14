@@ -170,6 +170,12 @@ yellow banner if the local `review.json` md5 differs from the
 DVC-tracked md5 — your cue that someone else's work hasn't been
 fetched yet.
 
+**Check progress at any time.** `make audit-summary` prints the
+per-split counts (reviewed / changed / pending / contributors) from
+each split's `manifest.json` without touching DVC. Useful before
+deciding which split to pick up, or to spot splits whose `review.json`
+is newer than their last export (warning fires inline).
+
 ### Apply the export to pyro-dataset
 
 The export's `manifest.json` is the contract; `pyro-dataset` provides
