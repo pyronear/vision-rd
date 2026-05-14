@@ -27,9 +27,9 @@ stages:
     deps:
     - path: data/01_raw/datasets/train
       hash: md5
-      md5: 4ef81dac053e8bb69d0053a390f6b59a.dir
-      size: 1751424303
-      nfiles: 29537
+      md5: ae387385fba5d0bbea0f1ea0131a88b9.dir
+      size: 1762944601
+      nfiles: 29534
     - path: data/01_raw/models/yolo11s-nimble-narwhal.pt
       hash: md5
       md5: fea4ddc8d904fcc5ff11ad900e040837
@@ -67,9 +67,9 @@ stages:
     deps:
     - path: data/01_raw/datasets/val
       hash: md5
-      md5: 939e0249dcfdcacaaa09ee02aae30615.dir
-      size: 161388482
-      nfiles: 2855
+      md5: 7f30e1641d1d2309c48c21103fbec30e.dir
+      size: 162950015
+      nfiles: 2852
     - path: data/01_raw/models/yolo11s-nimble-narwhal.pt
       hash: md5
       md5: fea4ddc8d904fcc5ff11ad900e040837
@@ -107,9 +107,9 @@ stages:
     deps:
     - path: data/01_raw/datasets/test
       hash: md5
-      md5: 3b8457851c760a78b80b90e5d8bd813f.dir
-      size: 272010928
-      nfiles: 5283
+      md5: 6c0319a204df663400755f67620e3e7c.dir
+      size: 272531936
+      nfiles: 5280
     - path: data/01_raw/models/yolo11s-nimble-narwhal.pt
       hash: md5
       md5: fea4ddc8d904fcc5ff11ad900e040837

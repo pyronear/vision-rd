@@ -66,7 +66,15 @@ def clone_and_pull(version: str, work_dir: Path) -> Path:
             str(clone_dir),
         ]
     )
-    run(["dvc", "pull"], cwd=clone_dir)
+    run(
+        [
+            "dvc",
+            "pull",
+            "data/processed/yolo_train_val",
+            "data/processed/yolo_test",
+        ],
+        cwd=clone_dir,
+    )
     return clone_dir
 
 
@@ -92,6 +100,31 @@ def copy_splits(pyro_root: Path, dest_root: Path) -> None:
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copytree(src, dst)
         print(f"copied {src} -> {dst}")
+
+
+def precheck_no_tracked_files(experiment_root: Path) -> None:
+    """Abort early if any target split has git-tracked files.
+
+    ``dvc add`` refuses to track paths git already tracks. Detect this
+    before the slow clone+pull so the operator gets a clear instruction
+    immediately rather than after several minutes of wasted work.
+    """
+    targets = [f"data/01_raw/datasets/{s}" for s in SPLITS]
+    result = subprocess.run(
+        ["git", "ls-files", "--", *targets],
+        cwd=experiment_root,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    tracked = [line for line in result.stdout.splitlines() if line.strip()]
+    if tracked:
+        lines = "\n".join(f"  {t}" for t in tracked)
+        raise SystemExit(
+            "Cannot refresh: the following files are git-tracked inside the\n"
+            "dataset directories. Run `git rm` to untrack them before retrying:\n"
+            f"{lines}"
+        )
 
 
 def dvc_add_and_push(experiment_root: Path) -> None:
@@ -139,6 +172,8 @@ def main() -> int:
 
     experiment_root = Path(__file__).resolve().parent.parent
     dest_root = experiment_root / "data" / "01_raw" / "datasets"
+
+    precheck_no_tracked_files(experiment_root)
 
     with tempfile.TemporaryDirectory(prefix="refresh-datasets-") as tmp:
         work_dir = Path(tmp)
