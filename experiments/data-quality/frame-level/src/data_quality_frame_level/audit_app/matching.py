@@ -61,9 +61,7 @@ def evaluate_frame(
     def agrees(gi: int, pj: int) -> bool:
         if pair_iou[gi][pj] >= iou_thresh:
             return True
-        if containment_thresh is not None and pair_iop[gi][pj] >= containment_thresh:
-            return True
-        return False
+        return containment_thresh is not None and pair_iop[gi][pj] >= containment_thresh
 
     pred_status = [
         "tp" if any(agrees(gi, pj) for gi in range(len(gt))) else "fp"

@@ -87,7 +87,10 @@ def test_evaluate_frame_containment_absorbs_tight_pred():
     preds = [_pred(0.5, 0.5, 0.1, 0.1, 0.9)]
     no_contain = evaluate_frame(gt=gt, predictions=preds, iou_thresh=0.5)
     with_contain = evaluate_frame(
-        gt=gt, predictions=preds, iou_thresh=0.5, containment_thresh=0.7,
+        gt=gt,
+        predictions=preds,
+        iou_thresh=0.5,
+        containment_thresh=0.7,
     )
     assert no_contain.gt_status == ["fn"] and no_contain.pred_status == ["fp"]
     assert with_contain.gt_status == ["tp"] and with_contain.pred_status == ["tp"]
@@ -98,14 +101,17 @@ def test_evaluate_frame_giant_pred_over_two_gts_is_fp():
     gt = [_gt(0.30, 0.5, 0.05, 0.05), _gt(0.70, 0.5, 0.05, 0.05)]
     preds = [_pred(0.5, 0.5, 0.9, 0.9, 0.9)]
     out = evaluate_frame(
-        gt=gt, predictions=preds, iou_thresh=0.5, containment_thresh=0.7,
+        gt=gt,
+        predictions=preds,
+        iou_thresh=0.5,
+        containment_thresh=0.7,
     )
     assert out.gt_status == ["fn", "fn"]
     assert out.pred_status == ["fp"]
 
 
 def test_evaluate_frame_containment_none_is_pure_iou_many_to_one():
-    """containment_thresh=None: duplicates still TP (many-to-one), tight pred still FP."""
+    """containment_thresh=None: duplicates TP (many-to-one), tight pred still FP."""
     gt = [_gt(0.5, 0.5, 0.2, 0.2)]
     duplicates = [
         _pred(0.50, 0.50, 0.2, 0.2, 0.9),
