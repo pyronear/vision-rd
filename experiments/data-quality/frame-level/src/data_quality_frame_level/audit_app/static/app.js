@@ -840,19 +840,17 @@ function renderRight() {
     const origKept = members.filter(m => m.kind === 'orig' && !m.spurious);
     const origSpurious = members.filter(m => m.kind === 'orig' && m.spurious);
     const preds = members.filter(m => m.kind === 'pred').sort((a, b) => b.conf - a.conf);
-    const hasGt = verified.length > 0 || origKept.length > 0 || origSpurious.length > 0;
-    const score = hasGt ? 1.0 : (preds.length > 0 ? preds[0].conf : 0);
+    const minLeft = Math.min(...members.map(m => m.bbox.cx - m.bbox.w / 2));
     return {
       verified, origKept, origSpurious, preds,
       size: members.length,
-      score,
+      minLeft,
       firstPoolIndex: Math.min(...memberIdxs),
     };
   });
 
   groups.sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    if (b.size !== a.size) return b.size - a.size;
+    if (a.minLeft !== b.minLeft) return a.minLeft - b.minLeft;
     return a.firstPoolIndex - b.firstPoolIndex;
   });
 

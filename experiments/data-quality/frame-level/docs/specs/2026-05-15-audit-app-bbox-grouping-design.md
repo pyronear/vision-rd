@@ -129,15 +129,14 @@ the model's confidence.
 
 ### 5.4 Group order
 
-Each group gets a `groupScore`:
+Groups are sorted left-to-right by their leftmost bbox edge: for each
+group, compute `minLeft = min over members of (bbox.cx - bbox.w/2)`,
+then sort ascending by `minLeft`. Ties break on the pool index of the
+group's first member (insertion order) for stability.
 
-- `1.0` if the group contains any `verified` or any `original_gt` row
-  (any GT anchors the group as confirmed-existing).
-- Otherwise the max `conf` across the group's predictions.
-
-Groups are sorted by `groupScore` descending. Ties break on group size
-descending, then on the pool index of the group's first member
-(insertion order) for stability.
+Spatial ordering matches the reviewer's left-to-right reading flow
+across the image — the row list mirrors what the eye sees scanning the
+canvas.
 
 ### 5.5 Rendering
 
