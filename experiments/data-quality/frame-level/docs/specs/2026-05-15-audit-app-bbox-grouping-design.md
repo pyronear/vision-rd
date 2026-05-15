@@ -79,15 +79,40 @@ above the group list untouched.
 Union-find over the pool:
 
 1. Assign each bbox an integer id (its index in the pooled array).
-2. For each pair `(i, j)` with `i < j`, if `bboxIou(boxes[i], boxes[j])
-   >= 0.3`, `union(i, j)`.
+2. For each pair `(i, j)` with `i < j`, merge them if **either** of the
+   following holds:
+   - `bboxIou(boxes[i], boxes[j]) >= 0.3` (significant overlap), **or**
+   - `bboxIoMin(boxes[i], boxes[j]) >= 0.6` (one box is mostly
+     contained in the other — Intersection over Smaller).
 3. Read off connected components.
+
+The containment check is needed because IoU drops sharply when bbox
+sizes differ: a small high-confidence pred sitting inside a much larger
+GT will have IoU well below 0.3 even though it is, semantically, the
+same detection. `IoMin = intersection / min(area_a, area_b)` is
+size-invariant — at 1.0 the smaller box is fully inside the larger.
 
 Pool size is small (typically <20 rows per frame, hard bound a few
 dozen), so O(N²) pair scan is fine. The existing `bboxIou` helper at
-`app.js:426-432` is reused.
+`app.js:426-432` is reused; a new sibling helper `bboxIoMin` is added
+next to it.
 
-The IoU threshold is a module-level constant `BBOX_GROUP_IOU = 0.3`.
+Module-level constants:
+
+- `BBOX_GROUP_IOU = 0.3`
+- `BBOX_GROUP_IOMIN = 0.6`
+
+`clusterBboxes` takes a `shouldMerge(a, b)` predicate rather than a
+fixed threshold, so the OR composition lives in one readable place at
+the call site:
+
+```javascript
+clusterBboxes(
+  pool.map(it => it.bbox),
+  (a, b) => bboxIou(a, b) >= BBOX_GROUP_IOU
+         || bboxIoMin(a, b) >= BBOX_GROUP_IOMIN,
+);
+```
 
 ### 5.3 Within-group order
 

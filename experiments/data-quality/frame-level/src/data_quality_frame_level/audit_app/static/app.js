@@ -431,9 +431,18 @@ function bboxIou(a, b) {
   return union > 0 ? inter / union : 0;
 }
 
-const BBOX_GROUP_IOU = 0.3;
+function bboxIoMin(a, b) {
+  const ix = Math.max(0, Math.min(a.cx + a.w/2, b.cx + b.w/2) - Math.max(a.cx - a.w/2, b.cx - b.w/2));
+  const iy = Math.max(0, Math.min(a.cy + a.h/2, b.cy + b.h/2) - Math.max(a.cy - a.h/2, b.cy - b.h/2));
+  const inter = ix * iy;
+  const minArea = Math.min(a.w * a.h, b.w * b.h);
+  return minArea > 0 ? inter / minArea : 0;
+}
 
-function clusterBboxes(boxes, threshold) {
+const BBOX_GROUP_IOU = 0.3;
+const BBOX_GROUP_IOMIN = 0.6;
+
+function clusterBboxes(boxes, shouldMerge) {
   const n = boxes.length;
   const parent = Array.from({ length: n }, (_, i) => i);
   const find = i => {
@@ -443,7 +452,7 @@ function clusterBboxes(boxes, threshold) {
   const union = (a, b) => { const ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; };
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
-      if (bboxIou(boxes[i], boxes[j]) >= threshold) union(i, j);
+      if (shouldMerge(boxes[i], boxes[j])) union(i, j);
     }
   }
   const byRoot = new Map();
@@ -820,7 +829,10 @@ function renderRight() {
     pool.push({ kind: 'pred', idx: i, bbox: p, conf: p.conf });
   });
 
-  const clusters = clusterBboxes(pool.map(it => it.bbox), BBOX_GROUP_IOU);
+  const clusters = clusterBboxes(
+    pool.map(it => it.bbox),
+    (a, b) => bboxIou(a, b) >= BBOX_GROUP_IOU || bboxIoMin(a, b) >= BBOX_GROUP_IOMIN,
+  );
 
   const groups = clusters.map(memberIdxs => {
     const members = memberIdxs.map(i => pool[i]);
