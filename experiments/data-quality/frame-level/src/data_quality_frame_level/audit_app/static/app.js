@@ -3,13 +3,33 @@ const state = {
   view: 'fp',
   conf: 0.05, iou: 0.05, reviewConf: 0.35,
   showOrig: true, showPred: true, showOnlyVerified: false,
+  showAnnotated: localStorage.getItem('show_annotated') === '1',
   reviewer: localStorage.getItem('reviewer') || '',
-  queue: [], queueIndex: -1,
+  queueRaw: [], queue: [], queueIndex: -1,
   sample: null,
   dirty: false,
   loadedSnapshot: null,
   undoStack: [],
 };
+
+function filterQueueForView(items, showAnnotated) {
+  if (showAnnotated) return items.slice();
+  const flaggedBySeq = new Map();
+  const doneBySeq = new Map();
+  items.forEach(it => {
+    if (it.kind && it.kind !== 'none') {
+      flaggedBySeq.set(it.sequence_id, (flaggedBySeq.get(it.sequence_id) || 0) + 1);
+      if (it.status === 'reviewed' || it.status === 'unclear') {
+        doneBySeq.set(it.sequence_id, (doneBySeq.get(it.sequence_id) || 0) + 1);
+      }
+    }
+  });
+  const hiddenSeqs = new Set();
+  for (const [seq, flagged] of flaggedBySeq) {
+    if ((doneBySeq.get(seq) || 0) >= flagged) hiddenSeqs.add(seq);
+  }
+  return items.filter(it => !hiddenSeqs.has(it.sequence_id));
+}
 
 const api = {
   contexts: () => fetch('/api/contexts').then(r => r.json()),
@@ -145,6 +165,22 @@ async function init() {
       reloadQueue();
     });
   });
+  const annotatedBtn = document.getElementById('show-annotated');
+  const syncAnnotatedBtn = () => annotatedBtn.classList.toggle('active', state.showAnnotated);
+  syncAnnotatedBtn();
+  annotatedBtn.addEventListener('click', async () => {
+    await flushPending();
+    state.showAnnotated = !state.showAnnotated;
+    localStorage.setItem('show_annotated', state.showAnnotated ? '1' : '0');
+    syncAnnotatedBtn();
+    const prevStem = state.sample?.stem ?? null;
+    applyQueueFilter();
+    if (state.queueIndex < 0) {
+      state.sample = null; paint(); renderRight(); renderTimeline();
+    } else if (state.queue[state.queueIndex].stem !== prevStem) {
+      await loadSample(state.queue[state.queueIndex].stem);
+    }
+  });
   document.getElementById('show-orig').addEventListener('change', e => {
     state.showOrig = e.target.checked; paint();
   });
@@ -218,22 +254,29 @@ async function reloadQueue() {
     model: state.model, split: state.split, view: state.view,
     conf: state.conf, iou: state.iou, reviewConf: state.reviewConf,
   });
-  state.queue = r.items;
-  state.queueIndex = state.queue.length > 0 ? 0 : -1;
-  renderQueue();
-  renderProgress();
-  if (state.queueIndex >= 0) await loadSample(state.queue[0].stem);
+  state.queueRaw = r.items;
+  applyQueueFilter();
+  if (state.queueIndex >= 0) await loadSample(state.queue[state.queueIndex].stem);
   else { state.sample = null; paint(); renderRight(); renderTimeline(); }
 }
 
+function applyQueueFilter() {
+  const prevStem = state.sample?.stem ?? null;
+  state.queue = filterQueueForView(state.queueRaw, state.showAnnotated);
+  const preserved = prevStem ? state.queue.findIndex(q => q.stem === prevStem) : -1;
+  state.queueIndex = preserved >= 0 ? preserved : (state.queue.length > 0 ? 0 : -1);
+  renderQueue();
+  renderProgress();
+}
+
 function renderProgress() {
-  const flagged = state.queue.filter(i => i.kind && i.kind !== 'none');
-  const reviewed = flagged.filter(i => i.status === 'reviewed').length;
+  const flagged = state.queueRaw.filter(i => i.kind && i.kind !== 'none');
+  const done = flagged.filter(i => i.status === 'reviewed' || i.status === 'unclear').length;
   const total = flagged.length;
-  const pct = total > 0 ? (reviewed / total) * 100 : 0;
+  const pct = total > 0 ? (done / total) * 100 : 0;
   const root = document.getElementById('progress');
   root.querySelector('.fill').style.width = `${pct}%`;
-  root.querySelector('.label').textContent = `${reviewed} / ${total}`;
+  root.querySelector('.label').textContent = `${done} / ${total}`;
 }
 
 function renderQueue() {
