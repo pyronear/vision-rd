@@ -890,7 +890,7 @@ function renderRight() {
       wrap.className = 'bbox-group';
       const header = document.createElement('div');
       header.className = 'bbox-group-header';
-      header.textContent = `Group ${multiGroupIdx} · ${g.size}`;
+      header.textContent = `Group ${multiGroupIdx}`;
       wrap.appendChild(header);
       rows.forEach(r => wrap.appendChild(r));
       root.appendChild(wrap);

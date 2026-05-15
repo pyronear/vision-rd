@@ -145,8 +145,9 @@ descending, then on the pool index of the group's first member
   today's markup. No frame, no header. This keeps the visual noise low
   when many isolated detections exist.
 - **Multi-member group (≥2 members):** wrap the rows in a framed
-  block. The header reads `Group N · K` where `N` is a 1-based group
-  index over multi-member groups only, and `K` is the member count.
+  block. The header reads `Group N` where `N` is a 1-based index over
+  multi-member groups only. (The member count is intentionally omitted
+  — the rows are visible directly below the header.)
 
 Markup sketch (multi-member case):
 
