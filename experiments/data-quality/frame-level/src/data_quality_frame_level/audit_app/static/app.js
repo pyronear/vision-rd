@@ -57,6 +57,7 @@ let drag = null;
 let hovered = null;
 let zoom = 1, panX = 0, panY = 0;
 let imgNaturalW = 0, imgNaturalH = 0;
+let viewMoved = false;
 
 function ensureReviewer() {
   if (state.reviewer) {
@@ -189,6 +190,9 @@ async function init() {
   });
   document.getElementById('show-only-verified').addEventListener('change', e => {
     state.showOnlyVerified = e.target.checked; paint();
+  });
+  document.getElementById('reset-view').addEventListener('click', () => {
+    resetView(); paint();
   });
   const helpPane = document.getElementById('help-pane');
   const toggleHelp = () => { helpPane.hidden = !helpPane.hidden; };
@@ -460,6 +464,13 @@ function resetView() {
   zoom = Math.min(cnv.width / imgNaturalW, cnv.height / imgNaturalH);
   panX = (cnv.width - imgNaturalW * zoom) / 2;
   panY = (cnv.height - imgNaturalH * zoom) / 2;
+  viewMoved = false;
+}
+
+function updateResetBtn() {
+  const btn = document.getElementById('reset-view');
+  if (!btn) return;
+  btn.hidden = !viewMoved;
 }
 
 function clampPan() {
@@ -477,6 +488,7 @@ function screenToWorld(clientX, clientY) {
 }
 
 function paint() {
+  updateResetBtn();
   if (!state.sample || !imgLoaded) {
     ctx2d.clearRect(0, 0, cnv.width || 1, cnv.height || 1);
     return;
@@ -621,6 +633,7 @@ cnv.addEventListener('mousemove', e => {
     panX = drag.startPan.x + (e.clientX - drag.startScreen.x);
     panY = drag.startPan.y + (e.clientY - drag.startScreen.y);
     clampPan();
+    viewMoved = true;
     paint();
     return;
   }
@@ -685,6 +698,7 @@ cnv.addEventListener('wheel', e => {
   panY = sy - wy * newZoom;
   zoom = newZoom;
   clampPan();
+  viewMoved = true;
   paint();
 }, { passive: false });
 
@@ -1045,7 +1059,11 @@ async function setStatusAndAdvance(s) {
 }
 
 window.addEventListener('resize', () => {
-  if (imgLoaded && state.sample) { sizeCanvas(); clampPan(); paint(); }
+  if (!imgLoaded || !state.sample) return;
+  const wasMoved = viewMoved;
+  sizeCanvas();
+  if (wasMoved) clampPan(); else resetView();
+  paint();
 });
 
 window.addEventListener('DOMContentLoaded', init);
