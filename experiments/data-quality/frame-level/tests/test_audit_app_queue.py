@@ -82,3 +82,25 @@ def test_fn_queue_sorts_by_max_gt_area():
         "seqB_2024-01-01T00-00-00",
         "seqA_2024-01-01T00-00-00",
     ]
+
+
+def test_fp_queue_absorbs_tight_pred_with_containment():
+    """A tight pred inside a generous GT is absorbed by default containment=0.7."""
+    stem = "s_2024-01-01T00-00-00"
+    predictions = {stem: [_pred(0.9, cx=0.5, cy=0.5, w=0.1, h=0.1)]}
+    gt = {stem: [_gt(cx=0.5, cy=0.5, w=0.4, h=0.4)]}
+    seq_map = _seq_map(predictions.keys() | gt.keys())
+    common_kwargs = dict(
+        predictions=predictions,
+        gt=gt,
+        sequence_id_by_stem=seq_map,
+        review_status={},
+        view="fp",
+        conf_thresh=0.05,
+        iou_thresh=0.5,
+        review_conf_thresh=0.5,
+    )
+    default = build_queue(**common_kwargs)
+    off = build_queue(**common_kwargs, containment_thresh=None)
+    assert default == []
+    assert [i.stem for i in off] == [stem]
