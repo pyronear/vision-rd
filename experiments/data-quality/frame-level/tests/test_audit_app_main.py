@@ -304,3 +304,65 @@ def test_post_export_writes_manifest(tmp_path):
     assert (out / "manifest.json").is_file()
     prov = json.loads((out / "provenance.json").read_text())
     assert prov["thresholds"] == {"conf": 0.05, "iou": 0.05, "review_conf": 0.35}
+
+
+def test_get_queue_containment_default_absorbs_tight_pred(tmp_path: Path):
+    """Default containment (no param sent) absorbs a tight-pred-in-loose-GT case."""
+    split = tmp_path / "01_raw" / "datasets" / "val"
+    (split / "images").mkdir(parents=True)
+    (split / "labels").mkdir(parents=True)
+    stem = "s_2024-01-01T00-00-00"
+    (split / "images" / f"{stem}.jpg").write_bytes(b"jpeg")
+    (split / "labels" / f"{stem}.txt").write_text("0 0.5 0.5 0.4 0.4\n")
+    pred_path = tmp_path / "07_model_output" / "m" / "val" / "predictions.json"
+    pred_path.parent.mkdir(parents=True)
+    pred_path.write_text(
+        json.dumps(
+            {
+                "model_name": "m",
+                "split_dir": "data/01_raw/datasets/val",
+                "conf_thresh": 0.05,
+                "frames": {
+                    stem: {
+                        "image_path": f"images/{stem}.jpg",
+                        "predictions": [
+                            {
+                                "class_id": 0,
+                                "cx": 0.5,
+                                "cy": 0.5,
+                                "w": 0.05,
+                                "h": 0.05,
+                                "conf": 0.9,
+                            }
+                        ],
+                    },
+                },
+            }
+        )
+    )
+    paths = Paths(
+        split_dir=split,
+        predictions_path=pred_path,
+        review_path=tmp_path / "09_review" / "m" / "val" / "review.json",
+    )
+    app = create_app(
+        contexts={("m", "val"): paths},
+        models=["m"],
+        splits=["val"],
+        repo_root=tmp_path,
+    )
+    client = TestClient(app)
+    common = {
+        "model": "m",
+        "split": "val",
+        "view": "fp",
+        "conf": 0.05,
+        "iou": 0.5,
+        "review_conf": 0.5,
+    }
+    default = client.get("/api/queue", params=common).json()["items"]
+    off = client.get("/api/queue", params={**common, "containment": 0}).json()["items"]
+    flagged = [i for i in default if i["kind"] != "none"]
+    flagged_off = [i for i in off if i["kind"] != "none"]
+    assert flagged == []
+    assert [i["stem"] for i in flagged_off] == [stem]

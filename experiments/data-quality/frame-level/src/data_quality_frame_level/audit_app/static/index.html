@@ -191,6 +191,11 @@
             <input type="range" id="review-conf" min="0" max="1" step="0.01" value="0.35">
             <span class="val" id="review-conf-v">0.35</span>
           </div>
+          <div class="slider-row">
+            <span class="hint" title="Containment threshold for the matcher. A prediction also counts as TP when at least this fraction of its area sits inside a GT box — independent of IoU. Slider at 0 = off (pure IoU).">contain ≥</span>
+            <input type="range" id="contain" min="0" max="1" step="0.05" value="0.7">
+            <span class="val" id="contain-v">0.70</span>
+          </div>
           <button id="filter-reset" type="button" class="mt-2 w-full rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-500 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700">Reset to defaults</button>
         </div>
       </section>

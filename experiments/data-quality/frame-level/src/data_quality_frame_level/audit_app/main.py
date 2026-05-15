@@ -88,6 +88,7 @@ def create_app(
         conf: float,
         iou: float,
         review_conf: float,
+        containment: float = 0.7,
     ) -> dict:
         s = _state(model, split)
         flagged = build_queue(
@@ -99,6 +100,7 @@ def create_app(
             conf_thresh=conf,
             iou_thresh=iou,
             review_conf_thresh=review_conf,
+            containment_thresh=containment if containment > 0 else None,
         )
         flagged_stems = {it.stem for it in flagged}
         flagged_seq_ids = {it.sequence_id for it in flagged}
@@ -138,13 +140,19 @@ def create_app(
         conf: float,
         iou: float,
         review_conf: float,
+        containment: float = 0.7,
     ) -> dict:
         s = _state(model, split)
         if stem not in s.gt and stem not in s.predictions:
             raise HTTPException(404, f"unknown stem: {stem}")
         gt = s.gt.get(stem, [])
         preds = [p for p in s.predictions.get(stem, []) if p.conf >= conf]
-        ev = evaluate_frame(gt=gt, predictions=preds, iou_thresh=iou)
+        ev = evaluate_frame(
+            gt=gt,
+            predictions=preds,
+            iou_thresh=iou,
+            containment_thresh=containment if containment > 0 else None,
+        )
         sample = s.review.samples.get(stem)
         seq_id = s.sequence_id_by_stem[stem]
         _, ts = parse_stem(stem)

@@ -34,9 +34,15 @@ def _frame_severity(
     iou_thresh: float,
     review_conf_thresh: float,
     view: str,
+    containment_thresh: float | None = 0.7,
 ) -> tuple[str | None, float]:
     pred_filt = [p for p in predictions if p.conf >= conf_thresh]
-    ev = evaluate_frame(gt=gt, predictions=pred_filt, iou_thresh=iou_thresh)
+    ev = evaluate_frame(
+        gt=gt,
+        predictions=pred_filt,
+        iou_thresh=iou_thresh,
+        containment_thresh=containment_thresh,
+    )
     fp_conf = max(
         (
             p.conf
@@ -73,6 +79,7 @@ def build_queue(
     conf_thresh: float,
     iou_thresh: float,
     review_conf_thresh: float,
+    containment_thresh: float | None = 0.7,
 ) -> list[QueueItem]:
     items: list[QueueItem] = []
     for stem in sorted(predictions.keys() | gt.keys()):
@@ -83,6 +90,7 @@ def build_queue(
             iou_thresh=iou_thresh,
             review_conf_thresh=review_conf_thresh,
             view=view,
+            containment_thresh=containment_thresh,
         )
         if kind is None:
             continue
