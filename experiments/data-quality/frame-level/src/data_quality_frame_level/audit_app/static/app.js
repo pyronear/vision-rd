@@ -1,7 +1,7 @@
 const state = {
   model: null, split: null,
   view: 'fp',
-  conf: 0.05, iou: 0.05, reviewConf: 0.35,
+  conf: 0.05, iou: 0.05, reviewConf: 0.35, contain: 0.7,
   showOrig: true, showPred: true, showOnlyVerified: false,
   showAnnotated: localStorage.getItem('show_annotated') === '1',
   reviewer: localStorage.getItem('reviewer') || '',
@@ -33,10 +33,10 @@ function filterQueueForView(items, showAnnotated) {
 
 const api = {
   contexts: () => fetch('/api/contexts').then(r => r.json()),
-  queue: ({ model, split, view, conf, iou, reviewConf }) =>
-    fetch(`/api/queue?model=${encodeURIComponent(model)}&split=${encodeURIComponent(split)}&view=${view}&conf=${conf}&iou=${iou}&review_conf=${reviewConf}`).then(r => r.json()),
-  sample: ({ model, split, stem, conf, iou, reviewConf }) =>
-    fetch(`/api/sample?model=${encodeURIComponent(model)}&split=${encodeURIComponent(split)}&stem=${encodeURIComponent(stem)}&conf=${conf}&iou=${iou}&review_conf=${reviewConf}`).then(r => r.json()),
+  queue: ({ model, split, view, conf, iou, reviewConf, contain }) =>
+    fetch(`/api/queue?model=${encodeURIComponent(model)}&split=${encodeURIComponent(split)}&view=${view}&conf=${conf}&iou=${iou}&review_conf=${reviewConf}&containment=${contain}`).then(r => r.json()),
+  sample: ({ model, split, stem, conf, iou, reviewConf, contain }) =>
+    fetch(`/api/sample?model=${encodeURIComponent(model)}&split=${encodeURIComponent(split)}&stem=${encodeURIComponent(stem)}&conf=${conf}&iou=${iou}&review_conf=${reviewConf}&containment=${contain}`).then(r => r.json()),
   save: ({ model, split, body }) =>
     fetch(`/api/sample?model=${encodeURIComponent(model)}&split=${encodeURIComponent(split)}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -131,7 +131,7 @@ async function init() {
   selModel.addEventListener('change', () => { state.model = selModel.value; reloadQueue(); });
   selSplit.addEventListener('change', () => { state.split = selSplit.value; reloadQueue(); });
 
-  ['conf', 'iou', 'review-conf'].forEach(id => {
+  ['conf', 'iou', 'review-conf', 'contain'].forEach(id => {
     const el = document.getElementById(id);
     const valEl = document.getElementById(`${id}-v`);
     el.addEventListener('input', () => {
@@ -139,7 +139,8 @@ async function init() {
       valEl.textContent = v.toFixed(2);
       if (id === 'conf') state.conf = v;
       else if (id === 'iou') state.iou = v;
-      else state.reviewConf = v;
+      else if (id === 'review-conf') state.reviewConf = v;
+      else state.contain = v;
       debounceReload();
     });
   });
@@ -150,12 +151,15 @@ async function init() {
     state.conf = 0.05;
     state.iou = 0.05;
     state.reviewConf = 0.35;
+    state.contain = 0.7;
     document.getElementById('conf').value = '0.05';
     document.getElementById('iou').value = '0.05';
     document.getElementById('review-conf').value = '0.35';
+    document.getElementById('contain').value = '0.7';
     document.getElementById('conf-v').textContent = '0.05';
     document.getElementById('iou-v').textContent = '0.05';
     document.getElementById('review-conf-v').textContent = '0.35';
+    document.getElementById('contain-v').textContent = '0.70';
     reloadQueue();
   });
   document.querySelectorAll('#view-chips button').forEach(btn => {
@@ -257,6 +261,7 @@ async function reloadQueue() {
   const r = await api.queue({
     model: state.model, split: state.split, view: state.view,
     conf: state.conf, iou: state.iou, reviewConf: state.reviewConf,
+    contain: state.contain,
   });
   state.queueRaw = r.items;
   applyQueueFilter();
@@ -362,6 +367,7 @@ async function loadSample(stem, opts = {}) {
   state.sample = await api.sample({
     model: state.model, split: state.split, stem,
     conf: state.conf, iou: state.iou, reviewConf: state.reviewConf,
+    contain: state.contain,
   });
   state.queueIndex = state.queue.findIndex(q => q.stem === stem);
   state.dirty = false;
