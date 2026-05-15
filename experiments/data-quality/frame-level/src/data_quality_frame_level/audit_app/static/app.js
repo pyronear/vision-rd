@@ -169,10 +169,17 @@ async function init() {
   const syncAnnotatedBtn = () => annotatedBtn.classList.toggle('active', state.showAnnotated);
   syncAnnotatedBtn();
   annotatedBtn.addEventListener('click', async () => {
+    await flushPending();
     state.showAnnotated = !state.showAnnotated;
     localStorage.setItem('show_annotated', state.showAnnotated ? '1' : '0');
     syncAnnotatedBtn();
-    await applyQueueFilter();
+    const prevStem = state.sample?.stem ?? null;
+    applyQueueFilter();
+    if (state.queueIndex < 0) {
+      state.sample = null; paint(); renderRight(); renderTimeline();
+    } else if (state.queue[state.queueIndex].stem !== prevStem) {
+      await loadSample(state.queue[state.queueIndex].stem);
+    }
   });
   document.getElementById('show-orig').addEventListener('change', e => {
     state.showOrig = e.target.checked; paint();
@@ -248,27 +255,28 @@ async function reloadQueue() {
     conf: state.conf, iou: state.iou, reviewConf: state.reviewConf,
   });
   state.queueRaw = r.items;
-  await applyQueueFilter();
+  applyQueueFilter();
+  if (state.queueIndex >= 0) await loadSample(state.queue[state.queueIndex].stem);
+  else { state.sample = null; paint(); renderRight(); renderTimeline(); }
 }
 
-async function applyQueueFilter() {
-  await flushPending();
+function applyQueueFilter() {
+  const prevStem = state.sample?.stem ?? null;
   state.queue = filterQueueForView(state.queueRaw, state.showAnnotated);
-  state.queueIndex = state.queue.length > 0 ? 0 : -1;
+  const preserved = prevStem ? state.queue.findIndex(q => q.stem === prevStem) : -1;
+  state.queueIndex = preserved >= 0 ? preserved : (state.queue.length > 0 ? 0 : -1);
   renderQueue();
   renderProgress();
-  if (state.queueIndex >= 0) await loadSample(state.queue[0].stem);
-  else { state.sample = null; paint(); renderRight(); renderTimeline(); }
 }
 
 function renderProgress() {
   const flagged = state.queueRaw.filter(i => i.kind && i.kind !== 'none');
-  const reviewed = flagged.filter(i => i.status === 'reviewed').length;
+  const done = flagged.filter(i => i.status === 'reviewed' || i.status === 'unclear').length;
   const total = flagged.length;
-  const pct = total > 0 ? (reviewed / total) * 100 : 0;
+  const pct = total > 0 ? (done / total) * 100 : 0;
   const root = document.getElementById('progress');
   root.querySelector('.fill').style.width = `${pct}%`;
-  root.querySelector('.label').textContent = `${reviewed} / ${total}`;
+  root.querySelector('.label').textContent = `${done} / ${total}`;
 }
 
 function renderQueue() {
