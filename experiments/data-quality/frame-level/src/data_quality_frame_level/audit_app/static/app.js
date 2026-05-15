@@ -3,13 +3,33 @@ const state = {
   view: 'fp',
   conf: 0.05, iou: 0.05, reviewConf: 0.35,
   showOrig: true, showPred: true, showOnlyVerified: false,
+  showAnnotated: localStorage.getItem('show_annotated') === '1',
   reviewer: localStorage.getItem('reviewer') || '',
-  queue: [], queueIndex: -1,
+  queueRaw: [], queue: [], queueIndex: -1,
   sample: null,
   dirty: false,
   loadedSnapshot: null,
   undoStack: [],
 };
+
+function filterQueueForView(items, showAnnotated) {
+  if (showAnnotated) return items.slice();
+  const flaggedBySeq = new Map();
+  const doneBySeq = new Map();
+  items.forEach(it => {
+    if (it.kind && it.kind !== 'none') {
+      flaggedBySeq.set(it.sequence_id, (flaggedBySeq.get(it.sequence_id) || 0) + 1);
+      if (it.status === 'reviewed' || it.status === 'unclear') {
+        doneBySeq.set(it.sequence_id, (doneBySeq.get(it.sequence_id) || 0) + 1);
+      }
+    }
+  });
+  const hiddenSeqs = new Set();
+  for (const [seq, flagged] of flaggedBySeq) {
+    if ((doneBySeq.get(seq) || 0) >= flagged) hiddenSeqs.add(seq);
+  }
+  return items.filter(it => !hiddenSeqs.has(it.sequence_id));
+}
 
 const api = {
   contexts: () => fetch('/api/contexts').then(r => r.json()),
@@ -145,6 +165,15 @@ async function init() {
       reloadQueue();
     });
   });
+  const annotatedBtn = document.getElementById('show-annotated');
+  const syncAnnotatedBtn = () => annotatedBtn.classList.toggle('active', state.showAnnotated);
+  syncAnnotatedBtn();
+  annotatedBtn.addEventListener('click', async () => {
+    state.showAnnotated = !state.showAnnotated;
+    localStorage.setItem('show_annotated', state.showAnnotated ? '1' : '0');
+    syncAnnotatedBtn();
+    await applyQueueFilter();
+  });
   document.getElementById('show-orig').addEventListener('change', e => {
     state.showOrig = e.target.checked; paint();
   });
@@ -218,7 +247,13 @@ async function reloadQueue() {
     model: state.model, split: state.split, view: state.view,
     conf: state.conf, iou: state.iou, reviewConf: state.reviewConf,
   });
-  state.queue = r.items;
+  state.queueRaw = r.items;
+  await applyQueueFilter();
+}
+
+async function applyQueueFilter() {
+  await flushPending();
+  state.queue = filterQueueForView(state.queueRaw, state.showAnnotated);
   state.queueIndex = state.queue.length > 0 ? 0 : -1;
   renderQueue();
   renderProgress();
@@ -227,7 +262,7 @@ async function reloadQueue() {
 }
 
 function renderProgress() {
-  const flagged = state.queue.filter(i => i.kind && i.kind !== 'none');
+  const flagged = state.queueRaw.filter(i => i.kind && i.kind !== 'none');
   const reviewed = flagged.filter(i => i.status === 'reviewed').length;
   const total = flagged.length;
   const pct = total > 0 ? (reviewed / total) * 100 : 0;
