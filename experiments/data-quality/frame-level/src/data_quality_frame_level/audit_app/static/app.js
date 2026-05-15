@@ -431,6 +431,39 @@ function bboxIou(a, b) {
   return union > 0 ? inter / union : 0;
 }
 
+function bboxIoMin(a, b) {
+  const ix = Math.max(0, Math.min(a.cx + a.w/2, b.cx + b.w/2) - Math.max(a.cx - a.w/2, b.cx - b.w/2));
+  const iy = Math.max(0, Math.min(a.cy + a.h/2, b.cy + b.h/2) - Math.max(a.cy - a.h/2, b.cy - b.h/2));
+  const inter = ix * iy;
+  const minArea = Math.min(a.w * a.h, b.w * b.h);
+  return minArea > 0 ? inter / minArea : 0;
+}
+
+const BBOX_GROUP_IOU = 0.3;
+const BBOX_GROUP_IOMIN = 0.6;
+
+function clusterBboxes(boxes, shouldMerge) {
+  const n = boxes.length;
+  const parent = Array.from({ length: n }, (_, i) => i);
+  const find = i => {
+    while (parent[i] !== i) { parent[i] = parent[parent[i]]; i = parent[i]; }
+    return i;
+  };
+  const union = (a, b) => { const ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; };
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      if (shouldMerge(boxes[i], boxes[j])) union(i, j);
+    }
+  }
+  const byRoot = new Map();
+  for (let i = 0; i < n; i++) {
+    const r = find(i);
+    if (!byRoot.has(r)) byRoot.set(r, []);
+    byRoot.get(r).push(i);
+  }
+  return [...byRoot.values()];
+}
+
 function renderCanvas(opts = {}) {
   if (!state.sample) { ctx2d.clearRect(0, 0, cnv.width, cnv.height); return; }
   const preserve = !!opts.preserveView;
@@ -784,27 +817,83 @@ function renderRight() {
     banner.innerHTML = `⚠️ <strong>${droppedOrigs.length}</strong> original bbox(es) will be dropped on save. <span class="actions ml-1"><button data-act="keep-all">Keep all</button> <button data-act="spurious-all">Mark all spurious</button></span>`;
     root.appendChild(banner);
   }
+  const pool = [];
+  state.sample.verified_gt.forEach((b, i) => {
+    pool.push({ kind: 'verified', idx: i, bbox: b });
+  });
   state.sample.original_gt.forEach((b, i) => {
     if (isInVerified(b)) return;
-    const sp = isSpurious(b);
-    const cls = sp ? 'orig spurious' : (showOrigsAsKept ? 'orig kept' : 'orig');
-    const meta = sp
-      ? `${b.status} · spurious`
-      : (showOrigsAsKept ? `${b.status} · kept` : b.status);
-    const actions = sp
-      ? `<button data-act="restore-orig" data-i="${i}">↺ Restore</button>`
-      : `<button data-act="promote-orig" data-i="${i}">Use as GT</button> <button data-act="spurious-orig" data-i="${i}">🚫 Spurious</button>`;
-    const row = make(cls, i, `GT #${i}`, meta, actions);
-    root.appendChild(row);
+    pool.push({ kind: 'orig', idx: i, bbox: b, spurious: isSpurious(b) });
   });
   state.sample.predictions.forEach((p, i) => {
-    const row = make('pred', i, 'pred', `${p.status} · ${p.conf.toFixed(2)}`, `<button data-act="promote-pred" data-i="${i}">Use as GT</button>`);
-    root.appendChild(row);
+    pool.push({ kind: 'pred', idx: i, bbox: p, conf: p.conf });
   });
-  state.sample.verified_gt.forEach((b, i) => {
-    const row = make('verified', i, `verified #${i}`, '', `<button data-act="del-verified" data-i="${i}">✕</button>`);
-    root.appendChild(row);
+
+  const clusters = clusterBboxes(
+    pool.map(it => it.bbox),
+    (a, b) => bboxIou(a, b) >= BBOX_GROUP_IOU || bboxIoMin(a, b) >= BBOX_GROUP_IOMIN,
+  );
+
+  const groups = clusters.map(memberIdxs => {
+    const members = memberIdxs.map(i => pool[i]);
+    const verified = members.filter(m => m.kind === 'verified');
+    const origKept = members.filter(m => m.kind === 'orig' && !m.spurious);
+    const origSpurious = members.filter(m => m.kind === 'orig' && m.spurious);
+    const preds = members.filter(m => m.kind === 'pred').sort((a, b) => b.conf - a.conf);
+    const minLeft = Math.min(...members.map(m => m.bbox.cx - m.bbox.w / 2));
+    return {
+      verified, origKept, origSpurious, preds,
+      size: members.length,
+      minLeft,
+      firstPoolIndex: Math.min(...memberIdxs),
+    };
   });
+
+  groups.sort((a, b) => {
+    if (a.minLeft !== b.minLeft) return a.minLeft - b.minLeft;
+    return a.firstPoolIndex - b.firstPoolIndex;
+  });
+
+  const renderOrigRow = m => {
+    const sp = m.spurious;
+    const cls = sp ? 'orig spurious' : (showOrigsAsKept ? 'orig kept' : 'orig');
+    const meta = sp
+      ? `${m.bbox.status} · spurious`
+      : (showOrigsAsKept ? `${m.bbox.status} · kept` : m.bbox.status);
+    const actions = sp
+      ? `<button data-act="restore-orig" data-i="${m.idx}">↺ Restore</button>`
+      : `<button data-act="promote-orig" data-i="${m.idx}">Use as GT</button> <button data-act="spurious-orig" data-i="${m.idx}">🚫 Spurious</button>`;
+    return make(cls, m.idx, `GT #${m.idx}`, meta, actions);
+  };
+  const renderPredRow = m =>
+    make('pred', m.idx, 'pred', `${m.bbox.status} · ${m.conf.toFixed(2)}`,
+         `<button data-act="promote-pred" data-i="${m.idx}">Use as GT</button>`);
+  const renderVerifiedRow = m =>
+    make('verified', m.idx, `verified #${m.idx}`, '',
+         `<button data-act="del-verified" data-i="${m.idx}">✕</button>`);
+
+  let multiGroupIdx = 0;
+  for (const g of groups) {
+    const rows = [
+      ...g.verified.map(renderVerifiedRow),
+      ...g.origKept.map(renderOrigRow),
+      ...g.origSpurious.map(renderOrigRow),
+      ...g.preds.map(renderPredRow),
+    ];
+    if (g.size <= 1) {
+      rows.forEach(r => root.appendChild(r));
+    } else {
+      multiGroupIdx += 1;
+      const wrap = document.createElement('div');
+      wrap.className = 'bbox-group';
+      const header = document.createElement('div');
+      header.className = 'bbox-group-header';
+      header.textContent = `Group ${multiGroupIdx}`;
+      wrap.appendChild(header);
+      rows.forEach(r => wrap.appendChild(r));
+      root.appendChild(wrap);
+    }
+  }
   document.querySelectorAll('#status-pane button[data-status]').forEach(btn => {
     btn.onclick = () => setStatus(btn.dataset.status);
   });
