@@ -152,7 +152,7 @@ Markup sketch (multi-member case):
 
 ```html
 <div class="bbox-group">
-  <div class="bbox-group-header">Group 1 · 5</div>
+  <div class="bbox-group-header">Group 1</div>
   <div class="bbox-row verified" data-layer="verified" data-idx="0">…</div>
   <div class="bbox-row orig"      data-layer="orig"     data-idx="0">…</div>
   <div class="bbox-row pred"      data-layer="pred"     data-idx="3">…</div>
