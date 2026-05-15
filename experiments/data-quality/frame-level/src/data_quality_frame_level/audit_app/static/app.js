@@ -431,6 +431,30 @@ function bboxIou(a, b) {
   return union > 0 ? inter / union : 0;
 }
 
+const BBOX_GROUP_IOU = 0.3;
+
+function clusterBboxes(boxes, threshold) {
+  const n = boxes.length;
+  const parent = Array.from({ length: n }, (_, i) => i);
+  const find = i => {
+    while (parent[i] !== i) { parent[i] = parent[parent[i]]; i = parent[i]; }
+    return i;
+  };
+  const union = (a, b) => { const ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; };
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      if (bboxIou(boxes[i], boxes[j]) >= threshold) union(i, j);
+    }
+  }
+  const byRoot = new Map();
+  for (let i = 0; i < n; i++) {
+    const r = find(i);
+    if (!byRoot.has(r)) byRoot.set(r, []);
+    byRoot.get(r).push(i);
+  }
+  return [...byRoot.values()];
+}
+
 function renderCanvas(opts = {}) {
   if (!state.sample) { ctx2d.clearRect(0, 0, cnv.width, cnv.height); return; }
   const preserve = !!opts.preserveView;
