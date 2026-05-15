@@ -56,8 +56,8 @@ stages:
     outs:
     - path: data/07_model_output/yolo11s-nimble-narwhal/train
       hash: md5
-      md5: 58f829ccaa0223a7ec992df76087d18e.dir
-      size: 6524018
+      md5: 2a728da58c899e4a4893219b2daaec1f.dir
+      size: 6281153
       nfiles: 1
   predict_val@yolo11s-nimble-narwhal:
     cmd: uv run python scripts/predict.py --model-name yolo11s-nimble-narwhal 
