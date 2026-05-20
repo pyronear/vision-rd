@@ -1356,11 +1356,23 @@ stages:
 Run: `uv run ruff check . && uv run python scripts/run_models.py --help && uv run python scripts/prepare_models.py --help`
 Expected: ruff clean; argparse help prints (`--store/--models-dir/--out`; `--out/--params`).
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 7: Configure the DVC remote (parity with sibling experiments)**
+
+Run (from the experiment dir):
 
 ```bash
-git add scripts/prepare_models.py scripts/import_local_zip.py scripts/import_platform.py scripts/run_models.py dvc.yaml
-git commit -m "feat(explorer): CLI wrappers + DVC pipeline (prepare_models, import_local_zip, run_models)"
+uv run dvc remote add -d s3remote s3://pyro-vision-rd/dvc/experiments/temporal-model-explorer/
+uv run dvc config core.analytics false
+```
+Expected: `.dvc/config` declares the default `s3remote` (matching the other
+experiments). This only configures the remote for later `dvc push/pull`; it
+pushes nothing now and is not required for local `dvc repro`.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add scripts/prepare_models.py scripts/import_local_zip.py scripts/import_platform.py scripts/run_models.py dvc.yaml .dvc/config
+git commit -m "feat(explorer): CLI wrappers + DVC pipeline + s3 remote"
 ```
 
 ---
