@@ -42,11 +42,15 @@ def filter_results(
     organization_name: str | None = None,
     errors_only: bool = False,
 ) -> pd.DataFrame:
-    """Apply the Streamlit sidebar filters to the results frame."""
+    """Filter a results DataFrame by any combination of column values."""
     out = df
     for col, val in (
-        ("model", model), ("decision", decision), ("label", label),
-        ("outcome", outcome), ("source", source), ("camera_name", camera_name),
+        ("model", model),
+        ("decision", decision),
+        ("label", label),
+        ("outcome", outcome),
+        ("source", source),
+        ("camera_name", camera_name),
         ("organization_name", organization_name),
     ):
         if val is not None:
