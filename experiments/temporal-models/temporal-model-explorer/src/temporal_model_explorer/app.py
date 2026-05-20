@@ -230,19 +230,18 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
     if not n:
         return
 
-    # One playback tick drives the full-frame view AND every tube crop.
-    tick_key = f"tick_{key}"
-    st.session_state.setdefault(tick_key, 0)
-    ctrl = st.columns([1, 1, 1, 7])
-    playing = ctrl[0].toggle("▶ play", value=True, key=f"play_{key}")
-    if ctrl[1].button("⏮", key=f"prev_{key}"):
-        st.session_state[tick_key] -= 1
-    if ctrl[2].button("⏭", key=f"next_{key}"):
-        st.session_state[tick_key] += 1
-    tick = st.session_state[tick_key]
+    # Playback: a play/pause toggle + a frame slider. While playing we advance the
+    # slider's session_state value BEFORE the slider widget is instantiated (the
+    # only point at which modifying a widget-keyed value is allowed).
+    frame_key = f"frame_{key}"
+    st.session_state.setdefault(frame_key, 0)
+    top = st.columns([1, 9])
+    playing = top[0].toggle("▶ play", value=True, key=f"play_{key}")
+    if playing:
+        st.session_state[frame_key] = (st.session_state[frame_key] + 1) % n
+    i = top[1].slider("frame", 0, n - 1, key=frame_key) if n > 1 else 0
 
     frame_col, tubes_col = st.columns([2, 1])
-    i = tick % n
     ref = meta.frames[i]
     frame_col.image(
         draw_bboxes(seq_dir / ref.file, bbmap.get(i, [])),
@@ -251,30 +250,30 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
         use_container_width=True,
     )
 
-    tubes_col.markdown(f"**{len(kept)} smoke tube(s)** (context-cropped)")
+    # Each tube crop is synced to the current frame i (shown when the tube has a
+    # detection at that frame).
+    tubes_col.markdown(f"**{len(kept)} smoke tube(s)** — context crop @ frame {i}")
     for tube in kept:
-        boxes = tube_input_boxes(tube, padded)
-        if not boxes:
-            continue
-        ti = tick % len(boxes)
-        in_idx, bbox = boxes[ti]
+        at_frame = dict(tube_input_boxes(tube, padded))
         tprob = tube.get("probability")
         head = (
             f"tube {tube['tube_id']} · prob {tprob:.2f}"
             if tprob is not None
             else f"tube {tube['tube_id']} · logit {tube['logit']:.2f}"
         )
-        tubes_col.image(
-            crop_around_bbox(seq_dir / meta.frames[in_idx].file, bbox),
-            width=220,
-            caption=f"{head} — f{in_idx} ({ti + 1}/{len(boxes)})",
-        )
+        if i in at_frame:
+            tubes_col.image(
+                crop_around_bbox(seq_dir / meta.frames[i].file, at_frame[i]),
+                width=220,
+                caption=head,
+            )
+        else:
+            tubes_col.caption(f"{head} — inactive at frame {i}")
 
     with st.expander("raw details JSON"):
         st.json(details)
 
     if playing:
-        st.session_state[tick_key] = tick + 1
         time.sleep(1.0 / PLAY_FPS)
         st.rerun()
 
