@@ -12,8 +12,10 @@ from pathlib import Path
 
 import pandas as pd
 
-from .outcomes import filter_results
-from .store import iter_sequence_dirs, read_meta
+# Absolute imports: this module is the Streamlit entrypoint, run as __main__ via
+# `streamlit run app.py` (no package context), so relative imports would fail.
+from temporal_model_explorer.outcomes import filter_results
+from temporal_model_explorer.store import iter_sequence_dirs, read_meta
 
 RESULTS = Path("data/07_model_output/results.parquet")
 DETAILS = Path("data/07_model_output/details")
