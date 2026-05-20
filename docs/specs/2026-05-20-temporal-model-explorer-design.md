@@ -143,9 +143,10 @@ packaged bbox-tube variants under
   outcome (incl. "errors only", "smoke wrongly discarded", "fp correctly
   discarded", "fp wrongly kept"); station/camera, organization; source; and
   (with >1 model) agreement (agree/disagree).
-- **Drill-down** — select a sequence: ordered frame strip with bbox overlay and the
-  trigger frame highlighted; per-model panel (KEEP/DISCARD, trigger index,
-  probability, raw `details`).
+- **Drill-down** — select a sequence: per-model panel (KEEP/DISCARD, outcome,
+  trigger index, probability) + each model's raw `details` JSON (expanders) + the
+  ordered frame strip (capture order, indexed captions). *Per-frame bbox overlay
+  and trigger-frame highlight are deferred — see Future work.*
 
 **Frontend-agnostic results.** Streamlit reads only the result artifacts
 (`results.parquet`, per-sequence `details` JSON, and the image store) — it never
@@ -247,6 +248,13 @@ standalone (`uv run python scripts/run_models.py …`) or via `uv run dvc repro`
 
 ## Future work
 
+- **Drill-down per-frame bbox overlay + trigger-frame highlight.** Deferred because
+  the model truncates/pads sequences to `max_frames`, so a tube entry's
+  `frame_idx` (and `trigger_frame_index`) live in *processed-sequence* space, not
+  input-frame space. Correct overlay/highlight (and an exact
+  `trigger_frame_file`) require mapping processed indices back to input frames via
+  `details.preprocessing.padded_frame_indices`. Until then the drill-down shows
+  the frame strip + raw `details` JSON without per-frame annotation.
 - Add more `TemporalModel` implementations (other architectures) to the registry.
 - Per-station / per-FP-category metrics summaries.
 - Optional: cache platform downloads to avoid re-fetching.
