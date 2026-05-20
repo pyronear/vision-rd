@@ -188,7 +188,7 @@ experiments/temporal-models/temporal-model-explorer/
   pyproject.toml        # deps: bbox-tube-temporal-core (path), streamlit, requests, pandas, pyarrow, pyyaml, pillow; dev: pytest, ruff
   Makefile              # install / lint / format / test / app (streamlit run)
   params.yaml           # model registry, label mapping, defaults
-  dvc.yaml              # stages: import_local_zip / import_platform / run_models
+  dvc.yaml              # stages: prepare_models / import_local_zip / run_models (models DVC-tracked)
   src/temporal_model_explorer/
     platform_api.py     # lean platform client (mirror copy)
     store.py            # meta.json read/write + sequence store helpers
@@ -204,19 +204,25 @@ experiments/temporal-models/temporal-model-explorer/
 
 ### Pipeline (DVC)
 
-Stages are wired in `dvc.yaml` (matching the other experiments), driven by
-`params.yaml`:
+DVC is **per-experiment** here (each experiment has its own `.dvc/`; no repo-root
+project), so the explorer runs `dvc init --subdir`. External inputs (the source
+`model.zip`s and the annotated zip) live outside this experiment's DVC root, so
+they are referenced in stage **commands**, not as DVC `deps`; each stage produces
+**local DVC-tracked outs** that downstream stages depend on. Stages (in `dvc.yaml`,
+driven by `params.yaml`):
 
-- **`import_local_zip`** — dep: the annotated zip → out:
-  `data/03_primary/sequences/zip_*`. Deterministic.
-- **`import_platform`** — params: date range, cameras → out:
-  `data/03_primary/sequences/platform_*`. Param-driven, but it hits the **live
-  API**, so a re-run fetches whatever the API currently returns (not
-  bit-reproducible); treat the fetched store as a cached snapshot.
-- **`run_models`** — deps: the sequence store + the configured `model.zip`(s);
-  params: model registry → out: `data/07_model_output/results.parquet` (+
-  per-sequence `details` JSON). **Deterministic** given store + packages — the
-  cleanest DVC stage, and the one you specifically want tracked.
+- **`prepare_models`** — copies the registry's source `model.zip`s → out:
+  `data/06_models/<name>/model.zip`. This is how **the models are DVC-tracked**
+  within the explorer.
+- **`import_local_zip`** — reads the annotated zip → out:
+  `data/03_primary/sequences/local_zip`. Deterministic.
+- **`import_platform`** — **not** a DVC stage: it hits the **live API** (not
+  reproducible). Run on demand; output lands in
+  `data/03_primary/sequences/platform/` and `run_models` picks it up.
+- **`run_models`** — deps: the sequence store + DVC-tracked `data/06_models` →
+  out: `data/07_model_output/results.parquet` (+ per-sequence `details` JSON).
+  **Deterministic** given store + models; DVC chains `prepare_models` +
+  `import_local_zip` → `run_models`.
 
 The Streamlit app is **not** a DVC stage — it's a viewer over `run_models`
 outputs. Each module also has a thin `scripts/` CLI wrapper, so every stage runs
