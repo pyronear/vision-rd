@@ -1,5 +1,9 @@
 .venv/
-data/
+# Ignore data contents but keep DVC pointers (.dvc) + dvc-managed .gitignore files.
+data/**
+!data/**/
+!data/**/*.dvc
+!data/**/.gitignore
 __pycache__/
 *.pyc
 .pytest_cache/
