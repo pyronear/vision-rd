@@ -280,9 +280,17 @@ def main() -> None:  # pragma: no cover - Streamlit UI
         selection_mode="single-row",
         key="seqtable",
     )
+    # Persist the selection in session_state: autoplay's st.rerun() doesn't carry
+    # the table's selection event, so without this the viewer would snap back to
+    # the first row every second.
     rows = event.selection.rows
-    pos = rows[0] if rows and rows[0] < len(view) else 0
-    _drilldown(st, view.iloc[pos]["key"], model, view.iloc[pos])
+    if rows and rows[0] < len(view):
+        st.session_state["selected_key"] = view.iloc[rows[0]]["key"]
+    keys = set(view["key"])
+    selected = st.session_state.get("selected_key")
+    if selected not in keys:
+        selected = view.iloc[0]["key"]
+    _drilldown(st, selected, model, view[view["key"] == selected].iloc[0])
 
 
 if __name__ == "__main__":  # pragma: no cover
