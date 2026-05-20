@@ -33,6 +33,16 @@ def _detection_id(file_name: str) -> int | None:
     return int(m.group(1)) if m else None
 
 
+def _frame_sort_key(item: tuple[str, str]) -> tuple[int, int, str]:
+    """Order frames by numeric detection id (so detection_2 sorts before detection_10).
+
+    ``item`` is ``(zip_name, file_name)``. Files without a numeric detection id
+    fall back to lexicographic order, after the numbered ones.
+    """
+    det_id = _detection_id(item[1])
+    return (0, det_id, "") if det_id is not None else (1, 0, item[1])
+
+
 def import_zip(zip_path: Path, store_dir: Path) -> int:
     """Extract image frames + write meta.json per sequence.
 
@@ -71,7 +81,7 @@ def import_zip(zip_path: Path, store_dir: Path) -> int:
             out_dir = store_dir / key
             (out_dir / "images").mkdir(parents=True, exist_ok=True)
             frames: list[FrameRef] = []
-            for src_name, file_name in sorted(entry["files"], key=lambda t: t[1]):
+            for src_name, file_name in sorted(entry["files"], key=_frame_sort_key):
                 (out_dir / "images" / file_name).write_bytes(zf.read(src_name))
                 frames.append(
                     FrameRef(

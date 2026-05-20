@@ -32,7 +32,7 @@ def test_import_zip_writes_store(tmp_path):
     smoke = read_meta(store / "zip_10")
     assert smoke.label == "smoke" and smoke.label_detail == "wildfire"
     assert smoke.source == "local_zip" and smoke.sequence_id == "10"
-    # images copied, ordered by filename (detection_1 before detection_2)
+    # images copied, ordered by detection id (detection_1 before detection_2)
     assert [f.file for f in smoke.frames] == [
         "images/detection_1.jpg",
         "images/detection_2.jpg",
@@ -41,3 +41,16 @@ def test_import_zip_writes_store(tmp_path):
 
     fp = read_meta(store / "zip_20")
     assert fp.label == "fp" and fp.label_detail == "tree"
+
+
+def test_import_zip_orders_frames_numerically_not_lexicographically(tmp_path):
+    z = tmp_path / "data.zip"
+    with zipfile.ZipFile(z, "w") as zf:
+        for i in (1, 2, 10, 11):  # written out of order; 10/11 must not sort before 2
+            zf.writestr(
+                f"root/smoke/wildfire/seq_30/images/detection_{i}.jpg", str(i).encode()
+            )
+    store = tmp_path / "store"
+    import_zip(z, store)
+    meta = read_meta(store / "zip_30")
+    assert [f.detection_id for f in meta.frames] == [1, 2, 10, 11]
