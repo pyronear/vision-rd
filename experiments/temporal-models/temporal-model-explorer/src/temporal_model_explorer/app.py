@@ -173,11 +173,27 @@ def tube_input_boxes(
     return boxes
 
 
+def _lightning_polygon(x: float, y: float, h: float) -> list[tuple[float, float]]:
+    """Points for a small downward lightning bolt with top-left at (x, y).
+
+    Drawn as a polygon because PIL's bundled font has no ⚡ emoji glyph.
+    """
+    w = h * 0.55
+    return [
+        (x + 0.55 * w, y),
+        (x, y + 0.58 * h),
+        (x + 0.40 * w, y + 0.58 * h),
+        (x + 0.28 * w, y + h),
+        (x + w, y + 0.38 * h),
+        (x + 0.55 * w, y + 0.38 * h),
+    ]
+
+
 def draw_bboxes(image_path: Path, boxes, width: int = 4) -> Image.Image:
     """Draw bboxes on the frame; ``boxes`` is ``[(bbox, conf, color, is_trigger)]``.
 
     Each box uses its tube's colour; the trigger box gets a thicker outline and a
-    ⚡ marker. The confidence (when present) is printed just above the box.
+    drawn lightning bolt. The confidence (when present) is printed above the box.
     """
     img = Image.open(image_path).convert("RGB")
     w_img, h_img = img.size
@@ -186,11 +202,14 @@ def draw_bboxes(image_path: Path, boxes, width: int = 4) -> Image.Image:
         x0, y0 = (cx - bw / 2) * w_img, (cy - bh / 2) * h_img
         x1, y1 = (cx + bw / 2) * w_img, (cy + bh / 2) * h_img
         draw.rectangle([x0, y0, x1, y1], outline=color, width=width + 3 * is_trigger)
-        label = f"{conf:.2f}" if conf is not None else ""
+        ty = max(0, y0 - 20)
+        tx = x0
+        if conf is not None:
+            label = f"{conf:.2f}"
+            draw.text((tx, ty), label, fill=color, font=_BBOX_FONT)
+            tx += draw.textlength(label, font=_BBOX_FONT) + 5
         if is_trigger:
-            label = f"{label} ⚡".strip()
-        if label:
-            draw.text((x0, max(0, y0 - 20)), label, fill=color, font=_BBOX_FONT)
+            draw.polygon(_lightning_polygon(tx, ty, 16), fill=color)
     return img
 
 
@@ -325,10 +344,6 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
     c3.metric("trigger frame", "—" if trig is None else str(trig))
     prob = row["probability"]
     c4.metric("probability", f"{prob:.3f}" if pd.notna(prob) else "—")
-    st.caption(
-        f"ground truth={meta.label} ({meta.label_detail}) · "
-        f"camera={meta.camera_name} · org={meta.organization_name} · frames={n}"
-    )
     if not n:
         return
 

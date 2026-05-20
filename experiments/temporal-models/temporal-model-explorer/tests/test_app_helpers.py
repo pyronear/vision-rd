@@ -1,6 +1,7 @@
 from PIL import Image
 
 from temporal_model_explorer.app import (
+    _lightning_polygon,
     correctness_label,
     crop_around_bbox,
     day_of,
@@ -69,6 +70,12 @@ def test_tube_input_boxes():
         ]
     }
     assert tube_input_boxes(tube, []) == [(0, (0.5, 0.5, 0.1, 0.1))]
+
+
+def test_lightning_polygon_has_six_points():
+    pts = _lightning_polygon(10, 20, 16)
+    assert len(pts) == 6
+    assert all(len(p) == 2 for p in pts)
 
 
 def test_draw_bboxes_preserves_size(tmp_path):
