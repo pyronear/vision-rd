@@ -335,66 +335,63 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
         processed_to_input_index(int(trig_raw), padded) if pd.notna(trig_raw) else None
     )
 
-    is_keep = row["decision"] == "keep"
-    verdict = "💨 KEEP (smoke)" if is_keep else "🚫 DISCARD (no smoke)"
-    st.subheader(f"{verdict} — {key}")
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("model verdict", row["decision"])
-    c2.metric("correctness", correctness_label(row["outcome"]))
-    c3.metric("trigger frame", "—" if trig is None else str(trig))
-    prob = row["probability"]
-    c4.metric("probability", f"{prob:.3f}" if pd.notna(prob) else "—")
-    if not n:
-        return
-
-    # Playback: a compact play/pause toggle (its own short line) above a full-width
-    # timeline + slider. While playing we advance the slider's session_state value
-    # BEFORE the slider widget is instantiated (the only point at which modifying a
-    # widget-keyed value is allowed).
-    frame_key = f"frame_{key}"
-    st.session_state.setdefault(frame_key, 0)
-    playing = st.toggle("▶ play", value=True, key=f"play_{key}")
-    if playing:
-        st.session_state[frame_key] = (st.session_state[frame_key] + 1) % n
-    cur = st.session_state[frame_key] % n
-
     trigger_tube_id = details.get("decision", {}).get("trigger_tube_id")
-    tube_rows = [
-        (f"T{t['tube_id']}", {idx for idx, _ in tube_input_boxes(t, padded)})
-        for t in kept
-    ]
-    color_map = {f"T{t['tube_id']}": tube_color(t["tube_id"]) for t in kept}
-    # st.empty() so the chart/info swap cleanly when switching sequences (otherwise
-    # a stale "no smoke tubes" box can linger over a sequence that has tubes).
-    timeline_slot = st.empty()
-    if tube_rows:
-        timeline_slot.altair_chart(
-            _tube_timeline_chart(
-                alt, tube_rows, n, trig, cur, color_map, trigger_tube_id
-            ),
+
+    # Render the whole drill-down into ONE placeholder so selecting a new sequence
+    # atomically replaces the previous render (no stale/ghosted leftovers).
+    with st.empty().container():
+        is_keep = row["decision"] == "keep"
+        verdict = "💨 KEEP (smoke)" if is_keep else "🚫 DISCARD (no smoke)"
+        st.subheader(f"{verdict} — {key}")
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("model verdict", row["decision"])
+        c2.metric("correctness", correctness_label(row["outcome"]))
+        c3.metric("trigger frame", "—" if trig is None else str(trig))
+        prob = row["probability"]
+        c4.metric("probability", f"{prob:.3f}" if pd.notna(prob) else "—")
+        if not n:
+            return
+
+        # Playback: compact toggle above a full-width timeline + slider. While
+        # playing we advance the slider's session_state value BEFORE the slider
+        # widget is instantiated (the only point a keyed value may be modified).
+        frame_key = f"frame_{key}"
+        st.session_state.setdefault(frame_key, 0)
+        playing = st.toggle("▶ play", value=True, key=f"play_{key}")
+        if playing:
+            st.session_state[frame_key] = (st.session_state[frame_key] + 1) % n
+        cur = st.session_state[frame_key] % n
+
+        tube_rows = [
+            (f"T{t['tube_id']}", {idx for idx, _ in tube_input_boxes(t, padded)})
+            for t in kept
+        ]
+        color_map = {f"T{t['tube_id']}": tube_color(t["tube_id"]) for t in kept}
+        if tube_rows:
+            st.altair_chart(
+                _tube_timeline_chart(
+                    alt, tube_rows, n, trig, cur, color_map, trigger_tube_id
+                ),
+                use_container_width=True,
+            )
+        else:
+            st.info("no smoke tubes extracted")
+        i = st.slider("frame", 0, n - 1, key=frame_key) if n > 1 else 0
+
+        frame_col, tubes_col = st.columns([2, 1])
+        ref = meta.frames[i]
+        frame_boxes = [
+            (bbox, conf, tube_color(tid), tid == trigger_tube_id)
+            for bbox, conf, tid in bbmap.get(i, [])
+        ]
+        frame_col.image(
+            draw_bboxes(seq_dir / ref.file, frame_boxes),
+            caption=f"frame {i + 1}/{n} — {len(frame_boxes)} detection(s)",
             use_container_width=True,
         )
-    else:
-        timeline_slot.info("no smoke tubes extracted")
-    i = st.slider("frame", 0, n - 1, key=frame_key) if n > 1 else 0
 
-    frame_col, tubes_col = st.columns([2, 1])
-    ref = meta.frames[i]
-    frame_boxes = [
-        (bbox, conf, tube_color(tid), tid == trigger_tube_id)
-        for bbox, conf, tid in bbmap.get(i, [])
-    ]
-    frame_col.image(
-        draw_bboxes(seq_dir / ref.file, frame_boxes),
-        caption=f"frame {i + 1}/{n} — {len(frame_boxes)} detection(s)",
-        use_container_width=True,
-    )
-
-    # Each tube crop is synced to the current frame i; the trigger tube is badged.
-    # Render into a single st.empty() placeholder so a sequence with fewer tubes
-    # fully replaces the previous one (no stale/ghosted leftovers across reruns).
-    with tubes_col.empty().container():
-        st.markdown(f"**tubes @ frame {i}** (context-cropped)")
+        # Each tube crop is synced to the current frame i; trigger tube is badged.
+        tubes_col.markdown(f"**tubes @ frame {i}** (context-cropped)")
         for tube in kept:
             at_frame = dict(tube_input_boxes(tube, padded))
             color = tube_color(tube["tube_id"])
@@ -404,20 +401,22 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
                 if tprob is not None
                 else f"logit {tube['logit']:.2f}"
             )
-            badge = " ⚡<b>triggered</b>" if tube["tube_id"] == trigger_tube_id else ""
+            trig_badge = (
+                " ⚡<b>triggered</b>" if tube["tube_id"] == trigger_tube_id else ""
+            )
             chip = f"<b style='color:{color}'>● T{tube['tube_id']}</b>"
-            st.markdown(f"{chip} · {stat}{badge}", unsafe_allow_html=True)
+            tubes_col.markdown(f"{chip} · {stat}{trig_badge}", unsafe_allow_html=True)
             if i in at_frame:
-                st.image(
+                tubes_col.image(
                     crop_around_bbox(seq_dir / meta.frames[i].file, at_frame[i]),
                     width=220,
                 )
             else:
-                st.caption("inactive at this frame")
+                tubes_col.caption("inactive at this frame")
 
-    if playing:
-        time.sleep(1.0 / PLAY_FPS)
-        st.rerun()
+        if playing:
+            time.sleep(1.0 / PLAY_FPS)
+            st.rerun()
 
 
 def main() -> None:  # pragma: no cover - Streamlit UI
