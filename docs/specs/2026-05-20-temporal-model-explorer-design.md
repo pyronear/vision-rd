@@ -18,14 +18,16 @@ with filters. R&D tool; not a production service.
 - No production API / deployment / cloud (that direction was dropped).
 - No retraining; we only *run* already-packaged models.
 - No write-back to the platform; read-only consumption.
-- No platform **admin** access (organization enrichment is skipped).
+- Organization **names** are an optional enrichment (need admin creds or a static
+  `org_id → name` map); the tool works fully without them. Admin access is
+  obtainable if/when we want org-name grouping.
 
 ## Locked decisions
 
 | Decision | Choice | Rationale |
 |---|---|---|
 | Architecture | 3-stage pipeline (`import → run → view`) + Streamlit viewer | Matches repo's Kedro-style layers; keeps heavy model work out of the UI; reproducible. |
-| Frontend | Streamlit | Simplest local dashboard; already used in the org (pyro-dataset). |
+| Frontend | Streamlit first; **results kept frontend-agnostic** so a tailored app (React/Next) can replace the viewer later | Fast to build now; the import/run layers and result artifacts don't change if we swap UIs. |
 | Data sources | Platform API import **and** local annotated zip | Zip gives clean ground truth now; API gives fresh sequences. |
 | Platform client | Mirror-copied lean `requests` client (login + sequences + detections) | Verified working with regular creds; no heavy deps, no admin. |
 | Comparison framing | Per-sequence **KEEP/DISCARD** + outcome vs ground-truth label, with filters | The actual question: which alerts get filtered, and which errors. |
@@ -45,8 +47,10 @@ with filters. R&D tool; not a production service.
 Components are isolated and independently runnable:
 
 1. **`platform_api.py`** — lean client (mirror-copied): `get_access_token`,
-   `list_sequences_for_date`, `list_sequence_detections`, `list_cameras`. Auth via
-   `POST /api/v1/login/creds`; bearer header. No admin/organizations.
+   `list_sequences_for_date`, `list_sequence_detections`, `list_cameras`, and
+   (optional, admin) `list_organizations`. Auth via `POST /api/v1/login/creds`;
+   bearer header. Camera + `organization_id` come from `/cameras/` (no admin);
+   `list_organizations` is only called when admin creds are present.
 2. **Importers → common store** (both write `data/03_primary/sequences/<key>/`):
    - **`import_platform.py`** — for a date range (+ optional `--camera-id` filter),
      list sequences, download each detection's full-frame image (`detection.url`),
@@ -65,13 +69,17 @@ Components are isolated and independently runnable:
 
 `data/03_primary/sequences/<key>/meta.json`:
 
+// Do we get this kind of sequence data from the API? Or is it from the zip only?
+
 ```jsonc
 {
   "key": "platform_43392",
   "sequence_id": "43392",
   "source": "platform",                // "platform" | "local_zip"
   "camera_id": 12,                     // null if unknown
-  "camera_name": "marguareis-01",      // null if unresolved
+  "camera_name": "marguareis-01",      // from /cameras/ (no admin); null if unresolved
+  "organization_id": 3,                // from /cameras/ (no admin); null if unknown
+  "organization_name": "SDIS-07",      // optional: admin /organizations OR params.yaml map; null if unavailable
   "started_at": "2026-05-19T14:10:01Z",// null for zip
   "label": "fp",                       // normalized GT: "smoke" | "fp" | "unknown"
   "label_detail": "other_smoke",       // raw platform is_wildfire OR zip subfolder
@@ -97,7 +105,7 @@ full `details`). One row per (sequence, model):
 
 | column | meaning |
 |---|---|
-| `key, source, sequence_id, camera_id, camera_name, label, label_detail, n_frames` | from `meta.json` |
+| `key, source, sequence_id, camera_id, camera_name, organization_id, organization_name, label, label_detail, n_frames` | from `meta.json` |
 | `model` | model name (config key) |
 | `decision` | `keep` (is_smoke=True) / `discard` |
 | `trigger_frame_index`, `trigger_frame_file` | 0-based index + resolved frame filename (null if discard) |
@@ -115,17 +123,28 @@ packaged bbox-tube variants under
   `outcome` chip. Sortable.
 - **Sidebar filters** — model decision (KEEP/DISCARD); GT label (smoke/fp/unknown);
   outcome (incl. "errors only", "smoke wrongly discarded", "fp correctly
-  discarded", "fp wrongly kept"); station/camera; source; and (with >1 model)
-  agreement (agree/disagree).
+  discarded", "fp wrongly kept"); station/camera, organization; source; and
+  (with >1 model) agreement (agree/disagree).
 - **Drill-down** — select a sequence: ordered frame strip with bbox overlay and the
   trigger frame highlighted; per-model panel (KEEP/DISCARD, trigger index,
   probability, raw `details`).
+
+**Frontend-agnostic results.** Streamlit reads only the result artifacts
+(`results.parquet`, per-sequence `details` JSON, and the image store) — it never
+re-runs models or fetches. All non-UI logic (filtering, `outcome` computation)
+lives in `outcomes.py`/`store.py`, not in `app.py`. A future tailored app
+(React/Next) can read the same artifacts — via a static JSON export of
+`results.parquet` or a thin read-only API added later — without changing the
+import/run layers.
 
 ## Configuration
 
 Env (from `.envrc`, gitignored): `PLATFORM_API_ENDPOINT`
 (`https://alertapi.pyronear.org`), `PLATFORM_LOGIN`, `PLATFORM_PASSWORD`.
+Optional `PLATFORM_ADMIN_LOGIN`/`PLATFORM_ADMIN_PASSWORD` enable org-name
+enrichment via `/organizations/` (skipped if unset/invalid).
 `params.yaml`: model registry (name → package path), platform→label mapping,
+optional static `org_id → name` map (fallback when admin is unavailable),
 default date range / detections limit.
 
 ## Error handling / edge cases
@@ -171,6 +190,8 @@ experiments/temporal-models/temporal-model-explorer/
   tests/
   data/                 # 01_raw, 03_primary/sequences, 07_model_output (gitignored / DVC)
 ```
+
+// Is it possible to wire the data output to a dvc yaml file or scripts? (at least for the model runs?)
 
 ## Prerequisites
 
