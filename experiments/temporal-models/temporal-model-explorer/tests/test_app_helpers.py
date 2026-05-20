@@ -1,11 +1,13 @@
 from PIL import Image
 
 from temporal_model_explorer.app import (
+    correctness_label,
     crop_around_bbox,
     day_of,
     draw_bboxes,
     frame_bboxes_by_input_index,
     processed_to_input_index,
+    row_background,
     tube_input_boxes,
 )
 
@@ -70,3 +72,17 @@ def test_crop_around_bbox_returns_square_patch(tmp_path):
     Image.new("RGB", (320, 240), "white").save(p)
     out = crop_around_bbox(p, (0.5, 0.5, 0.1, 0.1), context_factor=2.0, patch_size=224)
     assert out.size == (224, 224)
+
+
+def test_correctness_label():
+    assert correctness_label("discarded-smoke") == "🔴 missed smoke"
+    assert correctness_label("kept-fp") == "🟠 false alarm"
+    assert correctness_label("n/a") == "—"
+
+
+def test_row_background_errors_and_unknown():
+    # errors get their own colours, regardless of verdict
+    assert row_background("discard", "🔴 missed smoke") == "#f4b4b4"
+    assert row_background("keep", "🟠 false alarm") == "#fbdca0"
+    # unknown ground truth ("—") falls back to a verdict-based tint
+    assert row_background("keep", "—") != row_background("discard", "—")

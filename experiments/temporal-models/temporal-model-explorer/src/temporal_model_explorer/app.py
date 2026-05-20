@@ -40,6 +40,24 @@ CROP_CONTEXT = 2.0  # bbox expansion for tube crops (more context than the model
 CROP_SIZE = 224
 PLAY_FPS = 1  # autoplay speed (frames/sec); fixed, no UI control
 
+# Display vocabulary. The underlying columns stay label/decision/outcome; the UI
+# shows: ground truth (label) · model verdict (decision) · correctness (outcome).
+CORRECTNESS = {
+    "kept-smoke": "✅ smoke kept",
+    "discarded-fp": "✅ fp filtered",
+    "discarded-smoke": "🔴 missed smoke",
+    "kept-fp": "🟠 false alarm",
+    "n/a": "—",
+}
+ROW_BG = {  # by correctness (errors stand out)
+    "🔴 missed smoke": "#f4b4b4",
+    "🟠 false alarm": "#fbdca0",
+    "✅ smoke kept": "#bfe7bf",
+    "✅ fp filtered": "#e6f2e6",
+}
+KEEP_BG = "#cfe2ff"  # flagged as smoke, ground truth unknown
+DISCARD_BG = "#eeeeee"  # discarded, ground truth unknown
+
 
 def registered_models() -> list[str]:
     """Model names from params.yaml (so the UI only offers configured models)."""
@@ -51,6 +69,20 @@ def registered_models() -> list[str]:
 def day_of(started_at: str | None) -> str:
     """Calendar day (YYYY-MM-DD) from an ISO timestamp; 'unknown' if absent."""
     return started_at[:10] if started_at else "unknown"
+
+
+def correctness_label(outcome: str) -> str:
+    """Human-friendly correctness label for a raw outcome value."""
+    return CORRECTNESS.get(outcome, outcome)
+
+
+def row_background(verdict: str, correctness: str) -> str:
+    """Row background colour from the model verdict + correctness label.
+
+    Errors stand out (missed smoke / false alarm); correct rows are green; rows
+    with unknown ground truth are tinted by the verdict (kept vs discarded).
+    """
+    return ROW_BG.get(correctness) or (KEEP_BG if verdict == "keep" else DISCARD_BG)
 
 
 def processed_to_input_index(
@@ -162,14 +194,15 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
         f"{'🟥 KEEP (smoke)' if is_smoke else '⬜ DISCARD (no smoke)'} — {key}"
     )
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("decision", row["decision"])
-    c2.metric("outcome", str(row["outcome"]))
+    c1.metric("model verdict", row["decision"])
+    c2.metric("correctness", correctness_label(row["outcome"]))
     c3.metric("trigger frame idx", str(row["trigger_frame_index"]))
     prob = row["probability"]
     c4.metric("probability", f"{prob:.3f}" if pd.notna(prob) else "—")
     st.caption(
-        f"label={meta.label} ({meta.label_detail}) · camera={meta.camera_name} · "
-        f"org={meta.organization_name} · frames={len(meta.frames)}"
+        f"ground truth={meta.label} ({meta.label_detail}) · "
+        f"camera={meta.camera_name} · org={meta.organization_name} · "
+        f"frames={len(meta.frames)}"
     )
 
     bbmap = frame_bboxes_by_input_index(details)
@@ -268,12 +301,45 @@ def main() -> None:  # pragma: no cover - Streamlit UI
         .reset_index(drop=True)
     )
 
-    st.subheader(f"{len(view)} sequences — {camera or 'all cameras'}")
+    head, filt = st.columns([6, 1])
+    with filt.popover("🔎 filter"):
+        f_gt = st.selectbox(
+            "ground truth", ["all", "smoke", "fp", "unknown"], key="f_gt"
+        )
+        f_mv = st.selectbox("model verdict", ["all", "keep", "discard"], key="f_mv")
+        f_corr = st.selectbox(
+            "correctness", ["all", *CORRECTNESS.values()], key="f_corr"
+        )
+    if f_gt != "all":
+        view = view[view["label"] == f_gt]
+    if f_mv != "all":
+        view = view[view["decision"] == f_mv]
+    if f_corr != "all":
+        view = view[view["outcome"].map(correctness_label) == f_corr]
+
+    head.subheader(f"{len(view)} sequences — {camera or 'all cameras'}")
     if view.empty:
         return
-    cols = ["day", "key", "started_at", "label", "decision", "outcome", "probability"]
+
+    display = view.assign(correctness=view["outcome"].map(correctness_label)).rename(
+        columns={"label": "ground truth", "decision": "model verdict"}
+    )
+    cols = [
+        "day",
+        "key",
+        "started_at",
+        "ground truth",
+        "model verdict",
+        "correctness",
+        "probability",
+    ]
+    def _style_row(r):
+        bg = row_background(r["model verdict"], r["correctness"])
+        return [f"background-color: {bg}; color: #111"] * len(cols)
+
+    styled = display[cols].style.apply(_style_row, axis=1)
     event = st.dataframe(
-        view[cols],
+        styled,
         use_container_width=True,
         hide_index=True,
         on_select="rerun",
@@ -286,9 +352,8 @@ def main() -> None:  # pragma: no cover - Streamlit UI
     rows = event.selection.rows
     if rows and rows[0] < len(view):
         st.session_state["selected_key"] = view.iloc[rows[0]]["key"]
-    keys = set(view["key"])
     selected = st.session_state.get("selected_key")
-    if selected not in keys:
+    if selected not in set(view["key"]):
         selected = view.iloc[0]["key"]
     _drilldown(st, selected, model, view[view["key"] == selected].iloc[0])
 
