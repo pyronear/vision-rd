@@ -14,7 +14,6 @@ playback tick, plus the temporal-model decision.
 from __future__ import annotations
 
 import json
-import time
 from pathlib import Path
 
 import numpy as np
@@ -318,11 +317,11 @@ def _tube_timeline_chart(
     return alt.layer(*layers).properties(height=max(90, len(tube_rows) * 34))
 
 
-@st.fragment
+@st.fragment(run_every=1.0 / PLAY_FPS)
 def _drilldown(key: str, model: str, row: pd.Series) -> None:  # pragma: no cover
-    # A fragment so autoplay reruns ONLY this drill-down (st.rerun(scope="fragment"))
-    # instead of the whole page. The fragment is the atomic render unit, so selecting
-    # a new sequence replaces it cleanly (no stale/ghosted tubes across reruns).
+    # A fragment with run_every so autoplay reruns ONLY this drill-down on a timer
+    # (not the whole page). The fragment is the atomic render unit, so selecting a
+    # new sequence replaces it cleanly (no stale/ghosted tubes across reruns).
     import altair as alt  # noqa: PLC0415
 
     seq_dir = _find_seq_dir(key)
@@ -410,10 +409,6 @@ def _drilldown(key: str, model: str, row: pd.Series) -> None:  # pragma: no cove
             )
         else:
             tubes_col.caption("inactive at this frame")
-
-    if playing:
-        time.sleep(1.0 / PLAY_FPS)
-        st.rerun(scope="fragment")
 
 
 def main() -> None:  # pragma: no cover - Streamlit UI
