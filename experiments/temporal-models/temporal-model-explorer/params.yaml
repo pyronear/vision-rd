@@ -13,6 +13,5 @@ org_names: {}             # optional org_id -> name (fallback when admin unavail
 models:                   # name -> SOURCE model.zip path (copied into the DVC-tracked
                           # data/06_models/<name>/model.zip by the prepare_models stage)
   vit_dinov2_finetune: ../bbox-tube-temporal/data/06_models/vit_dinov2_finetune/model.zip
-  gru_convnext_finetune: ../bbox-tube-temporal/data/06_models/gru_convnext_finetune/model.zip
 
 local_zip: ../data/seq_annotation_done_by_label.zip

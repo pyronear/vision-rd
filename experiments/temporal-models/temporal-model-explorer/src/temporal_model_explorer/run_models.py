@@ -61,6 +61,7 @@ def run_over_store(
                     "camera_name": meta.camera_name,
                     "organization_id": meta.organization_id,
                     "organization_name": meta.organization_name,
+                    "started_at": meta.started_at,
                     "label": meta.label,
                     "label_detail": meta.label_detail,
                     "n_frames": len(frames),
