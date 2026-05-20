@@ -346,15 +346,18 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
         for t in kept
     ]
     color_map = {f"T{t['tube_id']}": tube_color(t["tube_id"]) for t in kept}
+    # st.empty() so the chart/info swap cleanly when switching sequences (otherwise
+    # a stale "no smoke tubes" box can linger over a sequence that has tubes).
+    timeline_slot = st.empty()
     if tube_rows:
-        st.altair_chart(
+        timeline_slot.altair_chart(
             _tube_timeline_chart(
                 alt, tube_rows, n, trig, cur, color_map, trigger_tube_id
             ),
             use_container_width=True,
         )
     else:
-        st.info("no smoke tubes extracted")
+        timeline_slot.info("no smoke tubes extracted")
     i = st.slider("frame", 0, n - 1, key=frame_key) if n > 1 else 0
 
     frame_col, tubes_col = st.columns([2, 1])
