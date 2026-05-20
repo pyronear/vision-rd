@@ -137,16 +137,23 @@ packaged bbox-tube variants under
 
 ### Streamlit app
 
-- **Main table** — one row per sequence; per-model KEEP/DISCARD + trigger + the
-  `outcome` chip. Sortable.
-- **Sidebar filters** — model decision (KEEP/DISCARD); GT label (smoke/fp/unknown);
-  outcome (incl. "errors only", "smoke wrongly discarded", "fp correctly
-  discarded", "fp wrongly kept"); station/camera, organization; source; and
-  (with >1 model) agreement (agree/disagree).
-- **Drill-down** — select a sequence: per-model panel (KEEP/DISCARD, outcome,
-  trigger index, probability) + each model's raw `details` JSON (expanders) + the
-  ordered frame strip (capture order, indexed captions). *Per-frame bbox overlay
-  and trigger-frame highlight are deferred — see Future work.*
+Kept deliberately simple (one model in focus at a time):
+
+- **Left pane** — select **organization** → **camera** (filtered by org) →
+  **model** (the model list comes from the `params.yaml` registry, so vit-only by
+  default).
+- **Main pane** — the selected org/camera/model's sequences as a **day-sorted,
+  row-selectable table** (`day, key, started_at, label, decision, outcome,
+  probability`); **clicking a row** opens that sequence.
+- **Drill-down** — the temporal-model **decision** (KEEP=smoke / DISCARD, outcome,
+  trigger index, probability) + an **autoplaying, pausable frame viewer** (1 fps,
+  ▶/⏸ + prev/next) showing each frame with the model's **YOLO bboxes overlaid**,
+  and alongside it each **extracted smoke tube as a context-cropped clip** that
+  autoplays on the **same playback tick** (per-tube logit/prob/first-crossing).
+  An expander shows the raw `details` JSON.
+- Processed-frame indices (from truncation/padding) are mapped back to input
+  frames via `details.preprocessing.padded_frame_indices` so overlays and crops
+  land on the right frame. Tube crops reuse the lib's context-expand helpers.
 
 **Frontend-agnostic results.** Streamlit reads only the result artifacts
 (`results.parquet`, per-sequence `details` JSON, and the image store) — it never
@@ -248,13 +255,10 @@ standalone (`uv run python scripts/run_models.py …`) or via `uv run dvc repro`
 
 ## Future work
 
-- **Drill-down per-frame bbox overlay + trigger-frame highlight.** Deferred because
-  the model truncates/pads sequences to `max_frames`, so a tube entry's
-  `frame_idx` (and `trigger_frame_index`) live in *processed-sequence* space, not
-  input-frame space. Correct overlay/highlight (and an exact
-  `trigger_frame_file`) require mapping processed indices back to input frames via
-  `details.preprocessing.padded_frame_indices`. Until then the drill-down shows
-  the frame strip + raw `details` JSON without per-frame annotation.
+- **Trigger-frame highlight** in the autoplaying viewer (the trigger index is shown
+  in the metrics; visually marking that exact frame is a small follow-up). Note the
+  per-frame bbox overlay + context-cropped tubes are **implemented** (processed
+  indices mapped back to input frames via `details.preprocessing.padded_frame_indices`).
 - Add more `TemporalModel` implementations (other architectures) to the registry.
 - Per-station / per-FP-category metrics summaries.
 - Optional: cache platform downloads to avoid re-fetching.
