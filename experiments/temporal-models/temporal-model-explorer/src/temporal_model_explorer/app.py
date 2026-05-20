@@ -85,6 +85,25 @@ def row_background(verdict: str, correctness: str) -> str:
     return ROW_BG.get(correctness) or (KEEP_BG if verdict == "keep" else DISCARD_BG)
 
 
+TUBE_PALETTE = [
+    "#1f77b4",
+    "#ff7f0e",
+    "#2ca02c",
+    "#d62728",
+    "#9467bd",
+    "#8c564b",
+    "#e377c2",
+    "#7f7f7f",
+    "#bcbd22",
+    "#17becf",
+]
+
+
+def tube_color(tube_id: int) -> str:
+    """Stable colour for a tube id (same colour in the timeline + crop headers)."""
+    return TUBE_PALETTE[tube_id % len(TUBE_PALETTE)]
+
+
 def legend_html() -> str:
     """HTML chips explaining the table row colours (built from the colour map)."""
     items = [
@@ -176,43 +195,18 @@ def crop_around_bbox(
     return Image.fromarray(crop_and_resize(img, box, patch_size))
 
 
-def timeline_image(
-    n_frames: int,
-    active_frames,
-    trigger: int | None = None,
-    current: int | None = None,
-    width: int = 1000,
-    height: int = 18,
-) -> Image.Image:
-    """Thin timeline bar aligned above the slider: green where a smoke tube is
-    present, red at the trigger frame, a dark tick at the current frame, grey
-    elsewhere."""
-    img = Image.new("RGB", (width, height), "#e8e8e8")
-    if n_frames <= 0:
-        return img
-    draw = ImageDraw.Draw(img)
-    active = set(active_frames)
-    seg = width / n_frames
-    for i in range(n_frames):
-        if i in active:
-            draw.rectangle(
-                [int(i * seg), 0, max(int(i * seg), int((i + 1) * seg) - 1), height - 1],
-                fill="#2e7d32",
-            )
-    if trigger is not None and 0 <= trigger < n_frames:
-        draw.rectangle(
-            [
-                int(trigger * seg),
-                0,
-                max(int(trigger * seg), int((trigger + 1) * seg) - 1),
-                height - 1,
-            ],
-            fill="#c62828",
-        )
-    if current is not None and 0 <= current < n_frames:
-        x = int((current + 0.5) * seg)
-        draw.rectangle([max(0, x - 1), 0, min(width - 1, x + 1), height - 1], fill="#000")
-    return img
+def tube_timeline_df(tube_rows: list[tuple[str, set]]) -> pd.DataFrame:
+    """Long frame for the Altair tube timeline: one row per (tube, present frame).
+
+    ``tube_rows`` is ``[(label, frame_index_set), ...]``; ``frame_end`` = frame + 1
+    so each present frame renders as a unit-width bar.
+    """
+    records = [
+        {"tube": label, "frame": f, "frame_end": f + 1}
+        for label, frames in tube_rows
+        for f in sorted(frames)
+    ]
+    return pd.DataFrame(records, columns=["tube", "frame", "frame_end"])
 
 
 def load_details(model: str, key: str) -> dict:
@@ -238,34 +232,79 @@ def started_at_by_key() -> dict[str, str | None]:
     return out
 
 
+def _tube_timeline_chart(
+    alt, tube_rows, n, trigger, current, color_map
+):  # pragma: no cover
+    """One colour-coded bar row per tube + trigger/current rules (Altair)."""
+    order = [label for label, _ in tube_rows]
+    xscale = alt.Scale(domain=[0, n], nice=False)
+    bars = (
+        alt.Chart(tube_timeline_df(tube_rows))
+        .mark_bar(height=16, cornerRadius=3)
+        .encode(
+            x=alt.X(
+                "frame:Q",
+                title="frame",
+                scale=xscale,
+                axis=alt.Axis(format="d", tickMinStep=1),
+            ),
+            x2="frame_end:Q",
+            y=alt.Y("tube:N", title=None, sort=order, axis=alt.Axis(labelFontSize=13)),
+            color=alt.Color(
+                "tube:N",
+                sort=order,
+                scale=alt.Scale(domain=order, range=[color_map[o] for o in order]),
+                legend=None,
+            ),
+            tooltip=["tube", "frame"],
+        )
+    )
+    layers = [bars]
+    if trigger is not None:
+        layers.append(
+            alt.Chart(pd.DataFrame({"x": [trigger + 0.5]}))
+            .mark_rule(color="#c62828", size=2)
+            .encode(x=alt.X("x:Q", scale=xscale, axis=None))
+        )
+    layers.append(
+        alt.Chart(pd.DataFrame({"x": [current + 0.5]}))
+        .mark_rule(color="#111", strokeDash=[4, 3], size=2)
+        .encode(x=alt.X("x:Q", scale=xscale, title="frame"))
+    )
+    return alt.layer(*layers).properties(height=max(90, len(tube_rows) * 34))
+
+
 def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no cover
+    import altair as alt  # noqa: PLC0415
+
     seq_dir = _find_seq_dir(key)
     if seq_dir is None:
         st.warning(f"sequence {key} not found in the store")
         return
     meta = read_meta(seq_dir)
     details = load_details(model, key)
-
-    is_smoke = row["decision"] == "keep"
-    st.subheader(
-        f"{'🟥 KEEP (smoke)' if is_smoke else '⬜ DISCARD (no smoke)'} — {key}"
-    )
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("model verdict", row["decision"])
-    c2.metric("correctness", correctness_label(row["outcome"]))
-    c3.metric("trigger frame idx", str(row["trigger_frame_index"]))
-    prob = row["probability"]
-    c4.metric("probability", f"{prob:.3f}" if pd.notna(prob) else "—")
-    st.caption(
-        f"ground truth={meta.label} ({meta.label_detail}) · "
-        f"camera={meta.camera_name} · org={meta.organization_name} · "
-        f"frames={len(meta.frames)}"
-    )
-
     bbmap = frame_bboxes_by_input_index(details)
     padded = details.get("preprocessing", {}).get("padded_frame_indices", [])
     kept = details.get("tubes", {}).get("kept", [])
     n = len(meta.frames)
+    trig_raw = row["trigger_frame_index"]
+    trig = (
+        processed_to_input_index(int(trig_raw), padded) if pd.notna(trig_raw) else None
+    )
+
+    is_keep = row["decision"] == "keep"
+    verdict = "💨 KEEP (smoke)" if is_keep else "🚫 DISCARD (no smoke)"
+    st.subheader(f"{verdict} — {key}")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("model verdict", row["decision"])
+    c2.metric("correctness", correctness_label(row["outcome"]))
+    c3.metric("trigger frame", "—" if trig is None else str(trig))
+    prob = row["probability"]
+    c4.metric("probability", f"{prob:.3f}" if pd.notna(prob) else "—")
+    st.caption(
+        f"ground truth={meta.label} ({meta.label_detail}) · "
+        f"camera={meta.camera_name} · org={meta.organization_name} · frames={n}"
+    )
     if not n:
         return
 
@@ -279,48 +318,48 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
     if playing:
         st.session_state[frame_key] = (st.session_state[frame_key] + 1) % n
     cur = st.session_state[frame_key] % n
-    trig_raw = row["trigger_frame_index"]
-    trig = (
-        processed_to_input_index(int(trig_raw), padded) if pd.notna(trig_raw) else None
-    )
-    top[1].image(
-        timeline_image(n, set(bbmap), trig, cur),
-        use_container_width=True,
-        caption="🟩 smoke tube present · 🟥 trigger · ▏ current frame",
-    )
-    i = top[1].slider("frame", 0, n - 1, key=frame_key) if n > 1 else 0
+
+    tube_rows = [
+        (f"T{t['tube_id']}", {idx for idx, _ in tube_input_boxes(t, padded)})
+        for t in kept
+    ]
+    color_map = {f"T{t['tube_id']}": tube_color(t["tube_id"]) for t in kept}
+    with top[1]:
+        if tube_rows:
+            st.altair_chart(
+                _tube_timeline_chart(alt, tube_rows, n, trig, cur, color_map),
+                use_container_width=True,
+            )
+        else:
+            st.info("no smoke tubes extracted")
+        i = st.slider("frame", 0, n - 1, key=frame_key) if n > 1 else 0
 
     frame_col, tubes_col = st.columns([2, 1])
     ref = meta.frames[i]
     frame_col.image(
         draw_bboxes(seq_dir / ref.file, bbmap.get(i, [])),
-        caption=f"frame {i + 1}/{n} — {Path(ref.file).name} — "
-        f"{len(bbmap.get(i, []))} detection(s)",
+        caption=f"frame {i + 1}/{n} — {len(bbmap.get(i, []))} detection(s)",
         use_container_width=True,
     )
 
-    # Each tube crop is synced to the current frame i (shown when the tube has a
-    # detection at that frame).
-    tubes_col.markdown(f"**{len(kept)} smoke tube(s)** — context crop @ frame {i}")
+    # Each tube crop is synced to the current frame i.
+    tubes_col.markdown(f"**tubes @ frame {i}** (context-cropped)")
     for tube in kept:
         at_frame = dict(tube_input_boxes(tube, padded))
+        color = tube_color(tube["tube_id"])
         tprob = tube.get("probability")
-        head = (
-            f"tube {tube['tube_id']} · prob {tprob:.2f}"
-            if tprob is not None
-            else f"tube {tube['tube_id']} · logit {tube['logit']:.2f}"
+        stat = (
+            f"prob {tprob:.2f}" if tprob is not None else f"logit {tube['logit']:.2f}"
         )
+        chip = f"<b style='color:{color}'>● T{tube['tube_id']}</b>"
+        tubes_col.markdown(f"{chip} · {stat}", unsafe_allow_html=True)
         if i in at_frame:
             tubes_col.image(
                 crop_around_bbox(seq_dir / meta.frames[i].file, at_frame[i]),
                 width=220,
-                caption=head,
             )
         else:
-            tubes_col.caption(f"{head} — inactive at frame {i}")
-
-    with st.expander("raw details JSON"):
-        st.json(details)
+            tubes_col.caption("inactive at this frame")
 
     if playing:
         time.sleep(1.0 / PLAY_FPS)
@@ -399,6 +438,7 @@ def main() -> None:  # pragma: no cover - Streamlit UI
         "correctness",
         "probability",
     ]
+
     def _style_row(r):
         bg = row_background(r["model verdict"], r["correctness"])
         return [f"background-color: {bg}; color: #111"] * len(cols)

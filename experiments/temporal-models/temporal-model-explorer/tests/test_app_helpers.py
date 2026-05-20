@@ -9,8 +9,9 @@ from temporal_model_explorer.app import (
     legend_html,
     processed_to_input_index,
     row_background,
-    timeline_image,
+    tube_color,
     tube_input_boxes,
+    tube_timeline_df,
 )
 
 
@@ -96,9 +97,16 @@ def test_legend_html_mentions_each_colour():
     assert "missed smoke" in html and "false alarm" in html
 
 
-def test_timeline_image_size_and_active_marking():
-    img = timeline_image(10, {2, 3}, trigger=5, current=7, width=200, height=20)
-    assert img.size == (200, 20)
-    # frame 2 is active -> a green-ish pixel in its segment (x ~ 2/10 * 200 = 40)
-    r, g, b = img.getpixel((45, 10))
-    assert g > r and g > b
+def test_tube_color_stable_and_distinct():
+    assert tube_color(0) != tube_color(1)  # distinct for different tubes
+    assert tube_color(0) == tube_color(0)  # stable
+    assert tube_color(0).startswith("#")
+
+
+def test_tube_timeline_df_one_row_per_present_frame():
+    df = tube_timeline_df([("T0", {2, 3}), ("T1", {5})])
+    assert list(df.columns) == ["tube", "frame", "frame_end"]
+    assert len(df) == 3
+    t0 = df[df["tube"] == "T0"].sort_values("frame")
+    assert list(t0["frame"]) == [2, 3]
+    assert list(t0["frame_end"]) == [3, 4]
