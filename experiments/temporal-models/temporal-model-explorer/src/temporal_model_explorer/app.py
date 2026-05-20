@@ -38,6 +38,7 @@ PARAMS = Path("params.yaml")
 
 CROP_CONTEXT = 2.0  # bbox expansion for tube crops (more context than the model's 1.5)
 CROP_SIZE = 224
+PLAY_FPS = 1  # autoplay speed (frames/sec); fixed, no UI control
 
 
 def registered_models() -> list[str]:
@@ -181,13 +182,12 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
     # One playback tick drives the full-frame view AND every tube crop.
     tick_key = f"tick_{key}"
     st.session_state.setdefault(tick_key, 0)
-    ctrl = st.columns([1, 1, 1, 3])
+    ctrl = st.columns([1, 1, 1, 7])
     playing = ctrl[0].toggle("▶ play", value=True, key=f"play_{key}")
     if ctrl[1].button("⏮", key=f"prev_{key}"):
         st.session_state[tick_key] -= 1
     if ctrl[2].button("⏭", key=f"next_{key}"):
         st.session_state[tick_key] += 1
-    fps = ctrl[3].slider("fps", 1, 10, 4, key=f"fps_{key}")
     tick = st.session_state[tick_key]
 
     frame_col, tubes_col = st.columns([2, 1])
@@ -224,7 +224,7 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
 
     if playing:
         st.session_state[tick_key] = tick + 1
-        time.sleep(1.0 / fps)
+        time.sleep(1.0 / PLAY_FPS)
         st.rerun()
 
 
