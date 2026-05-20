@@ -474,7 +474,6 @@ def main() -> None:  # pragma: no cover - Streamlit UI
     )
     cols = [
         "day",
-        "key",
         "started_at",
         "ground truth",
         "model verdict",
