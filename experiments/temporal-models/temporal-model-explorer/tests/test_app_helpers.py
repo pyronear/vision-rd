@@ -9,6 +9,7 @@ from temporal_model_explorer.app import (
     legend_html,
     processed_to_input_index,
     row_background,
+    timeline_image,
     tube_input_boxes,
 )
 
@@ -93,3 +94,11 @@ def test_legend_html_mentions_each_colour():
     html = legend_html()
     assert "#f4b4b4" in html and "#fbdca0" in html  # error colours present
     assert "missed smoke" in html and "false alarm" in html
+
+
+def test_timeline_image_size_and_active_marking():
+    img = timeline_image(10, {2, 3}, trigger=5, current=7, width=200, height=20)
+    assert img.size == (200, 20)
+    # frame 2 is active -> a green-ish pixel in its segment (x ~ 2/10 * 200 = 40)
+    r, g, b = img.getpixel((45, 10))
+    assert g > r and g > b

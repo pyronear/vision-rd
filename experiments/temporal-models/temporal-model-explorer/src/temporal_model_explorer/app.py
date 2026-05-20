@@ -176,6 +176,45 @@ def crop_around_bbox(
     return Image.fromarray(crop_and_resize(img, box, patch_size))
 
 
+def timeline_image(
+    n_frames: int,
+    active_frames,
+    trigger: int | None = None,
+    current: int | None = None,
+    width: int = 1000,
+    height: int = 18,
+) -> Image.Image:
+    """Thin timeline bar aligned above the slider: green where a smoke tube is
+    present, red at the trigger frame, a dark tick at the current frame, grey
+    elsewhere."""
+    img = Image.new("RGB", (width, height), "#e8e8e8")
+    if n_frames <= 0:
+        return img
+    draw = ImageDraw.Draw(img)
+    active = set(active_frames)
+    seg = width / n_frames
+    for i in range(n_frames):
+        if i in active:
+            draw.rectangle(
+                [int(i * seg), 0, max(int(i * seg), int((i + 1) * seg) - 1), height - 1],
+                fill="#2e7d32",
+            )
+    if trigger is not None and 0 <= trigger < n_frames:
+        draw.rectangle(
+            [
+                int(trigger * seg),
+                0,
+                max(int(trigger * seg), int((trigger + 1) * seg) - 1),
+                height - 1,
+            ],
+            fill="#c62828",
+        )
+    if current is not None and 0 <= current < n_frames:
+        x = int((current + 0.5) * seg)
+        draw.rectangle([max(0, x - 1), 0, min(width - 1, x + 1), height - 1], fill="#000")
+    return img
+
+
 def load_details(model: str, key: str) -> dict:
     """Read the per-(model, sequence) details JSON; ``{}`` if absent."""
     path = DETAILS / model / f"{key}.json"
@@ -239,6 +278,16 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
     playing = top[0].toggle("▶ play", value=True, key=f"play_{key}")
     if playing:
         st.session_state[frame_key] = (st.session_state[frame_key] + 1) % n
+    cur = st.session_state[frame_key] % n
+    trig_raw = row["trigger_frame_index"]
+    trig = (
+        processed_to_input_index(int(trig_raw), padded) if pd.notna(trig_raw) else None
+    )
+    top[1].image(
+        timeline_image(n, set(bbmap), trig, cur),
+        use_container_width=True,
+        caption="🟩 smoke tube present · 🟥 trigger · ▏ current frame",
+    )
     i = top[1].slider("frame", 0, n - 1, key=frame_key) if n > 1 else 0
 
     frame_col, tubes_col = st.columns([2, 1])
