@@ -25,7 +25,7 @@ from bbox_tube_temporal.model_input import (
     expand_bbox,
     norm_bbox_to_pixel_square,
 )
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 # Absolute imports: this module is the Streamlit entrypoint, run as __main__ via
 # `streamlit run app.py` (no package context), so relative imports would fail.
@@ -39,6 +39,11 @@ PARAMS = Path("params.yaml")
 CROP_CONTEXT = 2.0  # bbox expansion for tube crops (more context than the model's 1.5)
 CROP_SIZE = 224
 PLAY_FPS = 1  # autoplay speed (frames/sec); fixed, no UI control
+
+try:
+    _BBOX_FONT = ImageFont.load_default(size=18)  # confidence labels on the frame
+except TypeError:  # older Pillow without the size kwarg
+    _BBOX_FONT = ImageFont.load_default()
 
 # Display vocabulary. The underlying columns stay label/decision/outcome; the UI
 # shows: ground truth (label) · model verdict (decision) · correctness (outcome).
@@ -137,7 +142,7 @@ def processed_to_input_index(
 
 
 def frame_bboxes_by_input_index(details: dict) -> dict[int, list[tuple]]:
-    """input-frame index → list of normalized (cx,cy,w,h) bboxes from kept tubes."""
+    """input-frame index → list of ((cx,cy,w,h), confidence) from kept tubes."""
     padded = (details or {}).get("preprocessing", {}).get("padded_frame_indices", [])
     out: dict[int, list[tuple]] = {}
     for tube in (details or {}).get("tubes", {}).get("kept", []):
@@ -147,7 +152,9 @@ def frame_bboxes_by_input_index(details: dict) -> dict[int, list[tuple]]:
             inp = processed_to_input_index(entry["frame_idx"], padded)
             if inp is None:
                 continue
-            out.setdefault(inp, []).append(tuple(entry["bbox"]))
+            out.setdefault(inp, []).append(
+                (tuple(entry["bbox"]), entry.get("confidence"))
+            )
     return out
 
 
@@ -166,16 +173,21 @@ def tube_input_boxes(
 
 
 def draw_bboxes(
-    image_path: Path, bboxes_norm, color: str = "red", width: int = 4
+    image_path: Path, boxes, color: str = "red", width: int = 4
 ) -> Image.Image:
-    """Return the frame with normalized (cx,cy,w,h) bboxes drawn on it."""
+    """Return the frame with bboxes drawn; ``boxes`` is ``[((cx,cy,w,h), conf), ...]``.
+
+    The confidence (when present) is printed just above each box.
+    """
     img = Image.open(image_path).convert("RGB")
     w_img, h_img = img.size
     draw = ImageDraw.Draw(img)
-    for cx, cy, bw, bh in bboxes_norm:
+    for (cx, cy, bw, bh), conf in boxes:
         x0, y0 = (cx - bw / 2) * w_img, (cy - bh / 2) * h_img
         x1, y1 = (cx + bw / 2) * w_img, (cy + bh / 2) * h_img
         draw.rectangle([x0, y0, x1, y1], outline=color, width=width)
+        if conf is not None:
+            draw.text((x0, max(0, y0 - 20)), f"{conf:.2f}", fill=color, font=_BBOX_FONT)
     return img
 
 
@@ -233,9 +245,12 @@ def started_at_by_key() -> dict[str, str | None]:
 
 
 def _tube_timeline_chart(
-    alt, tube_rows, n, trigger, current, color_map
+    alt, tube_rows, n, trigger, current, color_map, trigger_tube_id=None
 ):  # pragma: no cover
-    """One colour-coded bar row per tube + trigger/current rules (Altair)."""
+    """One colour-coded bar row per tube + trigger/current rules (Altair).
+
+    The trigger tube's bars get a dark outline so it stands out.
+    """
     order = [label for label, _ in tube_rows]
     xscale = alt.Scale(domain=[0, n], nice=False)
     bars = (
@@ -259,6 +274,12 @@ def _tube_timeline_chart(
             tooltip=["tube", "frame"],
         )
     )
+    if trigger_tube_id is not None:
+        is_trig = f"datum.tube === 'T{trigger_tube_id}'"
+        bars = bars.encode(
+            stroke=alt.condition(is_trig, alt.value("#111"), alt.value(None)),
+            strokeWidth=alt.condition(is_trig, alt.value(2.5), alt.value(0)),
+        )
     layers = [bars]
     if trigger is not None:
         layers.append(
@@ -308,31 +329,33 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
     if not n:
         return
 
-    # Playback: a play/pause toggle + a frame slider. While playing we advance the
-    # slider's session_state value BEFORE the slider widget is instantiated (the
-    # only point at which modifying a widget-keyed value is allowed).
+    # Playback: a compact play/pause toggle (its own short line) above a full-width
+    # timeline + slider. While playing we advance the slider's session_state value
+    # BEFORE the slider widget is instantiated (the only point at which modifying a
+    # widget-keyed value is allowed).
     frame_key = f"frame_{key}"
     st.session_state.setdefault(frame_key, 0)
-    top = st.columns([1, 9])
-    playing = top[0].toggle("▶ play", value=True, key=f"play_{key}")
+    playing = st.toggle("▶ play", value=True, key=f"play_{key}")
     if playing:
         st.session_state[frame_key] = (st.session_state[frame_key] + 1) % n
     cur = st.session_state[frame_key] % n
 
+    trigger_tube_id = details.get("decision", {}).get("trigger_tube_id")
     tube_rows = [
         (f"T{t['tube_id']}", {idx for idx, _ in tube_input_boxes(t, padded)})
         for t in kept
     ]
     color_map = {f"T{t['tube_id']}": tube_color(t["tube_id"]) for t in kept}
-    with top[1]:
-        if tube_rows:
-            st.altair_chart(
-                _tube_timeline_chart(alt, tube_rows, n, trig, cur, color_map),
-                use_container_width=True,
-            )
-        else:
-            st.info("no smoke tubes extracted")
-        i = st.slider("frame", 0, n - 1, key=frame_key) if n > 1 else 0
+    if tube_rows:
+        st.altair_chart(
+            _tube_timeline_chart(
+                alt, tube_rows, n, trig, cur, color_map, trigger_tube_id
+            ),
+            use_container_width=True,
+        )
+    else:
+        st.info("no smoke tubes extracted")
+    i = st.slider("frame", 0, n - 1, key=frame_key) if n > 1 else 0
 
     frame_col, tubes_col = st.columns([2, 1])
     ref = meta.frames[i]
@@ -342,7 +365,7 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
         use_container_width=True,
     )
 
-    # Each tube crop is synced to the current frame i.
+    # Each tube crop is synced to the current frame i; the trigger tube is badged.
     tubes_col.markdown(f"**tubes @ frame {i}** (context-cropped)")
     for tube in kept:
         at_frame = dict(tube_input_boxes(tube, padded))
@@ -351,8 +374,9 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
         stat = (
             f"prob {tprob:.2f}" if tprob is not None else f"logit {tube['logit']:.2f}"
         )
+        badge = " ⚡<b>triggered</b>" if tube["tube_id"] == trigger_tube_id else ""
         chip = f"<b style='color:{color}'>● T{tube['tube_id']}</b>"
-        tubes_col.markdown(f"{chip} · {stat}", unsafe_allow_html=True)
+        tubes_col.markdown(f"{chip} · {stat}{badge}", unsafe_allow_html=True)
         if i in at_frame:
             tubes_col.image(
                 crop_around_bbox(seq_dir / meta.frames[i].file, at_frame[i]),
