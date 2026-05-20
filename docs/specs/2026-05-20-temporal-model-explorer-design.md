@@ -69,8 +69,6 @@ Components are isolated and independently runnable:
 
 `data/03_primary/sequences/<key>/meta.json`:
 
-// Do we get this kind of sequence data from the API? Or is it from the zip only?
-
 ```jsonc
 {
   "key": "platform_43392",
@@ -97,6 +95,18 @@ Components are isolated and independently runnable:
   containing `smoke` or equal to `wildfire` → `smoke`; other known FP-ish values →
   `fp`; unrecognized → `unknown`. Raw value always kept in `label_detail`. The
   local zip is the gold-standard GT.
+
+**Field provenance by source.** The rich metadata comes from the **API**:
+- **platform** → all fields from the API: `sequence_id, camera_id, started_at,
+  is_wildfire`(→`label_detail`) from the sequence; `camera_name, organization_id`
+  from `/cameras/`; `frames` from the sequence's detections; `organization_name`
+  only with admin (or the static map).
+- **local_zip** → only `label`/`label_detail` (folder), `frames` (`images/`,
+  ordered by filename), and `sequence_id` (`seq_<id>` dir). `camera_id`,
+  `camera_name`, `organization_*`, `started_at` are **not in the zip** → `null` by
+  default, but can be **optionally enriched** by looking the `sequence_id` up
+  against the API (`/sequences/{id}` + `/cameras/`), since the zip's `seq_<id>`
+  are platform sequence IDs.
 
 ### Model runner — results format
 
@@ -178,6 +188,7 @@ experiments/temporal-models/temporal-model-explorer/
   pyproject.toml        # deps: bbox-tube-temporal-core (path), streamlit, requests, pandas, pyarrow, pyyaml, pillow; dev: pytest, ruff
   Makefile              # install / lint / format / test / app (streamlit run)
   params.yaml           # model registry, label mapping, defaults
+  dvc.yaml              # stages: import_local_zip / import_platform / run_models
   src/temporal_model_explorer/
     platform_api.py     # lean platform client (mirror copy)
     store.py            # meta.json read/write + sequence store helpers
@@ -191,7 +202,25 @@ experiments/temporal-models/temporal-model-explorer/
   data/                 # 01_raw, 03_primary/sequences, 07_model_output (gitignored / DVC)
 ```
 
-// Is it possible to wire the data output to a dvc yaml file or scripts? (at least for the model runs?)
+### Pipeline (DVC)
+
+Stages are wired in `dvc.yaml` (matching the other experiments), driven by
+`params.yaml`:
+
+- **`import_local_zip`** — dep: the annotated zip → out:
+  `data/03_primary/sequences/zip_*`. Deterministic.
+- **`import_platform`** — params: date range, cameras → out:
+  `data/03_primary/sequences/platform_*`. Param-driven, but it hits the **live
+  API**, so a re-run fetches whatever the API currently returns (not
+  bit-reproducible); treat the fetched store as a cached snapshot.
+- **`run_models`** — deps: the sequence store + the configured `model.zip`(s);
+  params: model registry → out: `data/07_model_output/results.parquet` (+
+  per-sequence `details` JSON). **Deterministic** given store + packages — the
+  cleanest DVC stage, and the one you specifically want tracked.
+
+The Streamlit app is **not** a DVC stage — it's a viewer over `run_models`
+outputs. Each module also has a thin `scripts/` CLI wrapper, so every stage runs
+standalone (`uv run python scripts/run_models.py …`) or via `uv run dvc repro`.
 
 ## Prerequisites
 
