@@ -44,10 +44,12 @@ experiments/temporal-models/temporal-model-explorer/
 **Common store layout** (produced by both importers, scanned by the recursive
 `iter_sequence_dirs`, so nesting depth is flexible):
 - local zip → `data/03_primary/sequences/local_zip/zip_<id>/{images/…, meta.json}`
-- platform → `data/03_primary/sequences/platform/<org>/platform_<id>/{images/…, meta.json}`
-  — **organized by org on disk** (`<org>` = org name when known via admin
-  enrichment, else `org_<id>`). Swapping `PLATFORM_LOGIN`/`PASSWORD` between runs
-  fetches different org-scoped sites, which land in their own `<org>` subdir.
+- platform → `data/03_primary/sequences/<org>/<camera>/seq_<id>/{images/…, meta.json}`
+  — **organized by org then camera** (`<org>` = org name via admin enrichment else
+  `org_<id>`; `<camera>` = camera name else `cam_<id>`). Swapping
+  `PLATFORM_LOGIN`/`PASSWORD` between runs fetches different org-scoped sites, which
+  land in their own `<org>` subdir. The results `key` stays `platform_<id>` (folder
+  names don't equal the key; the app resolves a sequence by its `meta.key`).
 
 **DVC-tracked artifacts:** `data/06_models/<name>/model.zip` (from `prepare_models`),
 `data/03_primary/sequences/local_zip` (from `import_local_zip`), and
@@ -839,9 +841,10 @@ def test_import_platform_writes_store(tmp_path, monkeypatch):
         download=lambda url: f"BYTES:{url}".encode(),
     )
     assert n == 1
-    # organized on disk by org name: <org>/platform_<id>/
-    seq_dir = tmp_path / "demo" / "platform_43392"
+    # organized on disk by org/camera: <org>/<camera>/seq_<id>/
+    seq_dir = tmp_path / "demo" / "cam-7" / "seq_43392"
     meta = read_meta(seq_dir)
+    assert meta.key == "platform_43392"
     assert meta.label == "smoke" and meta.label_detail == "other_smoke"
     assert meta.camera_name == "cam-7" and meta.organization_id == 3
     assert meta.organization_name == "demo"
@@ -865,8 +868,8 @@ def test_import_platform_org_slug_fallback_without_org_index(tmp_path, monkeypat
         camera_index={7: {"id": 7, "name": "cam-7", "organization_id": 3}},
         download=lambda url: b"x",
     )
-    # no org_index -> org_<id> subdir, organization_name stays None
-    meta = read_meta(tmp_path / "org_3" / "platform_5")
+    # no org_index -> org_<id>/<camera>/seq_<id>, organization_name stays None
+    meta = read_meta(tmp_path / "org_3" / "cam-7" / "seq_5")
     assert meta.organization_id == 3 and meta.organization_name is None
 
 
@@ -927,14 +930,24 @@ def build_org_index(api_endpoint: str, admin_token: str) -> dict[int, str]:
     return {o["id"]: o["name"] for o in orgs}
 
 
+def _slug(value: str) -> str:
+    return value.strip().lower().replace(" ", "-").replace("/", "-")
+
+
 def _org_slug(org_id: int | None, org_index: dict[int, str] | None) -> str:
     """On-disk subdir for an org: its name when known, else org_<id>, else 'unknown'."""
     if org_id is None:
         return "unknown"
     name = (org_index or {}).get(org_id)
+    return _slug(name) if name else f"org_{org_id}"
+
+
+def _camera_slug(cam: dict, camera_id: int | None) -> str:
+    """On-disk subdir for a camera: its name when known, else cam_<id>, else 'unknown'."""
+    name = cam.get("name")
     if name:
-        return name.strip().lower().replace(" ", "-").replace("/", "-")
-    return f"org_{org_id}"
+        return _slug(name)
+    return f"cam_{camera_id}" if camera_id is not None else "unknown"
 
 
 def _import_one(
@@ -949,7 +962,12 @@ def _import_one(
         api_endpoint, token, sid, limit=detections_limit, desc=False
     )
     dets = sorted(dets, key=lambda d: d.get("created_at") or "")
-    out_dir = store_dir / _org_slug(org_id, org_index) / f"platform_{sid}"
+    out_dir = (
+        store_dir
+        / _org_slug(org_id, org_index)
+        / _camera_slug(cam, seq.get("camera_id"))
+        / f"seq_{sid}"
+    )
     (out_dir / "images").mkdir(parents=True, exist_ok=True)
     frames: list[FrameRef] = []
     for det in dets:
@@ -1250,7 +1268,7 @@ def _date(s: str):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", type=Path, default=Path("data/03_primary/sequences/platform"))
+    ap.add_argument("--out", type=Path, default=Path("data/03_primary/sequences"))
     ap.add_argument("--date-from", type=_date, required=True)
     ap.add_argument("--date-to", type=_date, required=True)
     ap.add_argument("--params", type=Path, default=Path("params.yaml"))
@@ -1409,9 +1427,9 @@ stages:
 >
 > `import_platform` is intentionally **not** a DVC stage (live API, not
 > reproducible). Run it on demand: `uv run python scripts/import_platform.py
-> --date-from … --date-to …`; its output lands in
-> `data/03_primary/sequences/platform/`, which `run_models` (depending on the
-> parent `data/03_primary/sequences`) picks up on its next run.
+> --date-from … --date-to …`; its output lands under
+> `data/03_primary/sequences/<org>/<camera>/seq_<id>/`, which `run_models`
+> (depending on the parent `data/03_primary/sequences`) picks up on its next run.
 
 - [ ] **Step 6: Verify the CLIs run (lint + help)**
 
@@ -1486,7 +1504,7 @@ from pathlib import Path
 import pandas as pd
 
 from .outcomes import filter_results
-from .store import read_meta
+from .store import iter_sequence_dirs, read_meta
 
 RESULTS = Path("data/07_model_output/results.parquet")
 STORE = Path("data/03_primary/sequences")
@@ -1504,8 +1522,11 @@ def pivot_decisions(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _find_seq_dir(key: str) -> Path | None:
-    matches = list(STORE.rglob(f"{key}/meta.json"))
-    return matches[0].parent if matches else None
+    """Resolve a sequence by its meta `key` (folder names don't equal the key)."""
+    for seq_dir in iter_sequence_dirs(STORE):
+        if read_meta(seq_dir).key == key:
+            return seq_dir
+    return None
 
 
 def main() -> None:  # pragma: no cover - Streamlit UI
@@ -1591,7 +1612,7 @@ data/03_primary/sequences --models-dir data/06_models --out data/07_model_output
 - [ ] **Step 2: (optional) Import a day of platform sequences**
 
 Run (creds in env): `uv run python scripts/import_platform.py --date-from 2026-05-19 --date-to 2026-05-19`
-Expected: `imported M platform sequences …` into `data/03_primary/sequences/platform/`. Re-run `uv run dvc repro run_models` to include them.
+Expected: `imported M platform sequences …` into `data/03_primary/sequences/<org>/<camera>/seq_<id>/`. Re-run `uv run dvc repro run_models` to include them.
 
 - [ ] **Step 3: Launch the viewer**
 
