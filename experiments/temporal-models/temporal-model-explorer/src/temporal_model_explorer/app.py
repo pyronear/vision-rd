@@ -85,6 +85,24 @@ def row_background(verdict: str, correctness: str) -> str:
     return ROW_BG.get(correctness) or (KEEP_BG if verdict == "keep" else DISCARD_BG)
 
 
+def legend_html() -> str:
+    """HTML chips explaining the table row colours (built from the colour map)."""
+    items = [
+        ("🔴 missed smoke (real smoke discarded)", ROW_BG["🔴 missed smoke"]),
+        ("🟠 false alarm (fp kept)", ROW_BG["🟠 false alarm"]),
+        ("✅ smoke kept", ROW_BG["✅ smoke kept"]),
+        ("✅ fp filtered", ROW_BG["✅ fp filtered"]),
+        ("flagged smoke · GT unknown", KEEP_BG),
+        ("discarded · GT unknown", DISCARD_BG),
+    ]
+    chips = "".join(
+        f'<span style="background:{color};color:#111;padding:2px 8px;'
+        f'border-radius:4px;margin:0 6px 4px 0;display:inline-block">{label}</span>'
+        for label, color in items
+    )
+    return f'<div style="line-height:2.2">{chips}</div>'
+
+
 def processed_to_input_index(
     frame_idx: int, padded_frame_indices: list[int]
 ) -> int | None:
@@ -338,6 +356,7 @@ def main() -> None:  # pragma: no cover - Streamlit UI
         return [f"background-color: {bg}; color: #111"] * len(cols)
 
     styled = display[cols].style.apply(_style_row, axis=1)
+    st.markdown(legend_html(), unsafe_allow_html=True)
     event = st.dataframe(
         styled,
         use_container_width=True,

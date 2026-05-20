@@ -6,6 +6,7 @@ from temporal_model_explorer.app import (
     day_of,
     draw_bboxes,
     frame_bboxes_by_input_index,
+    legend_html,
     processed_to_input_index,
     row_background,
     tube_input_boxes,
@@ -86,3 +87,9 @@ def test_row_background_errors_and_unknown():
     assert row_background("keep", "🟠 false alarm") == "#fbdca0"
     # unknown ground truth ("—") falls back to a verdict-based tint
     assert row_background("keep", "—") != row_background("discard", "—")
+
+
+def test_legend_html_mentions_each_colour():
+    html = legend_html()
+    assert "#f4b4b4" in html and "#fbdca0" in html  # error colours present
+    assert "missed smoke" in html and "false alarm" in html
