@@ -40,6 +40,7 @@ def test_frame_bboxes_by_input_index_skips_none_bbox():
         "tubes": {
             "kept": [
                 {
+                    "tube_id": 0,
                     "entries": [
                         {
                             "frame_idx": 0,
@@ -48,15 +49,15 @@ def test_frame_bboxes_by_input_index_skips_none_bbox():
                         },
                         {"frame_idx": 1, "bbox": None},
                         {"frame_idx": 2, "bbox": [0.2, 0.2, 0.05, 0.05]},
-                    ]
+                    ],
                 }
             ]
         },
     }
     out = frame_bboxes_by_input_index(details)
     assert out == {
-        0: [((0.5, 0.5, 0.1, 0.1), 0.7)],
-        2: [((0.2, 0.2, 0.05, 0.05), None)],
+        0: [((0.5, 0.5, 0.1, 0.1), 0.7, 0)],
+        2: [((0.2, 0.2, 0.05, 0.05), None, 0)],
     }
 
 
@@ -73,7 +74,13 @@ def test_tube_input_boxes():
 def test_draw_bboxes_preserves_size(tmp_path):
     p = tmp_path / "f.jpg"
     Image.new("RGB", (100, 80), "white").save(p)
-    out = draw_bboxes(p, [((0.5, 0.5, 0.2, 0.2), 0.9), ((0.3, 0.3, 0.1, 0.1), None)])
+    out = draw_bboxes(
+        p,
+        [
+            ((0.5, 0.5, 0.2, 0.2), 0.9, "#1f77b4", True),
+            ((0.3, 0.3, 0.1, 0.1), None, "#ff7f0e", False),
+        ],
+    )
     assert out.size == (100, 80)
 
 

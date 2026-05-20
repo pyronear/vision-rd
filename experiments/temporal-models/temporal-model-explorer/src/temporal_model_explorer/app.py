@@ -142,10 +142,11 @@ def processed_to_input_index(
 
 
 def frame_bboxes_by_input_index(details: dict) -> dict[int, list[tuple]]:
-    """input-frame index → list of ((cx,cy,w,h), confidence) from kept tubes."""
+    """input-frame index → list of ((cx,cy,w,h), confidence, tube_id) per kept tube."""
     padded = (details or {}).get("preprocessing", {}).get("padded_frame_indices", [])
     out: dict[int, list[tuple]] = {}
     for tube in (details or {}).get("tubes", {}).get("kept", []):
+        tid = tube.get("tube_id")
         for entry in tube.get("entries", []):
             if entry.get("bbox") is None:
                 continue
@@ -153,7 +154,7 @@ def frame_bboxes_by_input_index(details: dict) -> dict[int, list[tuple]]:
             if inp is None:
                 continue
             out.setdefault(inp, []).append(
-                (tuple(entry["bbox"]), entry.get("confidence"))
+                (tuple(entry["bbox"]), entry.get("confidence"), tid)
             )
     return out
 
@@ -172,22 +173,24 @@ def tube_input_boxes(
     return boxes
 
 
-def draw_bboxes(
-    image_path: Path, boxes, color: str = "red", width: int = 4
-) -> Image.Image:
-    """Return the frame with bboxes drawn; ``boxes`` is ``[((cx,cy,w,h), conf), ...]``.
+def draw_bboxes(image_path: Path, boxes, width: int = 4) -> Image.Image:
+    """Draw bboxes on the frame; ``boxes`` is ``[(bbox, conf, color, is_trigger)]``.
 
-    The confidence (when present) is printed just above each box.
+    Each box uses its tube's colour; the trigger box gets a thicker outline and a
+    ⚡ marker. The confidence (when present) is printed just above the box.
     """
     img = Image.open(image_path).convert("RGB")
     w_img, h_img = img.size
     draw = ImageDraw.Draw(img)
-    for (cx, cy, bw, bh), conf in boxes:
+    for (cx, cy, bw, bh), conf, color, is_trigger in boxes:
         x0, y0 = (cx - bw / 2) * w_img, (cy - bh / 2) * h_img
         x1, y1 = (cx + bw / 2) * w_img, (cy + bh / 2) * h_img
-        draw.rectangle([x0, y0, x1, y1], outline=color, width=width)
-        if conf is not None:
-            draw.text((x0, max(0, y0 - 20)), f"{conf:.2f}", fill=color, font=_BBOX_FONT)
+        draw.rectangle([x0, y0, x1, y1], outline=color, width=width + 3 * is_trigger)
+        label = f"{conf:.2f}" if conf is not None else ""
+        if is_trigger:
+            label = f"{label} ⚡".strip()
+        if label:
+            draw.text((x0, max(0, y0 - 20)), label, fill=color, font=_BBOX_FONT)
     return img
 
 
@@ -362,9 +365,13 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
 
     frame_col, tubes_col = st.columns([2, 1])
     ref = meta.frames[i]
+    frame_boxes = [
+        (bbox, conf, tube_color(tid), tid == trigger_tube_id)
+        for bbox, conf, tid in bbmap.get(i, [])
+    ]
     frame_col.image(
-        draw_bboxes(seq_dir / ref.file, bbmap.get(i, [])),
-        caption=f"frame {i + 1}/{n} — {len(bbmap.get(i, []))} detection(s)",
+        draw_bboxes(seq_dir / ref.file, frame_boxes),
+        caption=f"frame {i + 1}/{n} — {len(frame_boxes)} detection(s)",
         use_container_width=True,
     )
 
