@@ -5,17 +5,26 @@ data/03_primary/sequences/**; never runs models or fetches. Run with
 `streamlit run app.py` (or `make app`).
 
 Left pane selects organization → camera → model. The main pane lists the
-selected sequences grouped by day; selecting one shows a frame slider with the
-YOLO bboxes overlaid, the extracted smoke tubes, and the temporal-model decision.
+selected sequences (day-sorted); clicking a row opens it. The drill-down shows an
+autoplaying (pausable) frame viewer with the YOLO bboxes overlaid and, alongside,
+each extracted smoke tube as a context-cropped clip that autoplays on the same
+playback tick, plus the temporal-model decision.
 """
 
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import yaml
+from bbox_tube_temporal.model_input import (
+    crop_and_resize,
+    expand_bbox,
+    norm_bbox_to_pixel_square,
+)
 from PIL import Image, ImageDraw
 
 # Absolute imports: this module is the Streamlit entrypoint, run as __main__ via
@@ -26,6 +35,9 @@ RESULTS = Path("data/07_model_output/results.parquet")
 DETAILS = Path("data/07_model_output/details")
 STORE = Path("data/03_primary/sequences")
 PARAMS = Path("params.yaml")
+
+CROP_CONTEXT = 2.0  # bbox expansion for tube crops (more context than the model's 1.5)
+CROP_SIZE = 224
 
 
 def registered_models() -> list[str]:
@@ -97,6 +109,22 @@ def draw_bboxes(
     return img
 
 
+def crop_around_bbox(
+    image_path: Path,
+    bbox_norm,
+    context_factor: float = CROP_CONTEXT,
+    patch_size: int = CROP_SIZE,
+) -> Image.Image:
+    """Square crop centred on a normalized bbox, expanded for context (reuses the
+    lib's model-input crop so it matches what the classifier sees)."""
+    img = np.array(Image.open(image_path).convert("RGB"))
+    img_h, img_w = img.shape[:2]
+    cx, cy, bw, bh = bbox_norm
+    ecx, ecy, ew, eh = expand_bbox(cx, cy, bw, bh, context_factor)
+    box = norm_bbox_to_pixel_square(ecx, ecy, ew, eh, img_w, img_h)
+    return Image.fromarray(crop_and_resize(img, box, patch_size))
+
+
 def load_details(model: str, key: str) -> dict:
     """Read the per-(model, sequence) details JSON; ``{}`` if absent."""
     path = DETAILS / model / f"{key}.json"
@@ -140,47 +168,64 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
     c4.metric("probability", f"{prob:.3f}" if pd.notna(prob) else "—")
     st.caption(
         f"label={meta.label} ({meta.label_detail}) · camera={meta.camera_name} · "
-        f"org={meta.organization_name} · frames={len(meta.frames)} · "
-        f"kept tubes={len(details.get('tubes', {}).get('kept', []))}"
+        f"org={meta.organization_name} · frames={len(meta.frames)}"
     )
 
-    # Frame slider with YOLO bboxes overlaid.
     bbmap = frame_bboxes_by_input_index(details)
-    n = len(meta.frames)
-    if n:
-        i = st.slider("frame", 0, n - 1, 0) if n > 1 else 0
-        ref = meta.frames[i]
-        st.image(
-            draw_bboxes(seq_dir / ref.file, bbmap.get(i, [])),
-            caption=f"frame {i}/{n - 1} — {Path(ref.file).name} — "
-            f"{len(bbmap.get(i, []))} detection(s)",
-            use_container_width=True,
-        )
-
-    # Extracted smoke tubes.
     padded = details.get("preprocessing", {}).get("padded_frame_indices", [])
     kept = details.get("tubes", {}).get("kept", [])
-    st.markdown(f"### Extracted smoke tubes ({len(kept)})")
+    n = len(meta.frames)
+    if not n:
+        return
+
+    # One playback tick drives the full-frame view AND every tube crop.
+    tick_key = f"tick_{key}"
+    st.session_state.setdefault(tick_key, 0)
+    ctrl = st.columns([1, 1, 1, 3])
+    playing = ctrl[0].toggle("▶ play", value=True, key=f"play_{key}")
+    if ctrl[1].button("⏮", key=f"prev_{key}"):
+        st.session_state[tick_key] -= 1
+    if ctrl[2].button("⏭", key=f"next_{key}"):
+        st.session_state[tick_key] += 1
+    fps = ctrl[3].slider("fps", 1, 10, 4, key=f"fps_{key}")
+    tick = st.session_state[tick_key]
+
+    frame_col, tubes_col = st.columns([2, 1])
+    i = tick % n
+    ref = meta.frames[i]
+    frame_col.image(
+        draw_bboxes(seq_dir / ref.file, bbmap.get(i, [])),
+        caption=f"frame {i + 1}/{n} — {Path(ref.file).name} — "
+        f"{len(bbmap.get(i, []))} detection(s)",
+        use_container_width=True,
+    )
+
+    tubes_col.markdown(f"**{len(kept)} smoke tube(s)** (context-cropped)")
     for tube in kept:
-        prob = tube.get("probability")
-        st.markdown(
-            f"**Tube {tube['tube_id']}** — frames {tube['start_frame']}–"
-            f"{tube['end_frame']} · logit {tube['logit']:.2f} · "
-            f"prob {prob:.3f} · first crossing {tube['first_crossing_frame']}"
-            if prob is not None
-            else f"**Tube {tube['tube_id']}** — frames {tube['start_frame']}–"
-            f"{tube['end_frame']} · logit {tube['logit']:.2f} · "
-            f"first crossing {tube['first_crossing_frame']}"
-        )
         boxes = tube_input_boxes(tube, padded)
-        imgs = [
-            draw_bboxes(seq_dir / meta.frames[idx].file, [bbox]) for idx, bbox in boxes
-        ]
-        if imgs:
-            st.image(imgs, width=130, caption=[f"f{idx}" for idx, _ in boxes])
+        if not boxes:
+            continue
+        ti = tick % len(boxes)
+        in_idx, bbox = boxes[ti]
+        tprob = tube.get("probability")
+        head = (
+            f"tube {tube['tube_id']} · prob {tprob:.2f}"
+            if tprob is not None
+            else f"tube {tube['tube_id']} · logit {tube['logit']:.2f}"
+        )
+        tubes_col.image(
+            crop_around_bbox(seq_dir / meta.frames[in_idx].file, bbox),
+            width=220,
+            caption=f"{head} — f{in_idx} ({ti + 1}/{len(boxes)})",
+        )
 
     with st.expander("raw details JSON"):
         st.json(details)
+
+    if playing:
+        st.session_state[tick_key] = tick + 1
+        time.sleep(1.0 / fps)
+        st.rerun()
 
 
 def main() -> None:  # pragma: no cover - Streamlit UI
@@ -196,37 +241,48 @@ def main() -> None:  # pragma: no cover - Streamlit UI
         return
     df = pd.read_parquet(RESULTS)
     if "started_at" not in df.columns:
-        df["started_at"] = df["key"].map(started_at_by_key())
+        # Cache the store scan once per session so autoplay reruns stay snappy.
+        if "started_at_map" not in st.session_state:
+            st.session_state["started_at_map"] = started_at_by_key()
+        df["started_at"] = df["key"].map(st.session_state["started_at_map"])
     models = [m for m in registered_models() if m in set(df["model"])] or sorted(
         df["model"].unique()
     )
 
     st.sidebar.header("Select")
     orgs = sorted(x for x in df["organization_name"].dropna().unique())
-    org = st.sidebar.selectbox("organization", orgs) if orgs else None
+    org = st.sidebar.selectbox("organization", orgs, key="org") if orgs else None
     org_df = df[df["organization_name"] == org] if org else df
     cameras = sorted(x for x in org_df["camera_name"].dropna().unique())
-    camera = st.sidebar.selectbox("camera", cameras) if cameras else None
-    model = st.sidebar.selectbox("model", models)
+    camera = st.sidebar.selectbox("camera", cameras, key="camera") if cameras else None
+    model = st.sidebar.selectbox("model", models, key="model")
 
     view = df[df["model"] == model]
     if org:
         view = view[view["organization_name"] == org]
     if camera:
         view = view[view["camera_name"] == camera]
+    view = (
+        view.assign(day=view["started_at"].map(day_of))
+        .sort_values("started_at", ascending=False)
+        .reset_index(drop=True)
+    )
 
-    view = view.assign(day=view["started_at"].map(day_of))
     st.subheader(f"{len(view)} sequences — {camera or 'all cameras'}")
-    cols = ["key", "started_at", "label", "decision", "outcome", "probability"]
-    for day in sorted(view["day"].unique(), reverse=True):
-        day_rows = view[view["day"] == day]
-        st.markdown(f"**{day}** — {len(day_rows)} sequences")
-        st.dataframe(day_rows[cols], use_container_width=True, hide_index=True)
-
     if view.empty:
         return
-    key = st.selectbox("Inspect a sequence", sorted(view["key"]))
-    _drilldown(st, key, model, view[view["key"] == key].iloc[0])
+    cols = ["day", "key", "started_at", "label", "decision", "outcome", "probability"]
+    event = st.dataframe(
+        view[cols],
+        use_container_width=True,
+        hide_index=True,
+        on_select="rerun",
+        selection_mode="single-row",
+        key="seqtable",
+    )
+    rows = event.selection.rows
+    pos = rows[0] if rows and rows[0] < len(view) else 0
+    _drilldown(st, view.iloc[pos]["key"], model, view.iloc[pos])
 
 
 if __name__ == "__main__":  # pragma: no cover

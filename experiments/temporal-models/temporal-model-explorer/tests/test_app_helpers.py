@@ -1,6 +1,7 @@
 from PIL import Image
 
 from temporal_model_explorer.app import (
+    crop_around_bbox,
     day_of,
     draw_bboxes,
     frame_bboxes_by_input_index,
@@ -62,3 +63,10 @@ def test_draw_bboxes_preserves_size(tmp_path):
     Image.new("RGB", (100, 80), "white").save(p)
     out = draw_bboxes(p, [(0.5, 0.5, 0.2, 0.2)])
     assert out.size == (100, 80)
+
+
+def test_crop_around_bbox_returns_square_patch(tmp_path):
+    p = tmp_path / "f.jpg"
+    Image.new("RGB", (320, 240), "white").save(p)
+    out = crop_around_bbox(p, (0.5, 0.5, 0.1, 0.1), context_factor=2.0, patch_size=224)
+    assert out.size == (224, 224)
