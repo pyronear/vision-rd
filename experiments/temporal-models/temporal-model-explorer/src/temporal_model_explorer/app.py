@@ -337,9 +337,10 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
 
     trigger_tube_id = details.get("decision", {}).get("trigger_tube_id")
 
-    # Render the whole drill-down into ONE placeholder so selecting a new sequence
-    # atomically replaces the previous render (no stale/ghosted leftovers).
-    with st.empty().container():
+    # Render the whole drill-down inside a container keyed by the sequence. The key
+    # gives it a stable identity, so selecting a new sequence removes the previous
+    # container entirely (no stale/ghosted tubes left over under autoplay reruns).
+    with st.container(key=f"dd_{key}"):
         is_keep = row["decision"] == "keep"
         verdict = "💨 KEEP (smoke)" if is_keep else "🚫 DISCARD (no smoke)"
         st.subheader(f"{verdict} — {key}")
