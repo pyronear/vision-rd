@@ -41,9 +41,13 @@ experiments/temporal-models/temporal-model-explorer/
   .dvc/                 # this experiment's own DVC project (dvc init --subdir)
 ```
 
-**Common store layout** (produced by both importers, scanned by the runner):
-`data/03_primary/sequences/<source>/<key>/{images/…, meta.json}` where
-`<source>` is `local_zip` or `platform` and `<key>` is `zip_<id>` / `platform_<id>`.
+**Common store layout** (produced by both importers, scanned by the recursive
+`iter_sequence_dirs`, so nesting depth is flexible):
+- local zip → `data/03_primary/sequences/local_zip/zip_<id>/{images/…, meta.json}`
+- platform → `data/03_primary/sequences/platform/<org>/platform_<id>/{images/…, meta.json}`
+  — **organized by org on disk** (`<org>` = org name when known via admin
+  enrichment, else `org_<id>`). Swapping `PLATFORM_LOGIN`/`PASSWORD` between runs
+  fetches different org-scoped sites, which land in their own `<org>` subdir.
 
 **DVC-tracked artifacts:** `data/06_models/<name>/model.zip` (from `prepare_models`),
 `data/03_primary/sequences/local_zip` (from `import_local_zip`), and
@@ -831,15 +835,39 @@ def test_import_platform_writes_store(tmp_path, monkeypatch):
     n = ip.import_platform(
         "https://x", "tok", tmp_path, date(2026, 5, 19), date(2026, 5, 19),
         detections_limit=5, smoke_values=SMOKE, fp_values=FP,
-        camera_index=camera_index, download=lambda url: f"BYTES:{url}".encode(),
+        camera_index=camera_index, org_index={3: "demo"},
+        download=lambda url: f"BYTES:{url}".encode(),
     )
     assert n == 1
-    meta = read_meta(tmp_path / "platform_43392")
+    # organized on disk by org name: <org>/platform_<id>/
+    seq_dir = tmp_path / "demo" / "platform_43392"
+    meta = read_meta(seq_dir)
     assert meta.label == "smoke" and meta.label_detail == "other_smoke"
     assert meta.camera_name == "cam-7" and meta.organization_id == 3
+    assert meta.organization_name == "demo"
     # frames ordered by created_at ascending (detection 1 then 2)
     assert [f.detection_id for f in meta.frames] == [1, 2]
-    assert (tmp_path / "platform_43392" / "images" / "detection_1.jpg").read_bytes() == b"BYTES:http://img/1"
+    assert (seq_dir / "images" / "detection_1.jpg").read_bytes() == b"BYTES:http://img/1"
+
+
+def test_import_platform_org_slug_fallback_without_org_index(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        ip.platform_api, "list_sequences_for_date",
+        lambda ep, tok, day, limit, offset: [{"id": 5, "camera_id": 7, "is_wildfire": "other"}],
+    )
+    monkeypatch.setattr(
+        ip.platform_api, "list_sequence_detections",
+        lambda ep, tok, sid, limit, desc: [{"id": 1, "url": "http://img/1", "created_at": "t"}],
+    )
+    ip.import_platform(
+        "https://x", "tok", tmp_path, date(2026, 5, 19), date(2026, 5, 19),
+        detections_limit=5, smoke_values=SMOKE, fp_values=FP,
+        camera_index={7: {"id": 7, "name": "cam-7", "organization_id": 3}},
+        download=lambda url: b"x",
+    )
+    # no org_index -> org_<id> subdir, organization_name stays None
+    meta = read_meta(tmp_path / "org_3" / "platform_5")
+    assert meta.organization_id == 3 and meta.organization_name is None
 
 
 def test_camera_filter_excludes_other_cameras(tmp_path, monkeypatch):
@@ -893,18 +921,35 @@ def build_camera_index(api_endpoint: str, token: str) -> dict[int, dict]:
     return {c["id"]: c for c in platform_api.list_cameras(api_endpoint, token)}
 
 
+def build_org_index(api_endpoint: str, admin_token: str) -> dict[int, str]:
+    """org_id -> name, from the admin-only /organizations endpoint."""
+    orgs = platform_api.list_organizations(api_endpoint, admin_token)
+    return {o["id"]: o["name"] for o in orgs}
+
+
+def _org_slug(org_id: int | None, org_index: dict[int, str] | None) -> str:
+    """On-disk subdir for an org: its name when known, else org_<id>, else 'unknown'."""
+    if org_id is None:
+        return "unknown"
+    name = (org_index or {}).get(org_id)
+    if name:
+        return name.strip().lower().replace(" ", "-").replace("/", "-")
+    return f"org_{org_id}"
+
+
 def _import_one(
-    api_endpoint, token, store_dir, seq, camera_index, detections_limit,
+    api_endpoint, token, store_dir, seq, camera_index, org_index, detections_limit,
     smoke_values, fp_values, download,
 ) -> int:
     sid = seq["id"]
     raw_label = seq.get("is_wildfire")
     cam = camera_index.get(seq.get("camera_id"), {})
+    org_id = cam.get("organization_id")
     dets = platform_api.list_sequence_detections(
         api_endpoint, token, sid, limit=detections_limit, desc=False
     )
     dets = sorted(dets, key=lambda d: d.get("created_at") or "")
-    out_dir = store_dir / f"platform_{sid}"
+    out_dir = store_dir / _org_slug(org_id, org_index) / f"platform_{sid}"
     (out_dir / "images").mkdir(parents=True, exist_ok=True)
     frames: list[FrameRef] = []
     for det in dets:
@@ -929,7 +974,8 @@ def _import_one(
             label=normalize_label(raw_label, smoke_values, fp_values),
             label_detail=raw_label, label_source="platform_is_wildfire",
             frames=frames, camera_id=seq.get("camera_id"),
-            camera_name=cam.get("name"), organization_id=cam.get("organization_id"),
+            camera_name=cam.get("name"), organization_id=org_id,
+            organization_name=(org_index or {}).get(org_id),
             started_at=seq.get("started_at"),
         ),
     )
@@ -940,6 +986,7 @@ def import_platform(
     api_endpoint: str, token: str, store_dir: Path, day_from: date, day_to: date, *,
     detections_limit: int, smoke_values: list[str], fp_values: list[str],
     camera_ids: set[int] | None = None, camera_index: dict | None = None,
+    org_index: dict[int, str] | None = None,
     download=download_image,
 ) -> int:
     """Import all sequences in [day_from, day_to]. Returns #sequences imported."""
@@ -953,7 +1000,7 @@ def import_platform(
             if camera_ids and seq.get("camera_id") not in camera_ids:
                 continue
             count += _import_one(
-                api_endpoint, token, store_dir, seq, camera_index,
+                api_endpoint, token, store_dir, seq, camera_index, org_index,
                 detections_limit, smoke_values, fp_values, download,
             )
         day += timedelta(days=1)
@@ -1194,7 +1241,7 @@ from pathlib import Path
 import yaml
 
 from temporal_model_explorer import platform_api
-from temporal_model_explorer.import_platform import import_platform
+from temporal_model_explorer.import_platform import build_org_index, import_platform
 
 
 def _date(s: str):
@@ -1217,11 +1264,26 @@ def main() -> None:
     token = platform_api.get_access_token(
         endpoint, os.environ["PLATFORM_LOGIN"], os.environ["PLATFORM_PASSWORD"]
     )
+
+    # Org-name enrichment (optional): static params map, overlaid with live names
+    # from the admin /organizations endpoint when admin creds are present + valid.
+    org_index: dict[int, str] = {
+        int(k): v for k, v in (params.get("org_names") or {}).items()
+    }
+    admin_login = os.environ.get("PLATFORM_ADMIN_LOGIN")
+    admin_password = os.environ.get("PLATFORM_ADMIN_PASSWORD")
+    if admin_login and admin_password:
+        try:
+            admin_token = platform_api.get_access_token(endpoint, admin_login, admin_password)
+            org_index.update(build_org_index(endpoint, admin_token))
+        except Exception as exc:  # noqa: BLE001 - admin is optional; log and continue
+            print(f"admin org enrichment skipped: {exc}")
+
     n = import_platform(
         endpoint, token, args.out, args.date_from, args.date_to,
         detections_limit=params["platform"]["detections_limit"],
         smoke_values=mapping["smoke_values"], fp_values=mapping["fp_values"],
-        camera_ids=camera_ids or None,
+        camera_ids=camera_ids or None, org_index=org_index or None,
     )
     print(f"imported {n} platform sequences into {args.out}")
 

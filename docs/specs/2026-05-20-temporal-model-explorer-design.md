@@ -51,13 +51,18 @@ Components are isolated and independently runnable:
    (optional, admin) `list_organizations`. Auth via `POST /api/v1/login/creds`;
    bearer header. Camera + `organization_id` come from `/cameras/` (no admin);
    `list_organizations` is only called when admin creds are present.
-2. **Importers → common store** (both write `data/03_primary/sequences/<key>/`):
-   - **`import_platform.py`** — for a date range (+ optional `--camera-id` filter),
-     list sequences, download each detection's full-frame image (`detection.url`),
-     write `images/detection_<id>.jpg` + `meta.json`. `key = platform_<sequence_id>`.
+2. **Importers → common store** (scanned recursively, so nesting depth is flexible):
+   - **`import_platform.py`** — for a date range (+ optional camera filter), list
+     sequences, download each detection's full-frame image (`detection.url`), write
+     `images/detection_<id>.jpg` + `meta.json`. **Organized on disk by org:**
+     `data/03_primary/sequences/platform/<org>/platform_<id>/` (`<org>` = org name
+     when admin enrichment is available, else `org_<id>`). The credentials come from
+     the env (`PLATFORM_LOGIN`/`PASSWORD`); these are org-scoped, so swapping them
+     between runs fetches different sites, which land in their own `<org>` subdir.
+     `key = platform_<sequence_id>`.
    - **`import_local_zip.py`** — extract/adopt `seq_annotation_done_by_label.zip`;
      map folder (`smoke/*`, `fp/*`, `unlabeled`) → label; copy `images/` + write
-     `meta.json`. `key = zip_<seq_id>`.
+     `meta.json` under `data/03_primary/sequences/local_zip/zip_<id>/`. `key = zip_<seq_id>`.
 3. **`run_models.py`** — for each sequence in the store, build the ordered
    `list[Frame]`, run each configured model
    (`BboxTubeTemporalModel.from_package(model.zip, device="cpu").predict(frames)`),
