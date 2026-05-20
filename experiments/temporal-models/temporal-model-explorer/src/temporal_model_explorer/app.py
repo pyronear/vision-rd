@@ -366,24 +366,29 @@ def _drilldown(st, key: str, model: str, row: pd.Series) -> None:  # pragma: no 
     )
 
     # Each tube crop is synced to the current frame i; the trigger tube is badged.
-    tubes_col.markdown(f"**tubes @ frame {i}** (context-cropped)")
-    for tube in kept:
-        at_frame = dict(tube_input_boxes(tube, padded))
-        color = tube_color(tube["tube_id"])
-        tprob = tube.get("probability")
-        stat = (
-            f"prob {tprob:.2f}" if tprob is not None else f"logit {tube['logit']:.2f}"
-        )
-        badge = " ⚡<b>triggered</b>" if tube["tube_id"] == trigger_tube_id else ""
-        chip = f"<b style='color:{color}'>● T{tube['tube_id']}</b>"
-        tubes_col.markdown(f"{chip} · {stat}{badge}", unsafe_allow_html=True)
-        if i in at_frame:
-            tubes_col.image(
-                crop_around_bbox(seq_dir / meta.frames[i].file, at_frame[i]),
-                width=220,
+    # Render into a single st.empty() placeholder so a sequence with fewer tubes
+    # fully replaces the previous one (no stale/ghosted leftovers across reruns).
+    with tubes_col.empty().container():
+        st.markdown(f"**tubes @ frame {i}** (context-cropped)")
+        for tube in kept:
+            at_frame = dict(tube_input_boxes(tube, padded))
+            color = tube_color(tube["tube_id"])
+            tprob = tube.get("probability")
+            stat = (
+                f"prob {tprob:.2f}"
+                if tprob is not None
+                else f"logit {tube['logit']:.2f}"
             )
-        else:
-            tubes_col.caption("inactive at this frame")
+            badge = " ⚡<b>triggered</b>" if tube["tube_id"] == trigger_tube_id else ""
+            chip = f"<b style='color:{color}'>● T{tube['tube_id']}</b>"
+            st.markdown(f"{chip} · {stat}{badge}", unsafe_allow_html=True)
+            if i in at_frame:
+                st.image(
+                    crop_around_bbox(seq_dir / meta.frames[i].file, at_frame[i]),
+                    width=220,
+                )
+            else:
+                st.caption("inactive at this frame")
 
     if playing:
         time.sleep(1.0 / PLAY_FPS)
