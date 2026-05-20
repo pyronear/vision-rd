@@ -687,12 +687,23 @@ def test_import_zip_writes_store(tmp_path):
     smoke = read_meta(store / "zip_10")
     assert smoke.label == "smoke" and smoke.label_detail == "wildfire"
     assert smoke.source == "local_zip" and smoke.sequence_id == "10"
-    # images copied, ordered by filename (detection_1 before detection_2)
+    # images copied, ordered by detection id (detection_1 before detection_2)
     assert [f.file for f in smoke.frames] == ["images/detection_1.jpg", "images/detection_2.jpg"]
     assert (store / "zip_10" / "images" / "detection_1.jpg").read_bytes() == b"a"
 
     fp = read_meta(store / "zip_20")
     assert fp.label == "fp" and fp.label_detail == "tree"
+
+
+def test_import_zip_orders_frames_numerically_not_lexicographically(tmp_path):
+    z = tmp_path / "data.zip"
+    with zipfile.ZipFile(z, "w") as zf:
+        for i in (1, 2, 10, 11):  # 10/11 must not sort before 2
+            zf.writestr(f"root/smoke/wildfire/seq_30/images/detection_{i}.jpg", str(i).encode())
+    store = tmp_path / "store"
+    import_zip(z, store)
+    meta = read_meta(store / "zip_30")
+    assert [f.detection_id for f in meta.frames] == [1, 2, 10, 11]
 ```
 
 - [ ] **Step 2: Run → fail**
@@ -738,6 +749,16 @@ def _detection_id(file_name: str) -> int | None:
     return int(m.group(1)) if m else None
 
 
+def _frame_sort_key(item: tuple[str, str]) -> tuple[int, int, str]:
+    """Order frames by numeric detection id (so detection_2 sorts before detection_10).
+
+    ``item`` is ``(zip_name, file_name)``. Files without a numeric detection id
+    fall back to lexicographic order, after the numbered ones.
+    """
+    det_id = _detection_id(item[1])
+    return (0, det_id, "") if det_id is not None else (1, 0, item[1])
+
+
 def import_zip(zip_path: Path, store_dir: Path) -> int:
     """Extract image frames + write meta.json per sequence. Returns #sequences imported."""
     store_dir.mkdir(parents=True, exist_ok=True)
@@ -769,7 +790,7 @@ def import_zip(zip_path: Path, store_dir: Path) -> int:
             out_dir = store_dir / key
             (out_dir / "images").mkdir(parents=True, exist_ok=True)
             frames: list[FrameRef] = []
-            for src_name, file_name in sorted(entry["files"], key=lambda t: t[1]):
+            for src_name, file_name in sorted(entry["files"], key=_frame_sort_key):
                 (out_dir / "images" / file_name).write_bytes(zf.read(src_name))
                 frames.append(
                     FrameRef(file=f"images/{file_name}", detection_id=_detection_id(file_name))
