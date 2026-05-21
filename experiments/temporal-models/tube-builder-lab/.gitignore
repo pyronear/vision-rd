@@ -2,3 +2,9 @@ __pycache__/
 *.pyc
 .venv/
 .ipynb_checkpoints/
+
+# Data artifacts are tracked by DVC, never committed to git
+/data/03_primary/sequences/
+/data/05_model_input/detections/
+/data/05_model_input/pipeline_config.yaml
+/data/06_models/
