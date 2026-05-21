@@ -411,7 +411,9 @@ def _drilldown(key: str, model: str, row: pd.Series) -> None:  # pragma: no cove
 
     is_keep = row["decision"] == "keep"
     verdict = "💨 KEEP (smoke)" if is_keep else "🚫 DISCARD (no smoke)"
-    st.subheader(verdict)
+    vcol, idcol = st.columns([4, 1])
+    vcol.subheader(verdict)
+    idcol.code(key, language=None)  # one line; native hover copy-to-clipboard button
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("model verdict", row["decision"])
     c2.metric("correctness", correctness_label(row["outcome"]))
