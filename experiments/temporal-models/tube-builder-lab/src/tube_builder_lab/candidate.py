@@ -165,20 +165,21 @@ def _connected_components(
 def _combine(members: list[int], observed: list[Observed]) -> Tube | None:
     """Fuse a component's fragments into one tube.
 
-    Keeps the largest box per frame (fuller plume extent when fragments overlap),
-    and leaves missed frames as gap placeholders for the pipeline to interpolate.
+    Keeps the highest-ranked box per frame (largest, then most confident — see
+    ``_box_rank``, which makes the choice order-invariant), and leaves missed
+    frames as gap placeholders for the pipeline to interpolate.
     """
-    largest_by_frame: dict[int, Detection] = {}
+    best_by_frame: dict[int, Detection] = {}
     for m in members:
         for frame_idx, det in observed[m]:
-            best = largest_by_frame.get(frame_idx)
-            if best is None or _area(det) > _area(best):
-                largest_by_frame[frame_idx] = det
-    if not largest_by_frame:
+            best = best_by_frame.get(frame_idx)
+            if best is None or _box_rank(det) > _box_rank(best):
+                best_by_frame[frame_idx] = det
+    if not best_by_frame:
         return None
-    start, end = min(largest_by_frame), max(largest_by_frame)
+    start, end = min(best_by_frame), max(best_by_frame)
     entries = [
-        TubeEntry(frame_idx=f, detection=largest_by_frame.get(f))
+        TubeEntry(frame_idx=f, detection=best_by_frame.get(f))
         for f in range(start, end + 1)
     ]
     return Tube(tube_id=0, entries=entries, start_frame=start, end_frame=end)
@@ -190,3 +191,10 @@ def _observed(tube: Tube) -> Observed:
 
 def _area(det: Detection) -> float:
     return det.w * det.h
+
+
+def _box_rank(det: Detection) -> tuple[float, float, float]:
+    """Pick order among boxes on the same frame: larger area, then higher
+    confidence, then larger cx — a total order, so the choice is independent of
+    the input tube order (no silent nondeterminism on equal-area ties)."""
+    return (_area(det), det.confidence, det.cx)

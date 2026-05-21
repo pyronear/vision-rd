@@ -1,0 +1,37 @@
+schema: '2.0'
+stages:
+  cache_detections:
+    cmd: uv run python scripts/cache_detections.py
+    deps:
+    - path: data/03_primary/sequences
+      hash: md5
+      md5: cb3eddbb86b1a5105d76647498b57156.dir
+      size: 431216369
+      nfiles: 3446
+    - path: data/06_models
+      hash: md5
+      md5: 9d52a402da88bd04dd9268ac0b1d6dc9.dir
+      size: 162765093
+      nfiles: 2
+    - path: params.yaml
+      hash: md5
+      md5: 9c0e4534b7a9a3b3227640cd3a6132f8
+      size: 387
+    - path: scripts/cache_detections.py
+      hash: md5
+      md5: 56b47cfa608459a2fe25bf4e76173e6a
+      size: 1975
+    - path: working_set.yaml
+      hash: md5
+      md5: cc1000d42a105c4e1b1503c28b9a3198
+      size: 5501
+    outs:
+    - path: data/05_model_input/detections
+      hash: md5
+      md5: a04044072fba47e57275896392ef0b3b.dir
+      size: 999533
+      nfiles: 165
+    - path: data/05_model_input/pipeline_config.yaml
+      hash: md5
+      md5: f47ebe746e01a6c55bc58c5d13e67c85
+      size: 176

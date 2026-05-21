@@ -1,3 +1,4 @@
+import pytest
 from bbox_tube_temporal.types import Detection, FrameDetections, Tube, TubeEntry
 
 from tube_builder_lab.candidate import build_tubes_candidate, merge_colocated_tubes
@@ -44,6 +45,20 @@ def test_proximity_is_scale_relative():
     # ~1.75 box-sizes apart -> a separate detection, do NOT merge (no teleport).
     far = _tube(1, [(2, (0.535, 0.5, 0.02, 0.02)), (3, (0.535, 0.5, 0.02, 0.02))])
     assert len(merge_colocated_tubes([a, far])) == 2
+
+
+def test_combine_tiebreak_is_order_invariant():
+    # Two co-located tubes share frame 1 with equal-area boxes at different cx;
+    # the kept box must be the same regardless of input order (no nondeterminism).
+    a = _tube(0, [(0, (0.50, 0.5, 0.02, 0.02)), (1, (0.50, 0.5, 0.02, 0.02))])
+    b = _tube(1, [(1, (0.51, 0.5, 0.02, 0.02)), (2, (0.51, 0.5, 0.02, 0.02))])
+
+    def box_at_frame_1(tubes):
+        [tube] = tubes
+        return next(e.detection for e in tube.entries if e.frame_idx == 1)
+
+    assert box_at_frame_1(merge_colocated_tubes([a, b])).cx == pytest.approx(0.51)
+    assert box_at_frame_1(merge_colocated_tubes([b, a])).cx == pytest.approx(0.51)
 
 
 def test_bridge_gap_redetection_at_same_spot():
