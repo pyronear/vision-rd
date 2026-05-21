@@ -169,10 +169,11 @@ def _viewer(key: str, cfg, truncate: bool, rev: int):  # pragma: no cover
                 col.caption("inactive")
 
 
-def _summary(cfg, truncate: bool, rev: int) -> pd.DataFrame:  # pragma: no cover
+def _summary_for(
+    items, cfg, truncate: bool, rev: int
+) -> pd.DataFrame:  # pragma: no cover
     rows = []
-    ws = load_working_set(WORKING_SET)
-    for item in ws.all():
+    for item in items:
         if not detections_present(DETECTIONS, item.key):
             rows.append(
                 {
@@ -195,6 +196,24 @@ def _summary(cfg, truncate: bool, rev: int) -> pd.DataFrame:  # pragma: no cover
             }
         )
     return pd.DataFrame(rows)
+
+
+def _pick_from_table(df, key) -> str | None:  # pragma: no cover
+    """Render a clickable single-row table; return the key of a row clicked THIS
+    rerun (else None) so the two tables don't fight over the active selection."""
+    event = st.dataframe(
+        df,
+        width="stretch",
+        hide_index=True,
+        on_select="rerun",
+        selection_mode="single-row",
+        key=key,
+    )
+    cur = event.selection.rows[0] if event.selection.rows else None
+    prev_key = f"_prev_{key}"
+    changed = cur is not None and cur != st.session_state.get(prev_key)
+    st.session_state[prev_key] = cur
+    return df.iloc[cur]["key"] if changed else None
 
 
 def main() -> None:  # pragma: no cover
@@ -221,24 +240,30 @@ def main() -> None:  # pragma: no cover
             importlib.reload(candidate_mod)
             st.session_state["rev"] += 1
             st.toast("candidate.py reloaded")
-        idx = st.selectbox(
-            "sequence",
-            range(len(keys)),
-            format_func=lambda j: (
-                f"{keys[j]}  {('· ' + notes[keys[j]]) if notes[keys[j]] else ''}"
-            ),
-            key="seq_idx",
-        )
-
     rev = st.session_state["rev"]
-    key = keys[idx]
-    if notes.get(key):
-        st.caption(f"📝 {notes[key]}")
-    _viewer(key, cfg, truncate, rev)
+
+    # Two clickable tables drive the viewer below; the row clicked most recently
+    # (this rerun) wins. Counts are current -> candidate per sequence.
+    st.subheader("Targets — click a row to inspect")
+    picked_target = _pick_from_table(
+        _summary_for(ws.targets, cfg, truncate, rev), "tbl_targets"
+    )
+    st.subheader("Control (random sequences — regression watch)")
+    picked_control = _pick_from_table(
+        _summary_for(ws.control, cfg, truncate, rev), "tbl_control"
+    )
+    if picked_control:
+        st.session_state["selected_key"] = picked_control
+    elif picked_target:
+        st.session_state["selected_key"] = picked_target
+    selected = st.session_state.get("selected_key", keys[0])
+    if selected not in keys:
+        selected = keys[0]
 
     st.divider()
-    st.subheader("Working-set summary (current → candidate tube counts)")
-    st.dataframe(_summary(cfg, truncate, rev), width="stretch", hide_index=True)
+    if notes.get(selected):
+        st.caption(f"📝 {notes[selected]}")
+    _viewer(selected, cfg, truncate, rev)
 
 
 if __name__ == "__main__":  # pragma: no cover
