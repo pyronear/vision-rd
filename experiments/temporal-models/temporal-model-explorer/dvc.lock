@@ -1,0 +1,60 @@
+schema: '2.0'
+stages:
+  prepare_models:
+    cmd: uv run python scripts/prepare_models.py --out data/06_models
+    deps:
+    - path: scripts/prepare_models.py
+      hash: md5
+      md5: 2dcdb4c941a760e00c9873a86cac9e4a
+      size: 1164
+    params:
+      params.yaml:
+        models:
+          vit_dinov2_finetune: 
+            ../bbox-tube-temporal/data/06_models/vit_dinov2_finetune/model.zip
+    outs:
+    - path: data/06_models
+      hash: md5
+      md5: 59dac007dd00a31de5f93d4e8d394d4b.dir
+      size: 162765093
+      nfiles: 1
+  run_models:
+    cmd: uv run python scripts/run_models.py --store data/03_primary/sequences 
+      --models-dir data/06_models --out data/07_model_output
+    deps:
+    - path: data/03_primary/sequences
+      hash: md5
+      md5: 84dcf42265e29d51d7dba5931131e186.dir
+      size: 1087779014
+      nfiles: 8928
+    - path: data/06_models
+      hash: md5
+      md5: 59dac007dd00a31de5f93d4e8d394d4b.dir
+      size: 162765093
+      nfiles: 1
+    - path: scripts/run_models.py
+      hash: md5
+      md5: 58daf17d0184588770ae30bdaf1d24ba
+      size: 1249
+    - path: src/temporal_model_explorer/outcomes.py
+      hash: md5
+      md5: 89ab51f7cdb35f4467546400ee627c95
+      size: 1857
+    - path: src/temporal_model_explorer/run_models.py
+      hash: md5
+      md5: 9ee1296d0a133b4b4a117841c9f89784
+      size: 3577
+    - path: src/temporal_model_explorer/store.py
+      hash: md5
+      md5: 0dff1059fea663891fdc74effb0902ee
+      size: 2771
+    outs:
+    - path: data/07_model_output/details
+      hash: md5
+      md5: e3450c2d21cd4c56ddcc2cbd44d15fd6.dir
+      size: 3974263
+      nfiles: 698
+    - path: data/07_model_output/results.parquet
+      hash: md5
+      md5: 0511584db6b724a1e58ca2d2d1c39c13
+      size: 35165

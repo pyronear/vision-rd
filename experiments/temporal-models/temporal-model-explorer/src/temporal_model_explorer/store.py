@@ -24,10 +24,10 @@ class FrameRef:
 class SequenceMeta:
     key: str
     sequence_id: str
-    source: str  # "platform" | "local_zip"
+    source: str  # "platform"
     label: str  # "smoke" | "fp" | "unknown"
     label_detail: str | None
-    label_source: str  # "platform_is_wildfire" | "zip_folder"
+    label_source: str  # "platform_is_wildfire"
     frames: list[FrameRef] = field(default_factory=list)
     camera_id: int | None = None
     camera_name: str | None = None

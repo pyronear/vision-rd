@@ -8,15 +8,6 @@ stages:
     outs:
       - data/06_models
 
-  import_local_zip:
-    cmd: uv run python scripts/import_local_zip.py --zip ../data/seq_annotation_done_by_label.zip --out data/03_primary/sequences/local_zip
-    deps:
-      - src/temporal_model_explorer/import_local_zip.py
-      - src/temporal_model_explorer/store.py
-      - scripts/import_local_zip.py
-    outs:
-      - data/03_primary/sequences/local_zip
-
   run_models:
     cmd: uv run python scripts/run_models.py --store data/03_primary/sequences --models-dir data/06_models --out data/07_model_output
     deps:
