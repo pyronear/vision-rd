@@ -149,8 +149,11 @@ make format    # ruff format
 `tests/test_smoke.py`:
 
 ```python
+import tube_builder_lab
+
+
 def test_package_imports():
-    import tube_builder_lab  # noqa: F401
+    assert tube_builder_lab is not None
 ```
 
 - [ ] **Step 6: Install and verify the scaffold**
