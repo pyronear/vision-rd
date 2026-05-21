@@ -38,7 +38,7 @@ STORE = Path(PARAMS["store"])
 DETECTIONS = Path(PARAMS["detections_dir"])
 PIPELINE_CONFIG = Path(PARAMS["pipeline_config"])
 WORKING_SET = Path("working_set.yaml")
-PLAY_FPS = 1
+PLAY_FPS = 2
 
 
 def _both_tube_sets(key: str, cfg):

@@ -143,10 +143,10 @@ control:
   - { key: platform_42863 }
   - { key: platform_42870 }
   - { key: platform_42926 }
-  - { key: platform_42931 }
-  - { key: platform_42936 }
+  - { key: platform_42931, note: "verified ok" }
+  - { key: platform_42936, note: "verified ok" }
   - { key: platform_42944 }
-  - { key: platform_42945 }
+  - { key: platform_42945, note: "verified ok" }
   - { key: platform_42952 }
   - { key: platform_42987 }
   - { key: platform_43004 }
@@ -159,7 +159,7 @@ control:
   - { key: platform_43230 }
   - { key: platform_43259 }
   - { key: platform_43261 }
-  - { key: platform_43266 }
+  - { key: platform_43266, note: "verified ok (favor bigger box)" }
   - { key: platform_43267 }
   - { key: platform_43317 }
   - { key: platform_43321 }

@@ -8,10 +8,11 @@ grows across 30s-apart frames, so consecutive detections drop below IoU=0.2 and
 the greedy matcher splits one plume into several tubes — sometimes overlapping
 (parallel tracks), sometimes separated by a detector gap of up to ~9 frames.
 Across the 16 targets the fragments to merge are tightly co-located (containment
-``IoMin`` high, OR center-distance <= ~0.07) while genuinely distinct plumes sit
-far apart (center-distance >= ~0.23). So we merge two tubes when, at their
-closest-in-time observed boxes, the smaller is mostly inside the larger (IoMin)
-OR their centers nearly coincide, and the temporal gap is small.
+``IoMin`` high, OR centers within ~1.5 box-sizes) while genuinely distinct plumes
+sit far apart. So we merge two tubes when, at their closest-in-time observed
+boxes, the smaller is mostly inside the larger (IoMin) OR their centers are close
+relative to the box size (scale-relative, so tiny boxes don't chain across many
+widths and teleport the tube), and the temporal gap is small.
 """
 
 from __future__ import annotations
@@ -31,7 +32,7 @@ MIN_DETECTED_ENTRIES = 2
 
 # Post-hoc merge thresholds (see module docstring; tuned on the working set).
 MERGE_IOMIN = 0.3  # smaller box mostly inside the larger
-MERGE_CDIST = 0.08  # OR centers nearly coincide (tiny, non-overlapping boxes)
+MERGE_PROX_FACTOR = 1.0  # OR centers within this many box-sizes (scale-relative)
 MERGE_MAX_GAP = 10  # frames; bridge re-detections after a detector gap
 
 
@@ -86,7 +87,8 @@ def _linkable(
         ((abs(fa - fb), da, db) for fa, da in obs_a for fb, db in obs_b),
         key=lambda x: x[0],
     )
-    return _iomin(da, db) >= MERGE_IOMIN or _cdist(da, db) <= MERGE_CDIST
+    scale = max(da.w, da.h, db.w, db.h)
+    return _iomin(da, db) >= MERGE_IOMIN or _cdist(da, db) <= MERGE_PROX_FACTOR * scale
 
 
 def merge_colocated_tubes(tubes: list[Tube]) -> list[Tube]:
@@ -118,7 +120,9 @@ def merge_colocated_tubes(tubes: list[Tube]) -> list[Tube]:
         for m in members:
             for f, d in obs[m]:
                 cur = best_by_frame.get(f)
-                if cur is None or d.confidence > cur.confidence:
+                # When fragments overlap a frame, keep the larger box — it
+                # captures more of the plume's extent than a small sub-detection.
+                if cur is None or d.w * d.h > cur.w * cur.h:
                     best_by_frame[f] = d
         if not best_by_frame:
             continue

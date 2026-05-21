@@ -36,6 +36,16 @@ def test_keep_distinct_far_apart_plumes():
     assert len(merged) == 2
 
 
+def test_proximity_is_scale_relative():
+    # Two tiny (0.02-wide) boxes ~0.75 box-sizes apart -> same object, merge.
+    a = _tube(0, [(0, (0.50, 0.5, 0.02, 0.02)), (1, (0.50, 0.5, 0.02, 0.02))])
+    near = _tube(1, [(2, (0.515, 0.5, 0.02, 0.02)), (3, (0.515, 0.5, 0.02, 0.02))])
+    assert len(merge_colocated_tubes([a, near])) == 1
+    # ~1.75 box-sizes apart -> a separate detection, do NOT merge (no teleport).
+    far = _tube(1, [(2, (0.535, 0.5, 0.02, 0.02)), (3, (0.535, 0.5, 0.02, 0.02))])
+    assert len(merge_colocated_tubes([a, far])) == 2
+
+
 def test_bridge_gap_redetection_at_same_spot():
     # Same location, re-detected after a 6-frame gap (> max_misses, <= MERGE_MAX_GAP).
     a = _tube(0, [(0, (0.5, 0.5, 0.05, 0.05)), (2, (0.5, 0.5, 0.05, 0.05))])
