@@ -53,7 +53,7 @@ control:
   - { key: platform_41142 }
   - { key: platform_41143 }
   - { key: platform_41152 }
-  - { key: platform_41168 }
+  - { key: platform_41168, note: "verified ok" }
   - { key: platform_41170 }
   - { key: platform_41174 }
   - { key: platform_41177 }
@@ -75,18 +75,18 @@ control:
   - { key: platform_41295 }
   - { key: platform_41302 }
   - { key: platform_41313 }
-  - { key: platform_41314 }
+  - { key: platform_41314, note: "verified ok" }
   - { key: platform_41317 }
   - { key: platform_41330 }
   - { key: platform_41341 }
   - { key: platform_41351 }
-  - { key: platform_41356 }
-  - { key: platform_41380 }
+  - { key: platform_41356, note: "verified ok" }
+  - { key: platform_41380, note: "verified ok" }
   - { key: platform_41390 }
   - { key: platform_41405 }
-  - { key: platform_41443 }
+  - { key: platform_41443, note: "verified ok" }
   - { key: platform_41490 }
-  - { key: platform_41502 }
+  - { key: platform_41502, note: "verified ok" }
   - { key: platform_41542 }
   - { key: platform_41554 }
   - { key: platform_41628 }
