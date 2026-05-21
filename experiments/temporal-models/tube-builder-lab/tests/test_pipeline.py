@@ -1,4 +1,5 @@
 from bbox_tube_temporal.types import Detection, FrameDetections
+
 from tube_builder_lab.pipeline import (
     PipelineConfig,
     current_builder,

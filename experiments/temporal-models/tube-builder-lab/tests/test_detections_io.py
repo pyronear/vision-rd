@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from bbox_tube_temporal.types import Detection, FrameDetections
+
 from tube_builder_lab.detections_io import read_detections, write_detections
 
 

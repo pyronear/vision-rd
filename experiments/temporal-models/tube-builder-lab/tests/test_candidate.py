@@ -1,5 +1,6 @@
 from bbox_tube_temporal.tubes import build_tubes
 from bbox_tube_temporal.types import Detection, FrameDetections
+
 from tube_builder_lab.candidate import build_tubes_candidate
 
 
