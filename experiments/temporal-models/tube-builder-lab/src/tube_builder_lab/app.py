@@ -41,12 +41,12 @@ WORKING_SET = Path("working_set.yaml")
 PLAY_FPS = 1
 
 
-def _both_tube_sets(key: str, cfg, truncate: bool, _rev: int):
-    """(current_tubes, candidate_tubes) for a key. _rev busts cache on Re-run."""
+def _both_tube_sets(key: str, cfg):
+    """(current_tubes, candidate_tubes) for a key, over the full sequence."""
     fds = load_cached(DETECTIONS, key)
-    cur = detections_to_display_tubes(fds, current_builder(cfg), cfg, truncate=truncate)
+    cur = detections_to_display_tubes(fds, current_builder(cfg), cfg, truncate=False)
     cand = detections_to_display_tubes(
-        fds, candidate_mod.build_tubes_candidate, cfg, truncate=truncate
+        fds, candidate_mod.build_tubes_candidate, cfg, truncate=False
     )
     return cur, cand
 
@@ -98,19 +98,19 @@ def _timeline_chart(tubes, n, current, color_map):  # pragma: no cover
 
 
 @st.fragment(run_every=1.0 / PLAY_FPS)
-def _viewer(key: str, cfg, truncate: bool, rev: int):  # pragma: no cover
+def _viewer(key: str, cfg):  # pragma: no cover
     seq_dir = seq_dir_for_key(STORE, key)
     if seq_dir is None or not detections_present(DETECTIONS, key):
         st.warning(f"{key}: missing sequence frames or cached detections.")
         return
     meta = read_meta(seq_dir)
     frames = build_frames(seq_dir, meta)
-    n = min(len(frames), cfg.max_frames) if truncate else len(frames)
+    n = len(frames)
     if not n:
         st.info("no frames")
         return
 
-    cur, cand = _both_tube_sets(key, cfg, truncate, rev)
+    cur, cand = _both_tube_sets(key, cfg)
     c1, c2 = st.columns(2)
     c1.metric("current tubes", tube_count(cur))
     c2.metric(
@@ -169,9 +169,7 @@ def _viewer(key: str, cfg, truncate: bool, rev: int):  # pragma: no cover
                 col.caption("inactive")
 
 
-def _summary_for(
-    items, cfg, truncate: bool, rev: int
-) -> pd.DataFrame:  # pragma: no cover
+def _summary_for(items, cfg) -> pd.DataFrame:  # pragma: no cover
     rows = []
     for item in items:
         if not detections_present(DETECTIONS, item.key):
@@ -185,7 +183,7 @@ def _summary_for(
                 }
             )
             continue
-        cur, cand = _both_tube_sets(item.key, cfg, truncate, rev)
+        cur, cand = _both_tube_sets(item.key, cfg)
         rows.append(
             {
                 "key": item.key,
@@ -198,11 +196,25 @@ def _summary_for(
     return pd.DataFrame(rows)
 
 
+def _style_changes(row):  # pragma: no cover
+    """Amber where the candidate changes the tube count, grey if data is missing,
+    white when current == candidate."""
+    d = row["Δ"]
+    if pd.isna(d):
+        bg = "#eeeeee"
+    elif d != 0:
+        bg = "#fff3cd"
+    else:
+        bg = "white"
+    return [f"background-color: {bg}; color: #111"] * len(row)
+
+
 def _pick_from_table(df, key) -> str | None:  # pragma: no cover
-    """Render a clickable single-row table; return the key of a row clicked THIS
-    rerun (else None) so the two tables don't fight over the active selection."""
+    """Render a clickable single-row table (rows with a count change highlighted);
+    return the key of a row clicked THIS rerun (else None) so the two tables don't
+    fight over the active selection."""
     event = st.dataframe(
-        df,
+        df.style.apply(_style_changes, axis=1),
         width="stretch",
         hide_index=True,
         on_select="rerun",
@@ -224,34 +236,20 @@ def main() -> None:  # pragma: no cover
         st.warning("No pipeline config. Run `make cache` (cache_detections) first.")
         return
     cfg = load_pipeline_config(PIPELINE_CONFIG)
+    # Pick up edits to candidate.py on every rerun. It's an imported module, so a
+    # plain Streamlit rerun would otherwise keep the cached build_tubes_candidate.
+    importlib.reload(candidate_mod)
     ws = load_working_set(WORKING_SET)
     keys = [i.key for i in ws.all()]
     notes = {i.key: i.note for i in ws.all()}
 
-    st.session_state.setdefault("rev", 0)
-    with st.sidebar:
-        st.header("Tube Lab")
-        truncate = st.toggle(
-            "truncate to max_frames",
-            value=True,
-            help=f"first {cfg.max_frames} frames (reproduces the model)",
-        )
-        if st.button("🔄 Re-run candidate"):
-            importlib.reload(candidate_mod)
-            st.session_state["rev"] += 1
-            st.toast("candidate.py reloaded")
-    rev = st.session_state["rev"]
-
     # Two clickable tables drive the viewer below; the row clicked most recently
-    # (this rerun) wins. Counts are current -> candidate per sequence.
+    # (this rerun) wins. Counts are current -> candidate per sequence, over the
+    # full (untruncated) sequence; rows where the count changes are highlighted.
     st.subheader("Targets — click a row to inspect")
-    picked_target = _pick_from_table(
-        _summary_for(ws.targets, cfg, truncate, rev), "tbl_targets"
-    )
+    picked_target = _pick_from_table(_summary_for(ws.targets, cfg), "tbl_targets")
     st.subheader("Control (random sequences — regression watch)")
-    picked_control = _pick_from_table(
-        _summary_for(ws.control, cfg, truncate, rev), "tbl_control"
-    )
+    picked_control = _pick_from_table(_summary_for(ws.control, cfg), "tbl_control")
     if picked_control:
         st.session_state["selected_key"] = picked_control
     elif picked_target:
@@ -263,7 +261,7 @@ def main() -> None:  # pragma: no cover
     st.divider()
     if notes.get(selected):
         st.caption(f"📝 {notes[selected]}")
-    _viewer(selected, cfg, truncate, rev)
+    _viewer(selected, cfg)
 
 
 if __name__ == "__main__":  # pragma: no cover
