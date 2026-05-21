@@ -1504,6 +1504,7 @@ from __future__ import annotations
 import importlib
 from pathlib import Path
 
+import altair as alt
 import pandas as pd
 import streamlit as st
 import yaml
@@ -1544,7 +1545,7 @@ def _both_tube_sets(key: str, cfg, truncate: bool, _rev: int):
     return cur, cand
 
 
-def _timeline_chart(alt, tubes, n, current, color_map):  # pragma: no cover
+def _timeline_chart(tubes, n, current, color_map):  # pragma: no cover
     df = tube_timeline_df(tubes)
     order = sorted(df["tube"].unique(), key=lambda t: int(t[1:])) if len(df) else []
     xscale = alt.Scale(domain=[0, n], nice=False)
@@ -1579,8 +1580,6 @@ def _timeline_chart(alt, tubes, n, current, color_map):  # pragma: no cover
 
 @st.fragment(run_every=1.0 / PLAY_FPS)
 def _viewer(key: str, cfg, truncate: bool, rev: int):  # pragma: no cover
-    import altair as alt  # noqa: PLC0415
-
     seq_dir = seq_dir_for_key(STORE, key)
     if seq_dir is None or not detections_present(DETECTIONS, key):
         st.warning(f"{key}: missing sequence frames or cached detections.")
@@ -1616,10 +1615,10 @@ def _viewer(key: str, cfg, truncate: bool, rev: int):  # pragma: no cover
     cand_colors = {f"T{t.tube_id}": tube_color(t.tube_id) for t in cand}
     st.caption(f"current — {tube_count(cur)} tube(s)")
     if cur:
-        st.altair_chart(_timeline_chart(alt, cur, n, i, cur_colors), width="stretch")
+        st.altair_chart(_timeline_chart(cur, n, i, cur_colors), width="stretch")
     st.caption(f"candidate — {tube_count(cand)} tube(s)")
     if cand:
-        st.altair_chart(_timeline_chart(alt, cand, n, i, cand_colors), width="stretch")
+        st.altair_chart(_timeline_chart(cand, n, i, cand_colors), width="stretch")
 
     with st.expander("candidate crops @ this frame", expanded=False):
         cols = st.columns(max(1, len(cand)))
