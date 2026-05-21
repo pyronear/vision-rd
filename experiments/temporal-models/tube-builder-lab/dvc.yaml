@@ -1,0 +1,12 @@
+stages:
+  cache_detections:
+    cmd: uv run python scripts/cache_detections.py
+    deps:
+      - scripts/cache_detections.py
+      - data/03_primary/sequences
+      - data/06_models
+      - working_set.yaml
+      - params.yaml
+    outs:
+      - data/05_model_input/detections
+      - data/05_model_input/pipeline_config.yaml

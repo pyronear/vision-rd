@@ -1,0 +1,7 @@
+# Lab configuration
+model_name: vit_dinov2_finetune          # which data/06_models/<name>/model.zip to source YOLO + config from
+detections_limit: 30                      # frames per sequence to import from the platform
+store: data/03_primary/sequences
+models_dir: data/06_models
+detections_dir: data/05_model_input/detections
+pipeline_config: data/05_model_input/pipeline_config.yaml

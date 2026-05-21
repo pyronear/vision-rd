@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+.cache/
+
+# Data artifacts never go in git. Sequences + detections + pipeline_config are
+# tracked by DVC (via DVC-managed data/**/.gitignore files); the model package
+# is a local input used only to regenerate detections, so it is just ignored.
+/data/06_models/
