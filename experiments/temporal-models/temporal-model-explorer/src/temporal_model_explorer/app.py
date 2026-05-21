@@ -161,16 +161,36 @@ def frame_bboxes_by_input_index(details: dict) -> dict[int, list[tuple]]:
 
 def tube_input_boxes(
     tube: dict, padded_frame_indices: list[int]
-) -> list[tuple[int, tuple]]:
-    """(input_index, bbox) for one tube's real (non-synthetic) detected entries."""
-    boxes: list[tuple[int, tuple]] = []
+) -> list[tuple[int, tuple, float | None]]:
+    """(input_index, bbox, confidence) for a tube's real (non-synthetic) entries."""
+    boxes: list[tuple[int, tuple, float | None]] = []
     for entry in tube.get("entries", []):
         if entry.get("bbox") is None:
             continue
         inp = processed_to_input_index(entry["frame_idx"], padded_frame_indices)
         if inp is not None:
-            boxes.append((inp, tuple(entry["bbox"])))
+            boxes.append((inp, tuple(entry["bbox"]), entry.get("confidence")))
     return boxes
+
+
+def triggering_tube_ids(details: dict) -> set[int]:
+    """Tube ids whose full-tube score crosses the decision threshold.
+
+    Each of these tubes would have fired the temporal model on its own (the model
+    keeps a sequence when any tube qualifies). For the logistic aggregation the
+    score is the calibrated probability; otherwise it's the raw logit — the same
+    criterion the model uses to decide.
+    """
+    dec = (details or {}).get("decision", {})
+    threshold = dec.get("threshold")
+    if threshold is None:
+        return set()
+    field = "probability" if dec.get("aggregation") == "logistic" else "logit"
+    return {
+        tube["tube_id"]
+        for tube in (details or {}).get("tubes", {}).get("kept", [])
+        if tube.get(field) is not None and tube[field] >= threshold
+    }
 
 
 def _lightning_polygon(x: float, y: float, h: float) -> list[tuple[float, float]]:
@@ -190,26 +210,32 @@ def _lightning_polygon(x: float, y: float, h: float) -> list[tuple[float, float]
 
 
 def draw_bboxes(image_path: Path, boxes, width: int = 4) -> Image.Image:
-    """Draw bboxes on the frame; ``boxes`` is ``[(bbox, conf, color, is_trigger)]``.
+    """Draw bboxes on the frame; ``boxes`` is ``[(bbox, conf, color, trigger)]``.
 
-    Each box uses its tube's colour; the trigger box gets a thicker outline and a
-    drawn lightning bolt. The confidence (when present) is printed above the box.
+    ``trigger`` is ``"decisive"`` (the tube that fired the keep first), ``"would"``
+    (a tube that also crosses the threshold), or ``None``. The decisive box gets
+    the thickest outline and a filled lightning bolt; a would-trigger box gets a
+    medium outline and a hollow bolt. The confidence (when present) is printed
+    above the box.
     """
     img = Image.open(image_path).convert("RGB")
     w_img, h_img = img.size
     draw = ImageDraw.Draw(img)
-    for (cx, cy, bw, bh), conf, color, is_trigger in boxes:
+    for (cx, cy, bw, bh), conf, color, trigger in boxes:
         x0, y0 = (cx - bw / 2) * w_img, (cy - bh / 2) * h_img
         x1, y1 = (cx + bw / 2) * w_img, (cy + bh / 2) * h_img
-        draw.rectangle([x0, y0, x1, y1], outline=color, width=width + 3 * is_trigger)
+        extra = {"decisive": 3, "would": 1}.get(trigger, 0)
+        draw.rectangle([x0, y0, x1, y1], outline=color, width=width + extra)
         ty = max(0, y0 - 20)
         tx = x0
         if conf is not None:
             label = f"{conf:.2f}"
             draw.text((tx, ty), label, fill=color, font=_BBOX_FONT)
             tx += draw.textlength(label, font=_BBOX_FONT) + 5
-        if is_trigger:
+        if trigger == "decisive":
             draw.polygon(_lightning_polygon(tx, ty, 16), fill=color)
+        elif trigger == "would":
+            draw.polygon(_lightning_polygon(tx, ty, 16), outline=color)
     return img
 
 
@@ -229,18 +255,19 @@ def crop_around_bbox(
     return Image.fromarray(crop_and_resize(img, box, patch_size))
 
 
-def tube_timeline_df(tube_rows: list[tuple[str, set]]) -> pd.DataFrame:
+def tube_timeline_df(tube_rows: list[tuple[str, dict]]) -> pd.DataFrame:
     """Long frame for the Altair tube timeline: one row per (tube, present frame).
 
-    ``tube_rows`` is ``[(label, frame_index_set), ...]``; ``frame_end`` = frame + 1
-    so each present frame renders as a unit-width bar.
+    ``tube_rows`` is ``[(label, {frame_index: confidence}), ...]``; ``frame_end`` =
+    frame + 1 so each present frame renders as a unit-width bar, and ``confidence``
+    carries the detector score for the tooltip.
     """
     records = [
-        {"tube": label, "frame": f, "frame_end": f + 1}
+        {"tube": label, "frame": f, "frame_end": f + 1, "confidence": conf}
         for label, frames in tube_rows
-        for f in sorted(frames)
+        for f, conf in sorted(frames.items())
     ]
-    return pd.DataFrame(records, columns=["tube", "frame", "frame_end"])
+    return pd.DataFrame(records, columns=["tube", "frame", "frame_end", "confidence"])
 
 
 def load_details(model: str, key: str) -> dict:
@@ -267,16 +294,34 @@ def started_at_by_key() -> dict[str, str | None]:
 
 
 def _tube_timeline_chart(
-    alt, tube_rows, n, trigger, current, color_map, trigger_tube_id=None
+    alt,
+    tube_rows,
+    n,
+    trigger,
+    current,
+    color_map,
+    trigger_tube_id=None,
+    would_ids=frozenset(),
 ):  # pragma: no cover
     """One colour-coded bar row per tube + trigger/current rules (Altair).
 
-    The trigger tube's bars get a dark outline so it stands out.
+    The decisive trigger tube's bars get a thick dark outline; tubes that would
+    also have crossed the threshold get a thinner grey outline.
     """
     order = [label for label, _ in tube_rows]
+
+    def _level(label: str) -> str:
+        tid = int(label[1:])
+        if tid == trigger_tube_id:
+            return "decisive"
+        return "would" if tid in would_ids else "none"
+
+    df = tube_timeline_df(tube_rows)
+    df["level"] = df["tube"].map(_level)
+    levels = ["decisive", "would", "none"]
     xscale = alt.Scale(domain=[0, n], nice=False)
     bars = (
-        alt.Chart(tube_timeline_df(tube_rows))
+        alt.Chart(df)
         .mark_bar(height=16, cornerRadius=3)
         .encode(
             x=alt.X(
@@ -293,15 +338,23 @@ def _tube_timeline_chart(
                 scale=alt.Scale(domain=order, range=[color_map[o] for o in order]),
                 legend=None,
             ),
-            tooltip=["tube", "frame"],
+            stroke=alt.Stroke(
+                "level:N",
+                scale=alt.Scale(domain=levels, range=["#111", "#666", "transparent"]),
+                legend=None,
+            ),
+            strokeWidth=alt.StrokeWidth(
+                "level:N",
+                scale=alt.Scale(domain=levels, range=[2.5, 1.2, 0]),
+                legend=None,
+            ),
+            tooltip=[
+                alt.Tooltip("tube:N", title="tube"),
+                alt.Tooltip("frame:Q", title="frame"),
+                alt.Tooltip("confidence:Q", title="bbox score", format=".2f"),
+            ],
         )
     )
-    if trigger_tube_id is not None:
-        is_trig = f"datum.tube === 'T{trigger_tube_id}'"
-        bars = bars.encode(
-            stroke=alt.condition(is_trig, alt.value("#111"), alt.value(None)),
-            strokeWidth=alt.condition(is_trig, alt.value(2.5), alt.value(0)),
-        )
     layers = [bars]
     if trigger is not None:
         layers.append(
@@ -314,7 +367,15 @@ def _tube_timeline_chart(
         .mark_rule(color="#111", strokeDash=[4, 3], size=2)
         .encode(x=alt.X("x:Q", scale=xscale, title="frame"))
     )
-    return alt.layer(*layers).properties(height=max(90, len(tube_rows) * 34))
+    # autosize fit-x: fit the WIDTH to the container but keep `height` as the plot
+    # area (axes added outside). Streamlit's default for layer charts is full "fit",
+    # which crams plot+axes into `height`, compressing the rows until tubes collapse
+    # onto one line and dropping the x-axis labels. Streamlit only injects its own
+    # autosize when the spec lacks one, so setting it here wins.
+    return alt.layer(*layers).properties(
+        height=max(90, len(tube_rows) * 34),
+        autosize={"type": "fit-x", "contains": "padding"},
+    )
 
 
 @st.fragment(run_every=1.0 / PLAY_FPS)
@@ -334,6 +395,14 @@ def _drilldown(key: str, model: str, row: pd.Series) -> None:  # pragma: no cove
     padded = details.get("preprocessing", {}).get("padded_frame_indices", [])
     kept = details.get("tubes", {}).get("kept", [])
     trigger_tube_id = details.get("decision", {}).get("trigger_tube_id")
+    would_ids = triggering_tube_ids(details)
+
+    def trigger_state(tid: int | None) -> str | None:
+        """'decisive' for the firing tube, 'would' for others over threshold."""
+        if tid is not None and tid == trigger_tube_id:
+            return "decisive"
+        return "would" if tid in would_ids else None
+
     n = len(meta.frames)
     trig_raw = row["trigger_frame_index"]
     trig = (
@@ -363,16 +432,19 @@ def _drilldown(key: str, model: str, row: pd.Series) -> None:  # pragma: no cove
     cur = st.session_state[frame_key] % n
 
     tube_rows = [
-        (f"T{t['tube_id']}", {idx for idx, _ in tube_input_boxes(t, padded)})
+        (
+            f"T{t['tube_id']}",
+            {idx: conf for idx, _, conf in tube_input_boxes(t, padded)},
+        )
         for t in kept
     ]
     color_map = {f"T{t['tube_id']}": tube_color(t["tube_id"]) for t in kept}
     if tube_rows:
         st.altair_chart(
             _tube_timeline_chart(
-                alt, tube_rows, n, trig, cur, color_map, trigger_tube_id
+                alt, tube_rows, n, trig, cur, color_map, trigger_tube_id, would_ids
             ),
-            use_container_width=True,
+            width="stretch",
         )
     else:
         st.info("no smoke tubes extracted")
@@ -381,25 +453,33 @@ def _drilldown(key: str, model: str, row: pd.Series) -> None:  # pragma: no cove
     frame_col, tubes_col = st.columns([2, 1])
     ref = meta.frames[i]
     frame_boxes = [
-        (bbox, conf, tube_color(tid), tid == trigger_tube_id)
+        (bbox, conf, tube_color(tid), trigger_state(tid))
         for bbox, conf, tid in bbmap.get(i, [])
     ]
     frame_col.image(
         draw_bboxes(seq_dir / ref.file, frame_boxes),
         caption=f"frame {i + 1}/{n} — {len(frame_boxes)} detection(s)",
-        use_container_width=True,
+        width="stretch",
     )
 
     # Each tube crop is synced to the current frame i; trigger tube is badged.
     tubes_col.markdown(f"**tubes @ frame {i}** (context-cropped)")
     for tube in kept:
-        at_frame = dict(tube_input_boxes(tube, padded))
+        at_frame = {idx: bbox for idx, bbox, _ in tube_input_boxes(tube, padded)}
         color = tube_color(tube["tube_id"])
         tprob = tube.get("probability")
         stat = (
             f"prob {tprob:.2f}" if tprob is not None else f"logit {tube['logit']:.2f}"
         )
-        trig_badge = " ⚡<b>triggered</b>" if tube["tube_id"] == trigger_tube_id else ""
+        state = trigger_state(tube["tube_id"])
+        if state == "decisive":
+            trig_badge = " ⚡<b>triggered</b>"
+            if trig is not None:
+                trig_badge += f" (frame {trig})"
+        elif state == "would":
+            trig_badge = " <span style='color:#888'>⚡ would trigger</span>"
+        else:
+            trig_badge = ""
         chip = f"<b style='color:{color}'>● T{tube['tube_id']}</b>"
         tubes_col.markdown(f"{chip} · {stat}{trig_badge}", unsafe_allow_html=True)
         if i in at_frame:
@@ -449,8 +529,15 @@ def main() -> None:  # pragma: no cover - Streamlit UI
         .reset_index(drop=True)
     )
 
-    head, filt = st.columns([6, 1])
-    with filt.popover("🔎 filter"):
+    # Full-width title (filled via a placeholder after filtering so its count
+    # reflects the filter). Below it, a horizontal bar where the legend stretches to
+    # fill, pushing the filter popover flush against the table's right edge.
+    title_ph = st.empty()
+    bar = st.container(horizontal=True, vertical_alignment="center")
+    legend_box = (
+        bar.container()
+    )  # width="stretch" by default -> grows, pushing filter right
+    with bar.popover("🔎 filter"):
         f_gt = st.selectbox(
             "ground truth", ["all", "smoke", "fp", "unknown"], key="f_gt"
         )
@@ -465,7 +552,7 @@ def main() -> None:  # pragma: no cover - Streamlit UI
     if f_corr != "all":
         view = view[view["outcome"].map(correctness_label) == f_corr]
 
-    head.subheader(f"{len(view)} sequences — {camera or 'all cameras'}")
+    title_ph.subheader(f"{len(view)} sequences — {camera or 'all cameras'}")
     if view.empty:
         return
 
@@ -486,10 +573,10 @@ def main() -> None:  # pragma: no cover - Streamlit UI
         return [f"background-color: {bg}; color: #111"] * len(cols)
 
     styled = display[cols].style.apply(_style_row, axis=1)
-    st.markdown(legend_html(), unsafe_allow_html=True)
+    legend_box.markdown(legend_html(), unsafe_allow_html=True)
     event = st.dataframe(
         styled,
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
         on_select="rerun",
         selection_mode="single-row",
