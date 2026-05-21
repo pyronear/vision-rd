@@ -1,4 +1,4 @@
-.PHONY: install lint format test help notebook app cache
+.PHONY: install lint format test help notebook app cache bootstrap
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -24,3 +24,6 @@ app: ## Launch the Streamlit tube lab
 
 cache: ## Run YOLO over the working-set sequences and cache detections
 	uv run python scripts/cache_detections.py
+
+bootstrap: ## Copy working-set sequences from the local explorer store (no creds)
+	uv run python scripts/bootstrap_from_explorer.py

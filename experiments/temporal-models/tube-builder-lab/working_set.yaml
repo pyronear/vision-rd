@@ -15,4 +15,21 @@ targets:
   - { key: platform_41541 }
   - { key: platform_43206, note: "T0 and T5 should be one; T1 and T3 should be one" }
   - { key: platform_42910 }
-control: []
+# Control set: random explorer sequences (seed=0), watched for regressions —
+# a candidate that changes their tube counts is over/under-merging untargeted data.
+control:
+  - { key: platform_40611 }
+  - { key: platform_41170 }
+  - { key: platform_41219 }
+  - { key: platform_41295 }
+  - { key: platform_41405 }
+  - { key: platform_41490 }
+  - { key: platform_41554 }
+  - { key: platform_41633 }
+  - { key: platform_41881 }
+  - { key: platform_41967 }
+  - { key: platform_42055 }
+  - { key: platform_42077 }
+  - { key: platform_42428 }
+  - { key: platform_43259 }
+  - { key: platform_43359 }

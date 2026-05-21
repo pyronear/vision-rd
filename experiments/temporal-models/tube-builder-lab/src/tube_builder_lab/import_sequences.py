@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 import logging
+import shutil
 from collections.abc import Callable
 from pathlib import Path
 
@@ -82,3 +84,65 @@ def import_keys(
         count += 1
         log.info("imported %s (%d detections)", key, len(dets))
     return count
+
+
+def _explorer_seq_dir_for_key(explorer_store: Path, key: str) -> Path | None:
+    """Find an explorer sequence dir (nested layout, rich meta) by its key."""
+    for meta_path in explorer_store.rglob("meta.json"):
+        try:
+            if json.loads(meta_path.read_text()).get("key") == key:
+                return meta_path.parent
+        except (json.JSONDecodeError, OSError):
+            continue
+    return None
+
+
+def copy_one_from_explorer(*, lab_store: Path, explorer_seq_dir: Path) -> Path:
+    """Copy one explorer sequence into the lab's flat store with a minimal meta.
+
+    The explorer uses a nested org/camera layout and a richer meta; the lab
+    keeps a flat ``platform_<id>/`` layout with only key/sequence_id/frames.
+    """
+    raw = json.loads((explorer_seq_dir / "meta.json").read_text())
+    key = raw["key"]
+    seq_dir = lab_store / key
+    (seq_dir / "images").mkdir(parents=True, exist_ok=True)
+    frames: list[FrameRef] = []
+    for fr in raw.get("frames", []):
+        rel = fr["file"]
+        dst = seq_dir / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(explorer_seq_dir / rel, dst)
+        frames.append(
+            FrameRef(
+                file=rel,
+                detection_id=fr.get("detection_id"),
+                created_at=fr.get("created_at"),
+            )
+        )
+    write_meta(
+        seq_dir,
+        SequenceMeta(key=key, sequence_id=str(raw["sequence_id"]), frames=frames),
+    )
+    return seq_dir
+
+
+def bootstrap_from_explorer(
+    *, lab_store: Path, explorer_store: Path, keys: list[str]
+) -> tuple[int, list[str]]:
+    """Copy each key from the explorer store into the lab store (no creds).
+
+    Returns ``(copied_count, missing_keys)``.
+    """
+    copied = 0
+    missing: list[str] = []
+    for key in keys:
+        src = _explorer_seq_dir_for_key(explorer_store, key)
+        if src is None:
+            missing.append(key)
+            log.warning("key %s not found in explorer store %s", key, explorer_store)
+            continue
+        copy_one_from_explorer(lab_store=lab_store, explorer_seq_dir=src)
+        copied += 1
+        log.info("copied %s from explorer", key)
+    return copied, missing
