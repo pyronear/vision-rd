@@ -117,19 +117,24 @@ def _viewer(key: str, cfg, truncate: bool, rev: int):  # pragma: no cover
         "candidate tubes", tube_count(cand), delta=tube_count(cand) - tube_count(cur)
     )
 
-    color_by = st.radio(
-        "frame coloring", ["candidate", "current"], horizontal=True, key=f"color_{key}"
-    )
     frame_key = f"frame_{key}"
     st.session_state.setdefault(frame_key, 0)
     if st.toggle("▶ play", value=True, key=f"play_{key}"):
         st.session_state[frame_key] = (st.session_state[frame_key] + 1) % n
     i = st.slider("frame", 0, n - 1, key=frame_key) if n > 1 else 0
 
-    shown = cand if color_by == "candidate" else cur
-    st.image(
-        draw_tube_bboxes(seq_dir / meta.frames[i].file, shown, i),
-        caption=f"frame {i + 1}/{n} — colored by {color_by}",
+    # Two synced frame views (same frame index i): current (left) vs candidate
+    # (right). One slider/play tick drives both, so they advance in lockstep.
+    img_path = seq_dir / meta.frames[i].file
+    left, right = st.columns(2)
+    left.image(
+        draw_tube_bboxes(img_path, cur, i),
+        caption=f"current — frame {i + 1}/{n}, {tube_count(cur)} tube(s)",
+        width="stretch",
+    )
+    right.image(
+        draw_tube_bboxes(img_path, cand, i),
+        caption=f"candidate — frame {i + 1}/{n}, {tube_count(cand)} tube(s)",
         width="stretch",
     )
 
