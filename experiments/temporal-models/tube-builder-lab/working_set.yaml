@@ -1,0 +1,18 @@
+targets:
+  - { key: platform_43096 }
+  - { key: platform_42466 }
+  - { key: platform_41304, note: "the three tubes should only be one" }
+  - { key: platform_41319 }
+  - { key: platform_41310, note: "T3 and T4 should be the same tube?" }
+  - { key: platform_41289, note: "T0 and T3 should be the same tube" }
+  - { key: platform_41209 }
+  - { key: platform_40800 }
+  - { key: platform_41616, note: "the three tubes should only be one" }
+  - { key: platform_41786, note: "the tubes could be merged into one" }
+  - { key: platform_42562 }
+  - { key: platform_42538, note: "should be only one tube" }
+  - { key: platform_41887 }
+  - { key: platform_41541 }
+  - { key: platform_43206, note: "T0 and T5 should be one; T1 and T3 should be one" }
+  - { key: platform_42910 }
+control: []
