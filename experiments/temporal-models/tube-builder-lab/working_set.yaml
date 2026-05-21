@@ -26,7 +26,7 @@ control:
   - { key: platform_40611 }
   - { key: platform_40631 }
   - { key: platform_40678 }
-  - { key: platform_40686 }
+  - { key: platform_40686, note: "verified ok" }
   - { key: platform_40700 }
   - { key: platform_40720 }
   - { key: platform_40746 }
@@ -150,20 +150,20 @@ control:
   - { key: platform_42952 }
   - { key: platform_42987 }
   - { key: platform_43004 }
-  - { key: platform_43020 }
+  - { key: platform_43020, note: "verified ok" }
   - { key: platform_43021 }
   - { key: platform_43022 }
   - { key: platform_43071 }
   - { key: platform_43076 }
   - { key: platform_43182 }
-  - { key: platform_43230 }
+  - { key: platform_43230, note: "verified ok" }
   - { key: platform_43259 }
   - { key: platform_43261 }
   - { key: platform_43266, note: "verified ok (favor bigger box)" }
-  - { key: platform_43267 }
-  - { key: platform_43317 }
+  - { key: platform_43267, note: "verified ok (perfect)" }
+  - { key: platform_43317, note: "verified ok" }
   - { key: platform_43321 }
-  - { key: platform_43359 }
+  - { key: platform_43359, note: "verified ok" }
   - { key: platform_43378 }
-  - { key: platform_43441 }
+  - { key: platform_43441, note: "verified ok" }
   - { key: platform_43628 }
