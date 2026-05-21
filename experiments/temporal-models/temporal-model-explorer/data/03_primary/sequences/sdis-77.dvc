@@ -1,0 +1,6 @@
+outs:
+- md5: 3cf3cc142c27181554d834bb52d7a074.dir
+  size: 635480616
+  nfiles: 5350
+  hash: md5
+  path: sdis-77

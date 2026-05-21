@@ -1,0 +1,15 @@
+platform:
+  detections_limit: 30
+  date_from: "2026-05-19"
+  date_to: "2026-05-19"
+  camera_ids: []          # empty = all cameras
+
+label_mapping:
+  smoke_values: [wildfire, other_smoke, industrial, smoke]
+  fp_values: [other, low_cloud, high_cloud, cloud, tree, water_body, lens_droplet, light, antenna, building]
+
+org_names: {}             # optional org_id -> name (fallback when admin unavailable)
+
+models:                   # name -> SOURCE model.zip path (copied into the DVC-tracked
+                          # data/06_models/<name>/model.zip by the prepare_models stage)
+  vit_dinov2_finetune: ../bbox-tube-temporal/data/06_models/vit_dinov2_finetune/model.zip
