@@ -77,18 +77,6 @@ previous motion-CNN baseline **without** any precomputed optical-flow / frame-
 difference inputs: the local tube transformer learns the turbulence cue
 directly from pixels.
 
-## Objective
-
-Discriminate smoke tubes from look-alikes (clouds, fog, dust) using two
-complementary temporal views:
-
-- A **global** view (16 frames) that captures how the overall shape of the
-  region evolves over the full sequence — useful for distinguishing slow,
-  smoothly-deforming clouds from turbulent smoke plumes.
-- A **local** view (overlapping 4-frame sub-windows × spatial cells) that
-  preserves the high-frequency spatial structure inside the bbox patch, which
-  is washed out when the entire frame is compressed to a single 384-D vector.
-
 ## Approach
 
 ```
