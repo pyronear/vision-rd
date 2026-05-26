@@ -1,0 +1,2264 @@
+schema: '2.0'
+stages:
+  truncate@val:
+    cmd: uv run python scripts/truncate_sequences.py --input-dir 
+      data/01_raw/datasets_full/val --output-dir data/01_raw/datasets/val 
+      --max-frames 16
+    deps:
+    - path: data/01_raw/datasets_full/val
+      hash: md5
+      md5: b58404e2160d272fd736fad3aa561223.dir
+      size: 668383256
+      nfiles: 13044
+    - path: scripts/truncate_sequences.py
+      hash: md5
+      md5: 50ac7865933889df116cf61d7f35bc63
+      size: 2495
+    params:
+      params.yaml:
+        truncate.max_frames: 16
+    outs:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: 2ee83a5a253a8c7c7f44e3415c74d7d3.dir
+      size: 385718788
+      nfiles: 7594
+  truncate@train:
+    cmd: uv run python scripts/truncate_sequences.py --input-dir 
+      data/01_raw/datasets_full/train --output-dir data/01_raw/datasets/train 
+      --max-frames 16
+    deps:
+    - path: data/01_raw/datasets_full/train
+      hash: md5
+      md5: f02174099bc4dc115dad2b69d3b4e78e.dir
+      size: 7543045856
+      nfiles: 142052
+    - path: scripts/truncate_sequences.py
+      hash: md5
+      md5: 50ac7865933889df116cf61d7f35bc63
+      size: 2495
+    params:
+      params.yaml:
+        truncate.max_frames: 16
+    outs:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: 2cf294bcec0a832c25a2d1ffa086304c.dir
+      size: 4132370460
+      nfiles: 77646
+  build_tubes@val:
+    cmd: uv run python scripts/build_tubes.py --input-dir 
+      data/01_raw/datasets/val --output-dir data/03_primary/tubes/val 
+      --iou-threshold 0.2 --max-misses 2 --min-tube-length 4 
+      --min-detected-entries 2
+    deps:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: 2ee83a5a253a8c7c7f44e3415c74d7d3.dir
+      size: 385718788
+      nfiles: 7594
+    - path: scripts/build_tubes.py
+      hash: md5
+      md5: 1553153e36118e5c306172b5cb371daa
+      size: 5710
+    - path: src/tube_multiscale_fusion/data.py
+      hash: md5
+      md5: b907e5a0baedb93775446678c2cce034
+      size: 5078
+    - path: src/tube_multiscale_fusion/tubes.py
+      hash: md5
+      md5: 2f6f8e5e9ff7342a45ddaec8d0bedc1f
+      size: 11706
+    - path: src/tube_multiscale_fusion/types.py
+      hash: md5
+      md5: 71917e49ebe4659d6b1f5cb0f29a5747
+      size: 1693
+    params:
+      params.yaml:
+        build_tubes:
+          min_tube_length: 4
+          min_detected_entries: 2
+        tubes:
+          iou_threshold: 0.2
+          max_misses: 2
+    outs:
+    - path: data/03_primary/tubes/val
+      hash: md5
+      md5: 162ea13bca9521cf8920324caa6a2aaa.dir
+      size: 910719
+      nfiles: 281
+  build_tubes@train:
+    cmd: uv run python scripts/build_tubes.py --input-dir 
+      data/01_raw/datasets/train --output-dir data/03_primary/tubes/train 
+      --iou-threshold 0.2 --max-misses 2 --min-tube-length 4 
+      --min-detected-entries 2
+    deps:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: 2cf294bcec0a832c25a2d1ffa086304c.dir
+      size: 4132370460
+      nfiles: 77646
+    - path: scripts/build_tubes.py
+      hash: md5
+      md5: 1553153e36118e5c306172b5cb371daa
+      size: 5710
+    - path: src/tube_multiscale_fusion/data.py
+      hash: md5
+      md5: b907e5a0baedb93775446678c2cce034
+      size: 5078
+    - path: src/tube_multiscale_fusion/tubes.py
+      hash: md5
+      md5: 2f6f8e5e9ff7342a45ddaec8d0bedc1f
+      size: 11706
+    - path: src/tube_multiscale_fusion/types.py
+      hash: md5
+      md5: 71917e49ebe4659d6b1f5cb0f29a5747
+      size: 1693
+    params:
+      params.yaml:
+        build_tubes:
+          min_tube_length: 4
+          min_detected_entries: 2
+        tubes:
+          iou_threshold: 0.2
+          max_misses: 2
+    outs:
+    - path: data/03_primary/tubes/train
+      hash: md5
+      md5: 6f5ff8ee6cb88f5b000b08682645721b.dir
+      size: 9636021
+      nfiles: 2832
+  build_model_input@train:
+    cmd: uv run python scripts/build_model_input.py --tubes-dir 
+      data/03_primary/tubes/train --raw-dir data/01_raw/datasets/train 
+      --output-dir data/05_model_input/train --context-factor 1.5 --patch-size 
+      224
+    deps:
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: 2cf294bcec0a832c25a2d1ffa086304c.dir
+      size: 4132370460
+      nfiles: 77646
+    - path: data/03_primary/tubes/train
+      hash: md5
+      md5: 6f5ff8ee6cb88f5b000b08682645721b.dir
+      size: 9636021
+      nfiles: 2832
+    - path: scripts/build_model_input.py
+      hash: md5
+      md5: 1bc28c46225152680200e426c5d29c09
+      size: 3715
+    - path: src/tube_multiscale_fusion/model_input.py
+      hash: md5
+      md5: fa9e8bd01b4a5228feeeb8d689405f88
+      size: 3612
+    params:
+      params.yaml:
+        model_input:
+          context_factor: 1.5
+          patch_size: 224
+    outs:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+  build_model_input@val:
+    cmd: uv run python scripts/build_model_input.py --tubes-dir 
+      data/03_primary/tubes/val --raw-dir data/01_raw/datasets/val --output-dir 
+      data/05_model_input/val --context-factor 1.5 --patch-size 224
+    deps:
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: 2ee83a5a253a8c7c7f44e3415c74d7d3.dir
+      size: 385718788
+      nfiles: 7594
+    - path: data/03_primary/tubes/val
+      hash: md5
+      md5: 162ea13bca9521cf8920324caa6a2aaa.dir
+      size: 910719
+      nfiles: 281
+    - path: scripts/build_model_input.py
+      hash: md5
+      md5: 1bc28c46225152680200e426c5d29c09
+      size: 3715
+    - path: src/tube_multiscale_fusion/model_input.py
+      hash: md5
+      md5: fa9e8bd01b4a5228feeeb8d689405f88
+      size: 3612
+    params:
+      params.yaml:
+        model_input:
+          context_factor: 1.5
+          patch_size: 224
+    outs:
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+  train_dinov2_multiscale:
+    cmd: uv run python scripts/train.py --train-dir data/05_model_input/train 
+      --val-dir data/05_model_input/val --output-dir 
+      data/06_models/dinov2_multiscale --params-path params.yaml --params-key 
+      train_dinov2_multiscale
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: scripts/train.py
+      hash: md5
+      md5: 2b58199a26cb37fa2f42fbf397bab6b2
+      size: 5441
+    - path: src/tube_multiscale_fusion/augment.py
+      hash: md5
+      md5: f52a42f92caa2fac859bf3a81a18971d
+      size: 9489
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        augment:
+          enabled: true
+          spatial:
+            flip_prob: 0.5
+            rotation_deg: 5.0
+            scale_range:
+            - 0.9
+            - 1.1
+            translate_frac: 0.05
+          photometric:
+            brightness_range:
+            - 0.8
+            - 1.2
+            contrast_range:
+            - 0.8
+            - 1.2
+            saturation_range:
+            - 0.8
+            - 1.2
+          temporal:
+            subseq_prob: 0.5
+            subseq_min_len: 4
+            stride_prob: 0.25
+            frame_drop_prob: 0.15
+            min_valid_after_drop: 4
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch:
+          grid_size: 2
+          cell_size: 112
+          tube_length: 4
+          temporal_stride: 2
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+    outs:
+    - path: data/06_models/dinov2_multiscale
+      hash: md5
+      md5: e53145752327bb1e91450d552d57382f.dir
+      size: 278684379
+      nfiles: 5
+  evaluate_dinov2_multiscale@train:
+    cmd: uv run python scripts/evaluate.py --data-dir data/05_model_input/train 
+      --checkpoint data/06_models/dinov2_multiscale/best_checkpoint.pt 
+      --output-dir data/08_reporting/dinov2_multiscale/train --params-path 
+      params.yaml --params-key train_dinov2_multiscale
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/06_models/dinov2_multiscale
+      hash: md5
+      md5: e53145752327bb1e91450d552d57382f.dir
+      size: 278684379
+      nfiles: 5
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 44cba928007046cc57341989cd752879
+      size: 5231
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch:
+          grid_size: 2
+          cell_size: 112
+          tube_length: 4
+          temporal_stride: 2
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+    outs:
+    - path: data/08_reporting/dinov2_multiscale/train
+      hash: md5
+      md5: edfa5cacedfb9a1c20e83de0d9483cfe.dir
+      size: 585614
+      nfiles: 6
+  evaluate_dinov2_multiscale@val:
+    cmd: uv run python scripts/evaluate.py --data-dir data/05_model_input/val 
+      --checkpoint data/06_models/dinov2_multiscale/best_checkpoint.pt 
+      --output-dir data/08_reporting/dinov2_multiscale/val --params-path 
+      params.yaml --params-key train_dinov2_multiscale
+    deps:
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: data/06_models/dinov2_multiscale
+      hash: md5
+      md5: e53145752327bb1e91450d552d57382f.dir
+      size: 278684379
+      nfiles: 5
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 44cba928007046cc57341989cd752879
+      size: 5231
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch:
+          grid_size: 2
+          cell_size: 112
+          tube_length: 4
+          temporal_stride: 2
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+    outs:
+    - path: data/08_reporting/dinov2_multiscale/val
+      hash: md5
+      md5: cbbb27b14880e62866f2ce722b5e31b6.dir
+      size: 149127
+      nfiles: 6
+  train_dinov2_multiscale_sweep@spatial_2x2:
+    cmd: uv run python scripts/train.py --train-dir data/05_model_input/train 
+      --val-dir data/05_model_input/val --output-dir 
+      data/06_models/dinov2_multiscale_spatial_2x2 --params-path params.yaml 
+      --params-key train_dinov2_multiscale_spatial_2x2
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: scripts/train.py
+      hash: md5
+      md5: 2b58199a26cb37fa2f42fbf397bab6b2
+      size: 5441
+    - path: src/tube_multiscale_fusion/augment.py
+      hash: md5
+      md5: f52a42f92caa2fac859bf3a81a18971d
+      size: 9489
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        augment:
+          enabled: true
+          spatial:
+            flip_prob: 0.5
+            rotation_deg: 5.0
+            scale_range:
+            - 0.9
+            - 1.1
+            translate_frac: 0.05
+          photometric:
+            brightness_range:
+            - 0.8
+            - 1.2
+            contrast_range:
+            - 0.8
+            - 1.2
+            saturation_range:
+            - 0.8
+            - 1.2
+          temporal:
+            subseq_prob: 0.5
+            subseq_min_len: 4
+            stride_prob: 0.25
+            frame_drop_prob: 0.15
+            min_valid_after_drop: 4
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch_spatial_2x2:
+          grid_size: 2
+          cell_size: 112
+          tube_length: 4
+          temporal_stride: 2
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale_spatial_2x2:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          local_branch_section: local_branch_spatial_2x2
+    outs:
+    - path: data/06_models/dinov2_multiscale_spatial_2x2
+      hash: md5
+      md5: e53145752327bb1e91450d552d57382f.dir
+      size: 278684379
+      nfiles: 5
+  train_dinov2_multiscale_sweep@spatial_8x8:
+    cmd: uv run python scripts/train.py --train-dir data/05_model_input/train 
+      --val-dir data/05_model_input/val --output-dir 
+      data/06_models/dinov2_multiscale_spatial_8x8 --params-path params.yaml 
+      --params-key train_dinov2_multiscale_spatial_8x8
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: scripts/train.py
+      hash: md5
+      md5: 2b58199a26cb37fa2f42fbf397bab6b2
+      size: 5441
+    - path: src/tube_multiscale_fusion/augment.py
+      hash: md5
+      md5: f52a42f92caa2fac859bf3a81a18971d
+      size: 9489
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        augment:
+          enabled: true
+          spatial:
+            flip_prob: 0.5
+            rotation_deg: 5.0
+            scale_range:
+            - 0.9
+            - 1.1
+            translate_frac: 0.05
+          photometric:
+            brightness_range:
+            - 0.8
+            - 1.2
+            contrast_range:
+            - 0.8
+            - 1.2
+            saturation_range:
+            - 0.8
+            - 1.2
+          temporal:
+            subseq_prob: 0.5
+            subseq_min_len: 4
+            stride_prob: 0.25
+            frame_drop_prob: 0.15
+            min_valid_after_drop: 4
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch_spatial_8x8:
+          grid_size: 8
+          cell_size: 28
+          tube_length: 4
+          temporal_stride: 2
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale_spatial_8x8:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          local_branch_section: local_branch_spatial_8x8
+    outs:
+    - path: data/06_models/dinov2_multiscale_spatial_8x8
+      hash: md5
+      md5: c0cdcc7c374836b24affcfd6ae9481ec.dir
+      size: 278118256
+      nfiles: 5
+  train_dinov2_multiscale_sweep@temporal_stride1:
+    cmd: uv run python scripts/train.py --train-dir data/05_model_input/train 
+      --val-dir data/05_model_input/val --output-dir 
+      data/06_models/dinov2_multiscale_temporal_stride1 --params-path 
+      params.yaml --params-key train_dinov2_multiscale_temporal_stride1
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: scripts/train.py
+      hash: md5
+      md5: 2b58199a26cb37fa2f42fbf397bab6b2
+      size: 5441
+    - path: src/tube_multiscale_fusion/augment.py
+      hash: md5
+      md5: f52a42f92caa2fac859bf3a81a18971d
+      size: 9489
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        augment:
+          enabled: true
+          spatial:
+            flip_prob: 0.5
+            rotation_deg: 5.0
+            scale_range:
+            - 0.9
+            - 1.1
+            translate_frac: 0.05
+          photometric:
+            brightness_range:
+            - 0.8
+            - 1.2
+            contrast_range:
+            - 0.8
+            - 1.2
+            saturation_range:
+            - 0.8
+            - 1.2
+          temporal:
+            subseq_prob: 0.5
+            subseq_min_len: 4
+            stride_prob: 0.25
+            frame_drop_prob: 0.15
+            min_valid_after_drop: 4
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch_temporal_stride1:
+          grid_size: 2
+          cell_size: 112
+          tube_length: 4
+          temporal_stride: 1
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale_temporal_stride1:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          local_branch_section: local_branch_temporal_stride1
+    outs:
+    - path: data/06_models/dinov2_multiscale_temporal_stride1
+      hash: md5
+      md5: af4d6248690c381f0d28469a6730fac3.dir
+      size: 278234097
+      nfiles: 5
+  train_dinov2_multiscale_sweep@temporal_len8:
+    cmd: uv run python scripts/train.py --train-dir data/05_model_input/train 
+      --val-dir data/05_model_input/val --output-dir 
+      data/06_models/dinov2_multiscale_temporal_len8 --params-path params.yaml 
+      --params-key train_dinov2_multiscale_temporal_len8
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: scripts/train.py
+      hash: md5
+      md5: 2b58199a26cb37fa2f42fbf397bab6b2
+      size: 5441
+    - path: src/tube_multiscale_fusion/augment.py
+      hash: md5
+      md5: f52a42f92caa2fac859bf3a81a18971d
+      size: 9489
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        augment:
+          enabled: true
+          spatial:
+            flip_prob: 0.5
+            rotation_deg: 5.0
+            scale_range:
+            - 0.9
+            - 1.1
+            translate_frac: 0.05
+          photometric:
+            brightness_range:
+            - 0.8
+            - 1.2
+            contrast_range:
+            - 0.8
+            - 1.2
+            saturation_range:
+            - 0.8
+            - 1.2
+          temporal:
+            subseq_prob: 0.5
+            subseq_min_len: 4
+            stride_prob: 0.25
+            frame_drop_prob: 0.15
+            min_valid_after_drop: 4
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch_temporal_len8:
+          grid_size: 2
+          cell_size: 112
+          tube_length: 8
+          temporal_stride: 4
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale_temporal_len8:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          local_branch_section: local_branch_temporal_len8
+    outs:
+    - path: data/06_models/dinov2_multiscale_temporal_len8
+      hash: md5
+      md5: e8669b5629c79a9d377b199e1779e2c1.dir
+      size: 278384216
+      nfiles: 5
+  evaluate_dinov2_multiscale_sweep@spatial_2x2-train:
+    cmd: uv run python scripts/evaluate.py --data-dir data/05_model_input/train 
+      --checkpoint 
+      data/06_models/dinov2_multiscale_spatial_2x2/best_checkpoint.pt 
+      --output-dir data/08_reporting/dinov2_multiscale_spatial_2x2/train 
+      --params-path params.yaml --params-key train_dinov2_multiscale_spatial_2x2
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/06_models/dinov2_multiscale_spatial_2x2
+      hash: md5
+      md5: e53145752327bb1e91450d552d57382f.dir
+      size: 278684379
+      nfiles: 5
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 44cba928007046cc57341989cd752879
+      size: 5231
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch_spatial_2x2:
+          grid_size: 2
+          cell_size: 112
+          tube_length: 4
+          temporal_stride: 2
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale_spatial_2x2:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          local_branch_section: local_branch_spatial_2x2
+    outs:
+    - path: data/08_reporting/dinov2_multiscale_spatial_2x2/train
+      hash: md5
+      md5: edfa5cacedfb9a1c20e83de0d9483cfe.dir
+      size: 585614
+      nfiles: 6
+  evaluate_dinov2_multiscale_sweep@spatial_2x2-val:
+    cmd: uv run python scripts/evaluate.py --data-dir data/05_model_input/val 
+      --checkpoint 
+      data/06_models/dinov2_multiscale_spatial_2x2/best_checkpoint.pt 
+      --output-dir data/08_reporting/dinov2_multiscale_spatial_2x2/val 
+      --params-path params.yaml --params-key train_dinov2_multiscale_spatial_2x2
+    deps:
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: data/06_models/dinov2_multiscale_spatial_2x2
+      hash: md5
+      md5: e53145752327bb1e91450d552d57382f.dir
+      size: 278684379
+      nfiles: 5
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 44cba928007046cc57341989cd752879
+      size: 5231
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch_spatial_2x2:
+          grid_size: 2
+          cell_size: 112
+          tube_length: 4
+          temporal_stride: 2
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale_spatial_2x2:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          local_branch_section: local_branch_spatial_2x2
+    outs:
+    - path: data/08_reporting/dinov2_multiscale_spatial_2x2/val
+      hash: md5
+      md5: cbbb27b14880e62866f2ce722b5e31b6.dir
+      size: 149127
+      nfiles: 6
+  evaluate_dinov2_multiscale_sweep@spatial_8x8-train:
+    cmd: uv run python scripts/evaluate.py --data-dir data/05_model_input/train 
+      --checkpoint 
+      data/06_models/dinov2_multiscale_spatial_8x8/best_checkpoint.pt 
+      --output-dir data/08_reporting/dinov2_multiscale_spatial_8x8/train 
+      --params-path params.yaml --params-key train_dinov2_multiscale_spatial_8x8
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/06_models/dinov2_multiscale_spatial_8x8
+      hash: md5
+      md5: c0cdcc7c374836b24affcfd6ae9481ec.dir
+      size: 278118256
+      nfiles: 5
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 44cba928007046cc57341989cd752879
+      size: 5231
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch_spatial_8x8:
+          grid_size: 8
+          cell_size: 28
+          tube_length: 4
+          temporal_stride: 2
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale_spatial_8x8:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          local_branch_section: local_branch_spatial_8x8
+    outs:
+    - path: data/08_reporting/dinov2_multiscale_spatial_8x8/train
+      hash: md5
+      md5: 441101655a51abb16e0cb3f23e9feecf.dir
+      size: 586249
+      nfiles: 6
+  evaluate_dinov2_multiscale_sweep@spatial_8x8-val:
+    cmd: uv run python scripts/evaluate.py --data-dir data/05_model_input/val 
+      --checkpoint 
+      data/06_models/dinov2_multiscale_spatial_8x8/best_checkpoint.pt 
+      --output-dir data/08_reporting/dinov2_multiscale_spatial_8x8/val 
+      --params-path params.yaml --params-key train_dinov2_multiscale_spatial_8x8
+    deps:
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: data/06_models/dinov2_multiscale_spatial_8x8
+      hash: md5
+      md5: c0cdcc7c374836b24affcfd6ae9481ec.dir
+      size: 278118256
+      nfiles: 5
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 44cba928007046cc57341989cd752879
+      size: 5231
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch_spatial_8x8:
+          grid_size: 8
+          cell_size: 28
+          tube_length: 4
+          temporal_stride: 2
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale_spatial_8x8:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          local_branch_section: local_branch_spatial_8x8
+    outs:
+    - path: data/08_reporting/dinov2_multiscale_spatial_8x8/val
+      hash: md5
+      md5: 45412d8a41f51be0906abbd1a24943f7.dir
+      size: 147824
+      nfiles: 6
+  evaluate_dinov2_multiscale_sweep@temporal_stride1-train:
+    cmd: uv run python scripts/evaluate.py --data-dir data/05_model_input/train 
+      --checkpoint 
+      data/06_models/dinov2_multiscale_temporal_stride1/best_checkpoint.pt 
+      --output-dir data/08_reporting/dinov2_multiscale_temporal_stride1/train 
+      --params-path params.yaml --params-key 
+      train_dinov2_multiscale_temporal_stride1
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/06_models/dinov2_multiscale_temporal_stride1
+      hash: md5
+      md5: af4d6248690c381f0d28469a6730fac3.dir
+      size: 278234097
+      nfiles: 5
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 44cba928007046cc57341989cd752879
+      size: 5231
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch_temporal_stride1:
+          grid_size: 2
+          cell_size: 112
+          tube_length: 4
+          temporal_stride: 1
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale_temporal_stride1:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          local_branch_section: local_branch_temporal_stride1
+    outs:
+    - path: data/08_reporting/dinov2_multiscale_temporal_stride1/train
+      hash: md5
+      md5: e9584a06e2a448aa725538a339bdd2f0.dir
+      size: 586194
+      nfiles: 6
+  evaluate_dinov2_multiscale_sweep@temporal_stride1-val:
+    cmd: uv run python scripts/evaluate.py --data-dir data/05_model_input/val 
+      --checkpoint 
+      data/06_models/dinov2_multiscale_temporal_stride1/best_checkpoint.pt 
+      --output-dir data/08_reporting/dinov2_multiscale_temporal_stride1/val 
+      --params-path params.yaml --params-key 
+      train_dinov2_multiscale_temporal_stride1
+    deps:
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: data/06_models/dinov2_multiscale_temporal_stride1
+      hash: md5
+      md5: af4d6248690c381f0d28469a6730fac3.dir
+      size: 278234097
+      nfiles: 5
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 44cba928007046cc57341989cd752879
+      size: 5231
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch_temporal_stride1:
+          grid_size: 2
+          cell_size: 112
+          tube_length: 4
+          temporal_stride: 1
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale_temporal_stride1:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          local_branch_section: local_branch_temporal_stride1
+    outs:
+    - path: data/08_reporting/dinov2_multiscale_temporal_stride1/val
+      hash: md5
+      md5: 23f1d5e1871d08c46830383d4ca8b280.dir
+      size: 148984
+      nfiles: 6
+  evaluate_dinov2_multiscale_sweep@temporal_len8-train:
+    cmd: uv run python scripts/evaluate.py --data-dir data/05_model_input/train 
+      --checkpoint 
+      data/06_models/dinov2_multiscale_temporal_len8/best_checkpoint.pt 
+      --output-dir data/08_reporting/dinov2_multiscale_temporal_len8/train 
+      --params-path params.yaml --params-key 
+      train_dinov2_multiscale_temporal_len8
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/06_models/dinov2_multiscale_temporal_len8
+      hash: md5
+      md5: e8669b5629c79a9d377b199e1779e2c1.dir
+      size: 278384216
+      nfiles: 5
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 44cba928007046cc57341989cd752879
+      size: 5231
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch_temporal_len8:
+          grid_size: 2
+          cell_size: 112
+          tube_length: 8
+          temporal_stride: 4
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale_temporal_len8:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          local_branch_section: local_branch_temporal_len8
+    outs:
+    - path: data/08_reporting/dinov2_multiscale_temporal_len8/train
+      hash: md5
+      md5: dfad83dcb538e441275d86e54f46b912.dir
+      size: 586738
+      nfiles: 6
+  evaluate_dinov2_multiscale_sweep@temporal_len8-val:
+    cmd: uv run python scripts/evaluate.py --data-dir data/05_model_input/val 
+      --checkpoint 
+      data/06_models/dinov2_multiscale_temporal_len8/best_checkpoint.pt 
+      --output-dir data/08_reporting/dinov2_multiscale_temporal_len8/val 
+      --params-path params.yaml --params-key 
+      train_dinov2_multiscale_temporal_len8
+    deps:
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: data/06_models/dinov2_multiscale_temporal_len8
+      hash: md5
+      md5: e8669b5629c79a9d377b199e1779e2c1.dir
+      size: 278384216
+      nfiles: 5
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 44cba928007046cc57341989cd752879
+      size: 5231
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch_temporal_len8:
+          grid_size: 2
+          cell_size: 112
+          tube_length: 8
+          temporal_stride: 4
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale_temporal_len8:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          local_branch_section: local_branch_temporal_len8
+    outs:
+    - path: data/08_reporting/dinov2_multiscale_temporal_len8/val
+      hash: md5
+      md5: 79271c71ed3e07a1b73ad766daacb42d.dir
+      size: 148973
+      nfiles: 6
+  prepare:
+    cmd: uv run python scripts/prepare.py --model-repo 
+      pyronear/yolo11s_nimble-narwhal_v6.0.0 --model-filename best.pt 
+      --output-model-dir data/01_raw/models
+    deps:
+    - path: scripts/prepare.py
+      hash: md5
+      md5: bdccf5d50ba8f71ed560834ce23a3a52
+      size: 1778
+    params:
+      params.yaml:
+        prepare:
+          model_repo: pyronear/yolo11s_nimble-narwhal_v6.0.0
+          model_filename: best.pt
+    outs:
+    - path: data/01_raw/models
+      hash: md5
+      md5: aedaaff1a57ae80b0a7f66ad4e4c623b.dir
+      size: 19225626
+      nfiles: 1
+  train_dinov2_multiscale_sweep@spatial_4x4:
+    cmd: uv run python scripts/train.py --train-dir data/05_model_input/train 
+      --val-dir data/05_model_input/val --output-dir 
+      data/06_models/dinov2_multiscale_spatial_4x4 --params-path params.yaml 
+      --params-key train_dinov2_multiscale_spatial_4x4
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: scripts/train.py
+      hash: md5
+      md5: 2b58199a26cb37fa2f42fbf397bab6b2
+      size: 5441
+    - path: src/tube_multiscale_fusion/augment.py
+      hash: md5
+      md5: f52a42f92caa2fac859bf3a81a18971d
+      size: 9489
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        augment:
+          enabled: true
+          spatial:
+            flip_prob: 0.5
+            rotation_deg: 5.0
+            scale_range:
+            - 0.9
+            - 1.1
+            translate_frac: 0.05
+          photometric:
+            brightness_range:
+            - 0.8
+            - 1.2
+            contrast_range:
+            - 0.8
+            - 1.2
+            saturation_range:
+            - 0.8
+            - 1.2
+          temporal:
+            subseq_prob: 0.5
+            subseq_min_len: 4
+            stride_prob: 0.25
+            frame_drop_prob: 0.15
+            min_valid_after_drop: 4
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch_spatial_4x4:
+          grid_size: 4
+          cell_size: 56
+          tube_length: 4
+          temporal_stride: 2
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale_spatial_4x4:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          local_branch_section: local_branch_spatial_4x4
+    outs:
+    - path: data/06_models/dinov2_multiscale_spatial_4x4
+      hash: md5
+      md5: 7986079d3746bde09cd8c024cf5c2a27.dir
+      size: 278212941
+      nfiles: 5
+  evaluate_dinov2_multiscale_sweep@spatial_4x4-train:
+    cmd: uv run python scripts/evaluate.py --data-dir data/05_model_input/train 
+      --checkpoint 
+      data/06_models/dinov2_multiscale_spatial_4x4/best_checkpoint.pt 
+      --output-dir data/08_reporting/dinov2_multiscale_spatial_4x4/train 
+      --params-path params.yaml --params-key train_dinov2_multiscale_spatial_4x4
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/06_models/dinov2_multiscale_spatial_4x4
+      hash: md5
+      md5: 7986079d3746bde09cd8c024cf5c2a27.dir
+      size: 278212941
+      nfiles: 5
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 44cba928007046cc57341989cd752879
+      size: 5231
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch_spatial_4x4:
+          grid_size: 4
+          cell_size: 56
+          tube_length: 4
+          temporal_stride: 2
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale_spatial_4x4:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          local_branch_section: local_branch_spatial_4x4
+    outs:
+    - path: data/08_reporting/dinov2_multiscale_spatial_4x4/train
+      hash: md5
+      md5: 3a9b78c9e4f5882eb1d516653f10592b.dir
+      size: 582686
+      nfiles: 6
+  evaluate_dinov2_multiscale_sweep@spatial_4x4-val:
+    cmd: uv run python scripts/evaluate.py --data-dir data/05_model_input/val 
+      --checkpoint 
+      data/06_models/dinov2_multiscale_spatial_4x4/best_checkpoint.pt 
+      --output-dir data/08_reporting/dinov2_multiscale_spatial_4x4/val 
+      --params-path params.yaml --params-key train_dinov2_multiscale_spatial_4x4
+    deps:
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: data/06_models/dinov2_multiscale_spatial_4x4
+      hash: md5
+      md5: 7986079d3746bde09cd8c024cf5c2a27.dir
+      size: 278212941
+      nfiles: 5
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 44cba928007046cc57341989cd752879
+      size: 5231
+    - path: src/tube_multiscale_fusion/classifier.py
+      hash: md5
+      md5: 4a36dec854fd018990b5bee70bcffd9f
+      size: 3556
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/fusion.py
+      hash: md5
+      md5: dce0c5c806436477dd7f1ff93bd261a5
+      size: 5179
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 4cae3af1b1a020daaeeae747bd05f966
+      size: 6341
+    - path: src/tube_multiscale_fusion/lit_module.py
+      hash: md5
+      md5: 4022aa3dc29c80e1a38a23182bec83b3
+      size: 7307
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    params:
+      params.yaml:
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch_spatial_4x4:
+          grid_size: 4
+          cell_size: 56
+          tube_length: 4
+          temporal_stride: 2
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale_spatial_4x4:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          local_branch_section: local_branch_spatial_4x4
+    outs:
+    - path: data/08_reporting/dinov2_multiscale_spatial_4x4/val
+      hash: md5
+      md5: af2b0aa9895ae86bae2b98b0905d002f.dir
+      size: 143450
+      nfiles: 6
+  package_dinov2_multiscale:
+    cmd: uv run python scripts/package_model.py --checkpoint 
+      data/06_models/dinov2_multiscale/best_checkpoint.pt --params-path 
+      params.yaml --params-key train_dinov2_multiscale --output 
+      data/07_model_output/dinov2_multiscale/model_package.zip
+    deps:
+    - path: data/06_models/dinov2_multiscale
+      hash: md5
+      md5: e53145752327bb1e91450d552d57382f.dir
+      size: 278684379
+      nfiles: 5
+    - path: scripts/package_model.py
+      hash: md5
+      md5: aafbb586117caec1e4b5c86bbe4a15f6
+      size: 4608
+    params:
+      params.yaml:
+        fusion:
+          d_fusion: 384
+          num_layers: 2
+          num_heads: 6
+          ffn_dim: 1536
+          dropout: 0.1
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        local_branch:
+          grid_size: 2
+          cell_size: 112
+          tube_length: 4
+          temporal_stride: 2
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_dinov2_multiscale:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+    outs:
+    - path: data/07_model_output/dinov2_multiscale/model_package.zip
+      hash: md5
+      md5: 7326ce8ef279aa4588a42a6d299da9f3
+      size: 256730022

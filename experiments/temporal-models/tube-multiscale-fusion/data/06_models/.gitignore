@@ -1,0 +1,6 @@
+/dinov2_multiscale
+/dinov2_multiscale_spatial_2x2
+/dinov2_multiscale_spatial_8x8
+/dinov2_multiscale_temporal_stride1
+/dinov2_multiscale_temporal_len8
+/dinov2_multiscale_spatial_4x4
