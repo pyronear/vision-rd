@@ -106,6 +106,33 @@ stages:
     outs:
       - data/06_models/dinov2_multiscale
 
+  benchmark_dinov2_multiscale:
+    cmd: >-
+      uv run python scripts/benchmark.py
+      --data-dir data/05_model_input/val
+      --checkpoint data/06_models/dinov2_multiscale/best_checkpoint.pt
+      --predictions data/08_reporting/dinov2_multiscale/val/predictions.json
+      --output data/08_reporting/dinov2_multiscale_benchmark/benchmark.json
+    deps:
+      - scripts/benchmark.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/classifier.py
+      - src/tube_multiscale_fusion/global_branch.py
+      - src/tube_multiscale_fusion/local_branch.py
+      - src/tube_multiscale_fusion/fusion.py
+      - src/tube_multiscale_fusion/lit_module.py
+      - data/05_model_input/val
+      - data/06_models/dinov2_multiscale
+      - data/08_reporting/dinov2_multiscale/val
+    params:
+      - train_dinov2_multiscale
+      - global_branch
+      - local_branch
+      - fusion
+    metrics:
+      - data/08_reporting/dinov2_multiscale_benchmark/benchmark.json:
+          cache: false
+
   evaluate_dinov2_multiscale:
     foreach:
       - train

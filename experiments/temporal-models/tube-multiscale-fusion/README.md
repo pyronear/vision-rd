@@ -181,6 +181,44 @@ Same backbone (DINOv2 ViT-S/14, last block fine-tuned), same training schedule
 class, with **no motion-feature precomputation** — the local tube transformer
 learns the equivalent signal from raw pixels.
 
+### Benchmarking
+
+Standardized Pyronear R&D metrics (see [GUIDELINES.md](../../GUIDELINES.md))
+for the default 2×2 model on the val split (280 tubes), computed by
+`scripts/benchmark.py`. Hardware: NVIDIA RTX 4090 (GPU) / 24-thread CPU.
+
+| Metric | Value |
+|--------|-------|
+| **Recall @ FPR=1%** | 0.874 |
+| **Recall @ FPR=5%** | 1.000 |
+| **Recall @ FPR=10%** | 1.000 |
+| **Time-to-detection** (median) | 2 frames ≈ 30 s after tube start |
+| **Time-to-detection** (mean) | 2.07 frames ≈ 32 s; 135/135 positives eventually fire |
+| **Inference latency (GPU)** | 10.7 ms/sequence → 0.67 ms/frame |
+| **Inference latency (CPU)** | 290 ms/sequence → 18.2 ms/frame |
+| **Model size** | 36.4 M params (16.6 M trainable, 19.9 M frozen DINOv2) |
+| **FLOPs** | 226.5 GFLOPs/sequence → 14.2 GFLOPs/frame |
+
+Notes:
+
+- **Recall @ FPR** is the tube-level ROC operating point: at a 5 % false-alarm
+  rate every smoke tube in the val set is recovered. The 1 % point (0.874) is
+  the conservative-threshold regime relevant for low-nuisance deployment.
+- **Time-to-detection** is measured by feeding the model increasing frame
+  prefixes (k = 2…16, later frames masked — the same variable-length contract
+  used in training) and recording the first prefix whose probability crosses
+  0.5. Reported as `(k_fire − 1) × Δt`, with Δt = 30 s the median inter-frame
+  interval in the val sequences. Median detection at the 2nd frame means smoke
+  is typically flagged within one frame interval of the tube's first detection.
+- **FLOPs** is dominated by the 16 per-frame DINOv2 ViT-S/14 forward passes;
+  the local tube transformer and fusion add a small fraction on top.
+
+Reproduce with:
+
+```bash
+uv run dvc repro benchmark_dinov2_multiscale
+```
+
 ## How to Reproduce
 
 ```bash
