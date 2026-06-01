@@ -1,3 +1,5 @@
+import pytest
+
 import temporal_model_explorer.import_pyro_annotator as ipa
 from temporal_model_explorer.store import read_meta
 
@@ -16,8 +18,6 @@ def test_parse_label_unlabeled_is_unknown_with_no_detail():
 
 
 def test_parse_label_rejects_unknown_class():
-    import pytest
-
     with pytest.raises(ValueError):
         ipa.parse_label("bogus", None)
 
