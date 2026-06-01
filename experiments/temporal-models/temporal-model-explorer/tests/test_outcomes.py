@@ -5,6 +5,7 @@ from temporal_model_explorer.outcomes import (
     decision_from_output,
     filter_results,
     max_probability,
+    performance_summary,
 )
 
 
@@ -57,3 +58,42 @@ def test_filter_results_errors_only_returns_errors():
     )
     out = filter_results(df, errors_only=True)
     assert list(out["outcome"]) == ["discarded-smoke"]
+
+
+def _r(label, outcome):
+    return {"label": label, "outcome": outcome}
+
+
+def test_performance_summary_known_counts():
+    df = pd.DataFrame(
+        [
+            _r("smoke", "kept-smoke"),
+            _r("smoke", "kept-smoke"),
+            _r("smoke", "discarded-smoke"),  # 2 TP, 1 FN
+            _r("fp", "discarded-fp"),
+            _r("fp", "discarded-fp"),
+            _r("fp", "discarded-fp"),
+            _r("fp", "kept-fp"),  # 3 TN, 1 FP
+            _r("unknown", "n/a"),  # excluded
+        ]
+    )
+    s = performance_summary(df)
+    assert s["n_labeled"] == 7 and s["n_smoke"] == 3 and s["n_fp"] == 4
+    assert s["recall"] == 2 / 3  # kept_smoke / n_smoke
+    assert s["specificity"] == 3 / 4  # discarded_fp / n_fp
+    assert s["precision"] == 2 / 3  # kept_smoke / (kept_smoke + kept_fp)
+
+
+def test_performance_summary_zero_denominators():
+    df = pd.DataFrame([_r("fp", "discarded-fp"), _r("fp", "discarded-fp")])
+    s = performance_summary(df)
+    assert s["n_smoke"] == 0 and s["recall"] is None
+    assert s["precision"] is None  # nothing kept
+    assert s["specificity"] == 1.0
+
+
+def test_performance_summary_excludes_unknown():
+    df = pd.DataFrame([_r("unknown", "n/a"), _r("unknown", "n/a")])
+    s = performance_summary(df)
+    assert s["n_labeled"] == 0
+    assert s["recall"] is None and s["specificity"] is None and s["precision"] is None
