@@ -7,6 +7,7 @@ from bbox_tube_temporal.tubes import (
     compute_iou,
     interpolate_gaps,
     match_detections,
+    merge_colocated_tubes,
     select_longest_tube,
     tube_from_record,
 )
@@ -398,3 +399,100 @@ class TestTubeFromRecord:
         e = tube.entries[0]
         assert e.detection is None
         assert e.is_gap is True
+
+
+# ── merge_colocated_tubes ────────────────────────────────────────────────
+
+
+def _merge_tube(tid: int, frame_boxes):
+    """frame_boxes: list[(frame_idx, (cx, cy, w, h))]."""
+    entries = [
+        TubeEntry(frame_idx=f, detection=_det(cx, cy, w, h))
+        for f, (cx, cy, w, h) in frame_boxes
+    ]
+    return Tube(
+        tube_id=tid,
+        entries=entries,
+        start_frame=frame_boxes[0][0],
+        end_frame=frame_boxes[-1][0],
+    )
+
+
+class TestMergeColocatedTubes:
+    KWARGS = dict(merge_iomin=0.3, merge_prox_factor=1.0, merge_max_gap=10)
+
+    def test_empty_input(self):
+        assert merge_colocated_tubes([], **self.KWARGS) == []
+
+    def test_single_tube_passthrough(self):
+        t = _merge_tube(0, [(0, (0.5, 0.5, 0.05, 0.05)), (1, (0.5, 0.5, 0.05, 0.05))])
+        out = merge_colocated_tubes([t], **self.KWARGS)
+        assert len(out) == 1
+        assert (out[0].start_frame, out[0].end_frame) == (0, 1)
+
+    def test_merge_contained_overlapping(self):
+        """Small box inside big box on shared frames -> one tube."""
+        big = _merge_tube(0, [(0, (0.5, 0.5, 0.2, 0.2)), (1, (0.5, 0.5, 0.2, 0.2))])
+        small = _merge_tube(1, [(1, (0.5, 0.5, 0.02, 0.02))])
+        out = merge_colocated_tubes([big, small], **self.KWARGS)
+        assert len(out) == 1
+        assert (out[0].start_frame, out[0].end_frame) == (0, 1)
+
+    def test_keep_distinct_far_apart(self):
+        left = _merge_tube(
+            0, [(0, (0.2, 0.5, 0.05, 0.05)), (1, (0.2, 0.5, 0.05, 0.05))]
+        )
+        right = _merge_tube(
+            1, [(0, (0.8, 0.5, 0.05, 0.05)), (1, (0.8, 0.5, 0.05, 0.05))]
+        )
+        out = merge_colocated_tubes([left, right], **self.KWARGS)
+        assert len(out) == 2
+
+    def test_bridge_gap_within_window(self):
+        a = _merge_tube(0, [(0, (0.5, 0.5, 0.05, 0.05)), (2, (0.5, 0.5, 0.05, 0.05))])
+        b = _merge_tube(1, [(8, (0.5, 0.5, 0.05, 0.05)), (10, (0.5, 0.5, 0.05, 0.05))])
+        out = merge_colocated_tubes([a, b], **self.KWARGS)
+        assert len(out) == 1
+        assert (out[0].start_frame, out[0].end_frame) == (0, 10)
+        assert any(e.detection is None for e in out[0].entries)
+
+    def test_do_not_bridge_beyond_window(self):
+        a = _merge_tube(0, [(0, (0.5, 0.5, 0.05, 0.05)), (2, (0.5, 0.5, 0.05, 0.05))])
+        b = _merge_tube(1, [(16, (0.5, 0.5, 0.05, 0.05)), (18, (0.5, 0.5, 0.05, 0.05))])
+        out = merge_colocated_tubes([a, b], **self.KWARGS)
+        assert len(out) == 2
+
+    def test_transitive_merge(self):
+        a = _merge_tube(0, [(0, (0.5, 0.5, 0.05, 0.05))])
+        b = _merge_tube(1, [(3, (0.5, 0.5, 0.05, 0.05))])
+        c = _merge_tube(2, [(6, (0.5, 0.5, 0.05, 0.05))])
+        out = merge_colocated_tubes([a, b, c], **self.KWARGS)
+        assert len(out) == 1
+
+    def test_proximity_is_scale_relative(self):
+        """Tiny boxes ~1.75 box-sizes apart MUST NOT merge (no teleport)."""
+        a = _merge_tube(0, [(0, (0.50, 0.5, 0.02, 0.02)), (1, (0.50, 0.5, 0.02, 0.02))])
+        near = _merge_tube(
+            1, [(2, (0.515, 0.5, 0.02, 0.02)), (3, (0.515, 0.5, 0.02, 0.02))]
+        )
+        assert len(merge_colocated_tubes([a, near], **self.KWARGS)) == 1
+        far = _merge_tube(
+            1, [(2, (0.535, 0.5, 0.02, 0.02)), (3, (0.535, 0.5, 0.02, 0.02))]
+        )
+        assert len(merge_colocated_tubes([a, far], **self.KWARGS)) == 2
+
+    def test_combine_tiebreak_is_order_invariant(self):
+        """Equal-area ties resolve to the same box regardless of input order."""
+        a = _merge_tube(0, [(0, (0.50, 0.5, 0.02, 0.02)), (1, (0.50, 0.5, 0.02, 0.02))])
+        b = _merge_tube(1, [(1, (0.51, 0.5, 0.02, 0.02)), (2, (0.51, 0.5, 0.02, 0.02))])
+
+        def box_at_1(tubes):
+            [tube] = tubes
+            return next(e.detection for e in tube.entries if e.frame_idx == 1)
+
+        assert box_at_1(
+            merge_colocated_tubes([a, b], **self.KWARGS)
+        ).cx == pytest.approx(0.51)
+        assert box_at_1(
+            merge_colocated_tubes([b, a], **self.KWARGS)
+        ).cx == pytest.approx(0.51)

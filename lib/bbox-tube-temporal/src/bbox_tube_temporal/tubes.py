@@ -6,6 +6,8 @@ detections and the LSTM's need for temporally-ordered features of the
 same entity.
 """
 
+from collections.abc import Callable
+
 from .types import Detection, FrameDetections, Tube, TubeEntry
 
 
@@ -352,3 +354,187 @@ def tube_from_record(record: dict) -> Tube:
         start_frame=t["start_frame"],
         end_frame=t["end_frame"],
     )
+
+
+# ── post-hoc co-located merge ───────────────────────────────────────────────
+#
+# Fragments-of-the-same-plume merge that runs after build_tubes. Two tubes are
+# linked when temporally close AND, at the frames where they are nearest in
+# time, the smaller is mostly inside the larger (IoMin) OR their centers are
+# within ~merge_prox_factor box-sizes (scale-relative, so tiny boxes don't
+# chain across many widths). Merging is connected-components under that
+# relation; per-frame collisions on overlap keep the higher-ranked box
+# (largest area, then highest confidence, then larger cx — deterministic).
+
+Observed = list[tuple[int, Detection]]
+
+
+def merge_colocated_tubes(
+    tubes: list[Tube],
+    *,
+    merge_iomin: float,
+    merge_prox_factor: float,
+    merge_max_gap: int,
+) -> list[Tube]:
+    """Merge tubes that are fragments of the same plume.
+
+    Args:
+        tubes: candidate tubes (typically from :func:`build_tubes` after the
+            inference filter).
+        merge_iomin: containment threshold — link if the smaller box's
+            intersection-over-min-area with the larger is at least this.
+        merge_prox_factor: proximity factor — link if centers are within this
+            many box-sizes (scale-relative).
+        merge_max_gap: temporal gap, in frames, allowed between two observed
+            spans for them to still be considered the same plume.
+
+    Returns:
+        Merged tubes, sorted by ``(start_frame, end_frame)`` with sequentially
+        re-assigned ``tube_id``s. Gap entries (``detection=None``) are inserted
+        for unobserved frames between observed ones.
+    """
+    observed = [_observed(t) for t in tubes]
+
+    def related(i: int, j: int) -> bool:
+        return _same_plume(
+            observed[i],
+            observed[j],
+            merge_iomin=merge_iomin,
+            merge_prox_factor=merge_prox_factor,
+            merge_max_gap=merge_max_gap,
+        )
+
+    components = _connected_components(len(tubes), related)
+    merged = [_combine(c, observed) for c in components]
+    merged = [t for t in merged if t is not None]
+    merged.sort(key=lambda t: (t.start_frame, t.end_frame))
+    for tube_id, tube in enumerate(merged):
+        tube.tube_id = tube_id
+    return merged
+
+
+# ── the "same plume" relation ───────────────────────────────────────────────
+
+
+def _same_plume(
+    a: Observed,
+    b: Observed,
+    *,
+    merge_iomin: float,
+    merge_prox_factor: float,
+    merge_max_gap: int,
+) -> bool:
+    if not a or not b:
+        return False
+    if _time_gap(a, b) > merge_max_gap:
+        return False
+    det_a, det_b = _closest_in_time(a, b)
+    return _same_box(
+        det_a, det_b, merge_iomin=merge_iomin, merge_prox_factor=merge_prox_factor
+    )
+
+
+def _time_gap(a: Observed, b: Observed) -> int:
+    """Frames separating the two observed spans (0 when they overlap)."""
+    a_start, a_end = a[0][0], a[-1][0]
+    b_start, b_end = b[0][0], b[-1][0]
+    if b_start > a_end:
+        return b_start - a_end
+    if a_start > b_end:
+        return a_start - b_end
+    return 0
+
+
+def _closest_in_time(a: Observed, b: Observed) -> tuple[Detection, Detection]:
+    best = min(
+        ((abs(fa - fb), da, db) for fa, da in a for fb, db in b),
+        key=lambda candidate: candidate[0],
+    )
+    return best[1], best[2]
+
+
+def _same_box(
+    a: Detection,
+    b: Detection,
+    *,
+    merge_iomin: float,
+    merge_prox_factor: float,
+) -> bool:
+    if _iou_min(a, b) >= merge_iomin:
+        return True
+    box_size = max(a.w, a.h, b.w, b.h)
+    return _center_distance(a, b) <= merge_prox_factor * box_size
+
+
+def _iou_min(a: Detection, b: Detection) -> float:
+    """Intersection over the smaller box's area (containment)."""
+    ax1, ay1, ax2, ay2 = a.cx - a.w / 2, a.cy - a.h / 2, a.cx + a.w / 2, a.cy + a.h / 2
+    bx1, by1, bx2, by2 = b.cx - b.w / 2, b.cy - b.h / 2, b.cx + b.w / 2, b.cy + b.h / 2
+    inter_w = max(0.0, min(ax2, bx2) - max(ax1, bx1))
+    inter_h = max(0.0, min(ay2, by2) - max(ay1, by1))
+    inter = inter_w * inter_h
+    smaller = min(a.w * a.h, b.w * b.h)
+    return inter / smaller if smaller > 0 else 0.0
+
+
+def _center_distance(a: Detection, b: Detection) -> float:
+    return ((a.cx - b.cx) ** 2 + (a.cy - b.cy) ** 2) ** 0.5
+
+
+# ── grouping and rebuilding ─────────────────────────────────────────────────
+
+
+def _connected_components(
+    n: int, related: Callable[[int, int], bool]
+) -> list[list[int]]:
+    """Partition indices ``range(n)`` into components linked by ``related``."""
+    parent = list(range(n))
+
+    def root(x: int) -> int:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            if related(i, j):
+                parent[root(i)] = root(j)
+
+    groups: dict[int, list[int]] = {}
+    for i in range(n):
+        groups.setdefault(root(i), []).append(i)
+    return list(groups.values())
+
+
+def _combine(members: list[int], observed: list[Observed]) -> Tube | None:
+    """Fuse a component's fragments into one tube (largest box wins on overlap)."""
+    best_by_frame: dict[int, Detection] = {}
+    for m in members:
+        for frame_idx, det in observed[m]:
+            best = best_by_frame.get(frame_idx)
+            if best is None or _box_rank(det) > _box_rank(best):
+                best_by_frame[frame_idx] = det
+    if not best_by_frame:
+        return None
+    start, end = min(best_by_frame), max(best_by_frame)
+    entries = [
+        TubeEntry(frame_idx=f, detection=best_by_frame.get(f))
+        for f in range(start, end + 1)
+    ]
+    return Tube(tube_id=0, entries=entries, start_frame=start, end_frame=end)
+
+
+def _observed(tube: Tube) -> Observed:
+    return [(e.frame_idx, e.detection) for e in tube.entries if e.detection is not None]
+
+
+def _area(det: Detection) -> float:
+    return det.w * det.h
+
+
+def _box_rank(det: Detection) -> tuple[float, float, float]:
+    """Pick order among boxes on the same frame: larger area, then higher
+    confidence, then larger cx — a total order, so the choice is independent of
+    the input tube order (no silent nondeterminism on equal-area ties)."""
+    return (_area(det), det.confidence, det.cx)
