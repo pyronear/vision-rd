@@ -65,15 +65,19 @@ def _import_one(
 ) -> int:
     label, label_detail = parse_label(klass, subtype)
 
-    # Enrich: detection timestamps + camera id (constant per sequence).
-    ts_by_id: dict[int, str | None] = {}
+    # Enrich from the platform API. The zip's ``detection_<id>`` filenames are a
+    # different id space from the platform detection ids, so timestamps are
+    # matched by capture order, not id: the zip is the same frame set as the API
+    # detections. Both are ordered ascending in time (zip ids increment with
+    # capture; API sorted by created_at), so the i-th frames line up.
+    api_times: list[str | None] = []
     camera_id: int | None = None
     try:
         dets = list_detections(
             api_endpoint, token, seq_id, limit=detections_limit, desc=False
         )
-        for d in dets:
-            ts_by_id[d["id"]] = d.get("created_at")
+        dets = sorted(dets, key=lambda d: d.get("created_at") or "")
+        api_times = [d.get("created_at") for d in dets]
         if dets:
             camera_id = dets[0].get("camera_id")
     except Exception as exc:  # noqa: BLE001 - enrichment is best-effort; log + fall back
@@ -89,22 +93,22 @@ def _import_one(
     )
     (seq_out / "images").mkdir(parents=True, exist_ok=True)
 
+    # Frames in capture order (detection_<id> increments with time).
+    images = sorted(
+        (seq_dir / "images").glob("*.jpg"),
+        key=lambda p: int(p.stem.split("_")[-1]),
+    )
+    # Per-frame timestamps only when the frame sets line up; else leave them None.
+    times = api_times if len(api_times) == len(images) else [None] * len(images)
     frames: list[FrameRef] = []
-    for img in sorted((seq_dir / "images").glob("*.jpg")):
+    for img, ts in zip(images, times, strict=True):
         det_id = int(img.stem.split("_")[-1])
         shutil.copyfile(img, seq_out / "images" / img.name)
         frames.append(
-            FrameRef(
-                file=f"images/{img.name}",
-                detection_id=det_id,
-                created_at=ts_by_id.get(det_id),
-            )
+            FrameRef(file=f"images/{img.name}", detection_id=det_id, created_at=ts)
         )
-    # Time axis: known timestamps first (ascending), unknowns last by detection id.
-    frames.sort(
-        key=lambda f: (f.created_at is None, f.created_at or "", f.detection_id or 0)
-    )
-    started_at = next((f.created_at for f in frames if f.created_at), None)
+    # Sequence start: earliest API timestamp, independent of per-frame matching.
+    started_at = api_times[0] if api_times else None
 
     write_meta(
         seq_out,
@@ -132,7 +136,7 @@ def import_pyro_annotator(
     api_endpoint: str,
     token: str,
     *,
-    detections_limit: int = 200,
+    detections_limit: int = 100,  # platform API caps detections per call at 100
     camera_index: dict | None = None,
     org_index: dict[int, str] | None = None,
     list_detections=platform_api.list_sequence_detections,
