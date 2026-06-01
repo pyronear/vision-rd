@@ -1,4 +1,5 @@
 import temporal_model_explorer.import_pyro_annotator as ipa
+from temporal_model_explorer.store import read_meta
 
 
 def test_parse_label_smoke_keeps_subtype():
@@ -48,3 +49,68 @@ def test_iter_zip_sequences_finds_seqs_with_class_and_subtype(tmp_path):
         ("smoke", "wildfire", 40972),
         ("unlabeled", None, 40438),
     ]
+
+
+def test_import_enriches_and_writes_store(tmp_path):
+    src = tmp_path / "seq_annotation_done_by_label"
+    _make_seq(src, "smoke", "wildfire", "seq_40972", det_ids=[2, 1])  # unsorted on disk
+    out = tmp_path / "store"
+
+    def fake_detections(ep, tok, sid, limit, desc):
+        assert sid == 40972
+        return [
+            {"id": 1, "camera_id": 65, "created_at": "2026-05-09T15:03:49"},
+            {"id": 2, "camera_id": 65, "created_at": "2026-05-09T15:04:50"},
+        ]
+
+    camera_index = {65: {"id": 65, "name": "nemours-02", "organization_id": 7}}
+    n = ipa.import_pyro_annotator(
+        src,
+        out,
+        "https://x",
+        "admintok",
+        camera_index=camera_index,
+        org_index={7: "sdis-77"},
+        list_detections=fake_detections,
+    )
+
+    assert n == 1
+    seq_dir = out / "pyro-annotator" / "sdis-77" / "nemours-02" / "seq_40972"
+    meta = read_meta(seq_dir)
+    assert meta.key == "pyro_annotator_40972"
+    assert meta.source == "pyro-annotator"
+    assert meta.label == "smoke" and meta.label_detail == "wildfire"
+    assert meta.label_source == "pyro_annotator_folder"
+    assert meta.camera_id == 65 and meta.camera_name == "nemours-02"
+    assert meta.organization_id == 7 and meta.organization_name == "sdis-77"
+    # frames ordered by created_at ascending -> detection 1 then 2
+    assert [f.detection_id for f in meta.frames] == [1, 2]
+    assert meta.frames[0].created_at == "2026-05-09T15:03:49"
+    assert meta.started_at == "2026-05-09T15:03:49"
+    # image copied from the zip
+    assert (seq_dir / "images" / "detection_1.jpg").read_bytes() == b"img"
+
+
+def test_import_falls_back_to_unknown_when_no_detections(tmp_path):
+    src = tmp_path / "seq_annotation_done_by_label"
+    _make_seq(src, "fp", "low_cloud", "seq_99999", det_ids=[3])
+    out = tmp_path / "store"
+
+    n = ipa.import_pyro_annotator(
+        src,
+        out,
+        "https://x",
+        "admintok",
+        camera_index={},
+        org_index={},
+        list_detections=lambda ep, tok, sid, limit, desc: [],
+    )
+
+    assert n == 1
+    seq_dir = out / "pyro-annotator" / "unknown" / "unknown" / "seq_99999"
+    meta = read_meta(seq_dir)
+    assert meta.label == "fp" and meta.label_detail == "low_cloud"
+    assert meta.camera_name == "unknown" and meta.organization_name == "unknown"
+    assert meta.camera_id is None and meta.organization_id is None
+    assert meta.frames[0].created_at is None
+    assert meta.started_at is None
