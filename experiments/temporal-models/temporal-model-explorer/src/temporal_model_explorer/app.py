@@ -47,6 +47,7 @@ except TypeError:  # older Pillow without the size kwarg
 
 # Display vocabulary. The underlying columns stay label/decision/outcome; the UI
 # shows: ground truth (label) · model verdict (decision) · correctness (outcome).
+SOURCE_DISPLAY = {"platform": "alert-api"}  # stored source value -> sidebar label
 CORRECTNESS = {
     "kept-smoke": "✅ smoke kept",
     "discarded-fp": "✅ fp filtered",
@@ -513,8 +514,21 @@ def main() -> None:  # pragma: no cover - Streamlit UI
     )
 
     st.sidebar.header("Select")
-    sources = sorted(x for x in df["source"].dropna().unique())
-    source = st.sidebar.selectbox("source", sources, key="source") if sources else None
+    # pyro-annotator first (default), then any other source alphabetically.
+    sources = sorted(
+        (x for x in df["source"].dropna().unique()),
+        key=lambda s: (s != "pyro-annotator", s),
+    )
+    source = (
+        st.sidebar.selectbox(
+            "source",
+            sources,
+            format_func=lambda s: SOURCE_DISPLAY.get(s, s),
+            key="source",
+        )
+        if sources
+        else None
+    )
     src_df = df[df["source"] == source] if source else df
     orgs = sorted(x for x in src_df["organization_name"].dropna().unique())
     org = st.sidebar.selectbox("organization", orgs, key="org") if orgs else None
