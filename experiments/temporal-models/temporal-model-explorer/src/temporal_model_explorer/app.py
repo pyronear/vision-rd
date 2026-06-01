@@ -29,6 +29,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 # Absolute imports: this module is the Streamlit entrypoint, run as __main__ via
 # `streamlit run app.py` (no package context), so relative imports would fail.
+from temporal_model_explorer.outcomes import performance_summary
 from temporal_model_explorer.store import iter_sequence_dirs, read_meta
 
 RESULTS = Path("data/07_model_output/results.parquet")
@@ -494,6 +495,34 @@ def _drilldown(key: str, model: str, row: pd.Series) -> None:  # pragma: no cove
             tubes_col.caption("inactive at this frame")
 
 
+def render_performance(df, source, model) -> None:  # pragma: no cover - Streamlit UI
+    """Three headline metric cards over the full source+model labeled eval set.
+
+    Ignores org/camera (overall numbers). Renders nothing when the selected
+    source has no labeled (smoke/fp) sequences, e.g. alert-api.
+    """
+    sub = df[(df["source"] == source) & (df["model"] == model)]
+    s = performance_summary(sub)
+    if s["n_labeled"] == 0:
+        return
+    st.caption(
+        f"Model performance — {s['n_labeled']} labeled sequences "
+        f"({s['n_fp']} fp · {s['n_smoke']} smoke)"
+    )
+    cards = (
+        ("Recall (smoke kept)", s["recall"], f"{s['kept_smoke']}/{s['n_smoke']}"),
+        ("FP filtered", s["specificity"], f"{s['discarded_fp']}/{s['n_fp']}"),
+        (
+            "Precision",
+            s["precision"],
+            f"{s['kept_smoke']}/{s['kept_smoke'] + s['kept_fp']}",
+        ),
+    )
+    for col, (label, value, frac) in zip(st.columns(3), cards, strict=True):
+        col.metric(label, "—" if value is None else f"{value:.1%}")
+        col.caption(frac)
+
+
 def main() -> None:  # pragma: no cover - Streamlit UI
     st.set_page_config(page_title="Temporal Model Explorer", layout="wide")
     st.title("Temporal Model Explorer")
@@ -549,6 +578,8 @@ def main() -> None:  # pragma: no cover - Streamlit UI
         .sort_values("started_at", ascending=False)
         .reset_index(drop=True)
     )
+
+    render_performance(df, source, model)
 
     # Full-width title (filled via a placeholder after filtering so its count
     # reflects the filter). Below it, a horizontal bar where the legend stretches to
