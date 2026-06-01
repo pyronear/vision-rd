@@ -58,3 +58,32 @@ def filter_results(
     if errors_only:
         out = out[out["outcome"].isin(ERROR_OUTCOMES)]
     return out
+
+
+def performance_summary(df: pd.DataFrame) -> dict:
+    """Headline metrics over labeled rows (label in {smoke, fp}) of ``df``.
+
+    ``df`` is expected to already be narrowed to one source + model. Returns
+    counts plus recall / specificity (FP-filtered) / precision, each ``None``
+    when its denominator is 0. Counts are derived from the ``outcome`` column.
+    """
+    oc = df[df["label"].isin(("smoke", "fp"))]["outcome"]
+    kept_smoke = int((oc == "kept-smoke").sum())
+    discarded_smoke = int((oc == "discarded-smoke").sum())
+    discarded_fp = int((oc == "discarded-fp").sum())
+    kept_fp = int((oc == "kept-fp").sum())
+    n_smoke = kept_smoke + discarded_smoke
+    n_fp = discarded_fp + kept_fp
+    n_kept = kept_smoke + kept_fp
+    return {
+        "n_labeled": n_smoke + n_fp,
+        "n_smoke": n_smoke,
+        "n_fp": n_fp,
+        "kept_smoke": kept_smoke,
+        "discarded_smoke": discarded_smoke,
+        "discarded_fp": discarded_fp,
+        "kept_fp": kept_fp,
+        "recall": kept_smoke / n_smoke if n_smoke else None,
+        "specificity": discarded_fp / n_fp if n_fp else None,
+        "precision": kept_smoke / n_kept if n_kept else None,
+    }
