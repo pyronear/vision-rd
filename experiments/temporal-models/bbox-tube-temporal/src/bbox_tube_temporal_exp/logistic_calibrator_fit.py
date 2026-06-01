@@ -8,13 +8,12 @@ inference path stays sklearn-free.
 from __future__ import annotations
 
 import numpy as np
-from sklearn.linear_model import LogisticRegression
-
-from .logistic_calibrator import (
+from bbox_tube_temporal.logistic_calibrator import (
     FEATURE_NAMES,
     LogisticCalibrator,
     extract_features,
 )
+from sklearn.linear_model import LogisticRegression
 
 _EMPTY_FEATURES = np.zeros(len(FEATURE_NAMES), dtype=float)
 _N_SANITY_CHECKS = 3

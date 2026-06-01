@@ -4,9 +4,8 @@ import math
 
 import lightning as L
 import torch
+from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
 from torch import Tensor
-
-from .temporal_classifier import TemporalSmokeClassifier
 
 
 class LitTemporalClassifier(L.LightningModule):

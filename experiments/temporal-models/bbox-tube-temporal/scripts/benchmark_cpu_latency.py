@@ -1,6 +1,6 @@
 """CPU (and any-device) latency benchmark for the packaged temporal model.
 
-Thin CLI wrapper around :mod:`bbox_tube_temporal.benchmark_latency`. Loads a
+Thin CLI wrapper around :mod:`bbox_tube_temporal_exp.benchmark_latency`. Loads a
 packaged model, runs ``predict()`` over the given sequences directory (with
 warmup discard), writes a JSON to ``--output``, and prints a summary table.
 
@@ -11,14 +11,14 @@ import argparse
 import json
 from pathlib import Path
 
+from bbox_tube_temporal.data import list_sequences
+from bbox_tube_temporal.model import BboxTubeTemporalModel
 from tqdm import tqdm
 
-from bbox_tube_temporal.benchmark_latency import (
+from bbox_tube_temporal_exp.benchmark_latency import (
     print_summary,
     run_benchmark_on_model,
 )
-from bbox_tube_temporal.data import list_sequences
-from bbox_tube_temporal.model import BboxTubeTemporalModel
 
 
 def _parse_args() -> argparse.Namespace:

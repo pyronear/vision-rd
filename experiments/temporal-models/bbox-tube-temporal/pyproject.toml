@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/bbox_tube_temporal"]
+packages = ["src/bbox_tube_temporal_exp"]
 
 [project]
 name = "bbox-tube-temporal"
@@ -11,6 +11,7 @@ version = "0.1.0"
 description = "Temporal smoke classifier over YOLO-detected tube patches (timm backbone + mean-pool/GRU head)"
 requires-python = ">=3.11"
 dependencies = [
+    "bbox-tube-temporal-core",
     "pyrocore",
     "lightning>=2.2",
     "matplotlib>=3.8",
@@ -30,6 +31,7 @@ dependencies = [
 ]
 
 [tool.uv.sources]
+bbox-tube-temporal-core = { path = "../../../lib/bbox-tube-temporal", editable = true }
 pyrocore = { path = "../../../lib/pyrocore" }
 
 [dependency-groups]

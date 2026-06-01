@@ -1,4 +1,4 @@
-"""Tests for bbox_tube_temporal.benchmark_latency."""
+"""Tests for bbox_tube_temporal_exp.benchmark_latency."""
 
 from __future__ import annotations
 
@@ -8,11 +8,11 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 import torch
-from PIL import Image
-
-from bbox_tube_temporal import benchmark_latency as bench
 from bbox_tube_temporal.model import BboxTubeTemporalModel
 from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
+from PIL import Image
+
+from bbox_tube_temporal_exp import benchmark_latency as bench
 
 BENCHMARK_TEST_CONFIG: dict = {
     "infer": {

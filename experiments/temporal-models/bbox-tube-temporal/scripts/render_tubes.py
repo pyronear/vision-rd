@@ -26,14 +26,14 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-
 from bbox_tube_temporal.data import (
     find_sequence_dir,
     get_sorted_frames,
     load_tube_record,
 )
-from bbox_tube_temporal.tube_viz import plot_tube_summary
 from bbox_tube_temporal.tubes import tube_from_record
+
+from bbox_tube_temporal_exp.tube_viz import plot_tube_summary
 
 
 def _render_one(

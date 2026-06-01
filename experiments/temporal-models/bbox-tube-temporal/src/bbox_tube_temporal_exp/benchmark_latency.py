@@ -14,8 +14,7 @@ from collections.abc import Iterable
 from pathlib import Path
 
 import torch
-
-from .data import get_sorted_frames
+from bbox_tube_temporal.data import get_sorted_frames
 
 
 def percentile(xs: list[float], p: float) -> float:

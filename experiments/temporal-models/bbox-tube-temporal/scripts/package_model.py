@@ -12,18 +12,20 @@ from pathlib import Path
 import numpy as np
 import torch
 import yaml
-
-from bbox_tube_temporal.calibration import calibrate_threshold
 from bbox_tube_temporal.logistic_calibrator import (
     LogisticCalibrator,
     extract_features,
 )
-from bbox_tube_temporal.logistic_calibrator_fit import fit as fit_logistic_calibrator
 from bbox_tube_temporal.model import BboxTubeTemporalModel
 from bbox_tube_temporal.package import _load_yolo, build_model_package
-from bbox_tube_temporal.package_predict import collect_pipeline_records
 from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
-from bbox_tube_temporal.val_predict import collect_val_probabilities
+
+from bbox_tube_temporal_exp.calibration import calibrate_threshold
+from bbox_tube_temporal_exp.logistic_calibrator_fit import (
+    fit as fit_logistic_calibrator,
+)
+from bbox_tube_temporal_exp.package_predict import collect_pipeline_records
+from bbox_tube_temporal_exp.val_predict import collect_val_probabilities
 
 
 def _classifier_kwargs(cfg: dict) -> dict:
@@ -73,6 +75,34 @@ def _load_classifier_from_ckpt(
     return model
 
 
+def _tubes_config(all_params: dict) -> dict:
+    """Build the packaged ``config["tubes"]`` block.
+
+    Includes the post-build merge thresholds only when all three are present in
+    ``params.yaml::tubes``; missing/null keys mean "no merge" and are omitted
+    from the packaged config (preserves backward-compat semantics for older
+    consumers that don't know about merge keys).
+    """
+    tubes_params = all_params["tubes"]
+    build_tubes_params = all_params["build_tubes"]
+    cfg: dict = {
+        "iou_threshold": tubes_params["iou_threshold"],
+        "max_misses": tubes_params["max_misses"],
+        "min_tube_length": build_tubes_params["min_tube_length"],
+        "infer_min_tube_length": all_params["package"]["infer_min_tube_length"],
+        "min_detected_entries": build_tubes_params["min_detected_entries"],
+        "interpolate_gaps": True,
+    }
+    merge_iomin = tubes_params.get("merge_iomin")
+    merge_prox_factor = tubes_params.get("merge_prox_factor")
+    merge_max_gap = tubes_params.get("merge_max_gap")
+    if all(v is not None for v in (merge_iomin, merge_prox_factor, merge_max_gap)):
+        cfg["merge_iomin"] = float(merge_iomin)
+        cfg["merge_prox_factor"] = float(merge_prox_factor)
+        cfg["merge_max_gap"] = int(merge_max_gap)
+    return cfg
+
+
 def _build_config(
     all_params: dict,
     variant_cfg: dict,
@@ -93,14 +123,7 @@ def _build_config(
 
     return {
         "infer": package_params["infer"],
-        "tubes": {
-            "iou_threshold": all_params["tubes"]["iou_threshold"],
-            "max_misses": all_params["tubes"]["max_misses"],
-            "min_tube_length": all_params["build_tubes"]["min_tube_length"],
-            "infer_min_tube_length": package_params["infer_min_tube_length"],
-            "min_detected_entries": all_params["build_tubes"]["min_detected_entries"],
-            "interpolate_gaps": True,
-        },
+        "tubes": _tubes_config(all_params),
         "model_input": {
             "context_factor": all_params["model_input"]["context_factor"],
             "patch_size": all_params["model_input"]["patch_size"],

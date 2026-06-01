@@ -21,13 +21,13 @@ from sklearn.metrics import (
 )
 from torch.utils.data import DataLoader
 
-from bbox_tube_temporal.dataset import TubePatchDataset
-from bbox_tube_temporal.eval_plots import (
+from bbox_tube_temporal_exp.dataset import TubePatchDataset
+from bbox_tube_temporal_exp.eval_plots import (
     plot_confusion_matrix,
     plot_pr_curve,
     plot_roc_curve,
 )
-from bbox_tube_temporal.lit_temporal import LitTemporalClassifier
+from bbox_tube_temporal_exp.lit_temporal import LitTemporalClassifier
 
 
 def main() -> None:

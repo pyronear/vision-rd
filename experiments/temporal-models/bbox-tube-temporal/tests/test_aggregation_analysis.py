@@ -5,7 +5,7 @@ import json
 import numpy as np
 import pytest
 
-from bbox_tube_temporal.aggregation_analysis import (
+from bbox_tube_temporal_exp.aggregation_analysis import (
     aggregate_score,
     build_scores_and_labels,
     find_threshold_for_recall,

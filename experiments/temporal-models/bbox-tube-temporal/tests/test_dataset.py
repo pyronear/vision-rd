@@ -7,7 +7,7 @@ import numpy as np
 import torch
 from PIL import Image
 
-from bbox_tube_temporal.dataset import TubePatchDataset
+from bbox_tube_temporal_exp.dataset import TubePatchDataset
 
 
 def _make_split(tmp_path: Path, samples: list[tuple[str, int, int]]) -> Path:

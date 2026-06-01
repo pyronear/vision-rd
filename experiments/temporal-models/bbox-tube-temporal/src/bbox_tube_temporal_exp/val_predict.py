@@ -8,10 +8,10 @@ from pathlib import Path
 
 import numpy as np
 import torch
+from bbox_tube_temporal.temporal_classifier import TemporalSmokeClassifier
 from torch.utils.data import DataLoader
 
 from .dataset import TubePatchDataset
-from .temporal_classifier import TemporalSmokeClassifier
 
 
 def collect_val_probabilities(

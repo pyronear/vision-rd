@@ -9,9 +9,8 @@ from pathlib import Path
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+from bbox_tube_temporal.types import Detection, Tube
 from matplotlib.gridspec import GridSpec
-
-from .types import Detection, Tube
 
 # Distinct colours for up to 20 tubes (stored as RGB)
 _TUBE_COLORS = [

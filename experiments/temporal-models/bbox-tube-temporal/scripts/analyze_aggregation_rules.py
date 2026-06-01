@@ -15,7 +15,7 @@ Usage::
 import argparse
 from pathlib import Path
 
-from bbox_tube_temporal.aggregation_analysis import (
+from bbox_tube_temporal_exp.aggregation_analysis import (
     load_predictions,
     summarize_rule,
 )
