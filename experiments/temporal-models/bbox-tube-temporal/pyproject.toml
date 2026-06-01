@@ -51,5 +51,10 @@ line-length = 88
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "UP", "B", "SIM", "PLC0415"]
 
+[tool.ruff.lint.isort]
+# Pin first-party so CI (no editable installs cached) and local agree on
+# import grouping. bbox_tube_temporal (lib) and pyrocore stay third-party.
+known-first-party = ["bbox_tube_temporal_exp", "scripts"]
+
 [tool.ruff.format]
 quote-style = "double"

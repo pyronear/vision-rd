@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from bbox_tube_temporal.data import load_detections, load_tube_record
 
 

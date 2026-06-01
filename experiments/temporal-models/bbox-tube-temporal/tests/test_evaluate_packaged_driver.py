@@ -10,9 +10,9 @@ import sys
 from pathlib import Path
 
 import pytest
+from bbox_tube_temporal import model as model_module
 from pyrocore import Frame, TemporalModelOutput
 
-from bbox_tube_temporal import model as model_module
 from scripts import evaluate_packaged
 
 
