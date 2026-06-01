@@ -2,6 +2,7 @@
 
 import pytest
 
+from bbox_tube_temporal import merge_colocated_tubes as _merge_from_pkg_top
 from bbox_tube_temporal.tubes import (
     build_tubes,
     compute_iou,
@@ -496,3 +497,12 @@ class TestMergeColocatedTubes:
         assert box_at_1(
             merge_colocated_tubes([b, a], **self.KWARGS)
         ).cx == pytest.approx(0.51)
+
+
+# ── top-level package exports ────────────────────────────────────────────
+
+
+def test_merge_colocated_tubes_is_top_level_export():
+    """The top-level alias imported at module top must resolve to the same
+    function as the one in ``bbox_tube_temporal.tubes``."""
+    assert _merge_from_pkg_top is merge_colocated_tubes
