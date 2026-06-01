@@ -30,7 +30,7 @@ import argparse
 import math
 from pathlib import Path
 
-from bbox_tube_temporal.aggregation_analysis import load_predictions
+from bbox_tube_temporal_exp.aggregation_analysis import load_predictions
 
 
 def _tube_max_confidence(tube: dict) -> float:

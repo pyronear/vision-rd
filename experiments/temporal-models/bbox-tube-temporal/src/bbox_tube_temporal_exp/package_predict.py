@@ -12,7 +12,7 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
-from .data import get_sorted_frames, is_wf_sequence, list_sequences
+from bbox_tube_temporal.data import get_sorted_frames, is_wf_sequence, list_sequences
 
 
 def _iter_labelled_sequences(

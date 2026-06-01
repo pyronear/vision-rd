@@ -193,10 +193,12 @@ Train (3104 sequences) and val (318 sequences) of the packaged `model.zip` for e
 |---|---|---|---|---|---|---|---|---|---|
 | gru_convnext_finetune | train | max_logit | 0.9252 | 0.9716 | 0.9478 | 122 | 44 | 2.2 | 1.0 |
 | gru_convnext_finetune | val | max_logit | 0.9560 | 0.9560 | 0.9560 | 7 | 7 | 2.3 | 1.0 |
-| vit_dinov2_finetune | train | logistic | 0.9376 | 0.9781 | 0.9574 | 101 | 34 | 3.1 | 2.0 |
-| vit_dinov2_finetune | val | logistic | 0.9684 | 0.9623 | 0.9653 | 5 | 6 | 3.1 | 2.0 |
+| **vit_dinov2_finetune** | **train** | **logistic** | **0.9571** | **0.9774** | **0.9672** | **68** | **35** | **3.8** | **3.0** |
+| **vit_dinov2_finetune** | **val** | **logistic** | **0.9870** | **0.9560** | **0.9712** | **2** | **7** | **3.9** | **3.0** |
 
-Both packaged variants clear the precision target (≥ 0.93) at recall ≥ 0.95 on val. ViT is the F1 leader thanks to the logistic calibrator, which weights tube length and YOLO confidence alongside the raw logit. The exact operating point comes from automated variant analysis (next section) — change the target recall to shift the trade-off. TTD numbers reflect the first-crossing trigger and are reported in **frame index** (0-based `trigger_frame_index`) per the pyrocore convention — pyro-dataset filename timestamps are unreliable, so we do not convert to seconds. In production (30s/frame cadence), these correspond to ~30–90s wall-clock for GRU and ~90s for ViT.
+> **Note on `vit_dinov2_finetune`:** retrained on merge-aware tubes (PR #74 — `merge_colocated_tubes` from the lab fused co-located fragments back into one tube). The retrain **halved the val FPR (3.14% → 1.26%, 5 → 2 false positives)** at the cost of one extra missed smoke (FN 6 → 7) and ~30 s slower median trigger. Other gains: val F1 0.9653 → 0.9712 (+0.59 pp), val PR-AUC 0.9798 → 0.9845, val ROC-AUC 0.9776 → 0.9820. `gru_convnext_finetune` is still on the **pre-merge tubes** (not retrained in PR #74).
+
+Both packaged variants clear the precision target (≥ 0.93) at recall ≥ 0.95 on val. ViT is the F1 leader thanks to the logistic calibrator, which weights tube length and YOLO confidence alongside the raw logit. The exact operating point comes from automated variant analysis (next section) — change the target recall to shift the trade-off. TTD numbers reflect the first-crossing trigger and are reported in **frame index** (0-based `trigger_frame_index`) per the pyrocore convention — pyro-dataset filename timestamps are unreliable, so we do not convert to seconds. In production (30s/frame cadence), these correspond to ~30–90s wall-clock for GRU and ~90–120s for ViT.
 
 ### CPU latency (packaged, full val)
 

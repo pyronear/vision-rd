@@ -4,13 +4,13 @@ import math
 
 import numpy as np
 import pytest
-from sklearn.linear_model import LogisticRegression
-
 from bbox_tube_temporal.logistic_calibrator import (
     FEATURE_NAMES,
     LogisticCalibrator,
 )
-from bbox_tube_temporal.logistic_calibrator_fit import fit
+from sklearn.linear_model import LogisticRegression
+
+from bbox_tube_temporal_exp.logistic_calibrator_fit import fit
 
 
 def _record(*, label: str, logit: float, length: int, mean_conf: float) -> dict:

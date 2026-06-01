@@ -22,13 +22,15 @@ from statistics import mean
 
 import numpy as np
 import yaml
-
-from bbox_tube_temporal.aggregation_analysis import load_predictions
 from bbox_tube_temporal.logistic_calibrator import (
     LogisticCalibrator,
     extract_features,
 )
-from bbox_tube_temporal.logistic_calibrator_fit import fit as fit_logistic_calibrator
+
+from bbox_tube_temporal_exp.aggregation_analysis import load_predictions
+from bbox_tube_temporal_exp.logistic_calibrator_fit import (
+    fit as fit_logistic_calibrator,
+)
 
 CONF_THRESHOLDS = [0.05, 0.10, 0.15, 0.20, 0.25]
 TUBE_SELECTIONS = [("all", None), ("top-1", 1), ("top-2", 2), ("top-3", 3)]

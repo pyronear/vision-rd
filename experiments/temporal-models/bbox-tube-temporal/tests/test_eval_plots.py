@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from bbox_tube_temporal.eval_plots import (
+from bbox_tube_temporal_exp.eval_plots import (
     plot_confusion_matrix,
     plot_pr_curve,
     plot_roc_curve,

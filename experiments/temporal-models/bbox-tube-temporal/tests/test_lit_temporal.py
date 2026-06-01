@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import torch
 
-from bbox_tube_temporal.lit_temporal import LitTemporalClassifier
+from bbox_tube_temporal_exp.lit_temporal import LitTemporalClassifier
 
 
 def _batch(b: int = 2, t: int = 5) -> dict:

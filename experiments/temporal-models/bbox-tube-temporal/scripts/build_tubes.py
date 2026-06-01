@@ -26,6 +26,7 @@ from bbox_tube_temporal.data import (
 from bbox_tube_temporal.tubes import (
     build_tubes,
     interpolate_gaps,
+    merge_colocated_tubes,
     select_longest_tube,
 )
 from bbox_tube_temporal.types import Tube
@@ -87,6 +88,9 @@ def _process_sequence(
     max_misses: int,
     min_tube_length: int,
     min_detected_entries: int,
+    merge_iomin: float | None,
+    merge_prox_factor: float | None,
+    merge_max_gap: int | None,
 ) -> tuple[dict | None, str | None]:
     """Process a single sequence.
 
@@ -110,6 +114,20 @@ def _process_sequence(
     tubes = build_tubes(fdets, iou_threshold=iou_threshold, max_misses=max_misses)
     if not tubes:
         return None, "no_tubes"
+
+    # Fuse fragments of the same plume before picking the longest, so the
+    # selection sees the merged plume rather than one of its pieces.
+    if (
+        merge_iomin is not None
+        and merge_prox_factor is not None
+        and merge_max_gap is not None
+    ):
+        tubes = merge_colocated_tubes(
+            tubes,
+            merge_iomin=merge_iomin,
+            merge_prox_factor=merge_prox_factor,
+            merge_max_gap=merge_max_gap,
+        )
 
     selected = select_longest_tube(tubes)
     assert selected is not None  # tubes is non-empty
@@ -145,6 +163,30 @@ def main() -> None:
     parser.add_argument("--max-misses", type=int, default=2)
     parser.add_argument("--min-tube-length", type=int, default=4)
     parser.add_argument("--min-detected-entries", type=int, default=2)
+    parser.add_argument(
+        "--merge-iomin",
+        type=float,
+        default=None,
+        help="Post-build merge: containment threshold. Omit to disable merge.",
+    )
+    parser.add_argument(
+        "--merge-prox-factor",
+        type=float,
+        default=None,
+        help=(
+            "Post-build merge: centers-within-N box-sizes factor. "
+            "Omit to disable merge."
+        ),
+    )
+    parser.add_argument(
+        "--merge-max-gap",
+        type=int,
+        default=None,
+        help=(
+            "Post-build merge: max frames between observed spans. "
+            "Omit to disable merge."
+        ),
+    )
     args = parser.parse_args()
 
     split = args.input_dir.name
@@ -163,6 +205,9 @@ def main() -> None:
             max_misses=args.max_misses,
             min_tube_length=args.min_tube_length,
             min_detected_entries=args.min_detected_entries,
+            merge_iomin=args.merge_iomin,
+            merge_prox_factor=args.merge_prox_factor,
+            merge_max_gap=args.merge_max_gap,
         )
         if reason is not None:
             dropped.append(DropRecord(sequence_id=seq_dir.name, reason=reason))

@@ -21,8 +21,8 @@ from .details_schema import (
     Tubes,
 )
 from .inference import (
+    build_tubes_for_inference,
     crop_tube_patches,
-    filter_and_interpolate_tubes,
     find_first_crossing_trigger,
     pad_frames_symmetrically,
     pad_frames_uniform,
@@ -190,16 +190,22 @@ class BboxTubeTemporalModel(TemporalModel):
             device=self._device,
         )
 
+        # Pre-merge (raw) candidates count, for the details JSON.
         candidate_tubes = build_tubes(
             frame_dets,
             iou_threshold=tubes_cfg["iou_threshold"],
             max_misses=tubes_cfg["max_misses"],
         )
-        kept = filter_and_interpolate_tubes(
-            candidate_tubes,
+        kept = build_tubes_for_inference(
+            frame_dets,
+            iou_threshold=tubes_cfg["iou_threshold"],
+            max_misses=tubes_cfg["max_misses"],
             min_tube_length=tubes_cfg["infer_min_tube_length"],
             min_detected_entries=tubes_cfg["min_detected_entries"],
             interpolate_gaps=tubes_cfg["interpolate_gaps"],
+            merge_iomin=tubes_cfg.get("merge_iomin"),
+            merge_prox_factor=tubes_cfg.get("merge_prox_factor"),
+            merge_max_gap=tubes_cfg.get("merge_max_gap"),
         )
 
         if not kept:

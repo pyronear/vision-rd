@@ -11,6 +11,7 @@ from PIL import Image
 from pyrocore.types import Frame
 
 from bbox_tube_temporal.inference import (
+    build_tubes_for_inference,
     crop_tube_patches,
     filter_and_interpolate_tubes,
     find_first_crossing_trigger,
@@ -18,6 +19,7 @@ from bbox_tube_temporal.inference import (
     score_tubes,
 )
 from bbox_tube_temporal.logistic_calibrator import LogisticCalibrator
+from bbox_tube_temporal.tubes import build_tubes
 from bbox_tube_temporal.types import Detection, FrameDetections, Tube, TubeEntry
 
 
@@ -586,3 +588,85 @@ class TestFindFirstCrossingTrigger:
             min_prefix_length=2,
         )
         assert res == (False, None, None, {})
+
+
+# ── build_tubes_for_inference ────────────────────────────────────────────
+
+
+class TestBuildTubesForInference:
+    @staticmethod
+    def _fd(idx, dets):
+        return FrameDetections(
+            frame_idx=idx, frame_id=str(idx), timestamp=None, detections=dets
+        )
+
+    @staticmethod
+    def _d(cx, cy, w=0.05, h=0.05):
+        return Detection(class_id=0, cx=cx, cy=cy, w=w, h=h, confidence=0.9)
+
+    def test_without_merge_keys_matches_legacy(self):
+        """No merge keys -> same result as the legacy build + filter path."""
+        fds = [self._fd(i, [self._d(0.5, 0.5)]) for i in range(5)]
+        legacy = filter_and_interpolate_tubes(
+            build_tubes(fds, iou_threshold=0.2, max_misses=2),
+            min_tube_length=2,
+            min_detected_entries=2,
+            interpolate_gaps=True,
+        )
+        new = build_tubes_for_inference(
+            fds,
+            iou_threshold=0.2,
+            max_misses=2,
+            min_tube_length=2,
+            min_detected_entries=2,
+            interpolate_gaps=True,
+            merge_iomin=None,
+            merge_prox_factor=None,
+            merge_max_gap=None,
+        )
+        assert len(new) == len(legacy)
+        assert [(t.start_frame, t.end_frame, len(t.entries)) for t in new] == [
+            (t.start_frame, t.end_frame, len(t.entries)) for t in legacy
+        ]
+
+    def test_with_merge_keys_fuses_fragmented_plume(self):
+        """A growing plume that build_tubes splits at the IoU jump merges back."""
+        fds = [
+            self._fd(0, [self._d(0.5, 0.5, 0.02, 0.02)]),
+            self._fd(1, [self._d(0.5, 0.5, 0.02, 0.02)]),
+            self._fd(2, [self._d(0.5, 0.5, 0.2, 0.2)]),
+            self._fd(3, [self._d(0.5, 0.5, 0.2, 0.2)]),
+        ]
+        tubes = build_tubes_for_inference(
+            fds,
+            iou_threshold=0.2,
+            max_misses=2,
+            min_tube_length=2,
+            min_detected_entries=2,
+            interpolate_gaps=True,
+            merge_iomin=0.3,
+            merge_prox_factor=1.0,
+            merge_max_gap=10,
+        )
+        assert len(tubes) == 1
+
+    def test_partial_merge_keys_treated_as_no_merge(self):
+        """If any merge key is None, merging is skipped (backward-compat guard)."""
+        fds = [
+            self._fd(0, [self._d(0.5, 0.5, 0.02, 0.02)]),
+            self._fd(1, [self._d(0.5, 0.5, 0.02, 0.02)]),
+            self._fd(2, [self._d(0.5, 0.5, 0.2, 0.2)]),
+            self._fd(3, [self._d(0.5, 0.5, 0.2, 0.2)]),
+        ]
+        tubes = build_tubes_for_inference(
+            fds,
+            iou_threshold=0.2,
+            max_misses=2,
+            min_tube_length=2,
+            min_detected_entries=2,
+            interpolate_gaps=True,
+            merge_iomin=0.3,
+            merge_prox_factor=None,
+            merge_max_gap=10,
+        )
+        assert len(tubes) == 2  # would be 1 if merge ran

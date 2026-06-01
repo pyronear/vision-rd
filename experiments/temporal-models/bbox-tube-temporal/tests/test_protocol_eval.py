@@ -5,7 +5,7 @@ from pathlib import Path
 
 from pyrocore import Frame, TemporalModelOutput
 
-from bbox_tube_temporal.protocol_eval import (
+from bbox_tube_temporal_exp.protocol_eval import (
     SequenceRecord,
     build_record,
     compute_metrics,

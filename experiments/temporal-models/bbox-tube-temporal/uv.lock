@@ -386,6 +386,7 @@ name = "bbox-tube-temporal"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "bbox-tube-temporal-core" },
     { name = "huggingface-hub" },
     { name = "lightning" },
     { name = "matplotlib" },
@@ -416,6 +417,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "bbox-tube-temporal-core", editable = "../../../lib/bbox-tube-temporal" },
     { name = "huggingface-hub", specifier = ">=0.24" },
     { name = "lightning", specifier = ">=2.2" },
     { name = "matplotlib", specifier = ">=3.8" },
@@ -443,6 +445,38 @@ dev = [
     { name = "pytest", specifier = ">=8.0" },
     { name = "ruff", specifier = ">=0.9" },
 ]
+
+[[package]]
+name = "bbox-tube-temporal-core"
+version = "0.1.0"
+source = { editable = "../../../lib/bbox-tube-temporal" }
+dependencies = [
+    { name = "numpy" },
+    { name = "pillow" },
+    { name = "pydantic" },
+    { name = "pyrocore" },
+    { name = "pyyaml" },
+    { name = "timm" },
+    { name = "torch" },
+    { name = "torchvision" },
+    { name = "ultralytics" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "numpy", specifier = ">=1.26,<2" },
+    { name = "pillow", specifier = ">=10.0" },
+    { name = "pydantic", specifier = ">=2.6" },
+    { name = "pyrocore", directory = "../../../lib/pyrocore" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9" },
+    { name = "timm", specifier = ">=1.0" },
+    { name = "torch", specifier = ">=2.2" },
+    { name = "torchvision", specifier = ">=0.17" },
+    { name = "ultralytics", specifier = ">=8.3" },
+]
+provides-extras = ["dev"]
 
 [[package]]
 name = "beautifulsoup4"

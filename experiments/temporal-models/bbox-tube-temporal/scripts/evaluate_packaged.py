@@ -14,16 +14,16 @@ import json
 from pathlib import Path
 
 import numpy as np
+from bbox_tube_temporal.data import get_sorted_frames, is_wf_sequence, list_sequences
+from bbox_tube_temporal.model import BboxTubeTemporalModel
 from tqdm import tqdm
 
-from bbox_tube_temporal.data import get_sorted_frames, is_wf_sequence, list_sequences
-from bbox_tube_temporal.eval_plots import (
+from bbox_tube_temporal_exp.eval_plots import (
     plot_confusion_matrix,
     plot_pr_curve,
     plot_roc_curve,
 )
-from bbox_tube_temporal.model import BboxTubeTemporalModel
-from bbox_tube_temporal.protocol_eval import (
+from bbox_tube_temporal_exp.protocol_eval import (
     SequenceRecord,
     build_record,
     compute_metrics,

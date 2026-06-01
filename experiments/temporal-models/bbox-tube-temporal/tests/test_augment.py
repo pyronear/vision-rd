@@ -2,7 +2,7 @@
 
 import torch
 
-from bbox_tube_temporal.augment import (
+from bbox_tube_temporal_exp.augment import (
     PhotometricTubeTransform,
     SpatialTubeTransform,
     TemporalTubeTransform,

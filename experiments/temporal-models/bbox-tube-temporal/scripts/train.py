@@ -15,11 +15,11 @@ from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from lightning.pytorch.loggers import CSVLogger, TensorBoardLogger
 from torch.utils.data import DataLoader
 
-from bbox_tube_temporal.augment import build_tube_augment
-from bbox_tube_temporal.batch_samples import SampleTrainBatchesCallback
-from bbox_tube_temporal.dataset import TubePatchDataset
-from bbox_tube_temporal.lit_temporal import LitTemporalClassifier
-from bbox_tube_temporal.training_plots import (
+from bbox_tube_temporal_exp.augment import build_tube_augment
+from bbox_tube_temporal_exp.batch_samples import SampleTrainBatchesCallback
+from bbox_tube_temporal_exp.dataset import TubePatchDataset
+from bbox_tube_temporal_exp.lit_temporal import LitTemporalClassifier
+from bbox_tube_temporal_exp.training_plots import (
     find_latest_metrics_csv,
     plot_training_curves,
 )

@@ -3,8 +3,8 @@
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from bbox_tube_temporal import package_predict
-from bbox_tube_temporal.package_predict import collect_pipeline_records
+from bbox_tube_temporal_exp import package_predict
+from bbox_tube_temporal_exp.package_predict import collect_pipeline_records
 
 
 class _FakeOutput:

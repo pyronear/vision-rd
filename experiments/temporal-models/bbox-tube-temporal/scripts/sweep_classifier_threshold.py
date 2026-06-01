@@ -22,7 +22,7 @@ from pathlib import Path
 
 import numpy as np
 
-from bbox_tube_temporal.aggregation_analysis import (
+from bbox_tube_temporal_exp.aggregation_analysis import (
     build_scores_and_labels,
     load_predictions,
     metrics_at_threshold,

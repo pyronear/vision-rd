@@ -44,11 +44,14 @@ stages:
         --max-misses ${tubes.max_misses}
         --min-tube-length ${build_tubes.min_tube_length}
         --min-detected-entries ${build_tubes.min_detected_entries}
+        --merge-iomin ${tubes.merge_iomin}
+        --merge-prox-factor ${tubes.merge_prox_factor}
+        --merge-max-gap ${tubes.merge_max_gap}
       deps:
         - scripts/build_tubes.py
-        - src/bbox_tube_temporal/tubes.py
-        - src/bbox_tube_temporal/data.py
-        - src/bbox_tube_temporal/types.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/tubes.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/data.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/types.py
         - data/01_raw/datasets/${item}
       params:
         - tubes
@@ -70,7 +73,7 @@ stages:
         --patch-size ${model_input.patch_size}
       deps:
         - scripts/build_model_input.py
-        - src/bbox_tube_temporal/model_input.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model_input.py
         - data/03_primary/tubes/${item}
         - data/01_raw/datasets/${item}
       params:
@@ -90,9 +93,9 @@ stages:
         --output-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/render_tubes.py
-        - src/bbox_tube_temporal/tubes.py
-        - src/bbox_tube_temporal/tube_viz.py
-        - src/bbox_tube_temporal/data.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/tubes.py
+        - src/bbox_tube_temporal_exp/tube_viz.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/data.py
         - data/03_primary/tubes/${item}
         - data/01_raw/datasets/${item}
       outs:
@@ -109,11 +112,11 @@ stages:
       --params-key train_mean_pool
     deps:
       - scripts/train.py
-      - src/bbox_tube_temporal/augment.py
-      - src/bbox_tube_temporal/dataset.py
-      - src/bbox_tube_temporal/temporal_classifier.py
-      - src/bbox_tube_temporal/lit_temporal.py
-      - src/bbox_tube_temporal/training_plots.py
+      - src/bbox_tube_temporal_exp/augment.py
+      - src/bbox_tube_temporal_exp/dataset.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal_exp/lit_temporal.py
+      - src/bbox_tube_temporal_exp/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -136,11 +139,11 @@ stages:
       --params-key train_gru
     deps:
       - scripts/train.py
-      - src/bbox_tube_temporal/augment.py
-      - src/bbox_tube_temporal/dataset.py
-      - src/bbox_tube_temporal/temporal_classifier.py
-      - src/bbox_tube_temporal/lit_temporal.py
-      - src/bbox_tube_temporal/training_plots.py
+      - src/bbox_tube_temporal_exp/augment.py
+      - src/bbox_tube_temporal_exp/dataset.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal_exp/lit_temporal.py
+      - src/bbox_tube_temporal_exp/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -168,9 +171,9 @@ stages:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/bbox_tube_temporal/temporal_classifier.py
-        - src/bbox_tube_temporal/lit_temporal.py
-        - src/bbox_tube_temporal/dataset.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal_exp/lit_temporal.py
+        - src/bbox_tube_temporal_exp/dataset.py
         - data/06_models/mean_pool/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -205,9 +208,9 @@ stages:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/bbox_tube_temporal/temporal_classifier.py
-        - src/bbox_tube_temporal/lit_temporal.py
-        - src/bbox_tube_temporal/dataset.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal_exp/lit_temporal.py
+        - src/bbox_tube_temporal_exp/dataset.py
         - data/06_models/gru/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -237,11 +240,11 @@ stages:
       --params-key train_gru_convnext
     deps:
       - scripts/train.py
-      - src/bbox_tube_temporal/augment.py
-      - src/bbox_tube_temporal/dataset.py
-      - src/bbox_tube_temporal/temporal_classifier.py
-      - src/bbox_tube_temporal/lit_temporal.py
-      - src/bbox_tube_temporal/training_plots.py
+      - src/bbox_tube_temporal_exp/augment.py
+      - src/bbox_tube_temporal_exp/dataset.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal_exp/lit_temporal.py
+      - src/bbox_tube_temporal_exp/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -264,11 +267,11 @@ stages:
       --params-key train_gru_finetune
     deps:
       - scripts/train.py
-      - src/bbox_tube_temporal/augment.py
-      - src/bbox_tube_temporal/dataset.py
-      - src/bbox_tube_temporal/temporal_classifier.py
-      - src/bbox_tube_temporal/lit_temporal.py
-      - src/bbox_tube_temporal/training_plots.py
+      - src/bbox_tube_temporal_exp/augment.py
+      - src/bbox_tube_temporal_exp/dataset.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal_exp/lit_temporal.py
+      - src/bbox_tube_temporal_exp/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -291,11 +294,11 @@ stages:
       --params-key train_gru_convnext_finetune
     deps:
       - scripts/train.py
-      - src/bbox_tube_temporal/augment.py
-      - src/bbox_tube_temporal/dataset.py
-      - src/bbox_tube_temporal/temporal_classifier.py
-      - src/bbox_tube_temporal/lit_temporal.py
-      - src/bbox_tube_temporal/training_plots.py
+      - src/bbox_tube_temporal_exp/augment.py
+      - src/bbox_tube_temporal_exp/dataset.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal_exp/lit_temporal.py
+      - src/bbox_tube_temporal_exp/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -318,11 +321,11 @@ stages:
       --params-key train_gru_convnext_base_finetune
     deps:
       - scripts/train.py
-      - src/bbox_tube_temporal/augment.py
-      - src/bbox_tube_temporal/dataset.py
-      - src/bbox_tube_temporal/temporal_classifier.py
-      - src/bbox_tube_temporal/lit_temporal.py
-      - src/bbox_tube_temporal/training_plots.py
+      - src/bbox_tube_temporal_exp/augment.py
+      - src/bbox_tube_temporal_exp/dataset.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal_exp/lit_temporal.py
+      - src/bbox_tube_temporal_exp/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -345,11 +348,11 @@ stages:
       --params-key train_vit_dinov2_frozen
     deps:
       - scripts/train.py
-      - src/bbox_tube_temporal/augment.py
-      - src/bbox_tube_temporal/dataset.py
-      - src/bbox_tube_temporal/temporal_classifier.py
-      - src/bbox_tube_temporal/lit_temporal.py
-      - src/bbox_tube_temporal/training_plots.py
+      - src/bbox_tube_temporal_exp/augment.py
+      - src/bbox_tube_temporal_exp/dataset.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal_exp/lit_temporal.py
+      - src/bbox_tube_temporal_exp/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -372,11 +375,11 @@ stages:
       --params-key train_vit_dinov2_finetune
     deps:
       - scripts/train.py
-      - src/bbox_tube_temporal/augment.py
-      - src/bbox_tube_temporal/dataset.py
-      - src/bbox_tube_temporal/temporal_classifier.py
-      - src/bbox_tube_temporal/lit_temporal.py
-      - src/bbox_tube_temporal/training_plots.py
+      - src/bbox_tube_temporal_exp/augment.py
+      - src/bbox_tube_temporal_exp/dataset.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal_exp/lit_temporal.py
+      - src/bbox_tube_temporal_exp/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -399,11 +402,11 @@ stages:
       --params-key train_vit_in21k_finetune
     deps:
       - scripts/train.py
-      - src/bbox_tube_temporal/augment.py
-      - src/bbox_tube_temporal/dataset.py
-      - src/bbox_tube_temporal/temporal_classifier.py
-      - src/bbox_tube_temporal/lit_temporal.py
-      - src/bbox_tube_temporal/training_plots.py
+      - src/bbox_tube_temporal_exp/augment.py
+      - src/bbox_tube_temporal_exp/dataset.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal_exp/lit_temporal.py
+      - src/bbox_tube_temporal_exp/training_plots.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
@@ -431,9 +434,9 @@ stages:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/bbox_tube_temporal/temporal_classifier.py
-        - src/bbox_tube_temporal/lit_temporal.py
-        - src/bbox_tube_temporal/dataset.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal_exp/lit_temporal.py
+        - src/bbox_tube_temporal_exp/dataset.py
         - data/06_models/gru_convnext/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -468,9 +471,9 @@ stages:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/bbox_tube_temporal/temporal_classifier.py
-        - src/bbox_tube_temporal/lit_temporal.py
-        - src/bbox_tube_temporal/dataset.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal_exp/lit_temporal.py
+        - src/bbox_tube_temporal_exp/dataset.py
         - data/06_models/gru_finetune/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -505,9 +508,9 @@ stages:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/bbox_tube_temporal/temporal_classifier.py
-        - src/bbox_tube_temporal/lit_temporal.py
-        - src/bbox_tube_temporal/dataset.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal_exp/lit_temporal.py
+        - src/bbox_tube_temporal_exp/dataset.py
         - data/06_models/gru_convnext_finetune/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -542,9 +545,9 @@ stages:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/bbox_tube_temporal/temporal_classifier.py
-        - src/bbox_tube_temporal/lit_temporal.py
-        - src/bbox_tube_temporal/dataset.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal_exp/lit_temporal.py
+        - src/bbox_tube_temporal_exp/dataset.py
         - data/06_models/gru_convnext_base_finetune/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -579,9 +582,9 @@ stages:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/bbox_tube_temporal/temporal_classifier.py
-        - src/bbox_tube_temporal/lit_temporal.py
-        - src/bbox_tube_temporal/dataset.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal_exp/lit_temporal.py
+        - src/bbox_tube_temporal_exp/dataset.py
         - data/06_models/vit_dinov2_frozen/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -616,9 +619,9 @@ stages:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/bbox_tube_temporal/temporal_classifier.py
-        - src/bbox_tube_temporal/lit_temporal.py
-        - src/bbox_tube_temporal/dataset.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal_exp/lit_temporal.py
+        - src/bbox_tube_temporal_exp/dataset.py
         - data/06_models/vit_dinov2_finetune/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -653,9 +656,9 @@ stages:
         --render-tubes-dir data/08_reporting/tubes/${item}
       deps:
         - scripts/evaluate.py
-        - src/bbox_tube_temporal/temporal_classifier.py
-        - src/bbox_tube_temporal/lit_temporal.py
-        - src/bbox_tube_temporal/dataset.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+        - src/bbox_tube_temporal_exp/lit_temporal.py
+        - src/bbox_tube_temporal_exp/dataset.py
         - data/06_models/vit_in21k_finetune/best_checkpoint.pt
         - data/05_model_input/${item}
         - data/08_reporting/tubes/${item}
@@ -689,13 +692,13 @@ stages:
         --model-name ${item.variant}-${item.split}
       deps:
         - scripts/evaluate_packaged.py
-        - src/bbox_tube_temporal/data.py
-        - src/bbox_tube_temporal/eval_plots.py
-        - src/bbox_tube_temporal/inference.py
-        - src/bbox_tube_temporal/model.py
-        - src/bbox_tube_temporal/model_input.py
-        - src/bbox_tube_temporal/protocol_eval.py
-        - src/bbox_tube_temporal/tubes.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/data.py
+        - src/bbox_tube_temporal_exp/eval_plots.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/inference.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model_input.py
+        - src/bbox_tube_temporal_exp/protocol_eval.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/tubes.py
         - data/06_models/${item.variant}/model.zip
         - data/01_raw/datasets/${item.split}
       outs:
@@ -750,14 +753,14 @@ stages:
         - data/01_raw/datasets/train
         - data/01_raw/datasets/val
         - scripts/package_model.py
-        - src/bbox_tube_temporal/package.py
-        - src/bbox_tube_temporal/calibration.py
-        - src/bbox_tube_temporal/val_predict.py
-        - src/bbox_tube_temporal/package_predict.py
-        - src/bbox_tube_temporal/logistic_calibrator.py
-        - src/bbox_tube_temporal/logistic_calibrator_fit.py
-        - src/bbox_tube_temporal/inference.py
-        - src/bbox_tube_temporal/model.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/package.py
+        - src/bbox_tube_temporal_exp/calibration.py
+        - src/bbox_tube_temporal_exp/val_predict.py
+        - src/bbox_tube_temporal_exp/package_predict.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/logistic_calibrator.py
+        - src/bbox_tube_temporal_exp/logistic_calibrator_fit.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/inference.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model.py
       params:
         - package
         - tubes
