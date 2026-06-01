@@ -290,7 +290,7 @@ wheels = [
 [[package]]
 name = "bbox-tube-temporal-core"
 version = "0.1.0"
-source = { directory = "../../../lib/bbox-tube-temporal" }
+source = { editable = "../../../lib/bbox-tube-temporal" }
 dependencies = [
     { name = "numpy" },
     { name = "pillow" },
@@ -3043,7 +3043,7 @@ wheels = [
 [[package]]
 name = "pyrocore"
 version = "0.1.0"
-source = { directory = "../../../lib/pyrocore" }
+source = { editable = "../../../lib/pyrocore" }
 
 [package.metadata]
 requires-dist = [
@@ -3665,11 +3665,11 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "bbox-tube-temporal-core", directory = "../../../lib/bbox-tube-temporal" },
+    { name = "bbox-tube-temporal-core", editable = "../../../lib/bbox-tube-temporal" },
     { name = "pandas", specifier = ">=2.0" },
     { name = "pillow", specifier = ">=10.0" },
     { name = "pyarrow", specifier = ">=15" },
-    { name = "pyrocore", directory = "../../../lib/pyrocore" },
+    { name = "pyrocore", editable = "../../../lib/pyrocore" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "requests", specifier = ">=2.31" },
     { name = "streamlit", specifier = ">=1.40" },

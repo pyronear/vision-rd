@@ -22,8 +22,8 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-bbox-tube-temporal-core = { path = "../../../lib/bbox-tube-temporal" }
-pyrocore = { path = "../../../lib/pyrocore" }
+bbox-tube-temporal-core = { path = "../../../lib/bbox-tube-temporal", editable = true }
+pyrocore = { path = "../../../lib/pyrocore", editable = true }
 
 [dependency-groups]
 dev = ["pytest>=8.0", "ruff>=0.9", "dvc[s3]>=3.56"]
