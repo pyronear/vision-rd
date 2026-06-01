@@ -495,7 +495,9 @@ def _drilldown(key: str, model: str, row: pd.Series) -> None:  # pragma: no cove
             tubes_col.caption("inactive at this frame")
 
 
-def render_performance(df, source, model) -> None:  # pragma: no cover - Streamlit UI
+def render_performance(
+    df: pd.DataFrame, source: str | None, model: str
+) -> None:  # pragma: no cover - Streamlit UI
     """Three headline metric cards over the full source+model labeled eval set.
 
     Ignores org/camera (overall numbers). Renders nothing when the selected
@@ -519,8 +521,11 @@ def render_performance(df, source, model) -> None:  # pragma: no cover - Streaml
         ),
     )
     for col, (label, value, frac) in zip(st.columns(3), cards, strict=True):
-        col.metric(label, "—" if value is None else f"{value:.1%}")
-        col.caption(frac)
+        if value is None:
+            col.metric(label, "—")
+        else:
+            col.metric(label, f"{value:.1%}")
+            col.caption(frac)
 
 
 def main() -> None:  # pragma: no cover - Streamlit UI

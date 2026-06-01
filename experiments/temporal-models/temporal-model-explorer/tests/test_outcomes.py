@@ -92,6 +92,15 @@ def test_performance_summary_zero_denominators():
     assert s["specificity"] == 1.0
 
 
+def test_performance_summary_precision_zero_when_only_fp_kept():
+    # kept only false positives: precision 0.0 (not None), recall None (no smoke)
+    df = pd.DataFrame([_r("fp", "kept-fp"), _r("fp", "kept-fp")])
+    s = performance_summary(df)
+    assert s["precision"] == 0.0
+    assert s["recall"] is None
+    assert s["specificity"] == 0.0  # discarded_fp 0 / n_fp 2
+
+
 def test_performance_summary_excludes_unknown():
     df = pd.DataFrame([_r("unknown", "n/a"), _r("unknown", "n/a")])
     s = performance_summary(df)

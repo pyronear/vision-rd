@@ -69,8 +69,11 @@ and `model` (not the org/camera-filtered `view`).
 ### 3. Visibility
 
 Driven entirely by `n_labeled`: the section renders only when the selected
-source has labeled rows. This shows for `pyro-annotator` (default) and
-auto-hides for `alert-api`/`platform` — no source-name hardcoding.
+source has labeled (`smoke`/`fp`) rows — no source-name hardcoding. It always
+shows for `pyro-annotator` (fully labeled). It also shows for any other source
+that carries labeled rows: `alert-api`/`platform` has a labeled subset (~81 of
+its sequences have a real `is_wildfire`), so the cards render there too, scoped
+to that subset. A source with zero labeled rows renders nothing.
 
 ## Error handling / edge cases
 
