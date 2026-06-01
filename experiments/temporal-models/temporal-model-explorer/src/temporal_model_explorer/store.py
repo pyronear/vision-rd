@@ -13,6 +13,11 @@ from pyrocore import Frame
 META_FILENAME = "meta.json"
 
 
+def slug(value: str) -> str:
+    """On-disk-safe slug: lowercased, spaces and slashes become dashes."""
+    return value.strip().lower().replace(" ", "-").replace("/", "-")
+
+
 @dataclass
 class FrameRef:
     file: str  # path relative to the sequence dir, e.g. "images/detection_5.jpg"

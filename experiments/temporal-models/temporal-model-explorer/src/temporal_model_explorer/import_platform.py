@@ -13,7 +13,7 @@ from pathlib import Path
 import requests
 
 from . import platform_api
-from .store import FrameRef, SequenceMeta, normalize_label, write_meta
+from .store import FrameRef, SequenceMeta, normalize_label, slug, write_meta
 
 log = logging.getLogger(__name__)
 
@@ -34,23 +34,19 @@ def build_org_index(api_endpoint: str, admin_token: str) -> dict[int, str]:
     return {o["id"]: o["name"] for o in orgs}
 
 
-def _slug(value: str) -> str:
-    return value.strip().lower().replace(" ", "-").replace("/", "-")
-
-
 def _org_slug(org_id: int | None, org_index: dict[int, str] | None) -> str:
     """On-disk subdir for an org: its name when known, else org_<id>, else 'unknown'."""
     if org_id is None:
         return "unknown"
     name = (org_index or {}).get(org_id)
-    return _slug(name) if name else f"org_{org_id}"
+    return slug(name) if name else f"org_{org_id}"
 
 
 def _camera_slug(cam: dict, camera_id: int | None) -> str:
     """On-disk subdir for a camera: name when known, else cam_<id>, else 'unknown'."""
     name = cam.get("name")
     if name:
-        return _slug(name)
+        return slug(name)
     return f"cam_{camera_id}" if camera_id is not None else "unknown"
 
 

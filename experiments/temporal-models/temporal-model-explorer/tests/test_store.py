@@ -9,6 +9,7 @@ from temporal_model_explorer.store import (
     iter_sequence_dirs,
     normalize_label,
     read_meta,
+    slug,
     write_meta,
 )
 
@@ -43,6 +44,11 @@ def test_iter_sequence_dirs_finds_meta_recursively(tmp_path):
     write_meta(tmp_path / "platform" / "platform_2", _meta("platform_2"))
     found = {p.name for p in iter_sequence_dirs(tmp_path)}
     assert found == {"zip_1", "platform_2"}
+
+
+def test_slug_lowercases_and_replaces_spaces_and_slashes():
+    assert slug("SDIS 77") == "sdis-77"
+    assert slug("Champ/Du Feu") == "champ-du-feu"
 
 
 def test_normalize_label():

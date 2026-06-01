@@ -513,14 +513,19 @@ def main() -> None:  # pragma: no cover - Streamlit UI
     )
 
     st.sidebar.header("Select")
-    orgs = sorted(x for x in df["organization_name"].dropna().unique())
+    sources = sorted(x for x in df["source"].dropna().unique())
+    source = st.sidebar.selectbox("source", sources, key="source") if sources else None
+    src_df = df[df["source"] == source] if source else df
+    orgs = sorted(x for x in src_df["organization_name"].dropna().unique())
     org = st.sidebar.selectbox("organization", orgs, key="org") if orgs else None
-    org_df = df[df["organization_name"] == org] if org else df
+    org_df = src_df[src_df["organization_name"] == org] if org else src_df
     cameras = sorted(x for x in org_df["camera_name"].dropna().unique())
     camera = st.sidebar.selectbox("camera", cameras, key="camera") if cameras else None
     model = st.sidebar.selectbox("model", models, key="model")
 
     view = df[df["model"] == model]
+    if source:
+        view = view[view["source"] == source]
     if org:
         view = view[view["organization_name"] == org]
     if camera:
