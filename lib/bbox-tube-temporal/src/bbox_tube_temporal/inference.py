@@ -15,7 +15,13 @@ from torchvision.transforms.functional import to_tensor
 
 from .logistic_calibrator import LogisticCalibrator, extract_features
 from .model_input import crop_and_resize, expand_bbox, norm_bbox_to_pixel_square
-from .tubes import interpolate_gaps as _interpolate_gaps
+from .tubes import (
+    build_tubes,
+    merge_colocated_tubes,
+)
+from .tubes import (
+    interpolate_gaps as _interpolate_gaps,
+)
 from .types import Detection, FrameDetections, Tube
 
 
@@ -403,3 +409,53 @@ def find_first_crossing_trigger(
     )
     trigger = per_tube[trigger_tube_id]["crossing_frame"]
     return True, trigger, trigger_tube_id, per_tube
+
+
+def build_tubes_for_inference(
+    frame_detections: list[FrameDetections],
+    *,
+    iou_threshold: float,
+    max_misses: int,
+    min_tube_length: int,
+    min_detected_entries: int,
+    interpolate_gaps: bool,
+    merge_iomin: float | None,
+    merge_prox_factor: float | None,
+    merge_max_gap: int | None,
+) -> list[Tube]:
+    """Run the full inference tube pipeline.
+
+    When all three ``merge_*`` thresholds are provided, the merge pass runs
+    between two filter steps (filter-before-merge prevents resurrecting
+    sub-threshold noise; the second filter+interpolate prepares the tubes for
+    the classifier). If any ``merge_*`` is ``None`` the merge is skipped and
+    the pipeline collapses to the legacy ``build_tubes`` -> single
+    ``filter_and_interpolate_tubes`` path (bit-for-bit backward compatible).
+    """
+    tubes = build_tubes(
+        frame_detections, iou_threshold=iou_threshold, max_misses=max_misses
+    )
+    merge_active = (
+        merge_iomin is not None
+        and merge_prox_factor is not None
+        and merge_max_gap is not None
+    )
+    if merge_active:
+        tubes = filter_and_interpolate_tubes(
+            tubes,
+            min_tube_length=min_tube_length,
+            min_detected_entries=min_detected_entries,
+            interpolate_gaps=False,
+        )
+        tubes = merge_colocated_tubes(
+            tubes,
+            merge_iomin=merge_iomin,
+            merge_prox_factor=merge_prox_factor,
+            merge_max_gap=merge_max_gap,
+        )
+    return filter_and_interpolate_tubes(
+        tubes,
+        min_tube_length=min_tube_length,
+        min_detected_entries=min_detected_entries,
+        interpolate_gaps=interpolate_gaps,
+    )
