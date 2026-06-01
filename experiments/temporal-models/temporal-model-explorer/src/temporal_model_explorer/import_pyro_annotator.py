@@ -93,16 +93,28 @@ def _import_one(
     )
     (seq_out / "images").mkdir(parents=True, exist_ok=True)
 
-    # Frames in capture order (detection_<id> increments with time).
-    images = sorted(
-        (seq_dir / "images").glob("*.jpg"),
-        key=lambda p: int(p.stem.split("_")[-1]),
-    )
+    # Frames in capture order (detection_<id> increments with time). Globbing the
+    # ``detection_`` prefix excludes macOS AppleDouble ``._*`` siblings; any
+    # remaining odd filename is logged and skipped rather than aborting the run.
+    parsed: list[tuple[int, Path]] = []
+    for p in (seq_dir / "images").glob("detection_*.jpg"):
+        try:
+            parsed.append((int(p.stem.split("_")[-1]), p))
+        except ValueError:
+            log.warning("seq %s: skipping unparseable frame %s", seq_id, p.name)
+    parsed.sort(key=lambda x: x[0])
+
     # Per-frame timestamps only when the frame sets line up; else leave them None.
-    times = api_times if len(api_times) == len(images) else [None] * len(images)
+    if api_times and len(api_times) != len(parsed):
+        log.warning(
+            "seq %s: %d frames != %d API detections; per-frame timestamps skipped",
+            seq_id,
+            len(parsed),
+            len(api_times),
+        )
+    times = api_times if len(api_times) == len(parsed) else [None] * len(parsed)
     frames: list[FrameRef] = []
-    for img, ts in zip(images, times, strict=True):
-        det_id = int(img.stem.split("_")[-1])
+    for (det_id, img), ts in zip(parsed, times, strict=True):
         shutil.copyfile(img, seq_out / "images" / img.name)
         frames.append(
             FrameRef(file=f"images/{img.name}", detection_id=det_id, created_at=ts)
@@ -145,17 +157,20 @@ def import_pyro_annotator(
     camera_index = camera_index or {}
     count = 0
     for klass, subtype, seq_id, seq_dir in iter_zip_sequences(src):
-        count += _import_one(
-            api_endpoint,
-            token,
-            out,
-            klass,
-            subtype,
-            seq_id,
-            seq_dir,
-            camera_index,
-            org_index,
-            detections_limit,
-            list_detections,
-        )
+        try:
+            count += _import_one(
+                api_endpoint,
+                token,
+                out,
+                klass,
+                subtype,
+                seq_id,
+                seq_dir,
+                camera_index,
+                org_index,
+                detections_limit,
+                list_detections,
+            )
+        except Exception as exc:  # noqa: BLE001 - one bad seq shouldn't kill the run
+            log.warning("failed to import seq %s: %s", seq_id, exc)
     return count

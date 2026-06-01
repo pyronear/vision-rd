@@ -147,3 +147,53 @@ def test_import_falls_back_to_unknown_when_no_detections(tmp_path):
     assert meta.camera_id is None and meta.organization_id is None
     assert meta.frames[0].created_at is None
     assert meta.started_at is None
+
+
+def test_import_skips_appledouble_and_unparseable_frames(tmp_path):
+    src = tmp_path / "seq_annotation_done_by_label"
+    seq = _make_seq(src, "smoke", "wildfire", "seq_55", det_ids=[10, 11])
+    # macOS AppleDouble sibling, a non-detection jpg, and an unparseable det id
+    (seq / "images" / "._detection_10.jpg").write_bytes(b"junk")
+    (seq / "images" / "thumbnail.jpg").write_bytes(b"junk")
+    (seq / "images" / "detection_bad.jpg").write_bytes(b"junk")
+    out = tmp_path / "store"
+
+    ipa.import_pyro_annotator(
+        src,
+        out,
+        "https://x",
+        "tok",
+        camera_index={},
+        org_index={},
+        list_detections=lambda ep, tok, sid, limit, desc: [],
+    )
+
+    img_dir = out / "pyro-annotator" / "unknown" / "unknown" / "seq_55" / "images"
+    meta = read_meta(img_dir.parent)
+    assert [f.detection_id for f in meta.frames] == [10, 11]
+    assert sorted(p.name for p in img_dir.glob("*.jpg")) == [
+        "detection_10.jpg",
+        "detection_11.jpg",
+    ]
+
+
+def test_import_continues_past_a_bad_sequence(tmp_path):
+    src = tmp_path / "seq_annotation_done_by_label"
+    _make_seq(src, "smoke", "wildfire", "seq_1", det_ids=[1])
+    _make_seq(src, "weird", "seq_2", det_ids=[1])  # unknown class -> parse_label raises
+    out = tmp_path / "store"
+
+    n = ipa.import_pyro_annotator(
+        src,
+        out,
+        "https://x",
+        "tok",
+        camera_index={},
+        org_index={},
+        list_detections=lambda ep, tok, sid, limit, desc: [],
+    )
+
+    assert n == 1
+    assert (
+        out / "pyro-annotator" / "unknown" / "unknown" / "seq_1" / "meta.json"
+    ).exists()
