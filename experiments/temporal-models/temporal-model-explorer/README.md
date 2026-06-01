@@ -67,6 +67,28 @@ uv run dvc repro run_models     # score the newly imported sequences
 The date range is required on the command line; the detection limit and camera
 filter come from `params.yaml` (`platform.*`).
 
+## Importing the pyro-annotator export
+
+The pyro-annotator zip is a human-labeled export (smoke / fp / unlabeled, with
+subtype). Unzip it under `data/01_raw/`, then import — camera, organization, and
+timestamps are enriched from the platform API. **Admin creds are required**: the
+regular login is org-scoped and returns 403 for these sequences.
+
+```bash
+unzip data/01_raw/seq_annotation_done_by_label.zip -d data/01_raw/
+
+export PLATFORM_API_ENDPOINT=https://...
+export PLATFORM_ADMIN_LOGIN=...
+export PLATFORM_ADMIN_PASSWORD=...
+
+uv run python scripts/import_pyro_annotator.py \
+    --src data/01_raw/seq_annotation_done_by_label
+uv run dvc repro run_models     # score the newly imported sequences
+```
+
+These land under `data/03_primary/sequences/pyro-annotator/<org>/<camera>/` and
+appear in the app under the **source** selector as `pyro-annotator`.
+
 ## Common commands
 
 ```bash
@@ -85,6 +107,7 @@ Each pipeline stage is also a standalone script:
 | Script | Purpose | Key flags |
 | --- | --- | --- |
 | `scripts/import_platform.py` | Import platform sequences into the store | `--date-from`, `--date-to` (required), `--out` |
+| `scripts/import_pyro_annotator.py` | Import the pyro-annotator zip export (label from folder, camera/org/timestamps enriched via admin API) | `--src` (required), `--out` |
 | `scripts/prepare_models.py` | Copy the `model.zip`s named in `params.yaml` into `data/06_models/` | `--out`, `--params` |
 | `scripts/run_models.py` | Score every sequence and write `results.parquet` + `details/` | `--device {auto,cpu,cuda}`, `--store`, `--models-dir`, `--out` |
 
