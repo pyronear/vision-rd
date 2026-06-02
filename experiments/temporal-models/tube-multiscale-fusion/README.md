@@ -219,48 +219,55 @@ Reproduce with:
 uv run dvc repro benchmark_dinov2_multiscale
 ```
 
-### Ablation: local branch only, 3D ResNet (no temporal module)
+### Ablation: remove the temporal module (global branch)
 
-To isolate what the **global DINOv2 sequence branch + cross-attention fusion**
-(the "temporal module") contribute, we trained an ablation that keeps only the
-local tube decomposition but (a) swaps the tubelet-transformer tube encoder for
-a Kinetics-400 pretrained **r3d_18**, and (b) drops the global branch and
-fusion entirely — the per-tube vectors are simply mask-mean-pooled into an MLP
-head. Same tube geometry (2×2 / len 4 / stride 2 → 28 tubes/seq), same training
-schedule and data.
+To isolate what the **global DINOv2 sequence branch** (the "temporal module")
+contributes, we train a faithful ablation: the **local branch and the fusion
+module are the exact same modules with the same hyperparameters** as the full
+model, and the *only* change is that the global branch is removed. Because the
+fusion's cross-attention needs a query (the global context vector in the full
+model), that single input is replaced by a **learnable query token** — a
+constant, data-independent parameter. Everything else (local tube branch,
+fusion self-attention + cross-attention + FFN, MLP head) is byte-for-byte
+identical. Same tube geometry (2×2 / len 4 / stride 2 → 28 tubes/seq), schedule,
+and data.
 
-| | **Full model** (global + local + fusion) | **Ablation** (local-only r3d_18) |
+Removing the global branch removes the 16 per-frame DINOv2 forward passes that
+dominate the full model's compute, so the ablation is strictly *smaller and
+cheaper* — exactly the point of an ablation.
+
+| | **Full model** (global + local + fusion) | **Ablation** (no temporal module) |
 |---|---:|---:|
-| val F1 | **0.9783** | 0.9333 |
-| val accuracy | **0.9786** | 0.9321 |
-| val precision | **0.9574** | 0.8867 |
-| val recall | 1.0000 | 0.9852 |
-| val PR-AUC | **0.9936** | 0.9825 |
-| val FP / FN (of 280) | **6 / 0** | 17 / 2 |
-| Recall @ FPR=1% | **0.874** | 0.659 |
-| Recall @ FPR=5% | **1.000** | 0.911 |
-| Recall @ FPR=10% | **1.000** | 0.956 |
-| Params (trainable) | 36.4 M (16.6 M) | 33.3 M (25.0 M) |
-| GFLOPs / sequence | **226.5** | 603.9 |
-| GPU latency (ms/seq) | **10.7** | 13.3 |
+| val F1 | **0.9783** | 0.8716 |
+| val accuracy | **0.9786** | 0.8643 |
+| val precision | **0.9574** | 0.8012 |
+| val recall | **1.0000** | 0.9556 |
+| val PR-AUC | **0.9936** | 0.9019 |
+| val FP / FN (of 280) | **6 / 0** | 32 / 6 |
+| Recall @ FPR=1% | **0.874** | 0.193 |
+| Recall @ FPR=5% | **1.000** | 0.563 |
+| Recall @ FPR=10% | **1.000** | 0.748 |
+| Params (trainable) | 36.4 M (16.6 M) | **11.3 M** (11.3 M) |
+| GFLOPs / sequence | 226.5 | **30.5** |
+| GPU latency (ms/seq) | 10.7 | **2.1** |
 
-**Takeaway.** Removing the temporal module costs ~4.5 F1 points, and the damage
+**Takeaway.** Removing the temporal module costs ~11 F1 points, and the damage
 is concentrated exactly where the design predicts: **precision and the
-low-false-alarm regime**, not recall. False positives nearly triple (6 → 17),
-precision drops 0.957 → 0.887, and recall at a strict 1 % FPR collapses
-0.874 → 0.659 — while recall stays high (1.000 → 0.985). In other words, a
-purely local 3D-CNN still *finds* smoke, but without the global context branch
-it can no longer reliably *reject* slow-moving look-alikes (cloud, fog, haze):
-local turbulence alone is an ambiguous cue, and it takes the long-range
+low-false-alarm regime**, not recall. False positives jump 5× (6 → 32),
+precision drops 0.957 → 0.801, and recall at a strict 1 % FPR collapses
+0.874 → 0.193 — while recall stays comparatively high (1.000 → 0.956). In other
+words, the local tube branch alone still *finds* smoke, but without the global
+context it can no longer reliably *reject* slow-moving look-alikes (cloud, fog,
+haze): local turbulence alone is an ambiguous cue, and it takes the long-range
 sequence context to confirm whether that motion is a growing plume or benign
-weather. The ablation also costs **2.7× the FLOPs** (running r3d_18 over all 28
-tubes) to do worse — confirming the two-branch design is both more accurate and
-cheaper than scaling up the local branch alone.
+weather. The ablation is ~7× cheaper (30.5 vs 226.5 GFLOPs) precisely because it
+drops the DINOv2 sequence branch — but that branch is what buys the
+deployment-critical low-FPR operating point.
 
 Reproduce with:
 
 ```bash
-uv run dvc repro train_ablation_resnet3d evaluate_ablation_resnet3d
+uv run dvc repro train_ablation_no_temporal evaluate_ablation_no_temporal
 ```
 
 ## How to Reproduce

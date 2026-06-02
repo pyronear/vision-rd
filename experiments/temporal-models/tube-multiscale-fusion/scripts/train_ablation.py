@@ -1,7 +1,7 @@
-"""Train the local-only 3D ResNet ablation classifier.
+"""Train the no-temporal-module ablation (full model minus the global branch).
 
-Reads a single named section from ``params.yaml`` (e.g. ``train_ablation_resnet3d``)
-plus a ``local_branch`` section for the tube geometry.
+Reuses the same ``global_branch`` (ignored), ``local_branch``, and ``fusion``
+sections as the full model so the kept components are byte-for-byte identical.
 """
 
 import argparse
@@ -17,7 +17,7 @@ from torch.utils.data import DataLoader
 
 from tube_multiscale_fusion.augment import build_tube_augment
 from tube_multiscale_fusion.dataset import TubePatchDataset
-from tube_multiscale_fusion.lit_ablation import LitAblationLocalResnet3D
+from tube_multiscale_fusion.lit_ablation import LitAblationNoTemporal
 
 
 def main() -> None:
@@ -33,6 +33,7 @@ def main() -> None:
     cfg = full_params[args.params_key]
     augment_cfg = full_params.get("augment", {"enabled": False})
     l_cfg = full_params[cfg.get("local_branch_section", "local_branch")]
+    f_cfg = full_params[cfg.get("fusion_section", "fusion")]
 
     device_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu"
     print(
@@ -69,22 +70,29 @@ def main() -> None:
         persistent_workers=cfg["num_workers"] > 0,
     )
 
-    lit = LitAblationLocalResnet3D(
+    lit = LitAblationNoTemporal(
         grid_size=l_cfg["grid_size"],
         cell_size=l_cfg["cell_size"],
         tube_length=l_cfg["tube_length"],
         temporal_stride=l_cfg["temporal_stride"],
-        resnet_model=cfg.get("resnet_model", "r3d_18"),
-        resnet_pretrained=cfg.get("resnet_pretrained", True),
-        resnet_finetune=cfg.get("resnet_finetune", True),
-        resnet_finetune_last_n_blocks=cfg.get("resnet_finetune_last_n_blocks", 1),
-        resnet_clip_spatial_size=cfg.get("resnet_clip_spatial_size", 112),
-        embed_dim=cfg.get("embed_dim"),
+        local_t_kernel=l_cfg["encoder"]["t_kernel"],
+        local_h_patch=l_cfg["encoder"]["h_patch"],
+        local_w_patch=l_cfg["encoder"]["w_patch"],
+        local_embed_dim=l_cfg["encoder"]["embed_dim"],
+        local_num_layers=l_cfg["encoder"]["num_layers"],
+        local_num_heads=l_cfg["encoder"]["num_heads"],
+        local_ffn_dim=l_cfg["encoder"]["ffn_dim"],
+        local_dropout=l_cfg["encoder"]["dropout"],
+        d_fusion=f_cfg["d_fusion"],
+        fusion_num_layers=f_cfg["num_layers"],
+        fusion_num_heads=f_cfg["num_heads"],
+        fusion_ffn_dim=f_cfg["ffn_dim"],
+        fusion_dropout=f_cfg["dropout"],
         head_hidden_dim=cfg["head_hidden_dim"],
-        head_dropout=cfg.get("head_dropout", 0.1),
+        head_dropout=cfg.get("head_dropout", 0.0),
+        query_dim=cfg.get("query_dim", 384),
         learning_rate=cfg["learning_rate"],
         weight_decay=cfg["weight_decay"],
-        backbone_lr=cfg.get("backbone_lr"),
         use_cosine_warmup=cfg.get("use_cosine_warmup", False),
         warmup_frac=cfg.get("warmup_frac", 0.05),
     )

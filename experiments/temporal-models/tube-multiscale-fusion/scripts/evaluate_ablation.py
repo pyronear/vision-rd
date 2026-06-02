@@ -1,4 +1,4 @@
-"""Evaluate the trained local-only 3D ResNet ablation classifier on a split.
+"""Evaluate the no-temporal-module ablation classifier on a split.
 
 Same metric/plot outputs as ``scripts/evaluate.py`` so the ablation is
 directly comparable to the full model.
@@ -25,7 +25,7 @@ from tube_multiscale_fusion.eval_plots import (
     plot_pr_curve,
     plot_roc_curve,
 )
-from tube_multiscale_fusion.lit_ablation import LitAblationLocalResnet3D
+from tube_multiscale_fusion.lit_ablation import LitAblationNoTemporal
 
 
 def main() -> None:
@@ -43,9 +43,7 @@ def main() -> None:
 
     L.seed_everything(cfg["seed"], workers=True)
 
-    lit = LitAblationLocalResnet3D.load_from_checkpoint(
-        str(args.checkpoint), resnet_pretrained=False
-    )
+    lit = LitAblationNoTemporal.load_from_checkpoint(str(args.checkpoint))
     lit.eval()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
@@ -118,13 +116,13 @@ def main() -> None:
     plot_confusion_matrix(
         cm_abs,
         args.output_dir / "confusion_matrix.png",
-        title=f"ablation-resnet3d / {split_name} (counts)",
+        title=f"ablation-no-temporal / {split_name} (counts)",
         normalized=False,
     )
     plot_confusion_matrix(
         cm_norm,
         args.output_dir / "confusion_matrix_normalized.png",
-        title=f"ablation-resnet3d / {split_name} (row-normalized)",
+        title=f"ablation-no-temporal / {split_name} (row-normalized)",
         normalized=True,
     )
     plot_pr_curve(labels, probs, args.output_dir / "pr_curve.png", title="PR")

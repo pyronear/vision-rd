@@ -107,33 +107,36 @@ stages:
       - data/06_models/dinov2_multiscale
 
   # ---------------------------------------------------------------------------
-  # Ablation: local-only 3D ResNet (no global branch, no fusion).
+  # Ablation: full model minus the temporal module (global DINOv2 branch).
+  # Local branch + fusion are identical to the default model.
   # ---------------------------------------------------------------------------
-  train_ablation_resnet3d:
+  train_ablation_no_temporal:
     cmd: >-
       uv run python scripts/train_ablation.py
       --train-dir data/05_model_input/train
       --val-dir data/05_model_input/val
-      --output-dir data/06_models/ablation_resnet3d
+      --output-dir data/06_models/ablation_no_temporal
       --params-path params.yaml
-      --params-key train_ablation_resnet3d
+      --params-key train_ablation_no_temporal
     deps:
       - scripts/train_ablation.py
       - src/tube_multiscale_fusion/augment.py
       - src/tube_multiscale_fusion/dataset.py
       - src/tube_multiscale_fusion/local_branch.py
-      - src/tube_multiscale_fusion/local_resnet3d.py
+      - src/tube_multiscale_fusion/fusion.py
+      - src/tube_multiscale_fusion/ablation_classifier.py
       - src/tube_multiscale_fusion/lit_ablation.py
       - data/05_model_input/train
       - data/05_model_input/val
     params:
-      - train_ablation_resnet3d
+      - train_ablation_no_temporal
       - local_branch
+      - fusion
       - augment
     outs:
-      - data/06_models/ablation_resnet3d
+      - data/06_models/ablation_no_temporal
 
-  evaluate_ablation_resnet3d:
+  evaluate_ablation_no_temporal:
     foreach:
       - train
       - val
@@ -141,24 +144,26 @@ stages:
       cmd: >-
         uv run python scripts/evaluate_ablation.py
         --data-dir data/05_model_input/${item}
-        --checkpoint data/06_models/ablation_resnet3d/best_checkpoint.pt
-        --output-dir data/08_reporting/ablation_resnet3d/${item}
+        --checkpoint data/06_models/ablation_no_temporal/best_checkpoint.pt
+        --output-dir data/08_reporting/ablation_no_temporal/${item}
         --params-path params.yaml
-        --params-key train_ablation_resnet3d
+        --params-key train_ablation_no_temporal
       deps:
         - scripts/evaluate_ablation.py
         - src/tube_multiscale_fusion/dataset.py
         - src/tube_multiscale_fusion/local_branch.py
-        - src/tube_multiscale_fusion/local_resnet3d.py
+        - src/tube_multiscale_fusion/fusion.py
+        - src/tube_multiscale_fusion/ablation_classifier.py
         - src/tube_multiscale_fusion/lit_ablation.py
         - src/tube_multiscale_fusion/eval_plots.py
         - data/05_model_input/${item}
-        - data/06_models/ablation_resnet3d
+        - data/06_models/ablation_no_temporal
       params:
-        - train_ablation_resnet3d
+        - train_ablation_no_temporal
         - local_branch
+        - fusion
       outs:
-        - data/08_reporting/ablation_resnet3d/${item}
+        - data/08_reporting/ablation_no_temporal/${item}
 
   benchmark_dinov2_multiscale:
     cmd: >-

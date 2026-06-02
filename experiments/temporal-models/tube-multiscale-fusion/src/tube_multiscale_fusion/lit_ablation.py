@@ -1,4 +1,10 @@
-"""Lightning wrapper for the local-only 3D ResNet ablation classifier."""
+"""Lightning wrapper for the no-temporal-module ablation classifier.
+
+Mirrors ``LitTubeMultiscaleClassifier`` exactly (BCE, AdamW, cosine warmup,
+F1 metric logging) so the two models are directly comparable. There is no
+backbone to fine-tune here (the global DINOv2 branch is removed), so a single
+parameter group is used.
+"""
 
 from __future__ import annotations
 
@@ -8,57 +14,64 @@ import lightning as L
 import torch
 from torch import Tensor
 
-from .local_resnet3d import AblationLocalResnet3DClassifier
+from .ablation_classifier import AblationNoTemporalClassifier
 
 
-class LitAblationLocalResnet3D(L.LightningModule):
-    """BCE loss; AdamW with two param groups (3D ResNet vs head) when finetuning.
-
-    Mirrors the metric logging of ``LitTubeMultiscaleClassifier`` so the two
-    models are directly comparable on the same val curves.
-    """
-
+class LitAblationNoTemporal(L.LightningModule):
     def __init__(
         self,
         grid_size: int,
         cell_size: int,
         tube_length: int,
         temporal_stride: int,
-        resnet_model: str,
-        resnet_pretrained: bool,
-        resnet_finetune: bool,
-        resnet_finetune_last_n_blocks: int,
-        resnet_clip_spatial_size: int,
-        embed_dim: int | None,
+        local_t_kernel: int,
+        local_h_patch: int,
+        local_w_patch: int,
+        local_embed_dim: int,
+        local_num_layers: int,
+        local_num_heads: int,
+        local_ffn_dim: int,
+        local_dropout: float,
+        d_fusion: int,
+        fusion_num_layers: int,
+        fusion_num_heads: int,
+        fusion_ffn_dim: int,
+        fusion_dropout: float,
         head_hidden_dim: int,
         head_dropout: float,
+        query_dim: int,
         learning_rate: float,
         weight_decay: float,
-        backbone_lr: float | None = None,
         use_cosine_warmup: bool = False,
         warmup_frac: float = 0.05,
     ) -> None:
         super().__init__()
         self.save_hyperparameters()
-        self.model = AblationLocalResnet3DClassifier(
+        self.model = AblationNoTemporalClassifier(
             grid_size=grid_size,
             cell_size=cell_size,
             tube_length=tube_length,
             temporal_stride=temporal_stride,
-            resnet_model=resnet_model,
-            resnet_pretrained=resnet_pretrained,
-            resnet_finetune=resnet_finetune,
-            resnet_finetune_last_n_blocks=resnet_finetune_last_n_blocks,
-            resnet_clip_spatial_size=resnet_clip_spatial_size,
-            embed_dim=embed_dim,
+            local_t_kernel=local_t_kernel,
+            local_h_patch=local_h_patch,
+            local_w_patch=local_w_patch,
+            local_embed_dim=local_embed_dim,
+            local_num_layers=local_num_layers,
+            local_num_heads=local_num_heads,
+            local_ffn_dim=local_ffn_dim,
+            local_dropout=local_dropout,
+            d_fusion=d_fusion,
+            fusion_num_layers=fusion_num_layers,
+            fusion_num_heads=fusion_num_heads,
+            fusion_ffn_dim=fusion_ffn_dim,
+            fusion_dropout=fusion_dropout,
             head_hidden_dim=head_hidden_dim,
             head_dropout=head_dropout,
+            query_dim=query_dim,
         )
         self.loss_fn = torch.nn.BCEWithLogitsLoss()
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
-        self.backbone_lr = backbone_lr
-        self.finetune = resnet_finetune
         self.use_cosine_warmup = use_cosine_warmup
         self.warmup_frac = warmup_frac
         self._val_preds: list[float] = []
@@ -103,41 +116,12 @@ class LitAblationLocalResnet3D(L.LightningModule):
         self._val_preds.clear()
         self._val_labels.clear()
 
-    def _head_params(self) -> list[torch.nn.Parameter]:
-        encoder_ids = {id(p) for p in self.model.encoder.parameters()}
-        return [
-            p
-            for p in self.model.parameters()
-            if p.requires_grad and id(p) not in encoder_ids
-        ]
-
     def configure_optimizers(self):
-        head_params = self._head_params()
-        if not self.finetune:
-            optimizer = torch.optim.AdamW(
-                head_params, lr=self.learning_rate, weight_decay=self.weight_decay
-            )
-        else:
-            if self.backbone_lr is None:
-                raise ValueError("backbone_lr must be set when resnet_finetune=True")
-            encoder_params = [
-                p for p in self.model.encoder.parameters() if p.requires_grad
-            ]
-            optimizer = torch.optim.AdamW(
-                [
-                    {
-                        "params": head_params,
-                        "lr": self.learning_rate,
-                        "weight_decay": self.weight_decay,
-                    },
-                    {
-                        "params": encoder_params,
-                        "lr": self.backbone_lr,
-                        "weight_decay": self.weight_decay,
-                    },
-                ]
-            )
-
+        optimizer = torch.optim.AdamW(
+            [p for p in self.model.parameters() if p.requires_grad],
+            lr=self.learning_rate,
+            weight_decay=self.weight_decay,
+        )
         if not self.use_cosine_warmup:
             return optimizer
 
