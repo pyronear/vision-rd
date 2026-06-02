@@ -51,13 +51,21 @@ uv run playground run --model bbox-tube-vit-dinov2 data/01_raw/sample_sequences/
 uv run playground run --model bbox-tube-vit-dinov2 data/01_raw/sample_sequences/fp-seq_40312/
 # NO SMOKE ✗   frames=19   runtime=537ms
 
-# An explicit list of frames, full JSON output, a specific device:
-uv run playground run --model-package /path/to/model.zip f1.jpg f2.jpg f3.jpg --json --device cpu
+# Pass an explicit list of frame files instead of a directory (used in the
+# given order). Let the shell expand a glob, or list real paths yourself:
+uv run playground run --model bbox-tube-vit-dinov2 data/01_raw/sample_sequences/smoke-seq_40844/*.jpg
+
+# Full JSON output and a forced device, against an arbitrary package:
+uv run playground run --model-package data/01_raw/models/bbox-tube-vit-dinov2/model.zip \
+    data/01_raw/sample_sequences/smoke-seq_40844/ --json --device cpu
 ```
 
 `--model NAME` resolves to `data/01_raw/models/NAME/model.zip`; use
 `--model-package PATH` for an arbitrary `.zip`. `--device` defaults to auto
 (cuda → mps → cpu).
+
+When passing files explicitly, give **real paths** (a shell glob like
+`.../smoke-seq_40844/*.jpg` is easiest) — each path must exist or the run errors.
 
 ## Tracking new local data in DVC
 
