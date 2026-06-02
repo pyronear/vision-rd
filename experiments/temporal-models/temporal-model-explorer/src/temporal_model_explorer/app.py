@@ -4,8 +4,9 @@ Reads only data/07_model_output/{results.parquet,details/} +
 data/03_primary/sequences/**; never runs models or fetches. Run with
 `streamlit run app.py` (or `make app`).
 
-Left pane selects organization → camera → model. The main pane lists the
-selected sequences (day-sorted); clicking a row opens it. The drill-down shows an
+Left pane selects organization → model; camera is filtered from the table's
+filter popover. The main pane lists the selected sequences (day-sorted);
+clicking a row opens it. The drill-down shows an
 autoplaying (pausable) frame viewer with the YOLO bboxes overlaid and, alongside,
 each extracted smoke tube as a context-cropped clip that autoplays on the same
 playback tick, plus the temporal-model decision.
@@ -568,7 +569,6 @@ def main() -> None:  # pragma: no cover - Streamlit UI
     org = st.sidebar.selectbox("organization", orgs, key="org") if orgs else None
     org_df = src_df[src_df["organization_name"] == org] if org else src_df
     cameras = sorted(x for x in org_df["camera_name"].dropna().unique())
-    camera = st.sidebar.selectbox("camera", cameras, key="camera") if cameras else None
     model = st.sidebar.selectbox("model", models, key="model")
 
     view = df[df["model"] == model]
@@ -576,8 +576,6 @@ def main() -> None:  # pragma: no cover - Streamlit UI
         view = view[view["source"] == source]
     if org:
         view = view[view["organization_name"] == org]
-    if camera:
-        view = view[view["camera_name"] == camera]
     view = (
         view.assign(day=view["started_at"].map(day_of))
         .sort_values("started_at", ascending=False)
@@ -595,6 +593,7 @@ def main() -> None:  # pragma: no cover - Streamlit UI
         bar.container()
     )  # width="stretch" by default -> grows, pushing filter right
     with bar.popover("🔎 filter"):
+        camera = st.selectbox("camera", ["all", *cameras], key="camera")
         f_gt = st.selectbox(
             "ground truth", ["all", "smoke", "fp", "unknown"], key="f_gt"
         )
@@ -602,6 +601,8 @@ def main() -> None:  # pragma: no cover - Streamlit UI
         f_corr = st.selectbox(
             "correctness", ["all", *CORRECTNESS.values()], key="f_corr"
         )
+    if camera != "all":
+        view = view[view["camera_name"] == camera]
     if f_gt != "all":
         view = view[view["label"] == f_gt]
     if f_mv != "all":
@@ -609,16 +610,22 @@ def main() -> None:  # pragma: no cover - Streamlit UI
     if f_corr != "all":
         view = view[view["outcome"].map(correctness_label) == f_corr]
 
-    title_ph.subheader(f"{len(view)} sequences — {camera or 'all cameras'}")
+    cam_label = "all cameras" if camera == "all" else camera
+    title_ph.subheader(f"{len(view)} sequences — {cam_label}")
     if view.empty:
         return
 
     display = view.assign(correctness=view["outcome"].map(correctness_label)).rename(
-        columns={"label": "ground truth", "decision": "model verdict"}
+        columns={
+            "label": "ground truth",
+            "decision": "model verdict",
+            "camera_name": "camera",
+        }
     )
     cols = [
         "day",
         "started_at",
+        "camera",
         "ground truth",
         "model verdict",
         "correctness",
