@@ -3229,3 +3229,1248 @@ stages:
       md5: a196ef28362828c199fa1358af6980f4.dir
       size: 580956
       nfiles: 6
+  train_temporal@gru:
+    cmd: uv run python scripts/train_ablation_global.py --train-dir 
+      data/05_model_input/train --val-dir data/05_model_input/val --output-dir 
+      data/06_models/temporal_gru --params-path params.yaml --params-key 
+      train_temporal_gru
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: scripts/train_ablation_global.py
+      hash: md5
+      md5: 6678a014e3b92ce2046ebd6b8f90f3f7
+      size: 5301
+    - path: src/tube_multiscale_fusion/ablation_classifier.py
+      hash: md5
+      md5: 1c4f4f7de41e3253d389d3f4314fc4d0
+      size: 8701
+    - path: src/tube_multiscale_fusion/augment.py
+      hash: md5
+      md5: f52a42f92caa2fac859bf3a81a18971d
+      size: 9489
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 22bcbb284170752ff61a781a6119a474
+      size: 11333
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: e09db331d78b94f700a33fadbdedd246
+      size: 13267
+    params:
+      params.yaml:
+        augment:
+          enabled: true
+          spatial:
+            flip_prob: 0.5
+            rotation_deg: 5.0
+            scale_range:
+            - 0.9
+            - 1.1
+            translate_frac: 0.05
+          photometric:
+            brightness_range:
+            - 0.8
+            - 1.2
+            contrast_range:
+            - 0.8
+            - 1.2
+            saturation_range:
+            - 0.8
+            - 1.2
+          temporal:
+            subseq_prob: 0.5
+            subseq_min_len: 4
+            stride_prob: 0.25
+            frame_drop_prob: 0.15
+            min_valid_after_drop: 4
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_temporal_gru:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          ablation_variant: no_spatial
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          aggregator_kind: gru
+    outs:
+    - path: data/06_models/temporal_gru
+      hash: md5
+      md5: f8cf358b58419f54ddb7f699f5fec716.dir
+      size: 112687616
+      nfiles: 5
+  evaluate_temporal@gru-val:
+    cmd: uv run python scripts/evaluate_ablation_global.py --data-dir 
+      data/05_model_input/val --checkpoint 
+      data/06_models/temporal_gru/best_checkpoint.pt --output-dir 
+      data/08_reporting/temporal_gru/val --params-path params.yaml --params-key 
+      train_temporal_gru
+    deps:
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: data/06_models/temporal_gru
+      hash: md5
+      md5: f8cf358b58419f54ddb7f699f5fec716.dir
+      size: 112687616
+      nfiles: 5
+    - path: scripts/evaluate_ablation_global.py
+      hash: md5
+      md5: 6d3be966e0bf9143aa20ba3228a33c67
+      size: 5251
+    - path: src/tube_multiscale_fusion/ablation_classifier.py
+      hash: md5
+      md5: 1c4f4f7de41e3253d389d3f4314fc4d0
+      size: 8701
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 22bcbb284170752ff61a781a6119a474
+      size: 11333
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: e09db331d78b94f700a33fadbdedd246
+      size: 13267
+    params:
+      params.yaml:
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_temporal_gru:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          ablation_variant: no_spatial
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          aggregator_kind: gru
+    outs:
+    - path: data/08_reporting/temporal_gru/val
+      hash: md5
+      md5: 9cbfe7ef1da2666bf0f38e25fb8721cb.dir
+      size: 142392
+      nfiles: 6
+  train_temporal@conv1d:
+    cmd: uv run python scripts/train_ablation_global.py --train-dir 
+      data/05_model_input/train --val-dir data/05_model_input/val --output-dir 
+      data/06_models/temporal_conv1d --params-path params.yaml --params-key 
+      train_temporal_conv1d
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: scripts/train_ablation_global.py
+      hash: md5
+      md5: 6678a014e3b92ce2046ebd6b8f90f3f7
+      size: 5301
+    - path: src/tube_multiscale_fusion/ablation_classifier.py
+      hash: md5
+      md5: 1c4f4f7de41e3253d389d3f4314fc4d0
+      size: 8701
+    - path: src/tube_multiscale_fusion/augment.py
+      hash: md5
+      md5: f52a42f92caa2fac859bf3a81a18971d
+      size: 9489
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 22bcbb284170752ff61a781a6119a474
+      size: 11333
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: e09db331d78b94f700a33fadbdedd246
+      size: 13267
+    params:
+      params.yaml:
+        augment:
+          enabled: true
+          spatial:
+            flip_prob: 0.5
+            rotation_deg: 5.0
+            scale_range:
+            - 0.9
+            - 1.1
+            translate_frac: 0.05
+          photometric:
+            brightness_range:
+            - 0.8
+            - 1.2
+            contrast_range:
+            - 0.8
+            - 1.2
+            saturation_range:
+            - 0.8
+            - 1.2
+          temporal:
+            subseq_prob: 0.5
+            subseq_min_len: 4
+            stride_prob: 0.25
+            frame_drop_prob: 0.15
+            min_valid_after_drop: 4
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_temporal_conv1d:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          ablation_variant: no_spatial
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          aggregator_kind: conv1d
+    outs:
+    - path: data/06_models/temporal_conv1d
+      hash: md5
+      md5: 69be5b9da4e9b1e069222866c9dd06c3.dir
+      size: 112664954
+      nfiles: 5
+  evaluate_temporal@conv1d-val:
+    cmd: uv run python scripts/evaluate_ablation_global.py --data-dir 
+      data/05_model_input/val --checkpoint 
+      data/06_models/temporal_conv1d/best_checkpoint.pt --output-dir 
+      data/08_reporting/temporal_conv1d/val --params-path params.yaml 
+      --params-key train_temporal_conv1d
+    deps:
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: data/06_models/temporal_conv1d
+      hash: md5
+      md5: 69be5b9da4e9b1e069222866c9dd06c3.dir
+      size: 112664954
+      nfiles: 5
+    - path: scripts/evaluate_ablation_global.py
+      hash: md5
+      md5: 6d3be966e0bf9143aa20ba3228a33c67
+      size: 5251
+    - path: src/tube_multiscale_fusion/ablation_classifier.py
+      hash: md5
+      md5: 1c4f4f7de41e3253d389d3f4314fc4d0
+      size: 8701
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 22bcbb284170752ff61a781a6119a474
+      size: 11333
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: e09db331d78b94f700a33fadbdedd246
+      size: 13267
+    params:
+      params.yaml:
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_temporal_conv1d:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          ablation_variant: no_spatial
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          aggregator_kind: conv1d
+    outs:
+    - path: data/08_reporting/temporal_conv1d/val
+      hash: md5
+      md5: 231414adf4e44e68c3d96a3e3df6645d.dir
+      size: 143841
+      nfiles: 6
+  train_temporal@lstm:
+    cmd: uv run python scripts/train_ablation_global.py --train-dir 
+      data/05_model_input/train --val-dir data/05_model_input/val --output-dir 
+      data/06_models/temporal_lstm --params-path params.yaml --params-key 
+      train_temporal_lstm
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: scripts/train_ablation_global.py
+      hash: md5
+      md5: 6678a014e3b92ce2046ebd6b8f90f3f7
+      size: 5301
+    - path: src/tube_multiscale_fusion/ablation_classifier.py
+      hash: md5
+      md5: 1c4f4f7de41e3253d389d3f4314fc4d0
+      size: 8701
+    - path: src/tube_multiscale_fusion/augment.py
+      hash: md5
+      md5: f52a42f92caa2fac859bf3a81a18971d
+      size: 9489
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 22bcbb284170752ff61a781a6119a474
+      size: 11333
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: e09db331d78b94f700a33fadbdedd246
+      size: 13267
+    params:
+      params.yaml:
+        augment:
+          enabled: true
+          spatial:
+            flip_prob: 0.5
+            rotation_deg: 5.0
+            scale_range:
+            - 0.9
+            - 1.1
+            translate_frac: 0.05
+          photometric:
+            brightness_range:
+            - 0.8
+            - 1.2
+            contrast_range:
+            - 0.8
+            - 1.2
+            saturation_range:
+            - 0.8
+            - 1.2
+          temporal:
+            subseq_prob: 0.5
+            subseq_min_len: 4
+            stride_prob: 0.25
+            frame_drop_prob: 0.15
+            min_valid_after_drop: 4
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_temporal_lstm:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          ablation_variant: no_spatial
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          aggregator_kind: lstm
+    outs:
+    - path: data/06_models/temporal_lstm
+      hash: md5
+      md5: b9d77529a81befef12ec2555bcc18352.dir
+      size: 116259757
+      nfiles: 5
+  evaluate_temporal@lstm-train:
+    cmd: uv run python scripts/evaluate_ablation_global.py --data-dir 
+      data/05_model_input/train --checkpoint 
+      data/06_models/temporal_lstm/best_checkpoint.pt --output-dir 
+      data/08_reporting/temporal_lstm/train --params-path params.yaml 
+      --params-key train_temporal_lstm
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/06_models/temporal_lstm
+      hash: md5
+      md5: b9d77529a81befef12ec2555bcc18352.dir
+      size: 116259757
+      nfiles: 5
+    - path: scripts/evaluate_ablation_global.py
+      hash: md5
+      md5: 6d3be966e0bf9143aa20ba3228a33c67
+      size: 5251
+    - path: src/tube_multiscale_fusion/ablation_classifier.py
+      hash: md5
+      md5: 1c4f4f7de41e3253d389d3f4314fc4d0
+      size: 8701
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 22bcbb284170752ff61a781a6119a474
+      size: 11333
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: e09db331d78b94f700a33fadbdedd246
+      size: 13267
+    params:
+      params.yaml:
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_temporal_lstm:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          ablation_variant: no_spatial
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          aggregator_kind: lstm
+    outs:
+    - path: data/08_reporting/temporal_lstm/train
+      hash: md5
+      md5: 9043d6e8d6b7a9bfd1180f82a889089b.dir
+      size: 579279
+      nfiles: 6
+  train_temporal@linear_wavg:
+    cmd: uv run python scripts/train_ablation_global.py --train-dir 
+      data/05_model_input/train --val-dir data/05_model_input/val --output-dir 
+      data/06_models/temporal_linear_wavg --params-path params.yaml --params-key
+      train_temporal_linear_wavg
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: scripts/train_ablation_global.py
+      hash: md5
+      md5: 6678a014e3b92ce2046ebd6b8f90f3f7
+      size: 5301
+    - path: src/tube_multiscale_fusion/ablation_classifier.py
+      hash: md5
+      md5: 1c4f4f7de41e3253d389d3f4314fc4d0
+      size: 8701
+    - path: src/tube_multiscale_fusion/augment.py
+      hash: md5
+      md5: f52a42f92caa2fac859bf3a81a18971d
+      size: 9489
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 22bcbb284170752ff61a781a6119a474
+      size: 11333
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: e09db331d78b94f700a33fadbdedd246
+      size: 13267
+    params:
+      params.yaml:
+        augment:
+          enabled: true
+          spatial:
+            flip_prob: 0.5
+            rotation_deg: 5.0
+            scale_range:
+            - 0.9
+            - 1.1
+            translate_frac: 0.05
+          photometric:
+            brightness_range:
+            - 0.8
+            - 1.2
+            contrast_range:
+            - 0.8
+            - 1.2
+            saturation_range:
+            - 0.8
+            - 1.2
+          temporal:
+            subseq_prob: 0.5
+            subseq_min_len: 4
+            stride_prob: 0.25
+            frame_drop_prob: 0.15
+            min_valid_after_drop: 4
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_temporal_linear_wavg:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          ablation_variant: no_spatial
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          aggregator_kind: linear_wavg
+    outs:
+    - path: data/06_models/temporal_linear_wavg
+      hash: md5
+      md5: d8963d9ef59a5ef56448ed72c5c34511.dir
+      size: 103811952
+      nfiles: 5
+  evaluate_temporal@linear_wavg-val:
+    cmd: uv run python scripts/evaluate_ablation_global.py --data-dir 
+      data/05_model_input/val --checkpoint 
+      data/06_models/temporal_linear_wavg/best_checkpoint.pt --output-dir 
+      data/08_reporting/temporal_linear_wavg/val --params-path params.yaml 
+      --params-key train_temporal_linear_wavg
+    deps:
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: data/06_models/temporal_linear_wavg
+      hash: md5
+      md5: d8963d9ef59a5ef56448ed72c5c34511.dir
+      size: 103811952
+      nfiles: 5
+    - path: scripts/evaluate_ablation_global.py
+      hash: md5
+      md5: 6d3be966e0bf9143aa20ba3228a33c67
+      size: 5251
+    - path: src/tube_multiscale_fusion/ablation_classifier.py
+      hash: md5
+      md5: 1c4f4f7de41e3253d389d3f4314fc4d0
+      size: 8701
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 22bcbb284170752ff61a781a6119a474
+      size: 11333
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: e09db331d78b94f700a33fadbdedd246
+      size: 13267
+    params:
+      params.yaml:
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_temporal_linear_wavg:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          ablation_variant: no_spatial
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          aggregator_kind: linear_wavg
+    outs:
+    - path: data/08_reporting/temporal_linear_wavg/val
+      hash: md5
+      md5: 8d8acb1b795fd7f2c237d4fe6deb6af5.dir
+      size: 145067
+      nfiles: 6
+  train_temporal@mlp:
+    cmd: uv run python scripts/train_ablation_global.py --train-dir 
+      data/05_model_input/train --val-dir data/05_model_input/val --output-dir 
+      data/06_models/temporal_mlp --params-path params.yaml --params-key 
+      train_temporal_mlp
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: scripts/train_ablation_global.py
+      hash: md5
+      md5: 6678a014e3b92ce2046ebd6b8f90f3f7
+      size: 5301
+    - path: src/tube_multiscale_fusion/ablation_classifier.py
+      hash: md5
+      md5: 1c4f4f7de41e3253d389d3f4314fc4d0
+      size: 8701
+    - path: src/tube_multiscale_fusion/augment.py
+      hash: md5
+      md5: f52a42f92caa2fac859bf3a81a18971d
+      size: 9489
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 22bcbb284170752ff61a781a6119a474
+      size: 11333
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: e09db331d78b94f700a33fadbdedd246
+      size: 13267
+    params:
+      params.yaml:
+        augment:
+          enabled: true
+          spatial:
+            flip_prob: 0.5
+            rotation_deg: 5.0
+            scale_range:
+            - 0.9
+            - 1.1
+            translate_frac: 0.05
+          photometric:
+            brightness_range:
+            - 0.8
+            - 1.2
+            contrast_range:
+            - 0.8
+            - 1.2
+            saturation_range:
+            - 0.8
+            - 1.2
+          temporal:
+            subseq_prob: 0.5
+            subseq_min_len: 4
+            stride_prob: 0.25
+            frame_drop_prob: 0.15
+            min_valid_after_drop: 4
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_temporal_mlp:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          ablation_variant: no_spatial
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          aggregator_kind: mlp
+    outs:
+    - path: data/06_models/temporal_mlp
+      hash: md5
+      md5: 9a4eec86025bd02e640b39aedfc7b252.dir
+      size: 182282337
+      nfiles: 5
+  evaluate_temporal@conv1d-train:
+    cmd: uv run python scripts/evaluate_ablation_global.py --data-dir 
+      data/05_model_input/train --checkpoint 
+      data/06_models/temporal_conv1d/best_checkpoint.pt --output-dir 
+      data/08_reporting/temporal_conv1d/train --params-path params.yaml 
+      --params-key train_temporal_conv1d
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/06_models/temporal_conv1d
+      hash: md5
+      md5: 69be5b9da4e9b1e069222866c9dd06c3.dir
+      size: 112664954
+      nfiles: 5
+    - path: scripts/evaluate_ablation_global.py
+      hash: md5
+      md5: 6d3be966e0bf9143aa20ba3228a33c67
+      size: 5251
+    - path: src/tube_multiscale_fusion/ablation_classifier.py
+      hash: md5
+      md5: 1c4f4f7de41e3253d389d3f4314fc4d0
+      size: 8701
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 22bcbb284170752ff61a781a6119a474
+      size: 11333
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: e09db331d78b94f700a33fadbdedd246
+      size: 13267
+    params:
+      params.yaml:
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_temporal_conv1d:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          ablation_variant: no_spatial
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          aggregator_kind: conv1d
+    outs:
+    - path: data/08_reporting/temporal_conv1d/train
+      hash: md5
+      md5: 1ae2f543d3e55f0e3a2567302f1aef89.dir
+      size: 582314
+      nfiles: 6
+  evaluate_temporal@lstm-val:
+    cmd: uv run python scripts/evaluate_ablation_global.py --data-dir 
+      data/05_model_input/val --checkpoint 
+      data/06_models/temporal_lstm/best_checkpoint.pt --output-dir 
+      data/08_reporting/temporal_lstm/val --params-path params.yaml --params-key
+      train_temporal_lstm
+    deps:
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: data/06_models/temporal_lstm
+      hash: md5
+      md5: b9d77529a81befef12ec2555bcc18352.dir
+      size: 116259757
+      nfiles: 5
+    - path: scripts/evaluate_ablation_global.py
+      hash: md5
+      md5: 6d3be966e0bf9143aa20ba3228a33c67
+      size: 5251
+    - path: src/tube_multiscale_fusion/ablation_classifier.py
+      hash: md5
+      md5: 1c4f4f7de41e3253d389d3f4314fc4d0
+      size: 8701
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 22bcbb284170752ff61a781a6119a474
+      size: 11333
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: e09db331d78b94f700a33fadbdedd246
+      size: 13267
+    params:
+      params.yaml:
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_temporal_lstm:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          ablation_variant: no_spatial
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          aggregator_kind: lstm
+    outs:
+    - path: data/08_reporting/temporal_lstm/val
+      hash: md5
+      md5: 2c114406b3ea840825aa0ee086697183.dir
+      size: 143625
+      nfiles: 6
+  evaluate_temporal@gru-train:
+    cmd: uv run python scripts/evaluate_ablation_global.py --data-dir 
+      data/05_model_input/train --checkpoint 
+      data/06_models/temporal_gru/best_checkpoint.pt --output-dir 
+      data/08_reporting/temporal_gru/train --params-path params.yaml 
+      --params-key train_temporal_gru
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/06_models/temporal_gru
+      hash: md5
+      md5: f8cf358b58419f54ddb7f699f5fec716.dir
+      size: 112687616
+      nfiles: 5
+    - path: scripts/evaluate_ablation_global.py
+      hash: md5
+      md5: 6d3be966e0bf9143aa20ba3228a33c67
+      size: 5251
+    - path: src/tube_multiscale_fusion/ablation_classifier.py
+      hash: md5
+      md5: 1c4f4f7de41e3253d389d3f4314fc4d0
+      size: 8701
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 22bcbb284170752ff61a781a6119a474
+      size: 11333
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: e09db331d78b94f700a33fadbdedd246
+      size: 13267
+    params:
+      params.yaml:
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_temporal_gru:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          ablation_variant: no_spatial
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          aggregator_kind: gru
+    outs:
+    - path: data/08_reporting/temporal_gru/train
+      hash: md5
+      md5: d2efc1ef9e63e960e543c255c40c3c70.dir
+      size: 581035
+      nfiles: 6
+  evaluate_temporal@linear_wavg-train:
+    cmd: uv run python scripts/evaluate_ablation_global.py --data-dir 
+      data/05_model_input/train --checkpoint 
+      data/06_models/temporal_linear_wavg/best_checkpoint.pt --output-dir 
+      data/08_reporting/temporal_linear_wavg/train --params-path params.yaml 
+      --params-key train_temporal_linear_wavg
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/06_models/temporal_linear_wavg
+      hash: md5
+      md5: d8963d9ef59a5ef56448ed72c5c34511.dir
+      size: 103811952
+      nfiles: 5
+    - path: scripts/evaluate_ablation_global.py
+      hash: md5
+      md5: 6d3be966e0bf9143aa20ba3228a33c67
+      size: 5251
+    - path: src/tube_multiscale_fusion/ablation_classifier.py
+      hash: md5
+      md5: 1c4f4f7de41e3253d389d3f4314fc4d0
+      size: 8701
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 22bcbb284170752ff61a781a6119a474
+      size: 11333
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: e09db331d78b94f700a33fadbdedd246
+      size: 13267
+    params:
+      params.yaml:
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_temporal_linear_wavg:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          ablation_variant: no_spatial
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          aggregator_kind: linear_wavg
+    outs:
+    - path: data/08_reporting/temporal_linear_wavg/train
+      hash: md5
+      md5: 548e7b934bc97ee99dfe136fab89770e.dir
+      size: 584221
+      nfiles: 6
+  evaluate_temporal@mlp-train:
+    cmd: uv run python scripts/evaluate_ablation_global.py --data-dir 
+      data/05_model_input/train --checkpoint 
+      data/06_models/temporal_mlp/best_checkpoint.pt --output-dir 
+      data/08_reporting/temporal_mlp/train --params-path params.yaml 
+      --params-key train_temporal_mlp
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/06_models/temporal_mlp
+      hash: md5
+      md5: 9a4eec86025bd02e640b39aedfc7b252.dir
+      size: 182282337
+      nfiles: 5
+    - path: scripts/evaluate_ablation_global.py
+      hash: md5
+      md5: 6d3be966e0bf9143aa20ba3228a33c67
+      size: 5251
+    - path: src/tube_multiscale_fusion/ablation_classifier.py
+      hash: md5
+      md5: 1c4f4f7de41e3253d389d3f4314fc4d0
+      size: 8701
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 22bcbb284170752ff61a781a6119a474
+      size: 11333
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: e09db331d78b94f700a33fadbdedd246
+      size: 13267
+    params:
+      params.yaml:
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_temporal_mlp:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          ablation_variant: no_spatial
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          aggregator_kind: mlp
+    outs:
+    - path: data/08_reporting/temporal_mlp/train
+      hash: md5
+      md5: 0da9cb59981b9a125b7ef631e62a7fee.dir
+      size: 578771
+      nfiles: 6
+  evaluate_temporal@mlp-val:
+    cmd: uv run python scripts/evaluate_ablation_global.py --data-dir 
+      data/05_model_input/val --checkpoint 
+      data/06_models/temporal_mlp/best_checkpoint.pt --output-dir 
+      data/08_reporting/temporal_mlp/val --params-path params.yaml --params-key 
+      train_temporal_mlp
+    deps:
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: data/06_models/temporal_mlp
+      hash: md5
+      md5: 9a4eec86025bd02e640b39aedfc7b252.dir
+      size: 182282337
+      nfiles: 5
+    - path: scripts/evaluate_ablation_global.py
+      hash: md5
+      md5: 6d3be966e0bf9143aa20ba3228a33c67
+      size: 5251
+    - path: src/tube_multiscale_fusion/ablation_classifier.py
+      hash: md5
+      md5: 1c4f4f7de41e3253d389d3f4314fc4d0
+      size: 8701
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/global_branch.py
+      hash: md5
+      md5: 22bcbb284170752ff61a781a6119a474
+      size: 11333
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: e09db331d78b94f700a33fadbdedd246
+      size: 13267
+    params:
+      params.yaml:
+        global_branch:
+          backbone: vit_small_patch14_dinov2.lvd142m
+          aggregator:
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_temporal_mlp:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          ablation_variant: no_spatial
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+          aggregator_kind: mlp
+    outs:
+    - path: data/08_reporting/temporal_mlp/val
+      hash: md5
+      md5: 83dca1e4e32f2c46e3db807da84cb1a2.dir
+      size: 141485
+      nfiles: 6

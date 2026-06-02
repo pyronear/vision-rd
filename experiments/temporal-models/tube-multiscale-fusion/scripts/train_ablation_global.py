@@ -99,6 +99,7 @@ def main() -> None:
         finetune=cfg.get("finetune", False),
         finetune_last_n_blocks=cfg.get("finetune_last_n_blocks", 0),
         backbone_lr=cfg.get("backbone_lr"),
+        aggregator_kind=cfg.get("aggregator_kind", "transformer"),
         img_size=cfg.get("img_size", 224),
         pretrained=True,
         use_cosine_warmup=cfg.get("use_cosine_warmup", False),

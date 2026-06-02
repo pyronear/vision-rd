@@ -11,6 +11,7 @@ from __future__ import annotations
 import timm
 import torch
 from torch import Tensor, nn
+from torch.nn.utils.rnn import pack_padded_sequence
 
 
 class TimmBackbone(nn.Module):
@@ -143,8 +144,160 @@ class GlobalAggregator(nn.Module):
         return out[:, 0, :]
 
 
+class RNNAggregator(nn.Module):
+    """LSTM/GRU over the per-frame sequence; returns the final hidden state.
+
+    Uses packed sequences so padded frames are ignored. ``hidden_size`` is set
+    to ``feat_dim`` so the output matches the rest of the architecture.
+    """
+
+    def __init__(
+        self,
+        feat_dim: int,
+        kind: str,
+        num_layers: int = 1,
+        dropout: float = 0.0,
+    ) -> None:
+        super().__init__()
+        rnn_cls = {"lstm": nn.LSTM, "gru": nn.GRU}[kind]
+        self.kind = kind
+        self.rnn = rnn_cls(
+            input_size=feat_dim,
+            hidden_size=feat_dim,
+            num_layers=num_layers,
+            batch_first=True,
+            dropout=dropout if num_layers > 1 else 0.0,
+        )
+
+    def forward(self, feats: Tensor, mask: Tensor) -> Tensor:
+        lengths = mask.sum(dim=1).clamp(min=1).cpu()
+        packed = pack_padded_sequence(
+            feats, lengths, batch_first=True, enforce_sorted=False
+        )
+        if self.kind == "lstm":
+            _, (h_n, _) = self.rnn(packed)
+        else:
+            _, h_n = self.rnn(packed)
+        return h_n[-1]  # (B, feat_dim)
+
+
+class MLPAggregator(nn.Module):
+    """Flatten the (masked) ``T×D`` sequence and run an MLP -> ``(B, D)``.
+
+    Padded frames are zeroed before flattening. Sees the whole sequence at once
+    but has no inductive bias for temporal order beyond position-in-vector.
+    """
+
+    def __init__(
+        self,
+        feat_dim: int,
+        max_frames: int,
+        hidden: int = 1024,
+        dropout: float = 0.1,
+    ) -> None:
+        super().__init__()
+        self.max_frames = max_frames
+        self.net = nn.Sequential(
+            nn.Linear(feat_dim * max_frames, hidden),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden, feat_dim),
+        )
+
+    def forward(self, feats: Tensor, mask: Tensor) -> Tensor:
+        feats = feats * mask.unsqueeze(-1).to(feats.dtype)
+        return self.net(feats.reshape(feats.shape[0], -1))
+
+
+class Conv1DAggregator(nn.Module):
+    """1D temporal convolutions over the (B, D, T) sequence + masked mean pool."""
+
+    def __init__(
+        self,
+        feat_dim: int,
+        num_layers: int = 2,
+        kernel: int = 3,
+        dropout: float = 0.0,
+    ) -> None:
+        super().__init__()
+        layers: list[nn.Module] = []
+        for _ in range(num_layers):
+            layers += [
+                nn.Conv1d(feat_dim, feat_dim, kernel, padding=kernel // 2),
+                nn.GELU(),
+                nn.Dropout(dropout),
+            ]
+        self.conv = nn.Sequential(*layers)
+
+    def forward(self, feats: Tensor, mask: Tensor) -> Tensor:
+        x = self.conv(feats.transpose(1, 2)).transpose(1, 2)  # (B, T, D)
+        m = mask.unsqueeze(-1).to(x.dtype)
+        return (x * m).sum(dim=1) / m.sum(dim=1).clamp(min=1.0)
+
+
+class LinearWeightedAvgAggregator(nn.Module):
+    """Per-frame Linear projection + learned weighted average over time.
+
+    A lightweight attention-pool with no token-token interaction: each frame is
+    projected, scored to a scalar, softmax-normalized over the valid frames, and
+    combined by weighted mean.
+    """
+
+    def __init__(self, feat_dim: int) -> None:
+        super().__init__()
+        self.proj = nn.Linear(feat_dim, feat_dim)
+        self.score = nn.Linear(feat_dim, 1)
+
+    def forward(self, feats: Tensor, mask: Tensor) -> Tensor:
+        h = self.proj(feats)  # (B, T, D)
+        s = self.score(h).squeeze(-1)  # (B, T)
+        s = s.masked_fill(~mask, float("-inf"))
+        w = torch.softmax(s, dim=1)
+        w = torch.nan_to_num(w, nan=0.0)
+        return (w.unsqueeze(-1) * h).sum(dim=1)  # (B, D)
+
+
+def build_aggregator(
+    kind: str,
+    feat_dim: int,
+    max_frames: int,
+    *,
+    num_layers: int,
+    num_heads: int,
+    ffn_dim: int,
+    dropout: float,
+    rnn_layers: int = 1,
+    mlp_hidden: int = 1024,
+    conv_layers: int = 2,
+    conv_kernel: int = 3,
+) -> nn.Module:
+    """Construct a temporal aggregator ``(B, T, D), mask -> (B, D)`` by name."""
+    if kind == "transformer":
+        return GlobalAggregator(
+            feat_dim=feat_dim,
+            num_layers=num_layers,
+            num_heads=num_heads,
+            ffn_dim=ffn_dim,
+            dropout=dropout,
+            max_frames=max_frames,
+        )
+    if kind in ("lstm", "gru"):
+        return RNNAggregator(
+            feat_dim, kind=kind, num_layers=rnn_layers, dropout=dropout
+        )
+    if kind == "mlp":
+        return MLPAggregator(feat_dim, max_frames, hidden=mlp_hidden, dropout=dropout)
+    if kind == "conv1d":
+        return Conv1DAggregator(
+            feat_dim, num_layers=conv_layers, kernel=conv_kernel, dropout=dropout
+        )
+    if kind == "linear_wavg":
+        return LinearWeightedAvgAggregator(feat_dim)
+    raise ValueError(f"unknown aggregator kind {kind!r}")
+
+
 class GlobalBranch(nn.Module):
-    """DINOv2 per-frame embeddings + transformer aggregator -> ``(B, D)``."""
+    """DINOv2 per-frame embeddings + a temporal aggregator -> ``(B, D)``."""
 
     def __init__(
         self,
@@ -156,6 +309,7 @@ class GlobalBranch(nn.Module):
         aggregator_num_heads: int,
         aggregator_ffn_dim: int,
         aggregator_dropout: float,
+        aggregator_kind: str = "transformer",
         img_size: int = 224,
         pretrained: bool = True,
     ) -> None:
@@ -168,13 +322,14 @@ class GlobalBranch(nn.Module):
             img_size=img_size,
         )
         self.feat_dim = self.backbone.feat_dim
-        self.aggregator = GlobalAggregator(
+        self.aggregator = build_aggregator(
+            aggregator_kind,
             feat_dim=self.feat_dim,
+            max_frames=max_frames,
             num_layers=aggregator_num_layers,
             num_heads=aggregator_num_heads,
             ffn_dim=aggregator_ffn_dim,
             dropout=aggregator_dropout,
-            max_frames=max_frames,
         )
 
     def forward(self, patches: Tensor, mask: Tensor) -> Tensor:

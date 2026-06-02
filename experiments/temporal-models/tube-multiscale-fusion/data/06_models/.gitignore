@@ -8,3 +8,8 @@
 /ablation_no_temporal
 /ablation_weighted_mean
 /ablation_no_spatial
+/temporal_gru
+/temporal_conv1d
+/temporal_lstm
+/temporal_linear_wavg
+/temporal_mlp

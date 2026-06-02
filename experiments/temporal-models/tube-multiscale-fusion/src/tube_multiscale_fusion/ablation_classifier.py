@@ -118,6 +118,7 @@ class AblationNoSpatialClassifier(nn.Module):
         global_aggregator_dropout: float,
         head_hidden_dim: int,
         head_dropout: float = 0.0,
+        aggregator_kind: str = "transformer",
         img_size: int = 224,
         pretrained: bool = True,
     ) -> None:
@@ -131,6 +132,7 @@ class AblationNoSpatialClassifier(nn.Module):
             aggregator_num_heads=global_aggregator_num_heads,
             aggregator_ffn_dim=global_aggregator_ffn_dim,
             aggregator_dropout=global_aggregator_dropout,
+            aggregator_kind=aggregator_kind,
             img_size=img_size,
             pretrained=pretrained,
         )

@@ -281,6 +281,74 @@ stages:
       outs:
         - data/08_reporting/ablation_weighted_mean/${item}
 
+  # ---------------------------------------------------------------------------
+  # Temporal-module comparison — global-only, varying the aggregator.
+  # (Transformer baseline = train/evaluate_ablation_no_spatial above.)
+  # ---------------------------------------------------------------------------
+  train_temporal:
+    matrix:
+      agg:
+        - lstm
+        - gru
+        - mlp
+        - conv1d
+        - linear_wavg
+    cmd: >-
+      uv run python scripts/train_ablation_global.py
+      --train-dir data/05_model_input/train
+      --val-dir data/05_model_input/val
+      --output-dir data/06_models/temporal_${item.agg}
+      --params-path params.yaml
+      --params-key train_temporal_${item.agg}
+    deps:
+      - scripts/train_ablation_global.py
+      - src/tube_multiscale_fusion/augment.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/global_branch.py
+      - src/tube_multiscale_fusion/ablation_classifier.py
+      - src/tube_multiscale_fusion/lit_ablation.py
+      - data/05_model_input/train
+      - data/05_model_input/val
+    params:
+      - train_temporal_${item.agg}
+      - global_branch
+      - augment
+    outs:
+      - data/06_models/temporal_${item.agg}
+
+  evaluate_temporal:
+    matrix:
+      agg:
+        - lstm
+        - gru
+        - mlp
+        - conv1d
+        - linear_wavg
+      split:
+        - train
+        - val
+    cmd: >-
+      uv run python scripts/evaluate_ablation_global.py
+      --data-dir data/05_model_input/${item.split}
+      --checkpoint data/06_models/temporal_${item.agg}/best_checkpoint.pt
+      --output-dir data/08_reporting/temporal_${item.agg}/${item.split}
+      --params-path params.yaml
+      --params-key train_temporal_${item.agg}
+    deps:
+      - scripts/evaluate_ablation_global.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/global_branch.py
+      - src/tube_multiscale_fusion/ablation_classifier.py
+      - src/tube_multiscale_fusion/lit_ablation.py
+      - src/tube_multiscale_fusion/eval_plots.py
+      - data/05_model_input/${item.split}
+      - data/06_models/temporal_${item.agg}
+    params:
+      - train_temporal_${item.agg}
+      - global_branch
+    outs:
+      - data/08_reporting/temporal_${item.agg}/${item.split}
+
   benchmark_dinov2_multiscale:
     cmd: >-
       uv run python scripts/benchmark.py

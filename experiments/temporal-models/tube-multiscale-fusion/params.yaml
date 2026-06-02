@@ -220,6 +220,39 @@ train_ablation_weighted_mean:
   backbone_lr: 0.00001
 
 # ---------------------------------------------------------------------------
+# Temporal-module comparison — vary ONLY the global-branch aggregator, in the
+# global-only (no_spatial) setting so the temporal module is isolated. The
+# Transformer baseline is `train_ablation_no_spatial` above. See
+# TEMPORAL_COMPARISON.md.
+# ---------------------------------------------------------------------------
+_temporal_defaults: &temporal_defaults
+  <<: *train_defaults
+  ablation_variant: no_spatial
+  finetune: true
+  finetune_last_n_blocks: 1
+  backbone_lr: 0.00001
+
+train_temporal_lstm:
+  <<: *temporal_defaults
+  aggregator_kind: lstm
+
+train_temporal_gru:
+  <<: *temporal_defaults
+  aggregator_kind: gru
+
+train_temporal_mlp:
+  <<: *temporal_defaults
+  aggregator_kind: mlp
+
+train_temporal_conv1d:
+  <<: *temporal_defaults
+  aggregator_kind: conv1d
+
+train_temporal_linear_wavg:
+  <<: *temporal_defaults
+  aggregator_kind: linear_wavg
+
+# ---------------------------------------------------------------------------
 # Augmentation (RGB only)
 # ---------------------------------------------------------------------------
 augment:
