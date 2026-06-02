@@ -5,8 +5,6 @@ Usage:
     uv run playground run --model-package model.zip f1.jpg f2.jpg --json
 """
 
-from __future__ import annotations
-
 import argparse
 import dataclasses
 import json

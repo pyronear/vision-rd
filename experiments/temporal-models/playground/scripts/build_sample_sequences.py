@@ -13,8 +13,6 @@ Usage:
         --per-label 2
 """
 
-from __future__ import annotations
-
 import argparse
 import json
 import shutil
