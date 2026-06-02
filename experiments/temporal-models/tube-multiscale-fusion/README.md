@@ -219,6 +219,50 @@ Reproduce with:
 uv run dvc repro benchmark_dinov2_multiscale
 ```
 
+### Ablation: local branch only, 3D ResNet (no temporal module)
+
+To isolate what the **global DINOv2 sequence branch + cross-attention fusion**
+(the "temporal module") contribute, we trained an ablation that keeps only the
+local tube decomposition but (a) swaps the tubelet-transformer tube encoder for
+a Kinetics-400 pretrained **r3d_18**, and (b) drops the global branch and
+fusion entirely — the per-tube vectors are simply mask-mean-pooled into an MLP
+head. Same tube geometry (2×2 / len 4 / stride 2 → 28 tubes/seq), same training
+schedule and data.
+
+| | **Full model** (global + local + fusion) | **Ablation** (local-only r3d_18) |
+|---|---:|---:|
+| val F1 | **0.9783** | 0.9333 |
+| val accuracy | **0.9786** | 0.9321 |
+| val precision | **0.9574** | 0.8867 |
+| val recall | 1.0000 | 0.9852 |
+| val PR-AUC | **0.9936** | 0.9825 |
+| val FP / FN (of 280) | **6 / 0** | 17 / 2 |
+| Recall @ FPR=1% | **0.874** | 0.659 |
+| Recall @ FPR=5% | **1.000** | 0.911 |
+| Recall @ FPR=10% | **1.000** | 0.956 |
+| Params (trainable) | 36.4 M (16.6 M) | 33.3 M (25.0 M) |
+| GFLOPs / sequence | **226.5** | 603.9 |
+| GPU latency (ms/seq) | **10.7** | 13.3 |
+
+**Takeaway.** Removing the temporal module costs ~4.5 F1 points, and the damage
+is concentrated exactly where the design predicts: **precision and the
+low-false-alarm regime**, not recall. False positives nearly triple (6 → 17),
+precision drops 0.957 → 0.887, and recall at a strict 1 % FPR collapses
+0.874 → 0.659 — while recall stays high (1.000 → 0.985). In other words, a
+purely local 3D-CNN still *finds* smoke, but without the global context branch
+it can no longer reliably *reject* slow-moving look-alikes (cloud, fog, haze):
+local turbulence alone is an ambiguous cue, and it takes the long-range
+sequence context to confirm whether that motion is a growing plume or benign
+weather. The ablation also costs **2.7× the FLOPs** (running r3d_18 over all 28
+tubes) to do worse — confirming the two-branch design is both more accurate and
+cheaper than scaling up the local branch alone.
+
+Reproduce with:
+
+```bash
+uv run dvc repro train_ablation_resnet3d evaluate_ablation_resnet3d
+```
+
 ## How to Reproduce
 
 ```bash

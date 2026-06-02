@@ -215,8 +215,8 @@ stages:
       nfiles: 3219
     - path: scripts/train.py
       hash: md5
-      md5: 2b58199a26cb37fa2f42fbf397bab6b2
-      size: 5441
+      md5: 77eebc50193e30379e877c65e5ea7fa3
+      size: 5443
     - path: src/tube_multiscale_fusion/augment.py
       hash: md5
       md5: f52a42f92caa2fac859bf3a81a18971d
@@ -319,8 +319,8 @@ stages:
     outs:
     - path: data/06_models/dinov2_multiscale
       hash: md5
-      md5: e53145752327bb1e91450d552d57382f.dir
-      size: 278684379
+      md5: fca6623ba9be2bc9a236b3b9072097a4.dir
+      size: 278692327
       nfiles: 5
   evaluate_dinov2_multiscale@train:
     cmd: uv run python scripts/evaluate.py --data-dir data/05_model_input/train 
@@ -335,8 +335,8 @@ stages:
       nfiles: 34039
     - path: data/06_models/dinov2_multiscale
       hash: md5
-      md5: e53145752327bb1e91450d552d57382f.dir
-      size: 278684379
+      md5: fca6623ba9be2bc9a236b3b9072097a4.dir
+      size: 278692327
       nfiles: 5
     - path: scripts/evaluate.py
       hash: md5
@@ -419,8 +419,8 @@ stages:
     outs:
     - path: data/08_reporting/dinov2_multiscale/train
       hash: md5
-      md5: edfa5cacedfb9a1c20e83de0d9483cfe.dir
-      size: 585614
+      md5: 1f25da63bde9a257348ba11ed80e16d3.dir
+      size: 581387
       nfiles: 6
   evaluate_dinov2_multiscale@val:
     cmd: uv run python scripts/evaluate.py --data-dir data/05_model_input/val 
@@ -435,8 +435,8 @@ stages:
       nfiles: 3219
     - path: data/06_models/dinov2_multiscale
       hash: md5
-      md5: e53145752327bb1e91450d552d57382f.dir
-      size: 278684379
+      md5: fca6623ba9be2bc9a236b3b9072097a4.dir
+      size: 278692327
       nfiles: 5
     - path: scripts/evaluate.py
       hash: md5
@@ -519,8 +519,8 @@ stages:
     outs:
     - path: data/08_reporting/dinov2_multiscale/val
       hash: md5
-      md5: cbbb27b14880e62866f2ce722b5e31b6.dir
-      size: 149127
+      md5: 12a94f552478239031e92fc8b45e01ba.dir
+      size: 144894
       nfiles: 6
   train_dinov2_multiscale_sweep@spatial_2x2:
     cmd: uv run python scripts/train.py --train-dir data/05_model_input/train 
@@ -2362,3 +2362,279 @@ stages:
       hash: md5
       md5: 7c66931ea3aa26855736829baf1a22a6
       size: 1134
+  train_ablation_resnet3d:
+    cmd: uv run python scripts/train_ablation.py --train-dir 
+      data/05_model_input/train --val-dir data/05_model_input/val --output-dir 
+      data/06_models/ablation_resnet3d --params-path params.yaml --params-key 
+      train_ablation_resnet3d
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: scripts/train_ablation.py
+      hash: md5
+      md5: 8c35ec8b878b8f6198d9fba86c793865
+      size: 4432
+    - path: src/tube_multiscale_fusion/augment.py
+      hash: md5
+      md5: f52a42f92caa2fac859bf3a81a18971d
+      size: 9489
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: 3fa9e207263916d61be032dc3f5d978d
+      size: 5875
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    - path: src/tube_multiscale_fusion/local_resnet3d.py
+      hash: md5
+      md5: 44474a43c97d951cfa676b93b0ff85f6
+      size: 7690
+    params:
+      params.yaml:
+        augment:
+          enabled: true
+          spatial:
+            flip_prob: 0.5
+            rotation_deg: 5.0
+            scale_range:
+            - 0.9
+            - 1.1
+            translate_frac: 0.05
+          photometric:
+            brightness_range:
+            - 0.8
+            - 1.2
+            contrast_range:
+            - 0.8
+            - 1.2
+            saturation_range:
+            - 0.8
+            - 1.2
+          temporal:
+            subseq_prob: 0.5
+            subseq_min_len: 4
+            stride_prob: 0.25
+            frame_drop_prob: 0.15
+            min_valid_after_drop: 4
+        local_branch:
+          grid_size: 2
+          cell_size: 112
+          tube_length: 4
+          temporal_stride: 2
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_ablation_resnet3d:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          local_branch_section: local_branch
+          resnet_model: r3d_18
+          resnet_pretrained: true
+          resnet_finetune: true
+          resnet_finetune_last_n_blocks: 1
+          resnet_clip_spatial_size: 112
+          backbone_lr: 1e-05
+    outs:
+    - path: data/06_models/ablation_resnet3d
+      hash: md5
+      md5: 288936b321584b9f134e367aa74f444d.dir
+      size: 333672902
+      nfiles: 5
+  evaluate_ablation_resnet3d@train:
+    cmd: uv run python scripts/evaluate_ablation.py --data-dir 
+      data/05_model_input/train --checkpoint 
+      data/06_models/ablation_resnet3d/best_checkpoint.pt --output-dir 
+      data/08_reporting/ablation_resnet3d/train --params-path params.yaml 
+      --params-key train_ablation_resnet3d
+    deps:
+    - path: data/05_model_input/train
+      hash: md5
+      md5: 840f6c912a4c6ae3103627dd32594242.dir
+      size: 843667150
+      nfiles: 34039
+    - path: data/06_models/ablation_resnet3d
+      hash: md5
+      md5: 288936b321584b9f134e367aa74f444d.dir
+      size: 333672902
+      nfiles: 5
+    - path: scripts/evaluate_ablation.py
+      hash: md5
+      md5: 7c2da08efc5b59fb325f7f358b65ba27
+      size: 5280
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: 3fa9e207263916d61be032dc3f5d978d
+      size: 5875
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    - path: src/tube_multiscale_fusion/local_resnet3d.py
+      hash: md5
+      md5: 44474a43c97d951cfa676b93b0ff85f6
+      size: 7690
+    params:
+      params.yaml:
+        local_branch:
+          grid_size: 2
+          cell_size: 112
+          tube_length: 4
+          temporal_stride: 2
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_ablation_resnet3d:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          local_branch_section: local_branch
+          resnet_model: r3d_18
+          resnet_pretrained: true
+          resnet_finetune: true
+          resnet_finetune_last_n_blocks: 1
+          resnet_clip_spatial_size: 112
+          backbone_lr: 1e-05
+    outs:
+    - path: data/08_reporting/ablation_resnet3d/train
+      hash: md5
+      md5: 8180086b2d742ae5ee2b3085f6475a08.dir
+      size: 583518
+      nfiles: 6
+  evaluate_ablation_resnet3d@val:
+    cmd: uv run python scripts/evaluate_ablation.py --data-dir 
+      data/05_model_input/val --checkpoint 
+      data/06_models/ablation_resnet3d/best_checkpoint.pt --output-dir 
+      data/08_reporting/ablation_resnet3d/val --params-path params.yaml 
+      --params-key train_ablation_resnet3d
+    deps:
+    - path: data/05_model_input/val
+      hash: md5
+      md5: f8585e64f607a7a8d7d1651a9cbc930e.dir
+      size: 77725173
+      nfiles: 3219
+    - path: data/06_models/ablation_resnet3d
+      hash: md5
+      md5: 288936b321584b9f134e367aa74f444d.dir
+      size: 333672902
+      nfiles: 5
+    - path: scripts/evaluate_ablation.py
+      hash: md5
+      md5: 7c2da08efc5b59fb325f7f358b65ba27
+      size: 5280
+    - path: src/tube_multiscale_fusion/dataset.py
+      hash: md5
+      md5: d7d3e37c27fd25f7612751b3c5869dd2
+      size: 3036
+    - path: src/tube_multiscale_fusion/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/tube_multiscale_fusion/lit_ablation.py
+      hash: md5
+      md5: 3fa9e207263916d61be032dc3f5d978d
+      size: 5875
+    - path: src/tube_multiscale_fusion/local_branch.py
+      hash: md5
+      md5: 4a49a7286da503d7e0a21158d1c74295
+      size: 9228
+    - path: src/tube_multiscale_fusion/local_resnet3d.py
+      hash: md5
+      md5: 44474a43c97d951cfa676b93b0ff85f6
+      size: 7690
+    params:
+      params.yaml:
+        local_branch:
+          grid_size: 2
+          cell_size: 112
+          tube_length: 4
+          temporal_stride: 2
+          encoder:
+            t_kernel: 2
+            h_patch: 14
+            w_patch: 14
+            embed_dim: 384
+            num_layers: 2
+            num_heads: 6
+            ffn_dim: 1536
+            dropout: 0.1
+        train_ablation_resnet3d:
+          max_frames: 16
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          head_hidden_dim: 256
+          head_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          img_size: 224
+          local_branch_section: local_branch
+          resnet_model: r3d_18
+          resnet_pretrained: true
+          resnet_finetune: true
+          resnet_finetune_last_n_blocks: 1
+          resnet_clip_spatial_size: 112
+          backbone_lr: 1e-05
+    outs:
+    - path: data/08_reporting/ablation_resnet3d/val
+      hash: md5
+      md5: 8b9c4b19fa7c42474b1764e34cf7313d.dir
+      size: 145986
+      nfiles: 6

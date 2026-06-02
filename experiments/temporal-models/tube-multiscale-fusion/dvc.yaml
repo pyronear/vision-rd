@@ -106,6 +106,60 @@ stages:
     outs:
       - data/06_models/dinov2_multiscale
 
+  # ---------------------------------------------------------------------------
+  # Ablation: local-only 3D ResNet (no global branch, no fusion).
+  # ---------------------------------------------------------------------------
+  train_ablation_resnet3d:
+    cmd: >-
+      uv run python scripts/train_ablation.py
+      --train-dir data/05_model_input/train
+      --val-dir data/05_model_input/val
+      --output-dir data/06_models/ablation_resnet3d
+      --params-path params.yaml
+      --params-key train_ablation_resnet3d
+    deps:
+      - scripts/train_ablation.py
+      - src/tube_multiscale_fusion/augment.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/local_branch.py
+      - src/tube_multiscale_fusion/local_resnet3d.py
+      - src/tube_multiscale_fusion/lit_ablation.py
+      - data/05_model_input/train
+      - data/05_model_input/val
+    params:
+      - train_ablation_resnet3d
+      - local_branch
+      - augment
+    outs:
+      - data/06_models/ablation_resnet3d
+
+  evaluate_ablation_resnet3d:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/evaluate_ablation.py
+        --data-dir data/05_model_input/${item}
+        --checkpoint data/06_models/ablation_resnet3d/best_checkpoint.pt
+        --output-dir data/08_reporting/ablation_resnet3d/${item}
+        --params-path params.yaml
+        --params-key train_ablation_resnet3d
+      deps:
+        - scripts/evaluate_ablation.py
+        - src/tube_multiscale_fusion/dataset.py
+        - src/tube_multiscale_fusion/local_branch.py
+        - src/tube_multiscale_fusion/local_resnet3d.py
+        - src/tube_multiscale_fusion/lit_ablation.py
+        - src/tube_multiscale_fusion/eval_plots.py
+        - data/05_model_input/${item}
+        - data/06_models/ablation_resnet3d
+      params:
+        - train_ablation_resnet3d
+        - local_branch
+      outs:
+        - data/08_reporting/ablation_resnet3d/${item}
+
   benchmark_dinov2_multiscale:
     cmd: >-
       uv run python scripts/benchmark.py

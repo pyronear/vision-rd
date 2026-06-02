@@ -188,6 +188,25 @@ train_dinov2_multiscale_temporal_len8:
   local_branch_section: local_branch_temporal_len8
 
 # ---------------------------------------------------------------------------
+# Ablation: local-only, 3D ResNet tube encoder, no global branch / no fusion.
+#
+# Uses the default local_branch geometry (2x2 grid of 112x112 cells x 4-frame
+# windows at stride 2 -> 28 tubes/seq). Each tube is encoded by a Kinetics-400
+# pretrained r3d_18 (last stage fine-tuned); tube vectors are mask-mean-pooled
+# and classified by a 2-layer MLP. This removes the "temporal module" (global
+# DINOv2 sequence transformer + cross-attention fusion) entirely.
+# ---------------------------------------------------------------------------
+train_ablation_resnet3d:
+  <<: *train_defaults
+  local_branch_section: local_branch
+  resnet_model: r3d_18
+  resnet_pretrained: true
+  resnet_finetune: true
+  resnet_finetune_last_n_blocks: 1
+  resnet_clip_spatial_size: 112
+  backbone_lr: 0.00001
+
+# ---------------------------------------------------------------------------
 # Augmentation (RGB only)
 # ---------------------------------------------------------------------------
 augment:

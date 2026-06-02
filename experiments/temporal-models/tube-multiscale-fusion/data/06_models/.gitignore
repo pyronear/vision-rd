@@ -4,3 +4,4 @@
 /dinov2_multiscale_temporal_stride1
 /dinov2_multiscale_temporal_len8
 /dinov2_multiscale_spatial_4x4
+/ablation_resnet3d
