@@ -54,6 +54,8 @@ class LitTubeMultiscaleClassifier(L.LightningModule):
         finetune: bool = False,
         finetune_last_n_blocks: int = 0,
         backbone_lr: float | None = None,
+        aggregator_kind: str = "transformer",
+        encoder_kind: str = "tubelet_transformer",
         img_size: int = 224,
         pretrained: bool = True,
         use_cosine_warmup: bool = False,
@@ -89,6 +91,8 @@ class LitTubeMultiscaleClassifier(L.LightningModule):
             fusion_dropout=fusion_dropout,
             head_hidden_dim=head_hidden_dim,
             head_dropout=head_dropout,
+            aggregator_kind=aggregator_kind,
+            encoder_kind=encoder_kind,
             img_size=img_size,
             pretrained=pretrained,
         )

@@ -108,6 +108,8 @@ def main() -> None:
         finetune=cfg.get("finetune", False),
         finetune_last_n_blocks=cfg.get("finetune_last_n_blocks", 0),
         backbone_lr=cfg.get("backbone_lr"),
+        aggregator_kind=cfg.get("aggregator_kind", "transformer"),
+        encoder_kind=cfg.get("encoder_kind", "tubelet_transformer"),
         img_size=cfg.get("img_size", 224),
         pretrained=True,
         use_cosine_warmup=cfg.get("use_cosine_warmup", False),
@@ -124,7 +126,7 @@ def main() -> None:
             save_weights_only=False,
         ),
         EarlyStopping(
-            monitor="val/f1", mode="max", patience=cfg["early_stop_patience"]
+            monitor="val/loss", mode="min", patience=cfg["early_stop_patience"]
         ),
     ]
     loggers = [

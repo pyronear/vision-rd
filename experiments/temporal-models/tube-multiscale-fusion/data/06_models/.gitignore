@@ -17,3 +17,8 @@
 /spatial_convlstm
 /spatial_resnet3d
 /spatial_vivit
+/full_resnet3d_transformer
+/full_vivit_lstm
+/full_vivit_transformer
+/full_resnet3d_lstm
+/full_tubelet_lstm

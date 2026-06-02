@@ -52,6 +52,9 @@ class TubeMultiscaleClassifier(nn.Module):
         # Head
         head_hidden_dim: int,
         head_dropout: float = 0.0,
+        # Module variants (default = production architecture)
+        aggregator_kind: str = "transformer",
+        encoder_kind: str = "tubelet_transformer",
         # Misc
         img_size: int = 224,
         pretrained: bool = True,
@@ -66,6 +69,7 @@ class TubeMultiscaleClassifier(nn.Module):
             aggregator_num_heads=global_aggregator_num_heads,
             aggregator_ffn_dim=global_aggregator_ffn_dim,
             aggregator_dropout=global_aggregator_dropout,
+            aggregator_kind=aggregator_kind,
             img_size=img_size,
             pretrained=pretrained,
         )
@@ -82,6 +86,7 @@ class TubeMultiscaleClassifier(nn.Module):
             num_heads=local_num_heads,
             ffn_dim=local_ffn_dim,
             dropout=local_dropout,
+            encoder_kind=encoder_kind,
         )
         self.fusion = FusionModule(
             global_dim=self.global_branch.feat_dim,

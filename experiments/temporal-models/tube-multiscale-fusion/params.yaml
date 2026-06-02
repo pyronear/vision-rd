@@ -88,6 +88,45 @@ train_dinov2_multiscale:
   backbone_lr: 0.00001
 
 # ---------------------------------------------------------------------------
+# Combined variations — full two-branch model, cartesian product of
+# spatial (local encoder) x temporal (global aggregator). See
+# COMBINED_VARIATIONS.md. The tubelet_transformer x transformer cell is the
+# production default (= train_dinov2_multiscale above), reused there.
+# ---------------------------------------------------------------------------
+_full_combo_defaults: &full_combo_defaults
+  <<: *train_defaults
+  finetune: true
+  finetune_last_n_blocks: 1
+  backbone_lr: 0.00001
+
+train_full_resnet3d_lstm:
+  <<: *full_combo_defaults
+  encoder_kind: resnet3d
+  aggregator_kind: lstm
+  batch_size: 8            # r3d_18 local encoder over 28 tubes is memory-heavy
+
+train_full_resnet3d_transformer:
+  <<: *full_combo_defaults
+  encoder_kind: resnet3d
+  aggregator_kind: transformer
+  batch_size: 8
+
+train_full_vivit_lstm:
+  <<: *full_combo_defaults
+  encoder_kind: vivit
+  aggregator_kind: lstm
+
+train_full_vivit_transformer:
+  <<: *full_combo_defaults
+  encoder_kind: vivit
+  aggregator_kind: transformer
+
+train_full_tubelet_lstm:
+  <<: *full_combo_defaults
+  encoder_kind: tubelet_transformer
+  aggregator_kind: lstm
+
+# ---------------------------------------------------------------------------
 # Resolution sweep — alternative local_branch geometries kept as reference.
 #
 # Each block changes spatial grid and/or temporal slicing; the encoder

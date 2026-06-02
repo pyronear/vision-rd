@@ -419,6 +419,82 @@ stages:
     outs:
       - data/08_reporting/spatial_${item.enc}/${item.split}
 
+  # ---------------------------------------------------------------------------
+  # Combined variations — full model, spatial x temporal cartesian product.
+  # (tubelet x transformer = train/evaluate_dinov2_multiscale above.)
+  # ---------------------------------------------------------------------------
+  train_full_combo:
+    matrix:
+      combo:
+        - resnet3d_lstm
+        - resnet3d_transformer
+        - vivit_lstm
+        - vivit_transformer
+        - tubelet_lstm
+    cmd: >-
+      uv run python scripts/train.py
+      --train-dir data/05_model_input/train
+      --val-dir data/05_model_input/val
+      --output-dir data/06_models/full_${item.combo}
+      --params-path params.yaml
+      --params-key train_full_${item.combo}
+    deps:
+      - scripts/train.py
+      - src/tube_multiscale_fusion/augment.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/classifier.py
+      - src/tube_multiscale_fusion/global_branch.py
+      - src/tube_multiscale_fusion/local_branch.py
+      - src/tube_multiscale_fusion/fusion.py
+      - src/tube_multiscale_fusion/lit_module.py
+      - data/05_model_input/train
+      - data/05_model_input/val
+    params:
+      - train_full_${item.combo}
+      - global_branch
+      - local_branch
+      - fusion
+      - augment
+    outs:
+      - data/06_models/full_${item.combo}
+
+  evaluate_full_combo:
+    matrix:
+      combo:
+        - resnet3d_lstm
+        - resnet3d_transformer
+        - vivit_lstm
+        - vivit_transformer
+        - tubelet_lstm
+      split:
+        - train
+        - val
+    cmd: >-
+      uv run python scripts/evaluate.py
+      --data-dir data/05_model_input/${item.split}
+      --checkpoint data/06_models/full_${item.combo}/best_checkpoint.pt
+      --output-dir data/08_reporting/full_${item.combo}/${item.split}
+      --params-path params.yaml
+      --params-key train_full_${item.combo}
+    deps:
+      - scripts/evaluate.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/classifier.py
+      - src/tube_multiscale_fusion/global_branch.py
+      - src/tube_multiscale_fusion/local_branch.py
+      - src/tube_multiscale_fusion/fusion.py
+      - src/tube_multiscale_fusion/lit_module.py
+      - src/tube_multiscale_fusion/eval_plots.py
+      - data/05_model_input/${item.split}
+      - data/06_models/full_${item.combo}
+    params:
+      - train_full_${item.combo}
+      - global_branch
+      - local_branch
+      - fusion
+    outs:
+      - data/08_reporting/full_${item.combo}/${item.split}
+
   benchmark_dinov2_multiscale:
     cmd: >-
       uv run python scripts/benchmark.py
