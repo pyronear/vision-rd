@@ -1,0 +1,40 @@
+[project]
+name = "playground"
+version = "0.1.0"
+description = "Quickly run temporal smoke models on a directory or sequence of frames"
+requires-python = ">=3.11"
+dependencies = [
+    "pyrocore",
+    "bbox-tube-temporal-core",
+]
+
+[project.scripts]
+playground = "playground.cli:main"
+
+[tool.uv.sources]
+pyrocore = { path = "../../../lib/pyrocore", editable = true }
+bbox-tube-temporal-core = { path = "../../../lib/bbox-tube-temporal", editable = true }
+
+[dependency-groups]
+dev = [
+    "dvc[s3]>=3.56",
+    "pytest>=8.0",
+    "ruff>=0.9",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/playground"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B", "SIM", "PLC0415"]
+
+[tool.ruff.format]
+quote-style = "double"

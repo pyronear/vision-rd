@@ -1,0 +1,6 @@
+outs:
+- md5: 63c659eb07b924cdaeb3aba35c54c573.dir
+  size: 11219265
+  nfiles: 83
+  hash: md5
+  path: sample_sequences
