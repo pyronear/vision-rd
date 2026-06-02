@@ -200,6 +200,25 @@ train_ablation_no_temporal:
   local_branch_section: local_branch
   query_dim: 384
 
+# Ablation: remove the SPATIAL module (local tube branch). Global branch only —
+# DINOv2 per-frame + transformer aggregator -> MLP head. Keeps the global branch
+# identical to the full model (incl. last-block fine-tuning).
+train_ablation_no_spatial:
+  <<: *train_defaults
+  ablation_variant: no_spatial
+  finetune: true
+  finetune_last_n_blocks: 1
+  backbone_lr: 0.00001
+
+# Ablation: replace the cross-attention FUSION with weighted means. Both branches
+# kept identical to the full model; only the fusion module changes.
+train_ablation_weighted_mean:
+  <<: *train_defaults
+  ablation_variant: weighted_mean
+  finetune: true
+  finetune_last_n_blocks: 1
+  backbone_lr: 0.00001
+
 # ---------------------------------------------------------------------------
 # Augmentation (RGB only)
 # ---------------------------------------------------------------------------

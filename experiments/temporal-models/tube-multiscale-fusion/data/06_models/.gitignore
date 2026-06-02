@@ -6,3 +6,5 @@
 /dinov2_multiscale_spatial_4x4
 /ablation_resnet3d
 /ablation_no_temporal
+/ablation_weighted_mean
+/ablation_no_spatial

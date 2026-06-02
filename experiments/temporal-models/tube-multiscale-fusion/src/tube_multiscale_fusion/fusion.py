@@ -151,3 +151,54 @@ class FusionModule(nn.Module):
         for block in self.blocks:
             g, ltok = block(g, ltok, safe_mask)
         return self.final_norm(g.squeeze(1))
+
+
+class WeightedMeanFusion(nn.Module):
+    """Attention-free fusion ablation: weighted means instead of cross-attention.
+
+    Replaces :class:`FusionModule` (self-attn over tubes + global→locals
+    cross-attn) with two learned weighted means:
+
+    1. **Over local tubes:** a per-token score (Linear→scalar) is softmaxed over
+       the valid tubes to give a weighted mean ``local_pooled`` (i.e. learned
+       attention-pooling — a weighted mean, no token-token attention).
+    2. **Between branches:** a learnable 2-vector is softmaxed into
+       ``[w_global, w_local]`` and used to take a weighted mean of the global
+       vector and ``local_pooled``.
+
+    Same input/output signature as :class:`FusionModule` so it is a drop-in
+    fusion swap for the ablation.
+    """
+
+    def __init__(self, global_dim: int, local_dim: int, d_fusion: int) -> None:
+        super().__init__()
+        self.global_proj: nn.Module = (
+            nn.Identity() if global_dim == d_fusion else nn.Linear(global_dim, d_fusion)
+        )
+        self.local_proj: nn.Module = (
+            nn.Identity() if local_dim == d_fusion else nn.Linear(local_dim, d_fusion)
+        )
+        self.local_score = nn.Linear(d_fusion, 1)
+        self.branch_weights = nn.Parameter(torch.zeros(2))
+        self.final_norm = nn.LayerNorm(d_fusion)
+        self.d_fusion = d_fusion
+
+    def forward(
+        self,
+        global_vec: Tensor,
+        local_tokens: Tensor,
+        local_mask: Tensor,
+    ) -> Tensor:
+        g = self.global_proj(global_vec)  # (B, d)
+        lt = self.local_proj(local_tokens)  # (B, N, d)
+
+        scores = self.local_score(lt).squeeze(-1)  # (B, N)
+        scores = scores.masked_fill(~local_mask, float("-inf"))
+        weights = torch.softmax(scores, dim=1)
+        # All-masked rows softmax to NaN; zero them so local contributes nothing.
+        weights = torch.nan_to_num(weights, nan=0.0)
+        local_pooled = (weights.unsqueeze(-1) * lt).sum(dim=1)  # (B, d)
+
+        bw = torch.softmax(self.branch_weights, dim=0)  # (2,)
+        fused = bw[0] * g + bw[1] * local_pooled
+        return self.final_norm(fused)
