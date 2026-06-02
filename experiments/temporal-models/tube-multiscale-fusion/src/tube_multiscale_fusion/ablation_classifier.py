@@ -56,6 +56,8 @@ class AblationNoTemporalClassifier(nn.Module):
         head_dropout: float = 0.0,
         # Dim of the learnable query that stands in for the global vector.
         query_dim: int = 384,
+        # Per-tube spatial encoder (the module under test in the spatial study).
+        encoder_kind: str = "tubelet_transformer",
     ) -> None:
         super().__init__()
         self.local_branch = LocalBranch(
@@ -71,6 +73,7 @@ class AblationNoTemporalClassifier(nn.Module):
             num_heads=local_num_heads,
             ffn_dim=local_ffn_dim,
             dropout=local_dropout,
+            encoder_kind=encoder_kind,
         )
         # Learnable stand-in for the (removed) global context vector.
         self.query_token = nn.Parameter(torch.zeros(1, query_dim))

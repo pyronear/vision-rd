@@ -91,6 +91,7 @@ def main() -> None:
         head_hidden_dim=cfg["head_hidden_dim"],
         head_dropout=cfg.get("head_dropout", 0.0),
         query_dim=cfg.get("query_dim", 384),
+        encoder_kind=cfg.get("encoder_kind", "tubelet_transformer"),
         learning_rate=cfg["learning_rate"],
         weight_decay=cfg["weight_decay"],
         use_cosine_warmup=cfg.get("use_cosine_warmup", False),

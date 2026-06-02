@@ -253,6 +253,35 @@ train_temporal_linear_wavg:
   aggregator_kind: linear_wavg
 
 # ---------------------------------------------------------------------------
+# Spatial-module comparison — vary ONLY the per-tube encoder, in the local-only
+# (no_temporal) setting so the spatial module is isolated. The tubelet-
+# transformer baseline is `train_ablation_no_temporal` above. See
+# SPATIAL_COMPARISON.md.
+# ---------------------------------------------------------------------------
+_spatial_defaults: &spatial_defaults
+  <<: *train_defaults
+  ablation_variant: no_temporal
+  local_branch_section: local_branch
+  query_dim: 384
+
+train_spatial_resnet3d:
+  <<: *spatial_defaults
+  encoder_kind: resnet3d
+  batch_size: 8          # r3d_18 over 28 tubes is memory-heavy
+
+train_spatial_vivit:
+  <<: *spatial_defaults
+  encoder_kind: vivit
+
+train_spatial_convlstm:
+  <<: *spatial_defaults
+  encoder_kind: convlstm
+
+train_spatial_tsm:
+  <<: *spatial_defaults
+  encoder_kind: tsm
+
+# ---------------------------------------------------------------------------
 # Augmentation (RGB only)
 # ---------------------------------------------------------------------------
 augment:

@@ -46,6 +46,7 @@ class LitAblationNoTemporal(L.LightningModule):
         query_dim: int,
         learning_rate: float,
         weight_decay: float,
+        encoder_kind: str = "tubelet_transformer",
         use_cosine_warmup: bool = False,
         warmup_frac: float = 0.05,
     ) -> None:
@@ -72,6 +73,7 @@ class LitAblationNoTemporal(L.LightningModule):
             head_hidden_dim=head_hidden_dim,
             head_dropout=head_dropout,
             query_dim=query_dim,
+            encoder_kind=encoder_kind,
         )
         self.loss_fn = torch.nn.BCEWithLogitsLoss()
         self.learning_rate = learning_rate

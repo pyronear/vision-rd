@@ -13,3 +13,7 @@
 /temporal_lstm
 /temporal_linear_wavg
 /temporal_mlp
+/spatial_tsm
+/spatial_convlstm
+/spatial_resnet3d
+/spatial_vivit
