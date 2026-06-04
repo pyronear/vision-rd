@@ -118,16 +118,12 @@ def test_classifier_gradient_flows_through_both_branches(
     assert encoder_grads and all(g is not None for g in encoder_grads)
 
     # Fusion params must have grads.
-    fusion_grads = [
-        p.grad for p in model.fusion.parameters() if p.requires_grad
-    ]
+    fusion_grads = [p.grad for p in model.fusion.parameters() if p.requires_grad]
     assert fusion_grads and all(g is not None for g in fusion_grads)
 
     # Global aggregator params must have grads.
     agg_grads = [
-        p.grad
-        for p in model.global_branch.aggregator.parameters()
-        if p.requires_grad
+        p.grad for p in model.global_branch.aggregator.parameters() if p.requires_grad
     ]
     assert agg_grads and all(g is not None for g in agg_grads)
 

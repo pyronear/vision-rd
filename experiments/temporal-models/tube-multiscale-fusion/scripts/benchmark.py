@@ -104,9 +104,7 @@ def time_to_detection(
         for k in range(2, n_valid + 1):
             mask_k = torch.zeros_like(base_mask)
             mask_k[:k] = True
-            prob = torch.sigmoid(
-                lit(patches, mask_k.unsqueeze(0).to(device))
-            ).item()
+            prob = torch.sigmoid(lit(patches, mask_k.unsqueeze(0).to(device))).item()
             if prob >= threshold:
                 fired_at = k
                 break

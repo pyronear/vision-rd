@@ -72,9 +72,7 @@ def test_extract_tubes_rejects_mismatched_resolution() -> None:
 
 def test_tube_validity_mask_all_valid() -> None:
     mask = torch.ones(2, 16, dtype=torch.bool)
-    tube_mask = tube_validity_mask(
-        mask, grid_size=4, tube_length=4, temporal_stride=2
-    )
+    tube_mask = tube_validity_mask(mask, grid_size=4, tube_length=4, temporal_stride=2)
     assert tube_mask.shape == (2, 7 * 16)
     assert tube_mask.all()
 
@@ -83,9 +81,7 @@ def test_tube_validity_mask_partial_padding() -> None:
     """Frames 8..15 padded -> windows covering only padded frames must be invalid."""
     mask = torch.zeros(1, 16, dtype=torch.bool)
     mask[:, :8] = True
-    tube_mask = tube_validity_mask(
-        mask, grid_size=4, tube_length=4, temporal_stride=2
-    )
+    tube_mask = tube_validity_mask(mask, grid_size=4, tube_length=4, temporal_stride=2)
     # Windows: [0:4], [2:6], [4:8], [6:10], [8:12], [10:14], [12:16]
     # Valid windows: 0..3 (touch frames < 8); invalid: 4..6 (only padded).
     per_window = tube_mask.reshape(1, 7, 16).any(dim=-1)
@@ -94,9 +90,7 @@ def test_tube_validity_mask_partial_padding() -> None:
 
 def test_tube_validity_mask_zero_valid_frames() -> None:
     mask = torch.zeros(1, 16, dtype=torch.bool)
-    tube_mask = tube_validity_mask(
-        mask, grid_size=4, tube_length=4, temporal_stride=2
-    )
+    tube_mask = tube_validity_mask(mask, grid_size=4, tube_length=4, temporal_stride=2)
     assert tube_mask.shape == (1, 112)
     assert not tube_mask.any()
 
