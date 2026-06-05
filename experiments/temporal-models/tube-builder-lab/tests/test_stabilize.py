@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from bbox_tube_temporal.types import Detection, Tube, TubeEntry
 
-from tube_builder_lab.stabilize import MARGIN, tube_window
+from tube_builder_lab.stabilize import tube_window
 
 
 def _det(cx: float, cy: float, w: float, h: float) -> Detection:
@@ -21,35 +21,34 @@ def _tube(*entries: TubeEntry) -> Tube:
     )
 
 
-def test_union_of_two_boxes_with_unit_margin():
+def test_union_of_two_boxes():
     # A: x[0.15,0.25] y[0.15,0.25]; B: x[0.35,0.45] y[0.35,0.45]
     # union: x[0.15,0.45] y[0.15,0.45] -> center 0.3,0.3 size 0.3,0.3
     tube = _tube(
         TubeEntry(frame_idx=0, detection=_det(0.2, 0.2, 0.1, 0.1)),
         TubeEntry(frame_idx=1, detection=_det(0.4, 0.4, 0.1, 0.1)),
     )
-    cx, cy, w, h = tube_window(tube, margin=1.0)
-    assert cx == pytest.approx(0.3)
-    assert cy == pytest.approx(0.3)
-    assert w == pytest.approx(0.3)
-    assert h == pytest.approx(0.3)
+    assert tube_window(tube) == pytest.approx((0.3, 0.3, 0.3, 0.3))
 
 
-def test_margin_scales_size_only():
-    tube = _tube(
-        TubeEntry(frame_idx=0, detection=_det(0.2, 0.2, 0.1, 0.1)),
-        TubeEntry(frame_idx=1, detection=_det(0.4, 0.4, 0.1, 0.1)),
-    )
-    cx, cy, w, h = tube_window(tube, margin=2.0)
-    assert cx == pytest.approx(0.3)
-    assert cy == pytest.approx(0.3)
-    assert w == pytest.approx(0.6)
-    assert h == pytest.approx(0.6)
-
-
-def test_single_box_tube_returns_that_box_with_unit_margin():
+def test_single_box_tube_returns_that_box():
     tube = _tube(TubeEntry(frame_idx=0, detection=_det(0.5, 0.5, 0.2, 0.2)))
-    assert tube_window(tube, margin=1.0) == pytest.approx((0.5, 0.5, 0.2, 0.2))
+    assert tube_window(tube) == pytest.approx((0.5, 0.5, 0.2, 0.2))
+
+
+def test_union_is_axis_independent():
+    # x extent 0.3, y extent 0.1 -> width and height are computed separately.
+    tube = _tube(
+        TubeEntry(frame_idx=0, detection=_det(0.2, 0.5, 0.1, 0.1)),
+        TubeEntry(frame_idx=1, detection=_det(0.4, 0.5, 0.1, 0.1)),
+    )
+    assert tube_window(tube) == pytest.approx((0.3, 0.5, 0.3, 0.1))
+
+
+def test_empty_tube_raises():
+    tube = _tube(TubeEntry(frame_idx=0, detection=None, is_gap=True))
+    with pytest.raises(ValueError):
+        tube_window(tube)
 
 
 def test_gap_entries_without_detection_are_ignored():
@@ -63,10 +62,3 @@ def test_gap_entries_without_detection_are_ignored():
         TubeEntry(frame_idx=1, detection=_det(0.4, 0.4, 0.1, 0.1)),
     )
     assert tube_window(with_gap) == pytest.approx(tube_window(without_gap))
-
-
-def test_default_margin_constant_is_applied():
-    tube = _tube(TubeEntry(frame_idx=0, detection=_det(0.5, 0.5, 0.2, 0.2)))
-    _, _, w, h = tube_window(tube)
-    assert w == pytest.approx(0.2 * MARGIN)
-    assert h == pytest.approx(0.2 * MARGIN)

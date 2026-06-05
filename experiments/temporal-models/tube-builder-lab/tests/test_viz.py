@@ -1,7 +1,9 @@
 from bbox_tube_temporal.types import Detection, Tube, TubeEntry
 
 from tube_builder_lab.viz import (
+    CROP_CONTEXT,
     bboxes_at_frame,
+    crop_box_px,
     norm_bbox_to_pixel,
     tube_color,
     tube_timeline_df,
@@ -35,6 +37,24 @@ def test_norm_bbox_to_pixel():
         60.0,
         140.0,
     )
+
+
+def test_crop_box_px_is_square_and_context_scaled():
+    # Window wider than tall: the crop region squares to the larger side, scaled
+    # by CROP_CONTEXT, and stays centred on the window. (boxed == cropped.)
+    x0, y0, x1, y1 = crop_box_px((0.5, 0.5, 0.1, 0.05), 1000, 1000)
+    assert (x1 - x0) == (y1 - y0)  # square
+    assert (x1 - x0) == round(0.1 * CROP_CONTEXT * 1000)  # sized to max(w,h)*context
+    assert (x0 + x1) / 2 == 500
+    assert (y0 + y1) / 2 == 500
+
+
+def test_crop_box_px_clamps_to_image_bounds():
+    # Window in the corner: the box clamps to the image (crop_and_resize re-squares
+    # by padding); never negative or past the edge.
+    x0, y0, x1, y1 = crop_box_px((0.0, 0.0, 0.1, 0.1), 1000, 1000)
+    assert (x0, y0) == (0, 0)
+    assert x1 <= 1000 and y1 <= 1000
 
 
 def test_timeline_df_one_row_per_entry():
