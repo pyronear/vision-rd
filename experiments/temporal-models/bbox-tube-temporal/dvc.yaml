@@ -71,9 +71,11 @@ stages:
         --output-dir data/05_model_input/${item}
         --context-factor ${model_input.context_factor}
         --patch-size ${model_input.patch_size}
+        --stabilize ${model_input.stabilize}
       deps:
         - scripts/build_model_input.py
         - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model_input.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/stabilize.py
         - data/03_primary/tubes/${item}
         - data/01_raw/datasets/${item}
       params:
