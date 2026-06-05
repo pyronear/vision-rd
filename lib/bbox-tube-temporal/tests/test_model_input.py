@@ -177,3 +177,79 @@ def test_process_tube_uses_filename_from_raw_directory(tmp_path):
     meta = json.loads((out_dir / seq_id / "meta.json").read_text())
     assert meta["label"] == "fp"
     assert meta["label_int"] == 0
+
+
+def _write_tube_record_varying(path: Path, sequence_id: str, frame_ids: list[str]):
+    """Tube whose box drifts across frames (cx 0.3 -> 0.5 -> 0.7)."""
+    cxs = [0.3, 0.5, 0.7]
+    record = {
+        "sequence_id": sequence_id,
+        "split": "train",
+        "label": "smoke",
+        "source": "gt",
+        "num_frames": len(frame_ids),
+        "tube": {
+            "start_frame": 0,
+            "end_frame": len(frame_ids) - 1,
+            "entries": [
+                {
+                    "frame_idx": i,
+                    "frame_id": fid,
+                    "bbox": [cxs[i], 0.5, 0.05, 0.05],
+                    "is_gap": False,
+                    "confidence": 0.9,
+                }
+                for i, fid in enumerate(frame_ids)
+            ],
+        },
+    }
+    path.write_text(json.dumps(record))
+
+
+def test_process_tube_stabilize_uses_one_window_for_all_frames(tmp_path):
+    seq_id = "site_999_2023-05-23T17-18-31"
+    seq_root = tmp_path / "raw" / "wildfire" / seq_id / "images"
+    frame_ids = [f"{seq_id}_f{i}" for i in range(3)]
+    for fid in frame_ids:
+        _write_jpg(seq_root / f"{fid}.jpg", (255, 128, 64))
+    tube_path = tmp_path / "tubes" / f"{seq_id}.json"
+    tube_path.parent.mkdir(parents=True, exist_ok=True)
+    _write_tube_record_varying(tube_path, seq_id, frame_ids)
+
+    out_dir = tmp_path / "out"
+    process_tube(
+        tube_path=tube_path,
+        raw_dir=tmp_path / "raw",
+        out_dir=out_dir,
+        context_factor=1.5,
+        patch_size=224,
+        stabilize=True,
+    )
+    meta = json.loads((out_dir / seq_id / "meta.json").read_text())
+    boxes = [f["crop_bbox_pixels"] for f in meta["frames"]]
+    assert boxes[0] == boxes[1] == boxes[2]  # one fixed window
+    assert meta["stabilize"] is True
+
+
+def test_process_tube_per_frame_box_varies_when_not_stabilized(tmp_path):
+    seq_id = "site_999_2023-05-23T17-18-32"
+    seq_root = tmp_path / "raw" / "wildfire" / seq_id / "images"
+    frame_ids = [f"{seq_id}_f{i}" for i in range(3)]
+    for fid in frame_ids:
+        _write_jpg(seq_root / f"{fid}.jpg", (255, 128, 64))
+    tube_path = tmp_path / "tubes" / f"{seq_id}.json"
+    tube_path.parent.mkdir(parents=True, exist_ok=True)
+    _write_tube_record_varying(tube_path, seq_id, frame_ids)
+
+    out_dir = tmp_path / "out"
+    process_tube(
+        tube_path=tube_path,
+        raw_dir=tmp_path / "raw",
+        out_dir=out_dir,
+        context_factor=1.5,
+        patch_size=224,
+    )
+    meta = json.loads((out_dir / seq_id / "meta.json").read_text())
+    boxes = [f["crop_bbox_pixels"] for f in meta["frames"]]
+    assert boxes[0] != boxes[2]  # per-frame crop drifts
+    assert meta["stabilize"] is False
