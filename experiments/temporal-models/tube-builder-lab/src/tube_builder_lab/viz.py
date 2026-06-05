@@ -121,3 +121,13 @@ def crop_tube_at_frame(image_path: Path, bbox: tuple[float, float, float, float]
     ecx, ecy, ew, eh = expand_bbox(cx, cy, bw, bh, CROP_CONTEXT)
     box = norm_bbox_to_pixel_square(ecx, ecy, ew, eh, img_w, img_h)
     return Image.fromarray(crop_and_resize(img, box, CROP_SIZE))
+
+
+def stabilized_crop(image_path: Path, window: tuple[float, float, float, float]):
+    """Square context crop of a FIXED per-tube window (no extra context margin —
+    the margin is already baked into ``window`` by ``stabilize.tube_window``)."""
+    img = np.array(Image.open(image_path).convert("RGB"))
+    img_h, img_w = img.shape[:2]
+    cx, cy, w, h = window
+    box = norm_bbox_to_pixel_square(cx, cy, w, h, img_w, img_h)
+    return Image.fromarray(crop_and_resize(img, box, CROP_SIZE))
