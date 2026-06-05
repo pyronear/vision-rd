@@ -45,3 +45,21 @@ def test_tubes_config_omits_merge_keys_when_any_missing():
     assert "merge_iomin" not in cfg
     assert "merge_prox_factor" not in cfg
     assert "merge_max_gap" not in cfg
+
+
+def test_model_input_config_carries_stabilize_default_false():
+    mod = _load_script_module("package_model_script_mi_default")
+    all_params = {"model_input": {"context_factor": 1.5, "patch_size": 224}}
+    cfg = mod._model_input_config(all_params)
+    assert cfg["context_factor"] == 1.5
+    assert cfg["patch_size"] == 224
+    assert cfg["stabilize"] is False
+
+
+def test_model_input_config_carries_stabilize_true():
+    mod = _load_script_module("package_model_script_mi_true")
+    all_params = {
+        "model_input": {"context_factor": 1.5, "patch_size": 224, "stabilize": True}
+    }
+    cfg = mod._model_input_config(all_params)
+    assert cfg["stabilize"] is True

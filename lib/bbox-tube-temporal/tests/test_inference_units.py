@@ -670,3 +670,60 @@ class TestBuildTubesForInference:
             merge_max_gap=10,
         )
         assert len(tubes) == 2  # would be 1 if merge ran
+
+
+@pytest.fixture()
+def gradient_image_sequence(tmp_path: Path) -> list[Path]:
+    """Three identical 256x256 horizontal-gradient JPGs (spatial structure so a
+    different crop region yields different pixels)."""
+    col = np.linspace(0, 255, 256, dtype=np.uint8)
+    img = np.stack([np.tile(col, (256, 1))] * 3, axis=-1)
+    paths = []
+    for i in range(3):
+        p = tmp_path / f"grad_{i:02d}.jpg"
+        Image.fromarray(img).save(p, format="JPEG", quality=100)
+        paths.append(p)
+    return paths
+
+
+class TestCropTubePatchesStabilize:
+    def _tube_drifting(self):
+        return _tube(
+            0,
+            [
+                (0, _det(cx=0.3, cy=0.5, w=0.1, h=0.1)),
+                (1, _det(cx=0.5, cy=0.5, w=0.1, h=0.1)),
+                (2, _det(cx=0.7, cy=0.5, w=0.1, h=0.1)),
+            ],
+        )
+
+    def _crop(self, tube, frames, stabilize):
+        return crop_tube_patches(
+            tube,
+            frames,
+            context_factor=1.5,
+            patch_size=224,
+            max_frames=5,
+            normalization_mean=[0.485, 0.456, 0.406],
+            normalization_std=[0.229, 0.224, 0.225],
+            stabilize=stabilize,
+        )
+
+    def test_stabilized_crop_is_constant_across_frames(self, gradient_image_sequence):
+        frames = [
+            Frame(frame_id=p.stem, image_path=p, timestamp=None)
+            for p in gradient_image_sequence
+        ]
+        patches, _ = self._crop(self._tube_drifting(), frames, stabilize=True)
+        # One fixed window -> every real frame crops the same gradient region.
+        assert torch.equal(patches[0], patches[1])
+        assert torch.equal(patches[0], patches[2])
+
+    def test_per_frame_crop_varies_across_frames(self, gradient_image_sequence):
+        frames = [
+            Frame(frame_id=p.stem, image_path=p, timestamp=None)
+            for p in gradient_image_sequence
+        ]
+        patches, _ = self._crop(self._tube_drifting(), frames, stabilize=False)
+        # Boxes drift left->right across the gradient -> patches differ.
+        assert not torch.equal(patches[0], patches[2])

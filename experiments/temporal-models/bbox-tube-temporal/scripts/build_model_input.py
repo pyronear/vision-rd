@@ -18,12 +18,18 @@ from pathlib import Path
 from bbox_tube_temporal.model_input import LABEL_TO_INT, process_tube
 
 
+def _to_bool(value: str) -> bool:
+    """Parse a DVC-substituted boolean param (``true``/``false``)."""
+    return str(value).strip().lower() in {"true", "1", "yes"}
+
+
 def _process_one(
     tube_path: Path,
     raw_dir: Path,
     out_dir: Path,
     context_factor: float,
     patch_size: int,
+    stabilize: bool,
 ) -> tuple[str | None, str, str | None]:
     """Worker: returns (sequence_id, label, error_or_none)."""
     try:
@@ -36,6 +42,7 @@ def _process_one(
             out_dir=out_dir,
             context_factor=context_factor,
             patch_size=patch_size,
+            stabilize=stabilize,
         )
         return sequence_id, label, None
     except Exception as exc:  # noqa: BLE001
@@ -49,6 +56,7 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--context-factor", type=float, required=True)
     parser.add_argument("--patch-size", type=int, required=True)
+    parser.add_argument("--stabilize", default="false")
     parser.add_argument(
         "--workers",
         type=int,
@@ -78,6 +86,7 @@ def main() -> None:
                 args.output_dir,
                 args.context_factor,
                 args.patch_size,
+                _to_bool(args.stabilize),
             )
             for p in tube_paths
         ]

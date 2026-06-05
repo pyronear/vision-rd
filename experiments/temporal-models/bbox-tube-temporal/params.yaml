@@ -30,6 +30,7 @@ build_tubes:
 model_input:
   context_factor: 1.5
   patch_size: 224
+  stabilize: false
 
 _train_defaults: &train_defaults
   hidden_dim: 128
