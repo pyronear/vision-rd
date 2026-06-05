@@ -131,3 +131,9 @@ def stabilized_crop(image_path: Path, window: tuple[float, float, float, float])
     cx, cy, w, h = window
     box = norm_bbox_to_pixel_square(cx, cy, w, h, img_w, img_h)
     return Image.fromarray(crop_and_resize(img, box, CROP_SIZE))
+
+
+def blank_crop():
+    """Neutral placeholder so film-strip rows stay column-aligned on frames with
+    no detection."""
+    return Image.new("RGB", (CROP_SIZE, CROP_SIZE), (40, 40, 40))

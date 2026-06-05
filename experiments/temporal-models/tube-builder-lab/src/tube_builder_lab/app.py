@@ -23,10 +23,13 @@ from tube_builder_lab.pipeline import (
     detections_to_display_tubes,
     load_pipeline_config,
 )
+from tube_builder_lab.stabilize import tube_window
 from tube_builder_lab.store import build_frames, read_meta, seq_dir_for_key
 from tube_builder_lab.viz import (
+    blank_crop,
     crop_tube_at_frame,
     draw_tube_bboxes,
+    stabilized_crop,
     tube_color,
     tube_count,
     tube_timeline_df,
@@ -167,6 +170,37 @@ def _viewer(key: str, cfg):  # pragma: no cover
                 )
             else:
                 col.caption("inactive")
+
+    with st.expander("stabilized vs per-frame (film strip)", expanded=False):
+        if not cand:
+            st.caption("no candidate tubes")
+        for t in cand:
+            st.markdown(
+                f"<b style='color:{tube_color(t.tube_id)}'>T{t.tube_id}</b>",
+                unsafe_allow_html=True,
+            )
+            window = tube_window(t)
+            per_frame_imgs = []
+            stable_imgs = []
+            captions = []
+            for f in range(t.start_frame, t.end_frame + 1):
+                img_path = seq_dir / meta.frames[f].file
+                entry = next(
+                    (e for e in t.entries if e.frame_idx == f and e.detection), None
+                )
+                if entry:
+                    d = entry.detection
+                    per_frame_imgs.append(
+                        crop_tube_at_frame(img_path, (d.cx, d.cy, d.w, d.h))
+                    )
+                else:
+                    per_frame_imgs.append(blank_crop())
+                stable_imgs.append(stabilized_crop(img_path, window))
+                captions.append(str(f))
+            st.caption("per-frame (jumpy)")
+            st.image(per_frame_imgs, width=90, caption=captions)
+            st.caption("stabilized (fixed window)")
+            st.image(stable_imgs, width=90, caption=captions)
 
 
 def _summary_for(items, cfg) -> pd.DataFrame:  # pragma: no cover
