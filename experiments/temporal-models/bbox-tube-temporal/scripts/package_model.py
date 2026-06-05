@@ -103,6 +103,19 @@ def _tubes_config(all_params: dict) -> dict:
     return cfg
 
 
+def _model_input_config(all_params: dict) -> dict:
+    mi = all_params["model_input"]
+    return {
+        "context_factor": mi["context_factor"],
+        "patch_size": mi["patch_size"],
+        "stabilize": mi.get("stabilize", False),
+        "normalization": {
+            "mean": [0.485, 0.456, 0.406],
+            "std": [0.229, 0.224, 0.225],
+        },
+    }
+
+
 def _build_config(
     all_params: dict,
     variant_cfg: dict,
@@ -124,14 +137,7 @@ def _build_config(
     return {
         "infer": package_params["infer"],
         "tubes": _tubes_config(all_params),
-        "model_input": {
-            "context_factor": all_params["model_input"]["context_factor"],
-            "patch_size": all_params["model_input"]["patch_size"],
-            "normalization": {
-                "mean": [0.485, 0.456, 0.406],
-                "std": [0.229, 0.224, 0.225],
-            },
-        },
+        "model_input": _model_input_config(all_params),
         "classifier": _classifier_kwargs(variant_cfg),
         "decision": decision,
     }
