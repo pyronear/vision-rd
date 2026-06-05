@@ -1,8 +1,9 @@
-"""Tube Builder Lab — current vs candidate tube linking, Layout A.
+"""Tube Builder Lab — the builder's tubes + per-tube crop stabilization.
 
 Reads only data/05_model_input/detections/ + data/03_primary/sequences/**.
 Run with `streamlit run app.py` (or `make app`). Iterate by editing
-src/tube_builder_lab/candidate.py and clicking "Re-run candidate".
+src/tube_builder_lab/candidate.py (linking) or stabilize.py (crop window) and
+saving — Streamlit reloads.
 """
 
 from __future__ import annotations
@@ -19,14 +20,15 @@ import yaml
 from tube_builder_lab import candidate as candidate_mod
 from tube_builder_lab.cache import detections_present, load_cached
 from tube_builder_lab.pipeline import (
-    current_builder,
     detections_to_display_tubes,
     load_pipeline_config,
 )
+from tube_builder_lab.stabilize import tube_window
 from tube_builder_lab.store import build_frames, read_meta, seq_dir_for_key
 from tube_builder_lab.viz import (
     crop_tube_at_frame,
     draw_tube_bboxes,
+    draw_tube_windows,
     tube_color,
     tube_count,
     tube_timeline_df,
@@ -41,14 +43,12 @@ WORKING_SET = Path("working_set.yaml")
 PLAY_FPS = 2
 
 
-def _both_tube_sets(key: str, cfg):
-    """(current_tubes, candidate_tubes) for a key, over the full sequence."""
+def _candidate_tubes(key: str, cfg):
+    """Candidate (the committed builder) tubes for a key, over the full sequence."""
     fds = load_cached(DETECTIONS, key)
-    cur = detections_to_display_tubes(fds, current_builder(cfg), cfg, truncate=False)
-    cand = detections_to_display_tubes(
+    return detections_to_display_tubes(
         fds, candidate_mod.build_tubes_candidate, cfg, truncate=False
     )
-    return cur, cand
 
 
 def _timeline_chart(tubes, n, current, color_map):  # pragma: no cover
@@ -110,12 +110,8 @@ def _viewer(key: str, cfg):  # pragma: no cover
         st.info("no frames")
         return
 
-    cur, cand = _both_tube_sets(key, cfg)
-    c1, c2 = st.columns(2)
-    c1.metric("current tubes", tube_count(cur))
-    c2.metric(
-        "candidate tubes", tube_count(cand), delta=tube_count(cand) - tube_count(cur)
-    )
+    cand = _candidate_tubes(key, cfg)
+    st.metric("tubes", tube_count(cand))
 
     frame_key = f"frame_{key}"
     st.session_state.setdefault(frame_key, 0)
@@ -123,27 +119,29 @@ def _viewer(key: str, cfg):  # pragma: no cover
         st.session_state[frame_key] = (st.session_state[frame_key] + 1) % n
     i = st.slider("frame", 0, n - 1, key=frame_key) if n > 1 else 0
 
-    # Two synced frame views (same frame index i): current (left) vs candidate
-    # (right). One slider/play tick drives both, so they advance in lockstep.
+    # Two synced full-frame views for the current frame i (driven by the
+    # play/slider above): left = non-stabilized per-frame box (moves frame to
+    # frame); right = the FIXED stabilized crop window (identical every frame).
     img_path = seq_dir / meta.frames[i].file
     left, right = st.columns(2)
     left.image(
-        draw_tube_bboxes(img_path, cur, i),
-        caption=f"current — frame {i + 1}/{n}, {tube_count(cur)} tube(s)",
+        draw_tube_bboxes(img_path, cand, i),
+        caption=f"non-stabilized — frame {i + 1}/{n}, {tube_count(cand)} tube(s)",
         width="stretch",
     )
+    active_windows = [
+        (tube_window(t), tube_color(t.tube_id))
+        for t in cand
+        if any(e.frame_idx == i and e.detection for e in t.entries)
+    ]
     right.image(
-        draw_tube_bboxes(img_path, cand, i),
-        caption=f"candidate — frame {i + 1}/{n}, {tube_count(cand)} tube(s)",
+        draw_tube_windows(img_path, active_windows),
+        caption=f"stabilized window — frame {i + 1}/{n}, {tube_count(cand)} tube(s)",
         width="stretch",
     )
 
-    cur_colors = {f"T{t.tube_id}": tube_color(t.tube_id) for t in cur}
     cand_colors = {f"T{t.tube_id}": tube_color(t.tube_id) for t in cand}
-    st.caption(f"current — {tube_count(cur)} tube(s)")
-    if cur:
-        st.altair_chart(_timeline_chart(cur, n, i, cur_colors), width="stretch")
-    st.caption(f"candidate — {tube_count(cand)} tube(s)")
+    st.caption(f"tubes — {tube_count(cand)}")
     if cand:
         st.altair_chart(_timeline_chart(cand, n, i, cand_colors), width="stretch")
 
@@ -157,64 +155,49 @@ def _viewer(key: str, cfg):  # pragma: no cover
                 f"<b style='color:{tube_color(t.tube_id)}'>T{t.tube_id}</b>",
                 unsafe_allow_html=True,
             )
+            c_ns, c_st = col.columns(2)
             if entry:
                 d = entry.detection
-                col.image(
-                    crop_tube_at_frame(
-                        seq_dir / meta.frames[i].file, (d.cx, d.cy, d.w, d.h)
-                    ),
-                    width=180,
+                c_ns.image(
+                    crop_tube_at_frame(img_path, (d.cx, d.cy, d.w, d.h)),
+                    caption="non-stabilized",
+                    width="stretch",
+                )
+                c_st.image(
+                    crop_tube_at_frame(img_path, tube_window(t)),
+                    caption="stabilized",
+                    width="stretch",
                 )
             else:
-                col.caption("inactive")
+                c_ns.caption("inactive")
 
 
 def _summary_for(items, cfg) -> pd.DataFrame:  # pragma: no cover
     rows = []
     for item in items:
-        if not detections_present(DETECTIONS, item.key):
-            rows.append(
-                {
-                    "key": item.key,
-                    "current": None,
-                    "candidate": None,
-                    "Δ": None,
-                    "note": item.note or "",
-                }
-            )
-            continue
-        cur, cand = _both_tube_sets(item.key, cfg)
+        present = detections_present(DETECTIONS, item.key)
         rows.append(
             {
                 "key": item.key,
-                "current": len(cur),
-                "candidate": len(cand),
-                "Δ": len(cand) - len(cur),
+                "tubes": len(_candidate_tubes(item.key, cfg)) if present else None,
                 "note": item.note or "",
             }
         )
     return pd.DataFrame(rows)
 
 
-def _style_changes(row):  # pragma: no cover
-    """Amber where the candidate changes the tube count, grey if data is missing,
-    white when current == candidate."""
-    d = row["Δ"]
-    if pd.isna(d):
-        bg = "#eeeeee"
-    elif d != 0:
-        bg = "#fff3cd"
-    else:
-        bg = "white"
+def _style_missing(row):  # pragma: no cover
+    """Grey out rows whose detections cache is missing; white otherwise."""
+    bg = "#eeeeee" if pd.isna(row["tubes"]) else "white"
     return [f"background-color: {bg}; color: #111"] * len(row)
 
 
 def _pick_from_table(df, key) -> str | None:  # pragma: no cover
-    """Render a clickable single-row table (rows with a count change highlighted);
+    """Render a clickable single-row table (rows with missing data greyed out);
     return the key of a row clicked THIS rerun (else None) so the two tables don't
     fight over the active selection."""
     event = st.dataframe(
-        df.style.apply(_style_changes, axis=1),
+        df.style.apply(_style_missing, axis=1),
         width="stretch",
         hide_index=True,
         on_select="rerun",
@@ -244,8 +227,8 @@ def main() -> None:  # pragma: no cover
     notes = {i.key: i.note for i in ws.all()}
 
     # Two clickable tables drive the viewer below; the row clicked most recently
-    # (this rerun) wins. Counts are current -> candidate per sequence, over the
-    # full (untruncated) sequence; rows where the count changes are highlighted.
+    # (this rerun) wins. Counts are the builder's tube count per sequence, over
+    # the full (untruncated) sequence; rows with a missing cache are greyed out.
     st.subheader("Targets — click a row to inspect")
     picked_target = _pick_from_table(_summary_for(ws.targets, cfg), "tbl_targets")
     st.subheader("Control (random sequences — regression watch)")
