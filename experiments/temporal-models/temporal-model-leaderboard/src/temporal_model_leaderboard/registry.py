@@ -26,6 +26,10 @@ MODEL_REGISTRY: dict[str, tuple[str, str]] = {
         "bbox_tube_temporal.model",
         "BboxTubeTemporalModel",
     ),
+    "tube-multiscale-fusion": (
+        "tube_multiscale_fusion.model",
+        "TubeMultiscaleFusionModel",
+    ),
 }
 
 
