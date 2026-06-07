@@ -1,6 +1,6 @@
 stages:
   prepare:
-    desc: "Download YOLO detector weights from HuggingFace Hub"
+    desc: "Download YOLO detector weights from HuggingFace Hub (serving companion)"
     cmd: >-
       uv run python scripts/prepare.py
       --model-repo ${prepare.model_repo}
@@ -46,9 +46,6 @@ stages:
         --min-detected-entries ${build_tubes.min_detected_entries}
       deps:
         - scripts/build_tubes.py
-        - src/tube_multiscale_fusion/tubes.py
-        - src/tube_multiscale_fusion/data.py
-        - src/tube_multiscale_fusion/types.py
         - data/01_raw/datasets/${item}
       params:
         - tubes
@@ -70,7 +67,6 @@ stages:
         --patch-size ${model_input.patch_size}
       deps:
         - scripts/build_model_input.py
-        - src/tube_multiscale_fusion/model_input.py
         - data/03_primary/tubes/${item}
         - data/01_raw/datasets/${item}
       params:
@@ -596,11 +592,21 @@ stages:
       --checkpoint data/06_models/dinov2_multiscale/best_checkpoint.pt
       --params-path params.yaml
       --params-key train_dinov2_multiscale
+      --yolo-weights-path data/01_raw/models/best.pt
+      --val-patches-dir data/05_model_input/val
       --output data/07_model_output/dinov2_multiscale/model_package.zip
     deps:
       - scripts/package_model.py
+      - src/tube_multiscale_fusion/package.py
+      - src/tube_multiscale_fusion/model.py
       - data/06_models/dinov2_multiscale
+      - data/01_raw/models/best.pt
+      - data/05_model_input/val
     params:
+      - package
+      - tubes
+      - build_tubes
+      - model_input
       - train_dinov2_multiscale
       - global_branch
       - local_branch

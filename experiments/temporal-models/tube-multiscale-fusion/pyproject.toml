@@ -12,12 +12,15 @@ description = "Two-branch temporal smoke classifier: global DINOv2 sequence cont
 requires-python = ">=3.11"
 dependencies = [
     "pyrocore",
+    "bbox-tube-temporal-core",
     "lightning>=2.2",
     "matplotlib>=3.8",
     "numpy>=1.26,<2",
+    # Serving-path detector companion (tube_multiscale_fusion.model / package):
+    # ultralytics is imported directly; opencv-python-headless pins the cv2
+    # build that loads in headless envs (full opencv-python fails on libGL).
+    "ultralytics>=8.3",
     "opencv-python-headless>=4.8",
-    "pandas>=2.0",
-    "pydantic>=2.6",
     "pyyaml>=6.0",
     "scikit-learn>=1.4",
     "tensorboard>=2.16",
@@ -25,12 +28,12 @@ dependencies = [
     "torch>=2.2",
     "torchvision>=0.17",
     "tqdm>=4.66",
-    "ultralytics>=8.3",
     "huggingface-hub>=0.24",
 ]
 
 [tool.uv.sources]
 pyrocore = { path = "../../../lib/pyrocore" }
+bbox-tube-temporal-core = { path = "../../../lib/bbox-tube-temporal" }
 
 [dependency-groups]
 dev = [

@@ -21,6 +21,20 @@ model_input:
   patch_size: 224
 
 # ---------------------------------------------------------------------------
+# Serving / packaging — used by scripts/package_model.py to build the
+# leaderboard-comparable model archive (YOLO companion + classifier + config).
+# ---------------------------------------------------------------------------
+package:
+  target_recall: 0.95          # decision threshold calibrated to this recall on val
+  infer_min_tube_length: 2     # smallest tube prefix scored at inference
+  infer:
+    confidence_threshold: 0.1
+    iou_nms: 0.2
+    image_size: 1024
+    pad_to_min_frames: 16      # match truncate.max_frames / the global branch
+    pad_strategy: symmetric
+
+# ---------------------------------------------------------------------------
 # Global branch: DINOv2 per-frame + sequence transformer aggregator.
 # ---------------------------------------------------------------------------
 global_branch:
