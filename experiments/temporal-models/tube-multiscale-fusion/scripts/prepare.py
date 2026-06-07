@@ -3,6 +3,12 @@
 Fetches a single model file from a HuggingFace repository and saves it
 to the local data directory. Skips the download if the file already exists.
 
+These weights are the serving-time detector companion: the training /
+data-prep pipeline reads ground-truth label files (no inference), but the
+``TemporalModel`` serving path (``tube_multiscale_fusion.model``) runs this
+YOLO over raw frames before building tubes. The packager bundles the same
+weights into the deployable model archive.
+
 Usage:
     uv run python scripts/prepare.py \
         --model-repo pyronear/yolo11s_nimble-narwhal_v6.0.0 \

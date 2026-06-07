@@ -5,6 +5,7 @@ from .fusion import FusionModule
 from .global_branch import GlobalBranch, TimmBackbone
 from .lit_module import LitTubeMultiscaleClassifier
 from .local_branch import LocalBranch, LocalTubeEncoder, extract_tubes
+from .model import TubeMultiscaleFusionModel
 
 __all__ = [
     "FusionModule",
@@ -14,5 +15,6 @@ __all__ = [
     "LocalTubeEncoder",
     "TimmBackbone",
     "TubeMultiscaleClassifier",
+    "TubeMultiscaleFusionModel",
     "extract_tubes",
 ]

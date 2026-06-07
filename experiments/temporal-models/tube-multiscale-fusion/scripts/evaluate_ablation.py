@@ -106,10 +106,14 @@ def main() -> None:
     cm_abs = np.array([[tn, fp], [fn, tp]], dtype=float)
     cm_norm = np.array(
         [
-            [metrics["confusion_matrix_normalized"]["fp_as_fp"],
-             metrics["confusion_matrix_normalized"]["fp_as_smoke"]],
-            [metrics["confusion_matrix_normalized"]["smoke_as_fp"],
-             metrics["confusion_matrix_normalized"]["smoke_as_smoke"]],
+            [
+                metrics["confusion_matrix_normalized"]["fp_as_fp"],
+                metrics["confusion_matrix_normalized"]["fp_as_smoke"],
+            ],
+            [
+                metrics["confusion_matrix_normalized"]["smoke_as_fp"],
+                metrics["confusion_matrix_normalized"]["smoke_as_smoke"],
+            ],
         ],
         dtype=float,
     )
@@ -141,9 +145,7 @@ def main() -> None:
         )
     ]
     predictions.sort(key=lambda r: r["prob"], reverse=True)
-    (args.output_dir / "predictions.json").write_text(
-        json.dumps(predictions, indent=2)
-    )
+    (args.output_dir / "predictions.json").write_text(json.dumps(predictions, indent=2))
 
     print(json.dumps(metrics, indent=2))
 
