@@ -418,6 +418,33 @@ stages:
     plots:
       - data/06_models/vit_dinov2_finetune/plots/training_curves.png
 
+  train_vit_dinov2_finetune_stabilized:
+    cmd: >-
+      uv run python scripts/train.py
+      --arch transformer
+      --train-dir data/05_model_input_stabilized/train
+      --val-dir data/05_model_input_stabilized/val
+      --output-dir data/06_models/vit_dinov2_finetune_stabilized
+      --params-path params.yaml
+      --params-key train_vit_dinov2_finetune_stabilized
+    deps:
+      - scripts/train.py
+      - src/bbox_tube_temporal_exp/augment.py
+      - src/bbox_tube_temporal_exp/dataset.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal_exp/lit_temporal.py
+      - src/bbox_tube_temporal_exp/training_plots.py
+      - data/05_model_input_stabilized/train
+      - data/05_model_input_stabilized/val
+    params:
+      - train_vit_dinov2_finetune_stabilized
+      - augment
+    outs:
+      - data/06_models/vit_dinov2_finetune_stabilized/best_checkpoint.pt
+      - data/06_models/vit_dinov2_finetune_stabilized/csv_logs/
+    plots:
+      - data/06_models/vit_dinov2_finetune_stabilized/plots/training_curves.png
+
   train_vit_in21k_finetune:
     cmd: >-
       uv run python scripts/train.py
