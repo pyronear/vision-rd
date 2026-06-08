@@ -186,20 +186,37 @@ def main() -> None:
         action="store_true",
         help="Reuse a run's model.zip / metrics if already present.",
     )
+    parser.add_argument(
+        "--splits",
+        nargs="+",
+        choices=list(SPLITS),
+        default=list(SPLITS),
+        help="Which splits to evaluate this invocation. The report still "
+        "aggregates any split already present on disk.",
+    )
     args = parser.parse_args()
 
-    rows: list[dict] = []
+    # Compute phase: package each run, evaluate only the requested splits.
     for run in RUNS:
         run_dir = args.output_root / run["label"]
         model_zip = run_dir / "model.zip"
         if not (args.skip_existing and model_zip.exists()):
             _package(run, model_zip)
+        for split in args.splits:
+            split_dir = run_dir / split
+            if not (args.skip_existing and (split_dir / "metrics.json").exists()):
+                _evaluate(run, split, model_zip, split_dir)
+
+    # Report phase: aggregate whatever splits exist on disk (so a baseline-only
+    # train eval, or a later --splits train run, is picked up automatically).
+    rows: list[dict] = []
+    for run in RUNS:
+        run_dir = args.output_root / run["label"]
         for split in SPLITS:
             split_dir = run_dir / split
             metrics_path = split_dir / "metrics.json"
-            if not (args.skip_existing and metrics_path.exists()):
-                _evaluate(run, split, model_zip, split_dir)
-            metrics = json.loads(metrics_path.read_text())
+            if not metrics_path.exists():
+                continue
             predictions = json.loads((split_dir / "predictions.json").read_text())
             rows.append(
                 summarize_run(
@@ -207,7 +224,7 @@ def main() -> None:
                     pad=run["pad"],
                     strategy=run["strategy"],
                     split=split,
-                    metrics=metrics,
+                    metrics=json.loads(metrics_path.read_text()),
                     predictions=predictions,
                 )
             )
