@@ -4222,3 +4222,514 @@ stages:
       hash: md5
       md5: 96512a5d54bd7e530f60794c171500b9
       size: 197
+  build_model_input_stabilized@train:
+    cmd: uv run python scripts/build_model_input.py --tubes-dir 
+      data/03_primary/tubes/train --raw-dir data/01_raw/datasets/train 
+      --output-dir data/05_model_input_stabilized/train --context-factor 1.5 
+      --patch-size 224 --stabilize true
+    deps:
+    - path: 
+        ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model_input.py
+      hash: md5
+      md5: bae238a8fc43eab42c161c502c62352e
+      size: 3955
+    - path: ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/stabilize.py
+      hash: md5
+      md5: 19ae7ed52059079bc165be9140af28d3
+      size: 1120
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: caf37d4bf513efd49b9617378fff1ffa.dir
+      size: 4776619781
+      nfiles: 89870
+    - path: data/03_primary/tubes/train
+      hash: md5
+      md5: 7cf6a70ba126bfa11dfc78d7608ee79f.dir
+      size: 12515383
+      nfiles: 2910
+    - path: scripts/build_model_input.py
+      hash: md5
+      md5: 57c22fa12eed6b675dc718ebfe48e5c4
+      size: 4031
+    params:
+      params.yaml:
+        model_input.context_factor: 1.5
+        model_input.patch_size: 224
+    outs:
+    - path: data/05_model_input_stabilized/train
+      hash: md5
+      md5: a1d549c88d37c3bb84ec06d541fff939.dir
+      size: 1407122732
+      nfiles: 44105
+  build_model_input_stabilized@val:
+    cmd: uv run python scripts/build_model_input.py --tubes-dir 
+      data/03_primary/tubes/val --raw-dir data/01_raw/datasets/val --output-dir 
+      data/05_model_input_stabilized/val --context-factor 1.5 --patch-size 224 
+      --stabilize true
+    deps:
+    - path: 
+        ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model_input.py
+      hash: md5
+      md5: bae238a8fc43eab42c161c502c62352e
+      size: 3955
+    - path: ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/stabilize.py
+      hash: md5
+      md5: 19ae7ed52059079bc165be9140af28d3
+      size: 1120
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: 409ed7d0573adcb3be98f7ceab63cf25.dir
+      size: 444161180
+      nfiles: 8752
+    - path: data/03_primary/tubes/val
+      hash: md5
+      md5: 3799126119c0e51995824fcaa3027eeb.dir
+      size: 1202840
+      nfiles: 292
+    - path: scripts/build_model_input.py
+      hash: md5
+      md5: 57c22fa12eed6b675dc718ebfe48e5c4
+      size: 4031
+    params:
+      params.yaml:
+        model_input.context_factor: 1.5
+        model_input.patch_size: 224
+    outs:
+    - path: data/05_model_input_stabilized/val
+      hash: md5
+      md5: 0248311290b067503a3feadb7dde89fd.dir
+      size: 130350398
+      nfiles: 4241
+  train_vit_dinov2_finetune_stabilized:
+    cmd: uv run python scripts/train.py --arch transformer --train-dir 
+      data/05_model_input_stabilized/train --val-dir 
+      data/05_model_input_stabilized/val --output-dir 
+      data/06_models/vit_dinov2_finetune_stabilized --params-path params.yaml 
+      --params-key train_vit_dinov2_finetune_stabilized
+    deps:
+    - path: 
+        ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+      hash: md5
+      md5: 3b45bbcf906d7476384593f3706fe27d
+      size: 10042
+    - path: data/05_model_input_stabilized/train
+      hash: md5
+      md5: a1d549c88d37c3bb84ec06d541fff939.dir
+      size: 1407122732
+      nfiles: 44105
+    - path: data/05_model_input_stabilized/val
+      hash: md5
+      md5: 0248311290b067503a3feadb7dde89fd.dir
+      size: 130350398
+      nfiles: 4241
+    - path: scripts/train.py
+      hash: md5
+      md5: daa9d55ef1c8c19acbbe03d4552bdfca
+      size: 5970
+    - path: src/bbox_tube_temporal_exp/augment.py
+      hash: md5
+      md5: f52a42f92caa2fac859bf3a81a18971d
+      size: 9489
+    - path: src/bbox_tube_temporal_exp/dataset.py
+      hash: md5
+      md5: 2d685d135baa79b0916c936f37a052dd
+      size: 3177
+    - path: src/bbox_tube_temporal_exp/lit_temporal.py
+      hash: md5
+      md5: 4dc9173924a59df4c4211f92df335716
+      size: 6400
+    - path: src/bbox_tube_temporal_exp/training_plots.py
+      hash: md5
+      md5: 48015bd154587ba3ba493ed5c337e27a
+      size: 3290
+    params:
+      params.yaml:
+        augment:
+          enabled: true
+          spatial:
+            flip_prob: 0.5
+            rotation_deg: 5.0
+            scale_range:
+            - 0.9
+            - 1.1
+            translate_frac: 0.05
+          photometric:
+            brightness_range:
+            - 0.8
+            - 1.2
+            contrast_range:
+            - 0.8
+            - 1.2
+            saturation_range:
+            - 0.8
+            - 1.2
+          temporal:
+            subseq_prob: 0.5
+            subseq_min_len: 4
+            stride_prob: 0.25
+            frame_drop_prob: 0.15
+            min_valid_after_drop: 4
+        train_vit_dinov2_finetune_stabilized:
+          hidden_dim: 128
+          max_frames: 20
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          arch: transformer
+          global_pool: token
+          img_size: 224
+          transformer_num_layers: 2
+          transformer_num_heads: 6
+          transformer_ffn_dim: 1536
+          transformer_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          backbone: vit_small_patch14_dinov2.lvd142m
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+    outs:
+    - path: data/06_models/vit_dinov2_finetune_stabilized/best_checkpoint.pt
+      hash: md5
+      md5: 50edcfc0431b5abcdccd4a018a1ec5e4
+      size: 143537003
+    - path: data/06_models/vit_dinov2_finetune_stabilized/csv_logs/
+      hash: md5
+      md5: 629dd5cb29e123bab993a3c5074a89b3.dir
+      size: 8146
+      nfiles: 2
+    - path: 
+        data/06_models/vit_dinov2_finetune_stabilized/plots/training_curves.png
+      hash: md5
+      md5: 44e3150efebda81dbc3381a5bfca3807
+      size: 187284
+  package_vit_dinov2_finetune_stabilized:
+    cmd: uv run python scripts/package_model.py --variant 
+      vit_dinov2_finetune_stabilized --stabilize true --val-patches-dir 
+      data/05_model_input_stabilized/val --output 
+      data/06_models/vit_dinov2_finetune_stabilized/model.zip
+    deps:
+    - path: ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/inference.py
+      hash: md5
+      md5: 8a54f4357d8242fc2b6ead9711051900
+      size: 17291
+    - path: 
+        ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/logistic_calibrator.py
+      hash: md5
+      md5: e6b22f87bb70c1f929dddec2fd53654c
+      size: 4269
+    - path: ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model.py
+      hash: md5
+      md5: d38e63e1b5438036819b85ea0ae33607
+      size: 11171
+    - path: ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/package.py
+      hash: md5
+      md5: 12205063ddddeedf21e3777d171aa3e9
+      size: 9555
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: caf37d4bf513efd49b9617378fff1ffa.dir
+      size: 4776619781
+      nfiles: 89870
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: 409ed7d0573adcb3be98f7ceab63cf25.dir
+      size: 444161180
+      nfiles: 8752
+    - path: data/01_raw/models/best.pt
+      hash: md5
+      md5: fea4ddc8d904fcc5ff11ad900e040837
+      size: 19225626
+    - path: data/05_model_input_stabilized/val
+      hash: md5
+      md5: 0248311290b067503a3feadb7dde89fd.dir
+      size: 130350398
+      nfiles: 4241
+    - path: data/06_models/vit_dinov2_finetune_stabilized/best_checkpoint.pt
+      hash: md5
+      md5: 50edcfc0431b5abcdccd4a018a1ec5e4
+      size: 143537003
+    - path: scripts/package_model.py
+      hash: md5
+      md5: 2e8e399badf8bf6a4b140b9dc61898c2
+      size: 11706
+    - path: src/bbox_tube_temporal_exp/calibration.py
+      hash: md5
+      md5: 2303307ff3b86f1186582f9db6982163
+      size: 1811
+    - path: src/bbox_tube_temporal_exp/logistic_calibrator_fit.py
+      hash: md5
+      md5: 563a8f4e81b1c72e85eaabb3dcdcae30
+      size: 3178
+    - path: src/bbox_tube_temporal_exp/package_predict.py
+      hash: md5
+      md5: 04f2d5da74175abdbeb58b5057518544
+      size: 2420
+    - path: src/bbox_tube_temporal_exp/val_predict.py
+      hash: md5
+      md5: 4d9113dff767644da2653f6faa33c706
+      size: 1992
+    params:
+      params.yaml:
+        build_tubes:
+          min_tube_length: 4
+          min_detected_entries: 2
+        model_input:
+          context_factor: 1.5
+          patch_size: 224
+          stabilize: false
+        package.aggregation.vit_dinov2_finetune_stabilized: logistic
+        package.infer:
+          confidence_threshold: 0.1
+          iou_nms: 0.2
+          image_size: 1024
+          pad_to_min_frames: 20
+          pad_strategy: symmetric
+        package.infer_min_tube_length: 2
+        package.target_recall: 0.95
+        train_vit_dinov2_finetune_stabilized:
+          hidden_dim: 128
+          max_frames: 20
+          batch_size: 16
+          num_workers: 4
+          learning_rate: 0.0001
+          weight_decay: 0.05
+          max_epochs: 30
+          early_stop_patience: 5
+          seed: 42
+          arch: transformer
+          global_pool: token
+          img_size: 224
+          transformer_num_layers: 2
+          transformer_num_heads: 6
+          transformer_ffn_dim: 1536
+          transformer_dropout: 0.1
+          use_cosine_warmup: true
+          warmup_frac: 0.05
+          backbone: vit_small_patch14_dinov2.lvd142m
+          finetune: true
+          finetune_last_n_blocks: 1
+          backbone_lr: 1e-05
+        tubes:
+          iou_threshold: 0.2
+          max_misses: 2
+          merge_iomin: 0.3
+          merge_prox_factor: 1.0
+          merge_max_gap: 10
+    outs:
+    - path: data/06_models/vit_dinov2_finetune_stabilized/model.zip
+      hash: md5
+      md5: 9f6b52e4859453a00b793e7d2bf90fb3
+      size: 162765187
+  evaluate_packaged@4:
+    cmd: uv run python scripts/evaluate_packaged.py --model-zip 
+      data/06_models/vit_dinov2_finetune_stabilized/model.zip --sequences-dir 
+      data/01_raw/datasets/train --output-dir 
+      data/08_reporting/train/packaged/vit_dinov2_finetune_stabilized 
+      --model-name vit_dinov2_finetune_stabilized-train
+    deps:
+    - path: ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/data.py
+      hash: md5
+      md5: b907e5a0baedb93775446678c2cce034
+      size: 5078
+    - path: ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/inference.py
+      hash: md5
+      md5: 8a54f4357d8242fc2b6ead9711051900
+      size: 17291
+    - path: ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model.py
+      hash: md5
+      md5: d38e63e1b5438036819b85ea0ae33607
+      size: 11171
+    - path: 
+        ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model_input.py
+      hash: md5
+      md5: bae238a8fc43eab42c161c502c62352e
+      size: 3955
+    - path: ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/tubes.py
+      hash: md5
+      md5: 9426ca83132d1d4822d014c492b7015a
+      size: 18257
+    - path: data/01_raw/datasets/train
+      hash: md5
+      md5: caf37d4bf513efd49b9617378fff1ffa.dir
+      size: 4776619781
+      nfiles: 89870
+    - path: data/06_models/vit_dinov2_finetune_stabilized/model.zip
+      hash: md5
+      md5: 9f6b52e4859453a00b793e7d2bf90fb3
+      size: 162765187
+    - path: scripts/evaluate_packaged.py
+      hash: md5
+      md5: 517cfd26b9d042b8fe9ec3553f6b5319
+      size: 5854
+    - path: src/bbox_tube_temporal_exp/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/bbox_tube_temporal_exp/protocol_eval.py
+      hash: md5
+      md5: d8d5d69d2f7884a7e54d38f785e43726
+      size: 5327
+    outs:
+    - path: 
+        data/08_reporting/train/packaged/vit_dinov2_finetune_stabilized/confusion_matrix.png
+      hash: md5
+      md5: 9e9cae1322080896fd2c96484e7f280c
+      size: 26966
+    - path: 
+        data/08_reporting/train/packaged/vit_dinov2_finetune_stabilized/confusion_matrix_normalized.png
+      hash: md5
+      md5: d21917a2ce0bfae264f753a220b2a7ee
+      size: 26762
+    - path: 
+        data/08_reporting/train/packaged/vit_dinov2_finetune_stabilized/dropped.json
+      hash: md5
+      md5: d751713988987e9331980363e24189ce
+      size: 2
+    - path: 
+        data/08_reporting/train/packaged/vit_dinov2_finetune_stabilized/metrics.json
+      hash: md5
+      md5: 1d11cb219a51685f0cb4cdfbcff45d8a
+      size: 306
+    - path: 
+        data/08_reporting/train/packaged/vit_dinov2_finetune_stabilized/pr_curve.png
+      hash: md5
+      md5: 95d6cd02f6181d0ce317b61991f17bfd
+      size: 24785
+    - path: 
+        data/08_reporting/train/packaged/vit_dinov2_finetune_stabilized/predictions.json
+      hash: md5
+      md5: 7cd17e821a285323148377b7e8b7fae0
+      size: 14168004
+    - path: 
+        data/08_reporting/train/packaged/vit_dinov2_finetune_stabilized/roc_curve.png
+      hash: md5
+      md5: 5f5a8716f0947f75d8b57fb33923beaf
+      size: 34165
+  evaluate_packaged@5:
+    cmd: uv run python scripts/evaluate_packaged.py --model-zip 
+      data/06_models/vit_dinov2_finetune_stabilized/model.zip --sequences-dir 
+      data/01_raw/datasets/val --output-dir 
+      data/08_reporting/val/packaged/vit_dinov2_finetune_stabilized --model-name
+      vit_dinov2_finetune_stabilized-val
+    deps:
+    - path: ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/data.py
+      hash: md5
+      md5: b907e5a0baedb93775446678c2cce034
+      size: 5078
+    - path: ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/inference.py
+      hash: md5
+      md5: 8a54f4357d8242fc2b6ead9711051900
+      size: 17291
+    - path: ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model.py
+      hash: md5
+      md5: d38e63e1b5438036819b85ea0ae33607
+      size: 11171
+    - path: 
+        ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model_input.py
+      hash: md5
+      md5: bae238a8fc43eab42c161c502c62352e
+      size: 3955
+    - path: ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/tubes.py
+      hash: md5
+      md5: 9426ca83132d1d4822d014c492b7015a
+      size: 18257
+    - path: data/01_raw/datasets/val
+      hash: md5
+      md5: 409ed7d0573adcb3be98f7ceab63cf25.dir
+      size: 444161180
+      nfiles: 8752
+    - path: data/06_models/vit_dinov2_finetune_stabilized/model.zip
+      hash: md5
+      md5: 9f6b52e4859453a00b793e7d2bf90fb3
+      size: 162765187
+    - path: scripts/evaluate_packaged.py
+      hash: md5
+      md5: 517cfd26b9d042b8fe9ec3553f6b5319
+      size: 5854
+    - path: src/bbox_tube_temporal_exp/eval_plots.py
+      hash: md5
+      md5: f76a38b124a936129d9e0cc6910b9e33
+      size: 3399
+    - path: src/bbox_tube_temporal_exp/protocol_eval.py
+      hash: md5
+      md5: d8d5d69d2f7884a7e54d38f785e43726
+      size: 5327
+    outs:
+    - path: 
+        data/08_reporting/val/packaged/vit_dinov2_finetune_stabilized/confusion_matrix.png
+      hash: md5
+      md5: 4871102b53b366af2af75fe4ad9b09dc
+      size: 23806
+    - path: 
+        data/08_reporting/val/packaged/vit_dinov2_finetune_stabilized/confusion_matrix_normalized.png
+      hash: md5
+      md5: 9e99a9805efef01cfa0e90ee47ce758e
+      size: 26254
+    - path: 
+        data/08_reporting/val/packaged/vit_dinov2_finetune_stabilized/dropped.json
+      hash: md5
+      md5: d751713988987e9331980363e24189ce
+      size: 2
+    - path: 
+        data/08_reporting/val/packaged/vit_dinov2_finetune_stabilized/metrics.json
+      hash: md5
+      md5: e85f55705ed42ded0297d73def16b406
+      size: 298
+    - path: 
+        data/08_reporting/val/packaged/vit_dinov2_finetune_stabilized/pr_curve.png
+      hash: md5
+      md5: 26ff4495b2eddc4845eb7b88ea6e23da
+      size: 22670
+    - path: 
+        data/08_reporting/val/packaged/vit_dinov2_finetune_stabilized/predictions.json
+      hash: md5
+      md5: da8f5ec61484ffa00a23b917d005f942
+      size: 1408905
+    - path: 
+        data/08_reporting/val/packaged/vit_dinov2_finetune_stabilized/roc_curve.png
+      hash: md5
+      md5: 9e5802437dff15ae75441f39b03569f3
+      size: 32351
+  analyze_variant@vit_dinov2_finetune_stabilized:
+    cmd: uv run python scripts/analyze_variant.py --train-predictions 
+      data/08_reporting/train/packaged/vit_dinov2_finetune_stabilized/predictions.json
+      --val-predictions 
+      data/08_reporting/val/packaged/vit_dinov2_finetune_stabilized/predictions.json
+      --training-labels-dir data/01_raw/datasets/val/fp --output-dir 
+      data/08_reporting/variant_analysis/vit_dinov2_finetune_stabilized
+    deps:
+    - path: 
+        data/08_reporting/train/packaged/vit_dinov2_finetune_stabilized/predictions.json
+      hash: md5
+      md5: 7cd17e821a285323148377b7e8b7fae0
+      size: 14168004
+    - path: 
+        data/08_reporting/val/packaged/vit_dinov2_finetune_stabilized/predictions.json
+      hash: md5
+      md5: da8f5ec61484ffa00a23b917d005f942
+      size: 1408905
+    - path: scripts/analyze_variant.py
+      hash: md5
+      md5: 0311ab27193c495a868e348f31bd75b6
+      size: 13057
+    outs:
+    - path: 
+        data/08_reporting/variant_analysis/vit_dinov2_finetune_stabilized/analysis_report.md
+      hash: md5
+      md5: 0c691f89675d6f84d637d20a3bbfcc3c
+      size: 5092
+    - path: 
+        data/08_reporting/variant_analysis/vit_dinov2_finetune_stabilized/logistic_calibrator.json
+      hash: md5
+      md5: 6beeb51526dc4c2fc23211c7912f2183
+      size: 780
+    - path: 
+        data/08_reporting/variant_analysis/vit_dinov2_finetune_stabilized/recommended_config.yaml
+      hash: md5
+      md5: 96512a5d54bd7e530f60794c171500b9
+      size: 197

@@ -83,6 +83,31 @@ stages:
       outs:
         - data/05_model_input/${item}
 
+  build_model_input_stabilized:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/build_model_input.py
+        --tubes-dir data/03_primary/tubes/${item}
+        --raw-dir data/01_raw/datasets/${item}
+        --output-dir data/05_model_input_stabilized/${item}
+        --context-factor ${model_input.context_factor}
+        --patch-size ${model_input.patch_size}
+        --stabilize true
+      deps:
+        - scripts/build_model_input.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model_input.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/stabilize.py
+        - data/03_primary/tubes/${item}
+        - data/01_raw/datasets/${item}
+      params:
+        - model_input.context_factor
+        - model_input.patch_size
+      outs:
+        - data/05_model_input_stabilized/${item}
+
   render_tubes:
     foreach:
       - train
@@ -393,6 +418,33 @@ stages:
     plots:
       - data/06_models/vit_dinov2_finetune/plots/training_curves.png
 
+  train_vit_dinov2_finetune_stabilized:
+    cmd: >-
+      uv run python scripts/train.py
+      --arch transformer
+      --train-dir data/05_model_input_stabilized/train
+      --val-dir data/05_model_input_stabilized/val
+      --output-dir data/06_models/vit_dinov2_finetune_stabilized
+      --params-path params.yaml
+      --params-key train_vit_dinov2_finetune_stabilized
+    deps:
+      - scripts/train.py
+      - src/bbox_tube_temporal_exp/augment.py
+      - src/bbox_tube_temporal_exp/dataset.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/temporal_classifier.py
+      - src/bbox_tube_temporal_exp/lit_temporal.py
+      - src/bbox_tube_temporal_exp/training_plots.py
+      - data/05_model_input_stabilized/train
+      - data/05_model_input_stabilized/val
+    params:
+      - train_vit_dinov2_finetune_stabilized
+      - augment
+    outs:
+      - data/06_models/vit_dinov2_finetune_stabilized/best_checkpoint.pt
+      - data/06_models/vit_dinov2_finetune_stabilized/csv_logs/
+    plots:
+      - data/06_models/vit_dinov2_finetune_stabilized/plots/training_curves.png
+
   train_vit_in21k_finetune:
     cmd: >-
       uv run python scripts/train.py
@@ -685,6 +737,8 @@ stages:
       - {variant: vit_dinov2_finetune, split: val}
       - {variant: gru_convnext_finetune, split: train}
       - {variant: gru_convnext_finetune, split: val}
+      - {variant: vit_dinov2_finetune_stabilized, split: train}
+      - {variant: vit_dinov2_finetune_stabilized, split: val}
     do:
       cmd: >-
         uv run python scripts/evaluate_packaged.py
@@ -720,6 +774,7 @@ stages:
     foreach:
       - gru_convnext_finetune
       - vit_dinov2_finetune
+      - vit_dinov2_finetune_stabilized
     do:
       cmd: >-
         uv run python scripts/analyze_variant.py
@@ -764,13 +819,50 @@ stages:
         - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/inference.py
         - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model.py
       params:
-        - package
+        - package.target_recall
+        - package.infer
+        - package.infer_min_tube_length
+        - package.aggregation.${item}
         - tubes
         - build_tubes
         - model_input
         - train_${item}
       outs:
         - data/06_models/${item}/model.zip
+
+  package_vit_dinov2_finetune_stabilized:
+    cmd: >-
+      uv run python scripts/package_model.py
+      --variant vit_dinov2_finetune_stabilized
+      --stabilize true
+      --val-patches-dir data/05_model_input_stabilized/val
+      --output data/06_models/vit_dinov2_finetune_stabilized/model.zip
+    deps:
+      - data/06_models/vit_dinov2_finetune_stabilized/best_checkpoint.pt
+      - data/01_raw/models/best.pt
+      - data/05_model_input_stabilized/val
+      - data/01_raw/datasets/train
+      - data/01_raw/datasets/val
+      - scripts/package_model.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/package.py
+      - src/bbox_tube_temporal_exp/calibration.py
+      - src/bbox_tube_temporal_exp/val_predict.py
+      - src/bbox_tube_temporal_exp/package_predict.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/logistic_calibrator.py
+      - src/bbox_tube_temporal_exp/logistic_calibrator_fit.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/inference.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model.py
+    params:
+      - package.target_recall
+      - package.infer
+      - package.infer_min_tube_length
+      - package.aggregation.vit_dinov2_finetune_stabilized
+      - tubes
+      - build_tubes
+      - model_input
+      - train_vit_dinov2_finetune_stabilized
+    outs:
+      - data/06_models/vit_dinov2_finetune_stabilized/model.zip
 
   compare_variants:
     cmd: >-

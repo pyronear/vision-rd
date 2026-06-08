@@ -103,12 +103,17 @@ def _tubes_config(all_params: dict) -> dict:
     return cfg
 
 
-def _model_input_config(all_params: dict) -> dict:
+def _to_bool(value: str) -> bool:
+    """Parse a DVC-substituted boolean param (``true``/``false``)."""
+    return str(value).strip().lower() in {"true", "1", "yes"}
+
+
+def _model_input_config(all_params: dict, stabilize: bool | None = None) -> dict:
     mi = all_params["model_input"]
     return {
         "context_factor": mi["context_factor"],
         "patch_size": mi["patch_size"],
-        "stabilize": mi.get("stabilize", False),
+        "stabilize": mi.get("stabilize", False) if stabilize is None else stabilize,
         "normalization": {
             "mean": [0.485, 0.456, 0.406],
             "std": [0.229, 0.224, 0.225],
@@ -124,6 +129,7 @@ def _build_config(
     *,
     aggregation: str,
     logistic_threshold: float | None,
+    stabilize: bool | None = None,
 ) -> dict:
     decision: dict = {
         "aggregation": aggregation,
@@ -137,7 +143,7 @@ def _build_config(
     return {
         "infer": package_params["infer"],
         "tubes": _tubes_config(all_params),
-        "model_input": _model_input_config(all_params),
+        "model_input": _model_input_config(all_params, stabilize=stabilize),
         "classifier": _classifier_kwargs(variant_cfg),
         "decision": decision,
     }
@@ -232,6 +238,13 @@ def main() -> None:
         default=Path("data/01_raw/datasets/val"),
         help="Used only when variant aggregation is 'logistic'.",
     )
+    parser.add_argument(
+        "--stabilize",
+        type=_to_bool,
+        default=None,
+        help="Override model_input.stabilize baked into the package "
+        "(true/false). Default: use the params.yaml value.",
+    )
     args = parser.parse_args()
 
     all_params = yaml.safe_load(args.params_path.read_text())
@@ -278,6 +291,7 @@ def main() -> None:
             threshold,
             aggregation="max_logit",
             logistic_threshold=None,
+            stabilize=args.stabilize,
         )
         calibrator, logistic_threshold = _fit_logistic_calibrator_and_threshold(
             yolo_weights_path=args.yolo_weights_path,
@@ -295,6 +309,7 @@ def main() -> None:
         threshold,
         aggregation=aggregation,
         logistic_threshold=logistic_threshold,
+        stabilize=args.stabilize,
     )
     build_model_package(
         yolo_weights_path=args.yolo_weights_path,
