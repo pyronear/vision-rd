@@ -87,3 +87,19 @@ def test_to_bool_parses_dvc_strings():
     mod = _load_script_module("package_model_script_to_bool")
     assert mod._to_bool("true") is True
     assert mod._to_bool("false") is False
+
+
+def test_apply_infer_overrides_sets_values():
+    mod = _load_script_module("pkg_overrides_set")
+    pkg = {"infer": {"pad_to_min_frames": 20, "pad_strategy": "symmetric"}}
+    mod._apply_infer_overrides(pkg, pad_to_min_frames=8, pad_strategy="uniform")
+    assert pkg["infer"]["pad_to_min_frames"] == 8
+    assert pkg["infer"]["pad_strategy"] == "uniform"
+
+
+def test_apply_infer_overrides_none_is_noop():
+    mod = _load_script_module("pkg_overrides_noop")
+    pkg = {"infer": {"pad_to_min_frames": 20, "pad_strategy": "symmetric"}}
+    mod._apply_infer_overrides(pkg, pad_to_min_frames=None, pad_strategy=None)
+    assert pkg["infer"]["pad_to_min_frames"] == 20
+    assert pkg["infer"]["pad_strategy"] == "symmetric"
