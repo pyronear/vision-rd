@@ -113,12 +113,14 @@ train_vit_dinov2_frozen:
   backbone: vit_small_patch14_dinov2.lvd142m
   finetune: false
 
-train_vit_dinov2_finetune:
+train_vit_dinov2_finetune: &train_vit_dinov2_finetune
   <<: *vit_defaults
   backbone: vit_small_patch14_dinov2.lvd142m
   finetune: true
   finetune_last_n_blocks: 1
   backbone_lr: 0.00001
+
+train_vit_dinov2_finetune_stabilized: *train_vit_dinov2_finetune
 
 train_vit_in21k_finetune:
   <<: *vit_defaults
@@ -161,3 +163,4 @@ package:
   aggregation:
     gru_convnext_finetune: max_logit
     vit_dinov2_finetune: logistic
+    vit_dinov2_finetune_stabilized: logistic
