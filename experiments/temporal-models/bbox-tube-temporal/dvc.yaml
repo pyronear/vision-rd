@@ -83,6 +83,31 @@ stages:
       outs:
         - data/05_model_input/${item}
 
+  build_model_input_stabilized:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/build_model_input.py
+        --tubes-dir data/03_primary/tubes/${item}
+        --raw-dir data/01_raw/datasets/${item}
+        --output-dir data/05_model_input_stabilized/${item}
+        --context-factor ${model_input.context_factor}
+        --patch-size ${model_input.patch_size}
+        --stabilize true
+      deps:
+        - scripts/build_model_input.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model_input.py
+        - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/stabilize.py
+        - data/03_primary/tubes/${item}
+        - data/01_raw/datasets/${item}
+      params:
+        - model_input.context_factor
+        - model_input.patch_size
+      outs:
+        - data/05_model_input_stabilized/${item}
+
   render_tubes:
     foreach:
       - train
