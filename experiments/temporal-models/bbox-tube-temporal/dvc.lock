@@ -4409,8 +4409,8 @@ stages:
       size: 187284
   package_vit_dinov2_finetune_stabilized:
     cmd: uv run python scripts/package_model.py --variant 
-      vit_dinov2_finetune_stabilized --stabilize true --val-patches-dir 
-      data/05_model_input_stabilized/val --output 
+      vit_dinov2_finetune_stabilized --stabilize true --pad-to-min-frames 6 
+      --val-patches-dir data/05_model_input_stabilized/val --output 
       data/06_models/vit_dinov2_finetune_stabilized/model.zip
     deps:
     - path: ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/inference.py
@@ -4455,8 +4455,8 @@ stages:
       size: 143537003
     - path: scripts/package_model.py
       hash: md5
-      md5: 2e8e399badf8bf6a4b140b9dc61898c2
-      size: 11706
+      md5: c36c843c35c06f6ab14ead225e296cc7
+      size: 13026
     - path: src/bbox_tube_temporal_exp/calibration.py
       hash: md5
       md5: 2303307ff3b86f1186582f9db6982163
@@ -4523,8 +4523,8 @@ stages:
     outs:
     - path: data/06_models/vit_dinov2_finetune_stabilized/model.zip
       hash: md5
-      md5: 9f6b52e4859453a00b793e7d2bf90fb3
-      size: 162765187
+      md5: cc2954610a1fbb317ba0a71971684c56
+      size: 162765181
   evaluate_packaged@4:
     cmd: uv run python scripts/evaluate_packaged.py --model-zip 
       data/06_models/vit_dinov2_finetune_stabilized/model.zip --sequences-dir 
