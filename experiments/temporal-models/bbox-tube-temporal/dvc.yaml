@@ -824,6 +824,37 @@ stages:
       outs:
         - data/06_models/${item}/model.zip
 
+  package_vit_dinov2_finetune_stabilized:
+    cmd: >-
+      uv run python scripts/package_model.py
+      --variant vit_dinov2_finetune_stabilized
+      --stabilize true
+      --val-patches-dir data/05_model_input_stabilized/val
+      --output data/06_models/vit_dinov2_finetune_stabilized/model.zip
+    deps:
+      - data/06_models/vit_dinov2_finetune_stabilized/best_checkpoint.pt
+      - data/01_raw/models/best.pt
+      - data/05_model_input_stabilized/val
+      - data/01_raw/datasets/train
+      - data/01_raw/datasets/val
+      - scripts/package_model.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/package.py
+      - src/bbox_tube_temporal_exp/calibration.py
+      - src/bbox_tube_temporal_exp/val_predict.py
+      - src/bbox_tube_temporal_exp/package_predict.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/logistic_calibrator.py
+      - src/bbox_tube_temporal_exp/logistic_calibrator_fit.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/inference.py
+      - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model.py
+    params:
+      - package
+      - tubes
+      - build_tubes
+      - model_input
+      - train_vit_dinov2_finetune_stabilized
+    outs:
+      - data/06_models/vit_dinov2_finetune_stabilized/model.zip
+
   compare_variants:
     cmd: >-
       uv run python scripts/compare_variants.py
