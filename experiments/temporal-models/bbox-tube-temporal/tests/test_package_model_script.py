@@ -63,3 +63,27 @@ def test_model_input_config_carries_stabilize_true():
     }
     cfg = mod._model_input_config(all_params)
     assert cfg["stabilize"] is True
+
+
+def test_model_input_config_stabilize_override_true():
+    mod = _load_script_module("package_model_script_override_true")
+    all_params = {
+        "model_input": {"context_factor": 1.5, "patch_size": 224, "stabilize": False}
+    }
+    cfg = mod._model_input_config(all_params, stabilize=True)
+    assert cfg["stabilize"] is True
+
+
+def test_model_input_config_stabilize_override_none_uses_param():
+    mod = _load_script_module("package_model_script_override_none")
+    all_params = {
+        "model_input": {"context_factor": 1.5, "patch_size": 224, "stabilize": True}
+    }
+    cfg = mod._model_input_config(all_params, stabilize=None)
+    assert cfg["stabilize"] is True
+
+
+def test_to_bool_parses_dvc_strings():
+    mod = _load_script_module("package_model_script_to_bool")
+    assert mod._to_bool("true") is True
+    assert mod._to_bool("false") is False
