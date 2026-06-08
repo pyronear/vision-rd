@@ -835,6 +835,7 @@ stages:
       uv run python scripts/package_model.py
       --variant vit_dinov2_finetune_stabilized
       --stabilize true
+      --pad-to-min-frames 6
       --val-patches-dir data/05_model_input_stabilized/val
       --output data/06_models/vit_dinov2_finetune_stabilized/model.zip
     deps:

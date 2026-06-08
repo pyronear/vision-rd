@@ -121,6 +121,26 @@ def _model_input_config(all_params: dict, stabilize: bool | None = None) -> dict
     }
 
 
+def _apply_infer_overrides(
+    package_params: dict,
+    *,
+    pad_to_min_frames: int | None,
+    pad_strategy: str | None,
+) -> None:
+    """Mutate ``package_params['infer']`` in place with CLI overrides.
+
+    A ``None`` override leaves the ``params.yaml`` value untouched. Mutating
+    the shared ``infer`` dict propagates to both the calibration-time pipeline
+    config and the embedded package config (both read ``package_params['infer']``),
+    so calibration and inference use identical padding.
+    """
+    infer = package_params["infer"]
+    if pad_to_min_frames is not None:
+        infer["pad_to_min_frames"] = pad_to_min_frames
+    if pad_strategy is not None:
+        infer["pad_strategy"] = pad_strategy
+
+
 def _build_config(
     all_params: dict,
     variant_cfg: dict,
@@ -245,6 +265,20 @@ def main() -> None:
         help="Override model_input.stabilize baked into the package "
         "(true/false). Default: use the params.yaml value.",
     )
+    parser.add_argument(
+        "--pad-to-min-frames",
+        type=int,
+        default=None,
+        help="Override package.infer.pad_to_min_frames baked into the package. "
+        "Default: use the params.yaml value.",
+    )
+    parser.add_argument(
+        "--pad-strategy",
+        type=str,
+        default=None,
+        choices=["symmetric", "uniform"],
+        help="Override package.infer.pad_strategy. Default: params.yaml value.",
+    )
     args = parser.parse_args()
 
     all_params = yaml.safe_load(args.params_path.read_text())
@@ -256,6 +290,11 @@ def main() -> None:
     if "package" not in all_params:
         raise KeyError(f"'package' section missing from {args.params_path}")
     package_params = all_params["package"]
+    _apply_infer_overrides(
+        package_params,
+        pad_to_min_frames=args.pad_to_min_frames,
+        pad_strategy=args.pad_strategy,
+    )
 
     checkpoint = args.checkpoint_path or (
         Path("data/06_models") / args.variant / "best_checkpoint.pt"
