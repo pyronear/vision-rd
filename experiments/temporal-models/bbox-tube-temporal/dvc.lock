@@ -4482,19 +4482,15 @@ stages:
           context_factor: 1.5
           patch_size: 224
           stabilize: false
-        package:
-          target_recall: 0.95
-          infer_min_tube_length: 2
-          infer:
-            confidence_threshold: 0.1
-            iou_nms: 0.2
-            image_size: 1024
-            pad_to_min_frames: 20
-            pad_strategy: symmetric
-          aggregation:
-            gru_convnext_finetune: max_logit
-            vit_dinov2_finetune: logistic
-            vit_dinov2_finetune_stabilized: logistic
+        package.aggregation.vit_dinov2_finetune_stabilized: logistic
+        package.infer:
+          confidence_threshold: 0.1
+          iou_nms: 0.2
+          image_size: 1024
+          pad_to_min_frames: 20
+          pad_strategy: symmetric
+        package.infer_min_tube_length: 2
+        package.target_recall: 0.95
         train_vit_dinov2_finetune_stabilized:
           hidden_dim: 128
           max_frames: 20

@@ -819,7 +819,10 @@ stages:
         - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/inference.py
         - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model.py
       params:
-        - package
+        - package.target_recall
+        - package.infer
+        - package.infer_min_tube_length
+        - package.aggregation.${item}
         - tubes
         - build_tubes
         - model_input
@@ -850,7 +853,10 @@ stages:
       - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/inference.py
       - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model.py
     params:
-      - package
+      - package.target_recall
+      - package.infer
+      - package.infer_min_tube_length
+      - package.aggregation.vit_dinov2_finetune_stabilized
       - tubes
       - build_tubes
       - model_input

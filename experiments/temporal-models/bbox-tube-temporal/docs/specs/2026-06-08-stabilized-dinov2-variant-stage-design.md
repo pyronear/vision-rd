@@ -150,13 +150,23 @@ stabilized val crops for calibration.
       - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/inference.py
       - ../../../lib/bbox-tube-temporal/src/bbox_tube_temporal/model.py
     params:
-      - package
+      - package.target_recall
+      - package.infer
+      - package.infer_min_tube_length
+      - package.aggregation.vit_dinov2_finetune_stabilized
       - tubes
       - build_tubes
       - model_input
       - train_vit_dinov2_finetune_stabilized
     outs:
       - data/06_models/vit_dinov2_finetune_stabilized/model.zip
+
+The `package.*` params are **scoped** (dotted) rather than tracking the whole
+`package` block. The same scoping is applied to the existing shared `package`
+foreach (`package.aggregation.${item}`) so that adding this variant's aggregation
+rule does not ripple the per-frame package stages' param hash. `package_model.py`
+reads exactly these four `package.*` keys (`target_recall`, `infer`,
+`infer_min_tube_length`, `aggregation.<variant>`).
 ```
 
 ### 4. `evaluate_packaged` (append two foreach entries)
@@ -226,13 +236,27 @@ Add the variant to the per-variant decision-rule map:
     vit_dinov2_finetune_stabilized: logistic
 ```
 
-## Explicitly not touched
+## Per-frame impact
 
-- Global `model_input.stabilize` stays `false`.
-- `build_model_input`, `train_vit_dinov2_finetune`, the shared `package` foreach,
-  `evaluate_vit_dinov2_finetune`, and the gru variant are unchanged.
-- No `dvc repro` / data regeneration is part of this change — it adds stages;
-  running them is a separate, explicit step.
+The per-frame variant's **behaviour and outputs are unchanged** — `model_input.stabilize`
+stays `false`, `package_model.py` selects its aggregation rule per-variant
+(`aggregation.get(variant)`), and packaging without `--stabilize` falls back to the
+param, so per-frame `model.zip`s are byte-equivalent.
+
+Two shared dependencies are edited, however, so the per-frame package stages will
+**re-validate** (not change behaviour) on the next `dvc repro`:
+
+- `scripts/package_model.py` gains `--stabilize` (backward-compatible). It is a
+  legitimate dep of every `package` stage, so editing it re-hashes them — unavoidable
+  for any shared-script change.
+- The shared `package` foreach `params` are scoped from the whole `package` block to
+  `package.target_recall`, `package.infer`, `package.infer_min_tube_length`,
+  `package.aggregation.${item}` — so adding this variant's aggregation rule no longer
+  ripples sibling stages going forward.
+
+`build_model_input`, `train_vit_dinov2_finetune`, `evaluate_vit_dinov2_finetune`, and
+the gru training stages are otherwise unchanged. No data regeneration is part of this
+change beyond building the new variant's own stages.
 
 ## Testing
 
