@@ -30,7 +30,9 @@ RUNS = [
     {"label": "baseline_pad20_sym", "pad": 20, "strategy": "symmetric"},
     {"label": "pad12_sym", "pad": 12, "strategy": "symmetric"},
     {"label": "pad8_sym", "pad": 8, "strategy": "symmetric"},
+    {"label": "pad6_sym", "pad": 6, "strategy": "symmetric"},
     {"label": "pad4_sym", "pad": 4, "strategy": "symmetric"},
+    {"label": "pad2_sym", "pad": 2, "strategy": "symmetric"},
     {"label": "pad0_sym", "pad": 0, "strategy": "symmetric"},
     {"label": "pad20_uniform", "pad": 20, "strategy": "uniform"},
 ]
