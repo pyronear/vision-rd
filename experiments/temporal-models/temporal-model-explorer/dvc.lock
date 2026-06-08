@@ -12,34 +12,36 @@ stages:
         models:
           vit_dinov2_finetune: 
             ../bbox-tube-temporal/data/06_models/vit_dinov2_finetune/model.zip
+          vit_dinov2_finetune_stabilized: 
+            ../bbox-tube-temporal/data/06_models/vit_dinov2_finetune_stabilized/model.zip
     outs:
     - path: data/06_models
       hash: md5
-      md5: 44f0178915718f4a509b58ec8eeabb2d.dir
-      size: 162765157
-      nfiles: 1
+      md5: 52c855408125724b5db6f8d75640681d.dir
+      size: 325530344
+      nfiles: 2
   run_models:
     cmd: uv run python scripts/run_models.py --store data/03_primary/sequences 
       --models-dir data/06_models --out data/07_model_output
     deps:
     - path: data/03_primary/sequences
       hash: md5
-      md5: 60cadabcb8d4df06c90e5229516723eb.dir
-      size: 1663323730
-      nfiles: 14011
+      md5: 5229457da3908a9497b964dfb569a8d9.dir
+      size: 1663323848
+      nfiles: 14012
     - path: data/06_models
       hash: md5
-      md5: 44f0178915718f4a509b58ec8eeabb2d.dir
-      size: 162765157
-      nfiles: 1
+      md5: 52c855408125724b5db6f8d75640681d.dir
+      size: 325530344
+      nfiles: 2
     - path: scripts/run_models.py
       hash: md5
       md5: 58daf17d0184588770ae30bdaf1d24ba
       size: 1249
     - path: src/temporal_model_explorer/outcomes.py
       hash: md5
-      md5: 89ab51f7cdb35f4467546400ee627c95
-      size: 1857
+      md5: f573431eeb6b75c308e64d24140f1ac3
+      size: 3037
     - path: src/temporal_model_explorer/run_models.py
       hash: md5
       md5: 9ee1296d0a133b4b4a117841c9f89784
@@ -51,10 +53,10 @@ stages:
     outs:
     - path: data/07_model_output/details
       hash: md5
-      md5: 81fa9843db58c7e86fa3aae426d313b2.dir
-      size: 6101751
-      nfiles: 1030
+      md5: f9dd8b97d74e6d50bcfe65ed48d7e1ca.dir
+      size: 8941738
+      nfiles: 1536
     - path: data/07_model_output/results.parquet
       hash: md5
-      md5: 2176cc1b970c0a69e4e57c5576b72d1a
-      size: 49314
+      md5: 11340ce7dccf5ab80448b248a0f45e11
+      size: 68719
