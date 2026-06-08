@@ -737,6 +737,8 @@ stages:
       - {variant: vit_dinov2_finetune, split: val}
       - {variant: gru_convnext_finetune, split: train}
       - {variant: gru_convnext_finetune, split: val}
+      - {variant: vit_dinov2_finetune_stabilized, split: train}
+      - {variant: vit_dinov2_finetune_stabilized, split: val}
     do:
       cmd: >-
         uv run python scripts/evaluate_packaged.py
@@ -772,6 +774,7 @@ stages:
     foreach:
       - gru_convnext_finetune
       - vit_dinov2_finetune
+      - vit_dinov2_finetune_stabilized
     do:
       cmd: >-
         uv run python scripts/analyze_variant.py
