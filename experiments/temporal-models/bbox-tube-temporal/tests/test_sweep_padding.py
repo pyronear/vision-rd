@@ -64,10 +64,18 @@ def test_build_comparison_markdown_has_header_and_one_row_per_input():
     mod = _load_script_module("sweep_markdown")
     rows = [
         {
-            "label": "baseline_pad20_sym", "pad_to_min_frames": 20,
-            "pad_strategy": "symmetric", "split": "val", "recall": 0.95,
-            "recall_ceiling": 0.97, "fpr": 0.10, "precision": 0.8, "f1": 0.87,
-            "median_ttd_frames": 5.0, "mean_ttd_frames": 6.0, "pr_auc": 0.9,
+            "label": "baseline_pad20_sym",
+            "pad_to_min_frames": 20,
+            "pad_strategy": "symmetric",
+            "split": "val",
+            "recall": 0.95,
+            "recall_ceiling": 0.97,
+            "fpr": 0.10,
+            "precision": 0.8,
+            "f1": 0.87,
+            "median_ttd_frames": 5.0,
+            "mean_ttd_frames": 6.0,
+            "pr_auc": 0.9,
             "roc_auc": 0.92,
         }
     ]

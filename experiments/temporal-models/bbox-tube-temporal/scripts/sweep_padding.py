@@ -41,9 +41,19 @@ RUNS = [
 SPLITS = ("val", "train")
 
 COLUMNS = [
-    "label", "pad_to_min_frames", "pad_strategy", "split", "recall",
-    "recall_ceiling", "fpr", "precision", "f1", "median_ttd_frames",
-    "mean_ttd_frames", "pr_auc", "roc_auc",
+    "label",
+    "pad_to_min_frames",
+    "pad_strategy",
+    "split",
+    "recall",
+    "recall_ceiling",
+    "fpr",
+    "precision",
+    "f1",
+    "median_ttd_frames",
+    "mean_ttd_frames",
+    "pr_auc",
+    "roc_auc",
 ]
 
 
@@ -99,9 +109,7 @@ def build_comparison_markdown(rows: list[dict]) -> str:
     """Render rows as a GitHub-flavored markdown table."""
     header = "| " + " | ".join(COLUMNS) + " |"
     sep = "| " + " | ".join("---" for _ in COLUMNS) + " |"
-    body = [
-        "| " + " | ".join(_fmt(r.get(c)) for c in COLUMNS) + " |" for r in rows
-    ]
+    body = ["| " + " | ".join(_fmt(r.get(c)) for c in COLUMNS) + " |" for r in rows]
     return "\n".join([header, sep, *body]) + "\n"
 
 
@@ -128,13 +136,14 @@ def plot_fpr_vs_pad(rows: list[dict], output_path: Path) -> None:
                 label=f"{split} (symmetric)",
             )
         uni = [
-            r
-            for r in rows
-            if r["split"] == split and r["pad_strategy"] == "uniform"
+            r for r in rows if r["split"] == split and r["pad_strategy"] == "uniform"
         ]
         for r in uni:
             ax.scatter(
-                r["pad_to_min_frames"], r["fpr"], marker="x", s=90,
+                r["pad_to_min_frames"],
+                r["fpr"],
+                marker="x",
+                s=90,
                 label=f"{split} (uniform, pad={r['pad_to_min_frames']})",
             )
     ax.set_xlabel("pad_to_min_frames")
@@ -151,13 +160,22 @@ def _package(run: dict, model_zip: Path) -> None:
     model_zip.parent.mkdir(parents=True, exist_ok=True)
     subprocess.run(
         [
-            "uv", "run", "python", "scripts/package_model.py",
-            "--variant", VARIANT,
-            "--stabilize", "true",
-            "--val-patches-dir", str(VAL_PATCHES_DIR),
-            "--pad-to-min-frames", str(run["pad"]),
-            "--pad-strategy", run["strategy"],
-            "--output", str(model_zip),
+            "uv",
+            "run",
+            "python",
+            "scripts/package_model.py",
+            "--variant",
+            VARIANT,
+            "--stabilize",
+            "true",
+            "--val-patches-dir",
+            str(VAL_PATCHES_DIR),
+            "--pad-to-min-frames",
+            str(run["pad"]),
+            "--pad-strategy",
+            run["strategy"],
+            "--output",
+            str(model_zip),
         ],
         check=True,
     )
@@ -167,11 +185,18 @@ def _evaluate(run: dict, split: str, model_zip: Path, out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     subprocess.run(
         [
-            "uv", "run", "python", "scripts/evaluate_packaged.py",
-            "--model-zip", str(model_zip),
-            "--sequences-dir", f"data/01_raw/datasets/{split}",
-            "--output-dir", str(out_dir),
-            "--model-name", f"stabilized-{run['label']}-{split}",
+            "uv",
+            "run",
+            "python",
+            "scripts/evaluate_packaged.py",
+            "--model-zip",
+            str(model_zip),
+            "--sequences-dir",
+            f"data/01_raw/datasets/{split}",
+            "--output-dir",
+            str(out_dir),
+            "--model-name",
+            f"stabilized-{run['label']}-{split}",
         ],
         check=True,
     )
@@ -218,9 +243,12 @@ def main() -> None:
         for split in SPLITS:
             split_dir = run_dir / split
             metrics_path = split_dir / "metrics.json"
-            if not metrics_path.exists():
+            predictions_path = split_dir / "predictions.json"
+            # evaluate_packaged writes metrics.json before predictions.json, so an
+            # interrupted eval can leave a partial dir; require both before use.
+            if not (metrics_path.exists() and predictions_path.exists()):
                 continue
-            predictions = json.loads((split_dir / "predictions.json").read_text())
+            predictions = json.loads(predictions_path.read_text())
             rows.append(
                 summarize_run(
                     label=run["label"],

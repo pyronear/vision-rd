@@ -40,10 +40,10 @@ only (the decision split; train eval deferred unless needed).
 | 20  | symmetric (baseline) | 0.9560 | 0.9811 | 0.0252 | 4 | 0.9744 | 3.0 | 4.1 | 0.9848 | 0.9824 |
 | 12  | symmetric | 0.9560 | 0.9811 | 0.0314 | 5 | 0.9682 | 2.0 | 2.5 | 0.9855 | 0.9833 |
 | 8   | symmetric | 0.9560 | 0.9811 | 0.0252 | 4 | 0.9744 | 1.0 | 2.1 | 0.9857 | 0.9837 |
-| 6   | symmetric | 0.9560 | 0.9811 | 0.0252 | 4 | 0.9744 | 1.0 | 2.0 | 0.9858 | 0.9837 |
+| 6   | symmetric | 0.9560 | 0.9811 | 0.0252 | 4 | 0.9744 | 1.0 | 2.0 | 0.9856 | 0.9836 |
 | 5   | symmetric | 0.9560 | 0.9811 | 0.0314 | 5 | 0.9682 | 1.0 | 1.9 | 0.9851 | 0.9833 |
 | 4   | symmetric | 0.9560 | 0.9811 | 0.0377 | 6 | 0.9620 | 1.0 | 1.8 | 0.9850 | 0.9832 |
-| 2   | symmetric | 0.9560 | 0.9686 | 0.0377 | 6 | 0.9620 | 1.0 | 1.7 | 0.9788 | 0.9742 |
+| 2   | symmetric | 0.9560 | 0.9686 | 0.0377 | 6 | 0.9620 | 1.0 | 1.7 | 0.9788 | 0.9756 |
 | 0   | symmetric | 0.9560 | 0.9623 | 0.1447 | 23 | 0.8686 | 1.0 | 1.4 | 0.9756 | 0.9718 |
 | 20  | uniform   | 0.9560 | 0.9811 | 0.0314 | 5 | 0.9682 | 2.0 | 2.8 | 0.9809 | 0.9787 |
 
@@ -86,6 +86,16 @@ See `fpr_vs_pad.png` for the FPR-vs-pad curve.
 2. **Do not pursue `pad=0`** with the current model — the FPR cliff is
    disqualifying.
 3. **Keep `pad_strategy=symmetric`** — uniform offers no FPR/quality benefit.
+
+## Deployment
+
+`pad_to_min_frames=6` is now baked into the stabilized package (via a
+`--pad-to-min-frames 6` override on the `package_vit_dinov2_finetune_stabilized`
+dvc stage; the shared `package.infer.pad_to_min_frames: 20` default is left intact
+for the un-ablated variants). The committed end-to-end rerun confirms the sweep:
+**val** recall 0.956 / FPR 0.0252 / median TTD 1.0 (identical to the pad=20 baseline
+FPR, 3× faster), and **train** recall 0.9716 / FPR 0.0406 — the expected mild train
+cost, in line with the baseline and well within tolerance.
 
 ## Phase 2 (optional, only if `pad < 4` is desired)
 
