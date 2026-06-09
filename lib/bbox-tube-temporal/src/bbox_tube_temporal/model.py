@@ -31,6 +31,7 @@ from .inference import (
 )
 from .logistic_calibrator import LogisticCalibrator, extract_features
 from .package import ModelPackage, load_model_package
+from .stabilize import tube_union_window
 from .tubes import build_tubes
 
 _PAD_STRATEGIES = {
@@ -310,6 +311,11 @@ class BboxTubeTemporalModel(TemporalModel):
                     probability=_probability_for(tube_idx, logits_list[tube_idx]),
                     first_crossing_frame=first_crossing,
                     entries=entries_models,
+                    stabilized_window=(
+                        tube_union_window(tube.entries)
+                        if mi.get("stabilize", False)
+                        else None
+                    ),
                 )
             )
 

@@ -15,7 +15,7 @@ from torchvision.transforms.functional import to_tensor
 
 from .logistic_calibrator import LogisticCalibrator, extract_features
 from .model_input import crop_and_resize, expand_bbox, norm_bbox_to_pixel_square
-from .stabilize import union_window
+from .stabilize import tube_union_window
 from .tubes import (
     build_tubes,
     merge_colocated_tubes,
@@ -224,20 +224,7 @@ def crop_tube_patches(
     mean_t = torch.tensor(normalization_mean).view(3, 1, 1)
     std_t = torch.tensor(normalization_std).view(3, 1, 1)
 
-    window = None
-    if stabilize:
-        observed = [
-            (e.detection.cx, e.detection.cy, e.detection.w, e.detection.h)
-            for e in tube.entries
-            if e.detection is not None and not e.is_gap
-        ]
-        if not observed:
-            observed = [
-                (e.detection.cx, e.detection.cy, e.detection.w, e.detection.h)
-                for e in tube.entries
-                if e.detection is not None
-            ]
-        window = union_window(observed)
+    window = tube_union_window(tube.entries) if stabilize else None
 
     for slot, entry in enumerate(tube.entries[:n]):
         det = entry.detection
@@ -248,7 +235,7 @@ def crop_tube_patches(
         image = np.array(Image.open(frame.image_path).convert("RGB"))
         img_h, img_w, _ = image.shape
 
-        box_src = window if stabilize else (det.cx, det.cy, det.w, det.h)
+        box_src = window if window is not None else (det.cx, det.cy, det.w, det.h)
         cx, cy, w, h = expand_bbox(
             box_src[0], box_src[1], box_src[2], box_src[3], context_factor
         )

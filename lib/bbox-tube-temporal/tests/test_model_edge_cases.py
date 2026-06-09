@@ -342,11 +342,42 @@ class TestDeviceSelection:
             "probability",
             "first_crossing_frame",
             "entries",
+            "stabilized_window",
         }
         assert out.details["decision"]["trigger_tube_id"] == tube["tube_id"]
         assert isinstance(tube["entries"], list)
+        # Non-stabilized config -> no fixed window reported.
+        assert tube["stabilized_window"] is None
         entry = tube["entries"][0]
         assert set(entry.keys()) == {"frame_idx", "bbox", "is_gap", "confidence"}
+
+    def test_predict_details_report_stabilized_window_when_stabilizing(
+        self, tiny_classifier: TemporalSmokeClassifier, red_frames: list[Frame]
+    ) -> None:
+        """With ``model_input.stabilize=true`` each kept tube reports the fixed
+        union window the classifier cropped, so the explorer can show it."""
+        # Box drifts right across frames: x spans [0.25, 0.55], y fixed at 0.5.
+        per_frame = [
+            [(0.3 + 0.05 * i, 0.5, 0.1, 0.1, 0.9)] for i in range(len(red_frames))
+        ]
+        yolo = _fake_yolo_factory(per_frame)
+        cfg = {
+            **TEST_CONFIG,
+            "model_input": {**TEST_CONFIG["model_input"], "stabilize": True},
+        }
+        model = BboxTubeTemporalModel(
+            yolo_model=yolo, classifier=tiny_classifier, config=cfg, device="cpu"
+        )
+        out = model.predict(frames=red_frames)
+
+        kept = out.details["tubes"]["kept"]
+        assert len(kept) == 1
+        window = kept[0]["stabilized_window"]
+        assert window is not None
+        n = len(red_frames)
+        x0, x1 = 0.3 - 0.05, (0.3 + 0.05 * (n - 1)) + 0.05
+        expected = ((x0 + x1) / 2, 0.5, x1 - x0, 0.1)
+        assert tuple(window) == pytest.approx(expected)
 
     @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
     def test_predict_on_cuda_runs_end_to_end(

@@ -471,6 +471,9 @@ def _drilldown(key: str, model: str, row: pd.Series) -> None:  # pragma: no cove
     tubes_col.markdown(f"**tubes @ frame {i}** (context-cropped)")
     for tube in kept:
         at_frame = {idx: bbox for idx, bbox, _ in tube_input_boxes(tube, padded)}
+        # Stabilized variants crop a single fixed window (matching the classifier)
+        # for every frame, so the crop stays put instead of tracking the bbox.
+        stab_window = tube.get("stabilized_window")
         color = tube_color(tube["tube_id"])
         tprob = tube.get("probability")
         stat = (
@@ -486,10 +489,14 @@ def _drilldown(key: str, model: str, row: pd.Series) -> None:  # pragma: no cove
         else:
             trig_badge = ""
         chip = f"<b style='color:{color}'>● T{tube['tube_id']}</b>"
-        tubes_col.markdown(f"{chip} · {stat}{trig_badge}", unsafe_allow_html=True)
+        stab_note = " · 🔒 stabilized" if stab_window else ""
+        tubes_col.markdown(
+            f"{chip} · {stat}{trig_badge}{stab_note}", unsafe_allow_html=True
+        )
         if i in at_frame:
+            crop_box = tuple(stab_window) if stab_window else at_frame[i]
             tubes_col.image(
-                crop_around_bbox(seq_dir / meta.frames[i].file, at_frame[i]),
+                crop_around_bbox(seq_dir / meta.frames[i].file, crop_box),
                 width=220,
             )
         else:
