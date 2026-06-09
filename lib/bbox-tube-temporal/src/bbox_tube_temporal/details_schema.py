@@ -34,6 +34,9 @@ class KeptTube(_Frozen):
     probability: float | None
     first_crossing_frame: int | None
     entries: list[TubeEntry]
+    # Fixed crop window (cx, cy, w, h) the classifier saw when stabilize=true;
+    # None for per-frame (non-stabilized) variants.
+    stabilized_window: tuple[float, float, float, float] | None = None
 
 
 class Preprocessing(_Frozen):
