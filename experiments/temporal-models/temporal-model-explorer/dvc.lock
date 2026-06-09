@@ -17,8 +17,8 @@ stages:
     outs:
     - path: data/06_models
       hash: md5
-      md5: 52c855408125724b5db6f8d75640681d.dir
-      size: 325530344
+      md5: 7456c692e6af33debd6aa3ab1bee83f5.dir
+      size: 325530338
       nfiles: 2
   run_models:
     cmd: uv run python scripts/run_models.py --store data/03_primary/sequences 
@@ -31,8 +31,8 @@ stages:
       nfiles: 14012
     - path: data/06_models
       hash: md5
-      md5: 52c855408125724b5db6f8d75640681d.dir
-      size: 325530344
+      md5: 7456c692e6af33debd6aa3ab1bee83f5.dir
+      size: 325530338
       nfiles: 2
     - path: scripts/run_models.py
       hash: md5
@@ -53,10 +53,10 @@ stages:
     outs:
     - path: data/07_model_output/details
       hash: md5
-      md5: f9dd8b97d74e6d50bcfe65ed48d7e1ca.dir
-      size: 8941738
+      md5: 80aa72ee737034d9a5aac734042093f9.dir
+      size: 8019209
       nfiles: 1536
     - path: data/07_model_output/results.parquet
       hash: md5
-      md5: 11340ce7dccf5ab80448b248a0f45e11
-      size: 68719
+      md5: bf1e1fe15f10111cabb45cdc4c3890a9
+      size: 69388
