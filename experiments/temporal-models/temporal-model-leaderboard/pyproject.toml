@@ -9,6 +9,7 @@ dependencies = [
     "mtb-change-detection",
     "pyro-detector-baseline",
     "bbox-tube-temporal",
+    "tube-multiscale-fusion",
     "tqdm>=4.67.3",
 ]
 
@@ -18,6 +19,7 @@ tracking-fsm-baseline = { path = "../tracking-fsm-baseline" }
 mtb-change-detection = { path = "../mtb-change-detection" }
 pyro-detector-baseline = { path = "../pyro-detector-baseline" }
 bbox-tube-temporal = { path = "../bbox-tube-temporal" }
+tube-multiscale-fusion = { path = "../tube-multiscale-fusion" }
 
 [dependency-groups]
 dev = [

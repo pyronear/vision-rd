@@ -79,6 +79,26 @@ stages:
     outs:
       - data/07_model_output/bbox-tube-temporal-gru-convnext-finetune
 
+  # Best combination from the tube-multiscale-fusion ablation sweep
+  # (tubelet spatial x transformer temporal = the dinov2_multiscale default:
+  # top F1, perfect recall, cheapest — see that experiment's
+  # COMBINED_VARIATIONS.md).
+  evaluate_tube_multiscale_fusion_dinov2_multiscale:
+    cmd: >-
+      uv run python scripts/evaluate.py
+      --model-name tube-multiscale-fusion-dinov2-multiscale
+      --model-type tube-multiscale-fusion
+      --model-package data/01_raw/models/tube-multiscale-fusion-dinov2-multiscale.zip
+      --test-dir data/01_raw/sequential_test/test
+      --output-dir data/07_model_output/tube-multiscale-fusion-dinov2-multiscale
+    deps:
+      - scripts/evaluate.py
+      - src/temporal_model_leaderboard
+      - data/01_raw/sequential_test
+      - data/01_raw/models/tube-multiscale-fusion-dinov2-multiscale.zip
+    outs:
+      - data/07_model_output/tube-multiscale-fusion-dinov2-multiscale
+
   leaderboard:
     cmd: >-
       uv run python scripts/leaderboard.py

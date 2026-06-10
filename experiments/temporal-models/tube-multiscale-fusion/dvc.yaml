@@ -1,0 +1,651 @@
+stages:
+  prepare:
+    desc: "Download YOLO detector weights from HuggingFace Hub (serving companion)"
+    cmd: >-
+      uv run python scripts/prepare.py
+      --model-repo ${prepare.model_repo}
+      --model-filename ${prepare.model_filename}
+      --output-model-dir data/01_raw/models
+    deps:
+      - scripts/prepare.py
+    params:
+      - prepare
+    outs:
+      - data/01_raw/models
+
+  truncate:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/truncate_sequences.py
+        --input-dir data/01_raw/datasets_full/${item}
+        --output-dir data/01_raw/datasets/${item}
+        --max-frames ${truncate.max_frames}
+      deps:
+        - scripts/truncate_sequences.py
+        - data/01_raw/datasets_full/${item}
+      params:
+        - truncate.max_frames
+      outs:
+        - data/01_raw/datasets/${item}
+
+  build_tubes:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/build_tubes.py
+        --input-dir data/01_raw/datasets/${item}
+        --output-dir data/03_primary/tubes/${item}
+        --iou-threshold ${tubes.iou_threshold}
+        --max-misses ${tubes.max_misses}
+        --min-tube-length ${build_tubes.min_tube_length}
+        --min-detected-entries ${build_tubes.min_detected_entries}
+      deps:
+        - scripts/build_tubes.py
+        - data/01_raw/datasets/${item}
+      params:
+        - tubes
+        - build_tubes
+      outs:
+        - data/03_primary/tubes/${item}
+
+  build_model_input:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/build_model_input.py
+        --tubes-dir data/03_primary/tubes/${item}
+        --raw-dir data/01_raw/datasets/${item}
+        --output-dir data/05_model_input/${item}
+        --context-factor ${model_input.context_factor}
+        --patch-size ${model_input.patch_size}
+      deps:
+        - scripts/build_model_input.py
+        - data/03_primary/tubes/${item}
+        - data/01_raw/datasets/${item}
+      params:
+        - model_input
+      outs:
+        - data/05_model_input/${item}
+
+  train_dinov2_multiscale:
+    cmd: >-
+      uv run python scripts/train.py
+      --train-dir data/05_model_input/train
+      --val-dir data/05_model_input/val
+      --output-dir data/06_models/dinov2_multiscale
+      --params-path params.yaml
+      --params-key train_dinov2_multiscale
+    deps:
+      - scripts/train.py
+      - src/tube_multiscale_fusion/augment.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/classifier.py
+      - src/tube_multiscale_fusion/global_branch.py
+      - src/tube_multiscale_fusion/local_branch.py
+      - src/tube_multiscale_fusion/fusion.py
+      - src/tube_multiscale_fusion/lit_module.py
+      - data/05_model_input/train
+      - data/05_model_input/val
+    params:
+      - train_dinov2_multiscale
+      - global_branch
+      - local_branch
+      - fusion
+      - augment
+    outs:
+      - data/06_models/dinov2_multiscale
+
+  # ---------------------------------------------------------------------------
+  # Ablation: full model minus the temporal module (global DINOv2 branch).
+  # Local branch + fusion are identical to the default model.
+  # ---------------------------------------------------------------------------
+  train_ablation_no_temporal:
+    cmd: >-
+      uv run python scripts/train_ablation.py
+      --train-dir data/05_model_input/train
+      --val-dir data/05_model_input/val
+      --output-dir data/06_models/ablation_no_temporal
+      --params-path params.yaml
+      --params-key train_ablation_no_temporal
+    deps:
+      - scripts/train_ablation.py
+      - src/tube_multiscale_fusion/augment.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/local_branch.py
+      - src/tube_multiscale_fusion/fusion.py
+      - src/tube_multiscale_fusion/ablation_classifier.py
+      - src/tube_multiscale_fusion/lit_ablation.py
+      - data/05_model_input/train
+      - data/05_model_input/val
+    params:
+      - train_ablation_no_temporal
+      - local_branch
+      - fusion
+      - augment
+    outs:
+      - data/06_models/ablation_no_temporal
+
+  evaluate_ablation_no_temporal:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/evaluate_ablation.py
+        --data-dir data/05_model_input/${item}
+        --checkpoint data/06_models/ablation_no_temporal/best_checkpoint.pt
+        --output-dir data/08_reporting/ablation_no_temporal/${item}
+        --params-path params.yaml
+        --params-key train_ablation_no_temporal
+      deps:
+        - scripts/evaluate_ablation.py
+        - src/tube_multiscale_fusion/dataset.py
+        - src/tube_multiscale_fusion/local_branch.py
+        - src/tube_multiscale_fusion/fusion.py
+        - src/tube_multiscale_fusion/ablation_classifier.py
+        - src/tube_multiscale_fusion/lit_ablation.py
+        - src/tube_multiscale_fusion/eval_plots.py
+        - data/05_model_input/${item}
+        - data/06_models/ablation_no_temporal
+      params:
+        - train_ablation_no_temporal
+        - local_branch
+        - fusion
+      outs:
+        - data/08_reporting/ablation_no_temporal/${item}
+
+  # ---------------------------------------------------------------------------
+  # Ablation: remove the spatial module (global branch only).
+  # ---------------------------------------------------------------------------
+  train_ablation_no_spatial:
+    cmd: >-
+      uv run python scripts/train_ablation_global.py
+      --train-dir data/05_model_input/train
+      --val-dir data/05_model_input/val
+      --output-dir data/06_models/ablation_no_spatial
+      --params-path params.yaml
+      --params-key train_ablation_no_spatial
+    deps:
+      - scripts/train_ablation_global.py
+      - src/tube_multiscale_fusion/augment.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/global_branch.py
+      - src/tube_multiscale_fusion/ablation_classifier.py
+      - src/tube_multiscale_fusion/lit_ablation.py
+      - data/05_model_input/train
+      - data/05_model_input/val
+    params:
+      - train_ablation_no_spatial
+      - global_branch
+      - augment
+    outs:
+      - data/06_models/ablation_no_spatial
+
+  evaluate_ablation_no_spatial:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/evaluate_ablation_global.py
+        --data-dir data/05_model_input/${item}
+        --checkpoint data/06_models/ablation_no_spatial/best_checkpoint.pt
+        --output-dir data/08_reporting/ablation_no_spatial/${item}
+        --params-path params.yaml
+        --params-key train_ablation_no_spatial
+      deps:
+        - scripts/evaluate_ablation_global.py
+        - src/tube_multiscale_fusion/dataset.py
+        - src/tube_multiscale_fusion/global_branch.py
+        - src/tube_multiscale_fusion/ablation_classifier.py
+        - src/tube_multiscale_fusion/lit_ablation.py
+        - src/tube_multiscale_fusion/eval_plots.py
+        - data/05_model_input/${item}
+        - data/06_models/ablation_no_spatial
+      params:
+        - train_ablation_no_spatial
+        - global_branch
+      outs:
+        - data/08_reporting/ablation_no_spatial/${item}
+
+  # ---------------------------------------------------------------------------
+  # Ablation: cross-attention fusion -> weighted means (both branches kept).
+  # ---------------------------------------------------------------------------
+  train_ablation_weighted_mean:
+    cmd: >-
+      uv run python scripts/train_ablation_global.py
+      --train-dir data/05_model_input/train
+      --val-dir data/05_model_input/val
+      --output-dir data/06_models/ablation_weighted_mean
+      --params-path params.yaml
+      --params-key train_ablation_weighted_mean
+    deps:
+      - scripts/train_ablation_global.py
+      - src/tube_multiscale_fusion/augment.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/global_branch.py
+      - src/tube_multiscale_fusion/local_branch.py
+      - src/tube_multiscale_fusion/fusion.py
+      - src/tube_multiscale_fusion/ablation_classifier.py
+      - src/tube_multiscale_fusion/lit_ablation.py
+      - data/05_model_input/train
+      - data/05_model_input/val
+    params:
+      - train_ablation_weighted_mean
+      - global_branch
+      - local_branch
+      - fusion
+      - augment
+    outs:
+      - data/06_models/ablation_weighted_mean
+
+  evaluate_ablation_weighted_mean:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/evaluate_ablation_global.py
+        --data-dir data/05_model_input/${item}
+        --checkpoint data/06_models/ablation_weighted_mean/best_checkpoint.pt
+        --output-dir data/08_reporting/ablation_weighted_mean/${item}
+        --params-path params.yaml
+        --params-key train_ablation_weighted_mean
+      deps:
+        - scripts/evaluate_ablation_global.py
+        - src/tube_multiscale_fusion/dataset.py
+        - src/tube_multiscale_fusion/global_branch.py
+        - src/tube_multiscale_fusion/local_branch.py
+        - src/tube_multiscale_fusion/fusion.py
+        - src/tube_multiscale_fusion/ablation_classifier.py
+        - src/tube_multiscale_fusion/lit_ablation.py
+        - src/tube_multiscale_fusion/eval_plots.py
+        - data/05_model_input/${item}
+        - data/06_models/ablation_weighted_mean
+      params:
+        - train_ablation_weighted_mean
+        - global_branch
+        - local_branch
+        - fusion
+      outs:
+        - data/08_reporting/ablation_weighted_mean/${item}
+
+  # ---------------------------------------------------------------------------
+  # Temporal-module comparison — global-only, varying the aggregator.
+  # (Transformer baseline = train/evaluate_ablation_no_spatial above.)
+  # ---------------------------------------------------------------------------
+  train_temporal:
+    matrix:
+      agg:
+        - lstm
+        - gru
+        - mlp
+        - conv1d
+        - linear_wavg
+    cmd: >-
+      uv run python scripts/train_ablation_global.py
+      --train-dir data/05_model_input/train
+      --val-dir data/05_model_input/val
+      --output-dir data/06_models/temporal_${item.agg}
+      --params-path params.yaml
+      --params-key train_temporal_${item.agg}
+    deps:
+      - scripts/train_ablation_global.py
+      - src/tube_multiscale_fusion/augment.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/global_branch.py
+      - src/tube_multiscale_fusion/ablation_classifier.py
+      - src/tube_multiscale_fusion/lit_ablation.py
+      - data/05_model_input/train
+      - data/05_model_input/val
+    params:
+      - train_temporal_${item.agg}
+      - global_branch
+      - augment
+    outs:
+      - data/06_models/temporal_${item.agg}
+
+  evaluate_temporal:
+    matrix:
+      agg:
+        - lstm
+        - gru
+        - mlp
+        - conv1d
+        - linear_wavg
+      split:
+        - train
+        - val
+    cmd: >-
+      uv run python scripts/evaluate_ablation_global.py
+      --data-dir data/05_model_input/${item.split}
+      --checkpoint data/06_models/temporal_${item.agg}/best_checkpoint.pt
+      --output-dir data/08_reporting/temporal_${item.agg}/${item.split}
+      --params-path params.yaml
+      --params-key train_temporal_${item.agg}
+    deps:
+      - scripts/evaluate_ablation_global.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/global_branch.py
+      - src/tube_multiscale_fusion/ablation_classifier.py
+      - src/tube_multiscale_fusion/lit_ablation.py
+      - src/tube_multiscale_fusion/eval_plots.py
+      - data/05_model_input/${item.split}
+      - data/06_models/temporal_${item.agg}
+    params:
+      - train_temporal_${item.agg}
+      - global_branch
+    outs:
+      - data/08_reporting/temporal_${item.agg}/${item.split}
+
+  # ---------------------------------------------------------------------------
+  # Spatial-module comparison — local-only, varying the per-tube encoder.
+  # (Tubelet-transformer baseline = train/evaluate_ablation_no_temporal above.)
+  # ---------------------------------------------------------------------------
+  train_spatial:
+    matrix:
+      enc:
+        - resnet3d
+        - vivit
+        - convlstm
+        - tsm
+    cmd: >-
+      uv run python scripts/train_ablation.py
+      --train-dir data/05_model_input/train
+      --val-dir data/05_model_input/val
+      --output-dir data/06_models/spatial_${item.enc}
+      --params-path params.yaml
+      --params-key train_spatial_${item.enc}
+    deps:
+      - scripts/train_ablation.py
+      - src/tube_multiscale_fusion/augment.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/local_branch.py
+      - src/tube_multiscale_fusion/fusion.py
+      - src/tube_multiscale_fusion/ablation_classifier.py
+      - src/tube_multiscale_fusion/lit_ablation.py
+      - data/05_model_input/train
+      - data/05_model_input/val
+    params:
+      - train_spatial_${item.enc}
+      - local_branch
+      - fusion
+      - augment
+    outs:
+      - data/06_models/spatial_${item.enc}
+
+  evaluate_spatial:
+    matrix:
+      enc:
+        - resnet3d
+        - vivit
+        - convlstm
+        - tsm
+      split:
+        - train
+        - val
+    cmd: >-
+      uv run python scripts/evaluate_ablation.py
+      --data-dir data/05_model_input/${item.split}
+      --checkpoint data/06_models/spatial_${item.enc}/best_checkpoint.pt
+      --output-dir data/08_reporting/spatial_${item.enc}/${item.split}
+      --params-path params.yaml
+      --params-key train_spatial_${item.enc}
+    deps:
+      - scripts/evaluate_ablation.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/local_branch.py
+      - src/tube_multiscale_fusion/fusion.py
+      - src/tube_multiscale_fusion/ablation_classifier.py
+      - src/tube_multiscale_fusion/lit_ablation.py
+      - src/tube_multiscale_fusion/eval_plots.py
+      - data/05_model_input/${item.split}
+      - data/06_models/spatial_${item.enc}
+    params:
+      - train_spatial_${item.enc}
+      - local_branch
+      - fusion
+    outs:
+      - data/08_reporting/spatial_${item.enc}/${item.split}
+
+  # ---------------------------------------------------------------------------
+  # Combined variations — full model, spatial x temporal cartesian product.
+  # (tubelet x transformer = train/evaluate_dinov2_multiscale above.)
+  # ---------------------------------------------------------------------------
+  train_full_combo:
+    matrix:
+      combo:
+        - resnet3d_lstm
+        - resnet3d_transformer
+        - vivit_lstm
+        - vivit_transformer
+        - tubelet_lstm
+    cmd: >-
+      uv run python scripts/train.py
+      --train-dir data/05_model_input/train
+      --val-dir data/05_model_input/val
+      --output-dir data/06_models/full_${item.combo}
+      --params-path params.yaml
+      --params-key train_full_${item.combo}
+    deps:
+      - scripts/train.py
+      - src/tube_multiscale_fusion/augment.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/classifier.py
+      - src/tube_multiscale_fusion/global_branch.py
+      - src/tube_multiscale_fusion/local_branch.py
+      - src/tube_multiscale_fusion/fusion.py
+      - src/tube_multiscale_fusion/lit_module.py
+      - data/05_model_input/train
+      - data/05_model_input/val
+    params:
+      - train_full_${item.combo}
+      - global_branch
+      - local_branch
+      - fusion
+      - augment
+    outs:
+      - data/06_models/full_${item.combo}
+
+  evaluate_full_combo:
+    matrix:
+      combo:
+        - resnet3d_lstm
+        - resnet3d_transformer
+        - vivit_lstm
+        - vivit_transformer
+        - tubelet_lstm
+      split:
+        - train
+        - val
+    cmd: >-
+      uv run python scripts/evaluate.py
+      --data-dir data/05_model_input/${item.split}
+      --checkpoint data/06_models/full_${item.combo}/best_checkpoint.pt
+      --output-dir data/08_reporting/full_${item.combo}/${item.split}
+      --params-path params.yaml
+      --params-key train_full_${item.combo}
+    deps:
+      - scripts/evaluate.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/classifier.py
+      - src/tube_multiscale_fusion/global_branch.py
+      - src/tube_multiscale_fusion/local_branch.py
+      - src/tube_multiscale_fusion/fusion.py
+      - src/tube_multiscale_fusion/lit_module.py
+      - src/tube_multiscale_fusion/eval_plots.py
+      - data/05_model_input/${item.split}
+      - data/06_models/full_${item.combo}
+    params:
+      - train_full_${item.combo}
+      - global_branch
+      - local_branch
+      - fusion
+    outs:
+      - data/08_reporting/full_${item.combo}/${item.split}
+
+  benchmark_dinov2_multiscale:
+    cmd: >-
+      uv run python scripts/benchmark.py
+      --data-dir data/05_model_input/val
+      --checkpoint data/06_models/dinov2_multiscale/best_checkpoint.pt
+      --predictions data/08_reporting/dinov2_multiscale/val/predictions.json
+      --output data/08_reporting/dinov2_multiscale_benchmark/benchmark.json
+    deps:
+      - scripts/benchmark.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/classifier.py
+      - src/tube_multiscale_fusion/global_branch.py
+      - src/tube_multiscale_fusion/local_branch.py
+      - src/tube_multiscale_fusion/fusion.py
+      - src/tube_multiscale_fusion/lit_module.py
+      - data/05_model_input/val
+      - data/06_models/dinov2_multiscale
+      - data/08_reporting/dinov2_multiscale/val
+    params:
+      - train_dinov2_multiscale
+      - global_branch
+      - local_branch
+      - fusion
+    metrics:
+      - data/08_reporting/dinov2_multiscale_benchmark/benchmark.json:
+          cache: false
+
+  evaluate_dinov2_multiscale:
+    foreach:
+      - train
+      - val
+    do:
+      cmd: >-
+        uv run python scripts/evaluate.py
+        --data-dir data/05_model_input/${item}
+        --checkpoint data/06_models/dinov2_multiscale/best_checkpoint.pt
+        --output-dir data/08_reporting/dinov2_multiscale/${item}
+        --params-path params.yaml
+        --params-key train_dinov2_multiscale
+      deps:
+        - scripts/evaluate.py
+        - src/tube_multiscale_fusion/dataset.py
+        - src/tube_multiscale_fusion/classifier.py
+        - src/tube_multiscale_fusion/global_branch.py
+        - src/tube_multiscale_fusion/local_branch.py
+        - src/tube_multiscale_fusion/fusion.py
+        - src/tube_multiscale_fusion/lit_module.py
+        - src/tube_multiscale_fusion/eval_plots.py
+        - data/05_model_input/${item}
+        - data/06_models/dinov2_multiscale
+      params:
+        - train_dinov2_multiscale
+        - global_branch
+        - local_branch
+        - fusion
+      outs:
+        - data/08_reporting/dinov2_multiscale/${item}
+
+  # ---------------------------------------------------------------------------
+  # Resolution sweep — same architecture, different local_branch geometry.
+  # ---------------------------------------------------------------------------
+  train_dinov2_multiscale_sweep:
+    matrix:
+      variant:
+        - spatial_4x4
+        - spatial_8x8
+        - temporal_stride1
+        - temporal_len8
+    cmd: >-
+      uv run python scripts/train.py
+      --train-dir data/05_model_input/train
+      --val-dir data/05_model_input/val
+      --output-dir data/06_models/dinov2_multiscale_${item.variant}
+      --params-path params.yaml
+      --params-key train_dinov2_multiscale_${item.variant}
+    deps:
+      - scripts/train.py
+      - src/tube_multiscale_fusion/augment.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/classifier.py
+      - src/tube_multiscale_fusion/global_branch.py
+      - src/tube_multiscale_fusion/local_branch.py
+      - src/tube_multiscale_fusion/fusion.py
+      - src/tube_multiscale_fusion/lit_module.py
+      - data/05_model_input/train
+      - data/05_model_input/val
+    params:
+      - train_dinov2_multiscale_${item.variant}
+      - global_branch
+      - local_branch_${item.variant}
+      - fusion
+      - augment
+    outs:
+      - data/06_models/dinov2_multiscale_${item.variant}
+
+  package_dinov2_multiscale:
+    cmd: >-
+      uv run python scripts/package_model.py
+      --checkpoint data/06_models/dinov2_multiscale/best_checkpoint.pt
+      --params-path params.yaml
+      --params-key train_dinov2_multiscale
+      --yolo-weights-path data/01_raw/models/best.pt
+      --val-patches-dir data/05_model_input/val
+      --output data/07_model_output/dinov2_multiscale/model_package.zip
+    deps:
+      - scripts/package_model.py
+      - src/tube_multiscale_fusion/package.py
+      - src/tube_multiscale_fusion/model.py
+      - data/06_models/dinov2_multiscale
+      - data/01_raw/models/best.pt
+      - data/05_model_input/val
+    params:
+      - package
+      - tubes
+      - build_tubes
+      - model_input
+      - train_dinov2_multiscale
+      - global_branch
+      - local_branch
+      - fusion
+    outs:
+      - data/07_model_output/dinov2_multiscale/model_package.zip
+
+  evaluate_dinov2_multiscale_sweep:
+    matrix:
+      variant:
+        - spatial_4x4
+        - spatial_8x8
+        - temporal_stride1
+        - temporal_len8
+      split:
+        - train
+        - val
+    cmd: >-
+      uv run python scripts/evaluate.py
+      --data-dir data/05_model_input/${item.split}
+      --checkpoint data/06_models/dinov2_multiscale_${item.variant}/best_checkpoint.pt
+      --output-dir data/08_reporting/dinov2_multiscale_${item.variant}/${item.split}
+      --params-path params.yaml
+      --params-key train_dinov2_multiscale_${item.variant}
+    deps:
+      - scripts/evaluate.py
+      - src/tube_multiscale_fusion/dataset.py
+      - src/tube_multiscale_fusion/classifier.py
+      - src/tube_multiscale_fusion/global_branch.py
+      - src/tube_multiscale_fusion/local_branch.py
+      - src/tube_multiscale_fusion/fusion.py
+      - src/tube_multiscale_fusion/lit_module.py
+      - src/tube_multiscale_fusion/eval_plots.py
+      - data/05_model_input/${item.split}
+      - data/06_models/dinov2_multiscale_${item.variant}
+    params:
+      - train_dinov2_multiscale_${item.variant}
+      - global_branch
+      - local_branch_${item.variant}
+      - fusion
+    outs:
+      - data/08_reporting/dinov2_multiscale_${item.variant}/${item.split}

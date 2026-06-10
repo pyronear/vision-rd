@@ -1,0 +1,356 @@
+# Keys prefixed with `_` are shared defaults consumed via YAML merge keys
+# (`<<: *anchor`). They are NOT DVC stage parameters.
+
+prepare:
+  model_repo: "pyronear/yolo11s_nimble-narwhal_v6.0.0"
+  model_filename: "best.pt"
+
+truncate:
+  max_frames: 16              # the global branch resolution
+
+tubes:
+  iou_threshold: 0.2
+  max_misses: 2
+
+build_tubes:
+  min_tube_length: 4
+  min_detected_entries: 2
+
+model_input:
+  context_factor: 1.5
+  patch_size: 224
+
+# ---------------------------------------------------------------------------
+# Serving / packaging — used by scripts/package_model.py to build the
+# leaderboard-comparable model archive (YOLO companion + classifier + config).
+# ---------------------------------------------------------------------------
+package:
+  target_recall: 0.95          # decision threshold calibrated to this recall on val
+  infer_min_tube_length: 2     # smallest tube prefix scored at inference
+  infer:
+    confidence_threshold: 0.1
+    iou_nms: 0.2
+    image_size: 1024
+    pad_to_min_frames: 16      # match truncate.max_frames / the global branch
+    pad_strategy: symmetric
+
+# ---------------------------------------------------------------------------
+# Global branch: DINOv2 per-frame + sequence transformer aggregator.
+# ---------------------------------------------------------------------------
+global_branch:
+  backbone: vit_small_patch14_dinov2.lvd142m   # feat_dim = 384
+  aggregator:
+    num_layers: 2
+    num_heads: 6
+    ffn_dim: 1536
+    dropout: 0.1
+
+# ---------------------------------------------------------------------------
+# Local branch: spatio-temporal tube extraction + video transformer encoder.
+#
+# Default geometry (winner of the resolution sweep): coarse 2x2 grid of
+# 112x112 cells x overlapping 4-frame windows -> 7 windows * 4 cells = 28
+# tubes per sequence. See README.md for sweep table.
+# ---------------------------------------------------------------------------
+local_branch:
+  grid_size: 2                # 2x2 spatial grid -> cell_size = patch_size / grid_size = 112
+  cell_size: 112
+  tube_length: 4
+  temporal_stride: 2          # 50% overlap (set to tube_length for no overlap)
+  encoder:
+    t_kernel: 2               # tubelet conv kernel along time
+    h_patch: 14               # tubelet conv kernel along height
+    w_patch: 14               # tubelet conv kernel along width
+    embed_dim: 384            # matches DINOv2 ViT-S feat_dim
+    num_layers: 2
+    num_heads: 6
+    ffn_dim: 1536
+    dropout: 0.1
+
+# ---------------------------------------------------------------------------
+# Fusion: self-attn over locals + cross-attn (global=Q, locals=KV).
+# ---------------------------------------------------------------------------
+fusion:
+  d_fusion: 384
+  num_layers: 2
+  num_heads: 6
+  ffn_dim: 1536
+  dropout: 0.1
+
+# ---------------------------------------------------------------------------
+# Training variants
+# ---------------------------------------------------------------------------
+_train_defaults: &train_defaults
+  max_frames: 16
+  batch_size: 16
+  num_workers: 4
+  learning_rate: 0.0001
+  weight_decay: 0.05
+  max_epochs: 30
+  early_stop_patience: 5
+  seed: 42
+  head_hidden_dim: 256
+  head_dropout: 0.1
+  use_cosine_warmup: true
+  warmup_frac: 0.05
+  img_size: 224
+
+train_dinov2_multiscale:
+  <<: *train_defaults
+  finetune: true
+  finetune_last_n_blocks: 1
+  backbone_lr: 0.00001
+
+# ---------------------------------------------------------------------------
+# Combined variations — full two-branch model, cartesian product of
+# spatial (local encoder) x temporal (global aggregator). See
+# COMBINED_VARIATIONS.md. The tubelet_transformer x transformer cell is the
+# production default (= train_dinov2_multiscale above), reused there.
+# ---------------------------------------------------------------------------
+_full_combo_defaults: &full_combo_defaults
+  <<: *train_defaults
+  finetune: true
+  finetune_last_n_blocks: 1
+  backbone_lr: 0.00001
+
+train_full_resnet3d_lstm:
+  <<: *full_combo_defaults
+  encoder_kind: resnet3d
+  aggregator_kind: lstm
+  batch_size: 8            # r3d_18 local encoder over 28 tubes is memory-heavy
+
+train_full_resnet3d_transformer:
+  <<: *full_combo_defaults
+  encoder_kind: resnet3d
+  aggregator_kind: transformer
+  batch_size: 8
+
+train_full_vivit_lstm:
+  <<: *full_combo_defaults
+  encoder_kind: vivit
+  aggregator_kind: lstm
+
+train_full_vivit_transformer:
+  <<: *full_combo_defaults
+  encoder_kind: vivit
+  aggregator_kind: transformer
+
+train_full_tubelet_lstm:
+  <<: *full_combo_defaults
+  encoder_kind: tubelet_transformer
+  aggregator_kind: lstm
+
+# ---------------------------------------------------------------------------
+# Resolution sweep — alternative local_branch geometries kept as reference.
+#
+# Each block changes spatial grid and/or temporal slicing; the encoder
+# tubelet kernel is sized to the cell so tubelet conv always emits at least
+# one spatial token. Total tube count = n_temporal_windows * grid_size**2.
+# ---------------------------------------------------------------------------
+
+# Baseline 4x4 grid of 56x56 cells -> 112 tubes/seq (previous default).
+local_branch_spatial_4x4:
+  grid_size: 4
+  cell_size: 56
+  tube_length: 4
+  temporal_stride: 2
+  encoder:
+    t_kernel: 2
+    h_patch: 14
+    w_patch: 14
+    embed_dim: 384
+    num_layers: 2
+    num_heads: 6
+    ffn_dim: 1536
+    dropout: 0.1
+
+# Fine spatial (8x8 grid of 28x28 cells -> 448 tubes/seq with default time).
+local_branch_spatial_8x8:
+  grid_size: 8
+  cell_size: 28
+  tube_length: 4
+  temporal_stride: 2
+  encoder:
+    t_kernel: 2
+    h_patch: 14
+    w_patch: 14
+    embed_dim: 384
+    num_layers: 2
+    num_heads: 6
+    ffn_dim: 1536
+    dropout: 0.1
+
+# Dense temporal (stride 1 -> 13 windows -> 52 tubes/seq with 2x2 spatial).
+local_branch_temporal_stride1:
+  grid_size: 2
+  cell_size: 112
+  tube_length: 4
+  temporal_stride: 1
+  encoder:
+    t_kernel: 2
+    h_patch: 14
+    w_patch: 14
+    embed_dim: 384
+    num_layers: 2
+    num_heads: 6
+    ffn_dim: 1536
+    dropout: 0.1
+
+# Longer tubes, fewer windows (tube_length=8, stride=4 -> 3 windows -> 12 tubes/seq).
+local_branch_temporal_len8:
+  grid_size: 2
+  cell_size: 112
+  tube_length: 8
+  temporal_stride: 4
+  encoder:
+    t_kernel: 2
+    h_patch: 14
+    w_patch: 14
+    embed_dim: 384
+    num_layers: 2
+    num_heads: 6
+    ffn_dim: 1536
+    dropout: 0.1
+
+train_dinov2_multiscale_spatial_4x4:
+  <<: *train_defaults
+  finetune: true
+  finetune_last_n_blocks: 1
+  backbone_lr: 0.00001
+  local_branch_section: local_branch_spatial_4x4
+
+train_dinov2_multiscale_spatial_8x8:
+  <<: *train_defaults
+  finetune: true
+  finetune_last_n_blocks: 1
+  backbone_lr: 0.00001
+  local_branch_section: local_branch_spatial_8x8
+
+train_dinov2_multiscale_temporal_stride1:
+  <<: *train_defaults
+  finetune: true
+  finetune_last_n_blocks: 1
+  backbone_lr: 0.00001
+  local_branch_section: local_branch_temporal_stride1
+
+train_dinov2_multiscale_temporal_len8:
+  <<: *train_defaults
+  finetune: true
+  finetune_last_n_blocks: 1
+  backbone_lr: 0.00001
+  local_branch_section: local_branch_temporal_len8
+
+# ---------------------------------------------------------------------------
+# Ablation: full model MINUS the temporal module (global DINOv2 branch).
+#
+# Identical local_branch + fusion modules/hyperparameters as the default model;
+# the global DINOv2 sequence branch is removed and its context vector into the
+# fusion cross-attention is replaced by a learnable query token. Isolates the
+# contribution of the global temporal context. Same 2x2 geometry as default.
+# ---------------------------------------------------------------------------
+train_ablation_no_temporal:
+  <<: *train_defaults
+  local_branch_section: local_branch
+  query_dim: 384
+
+# Ablation: remove the SPATIAL module (local tube branch). Global branch only —
+# DINOv2 per-frame + transformer aggregator -> MLP head. Keeps the global branch
+# identical to the full model (incl. last-block fine-tuning).
+train_ablation_no_spatial:
+  <<: *train_defaults
+  ablation_variant: no_spatial
+  finetune: true
+  finetune_last_n_blocks: 1
+  backbone_lr: 0.00001
+
+# Ablation: replace the cross-attention FUSION with weighted means. Both branches
+# kept identical to the full model; only the fusion module changes.
+train_ablation_weighted_mean:
+  <<: *train_defaults
+  ablation_variant: weighted_mean
+  finetune: true
+  finetune_last_n_blocks: 1
+  backbone_lr: 0.00001
+
+# ---------------------------------------------------------------------------
+# Temporal-module comparison — vary ONLY the global-branch aggregator, in the
+# global-only (no_spatial) setting so the temporal module is isolated. The
+# Transformer baseline is `train_ablation_no_spatial` above. See
+# TEMPORAL_COMPARISON.md.
+# ---------------------------------------------------------------------------
+_temporal_defaults: &temporal_defaults
+  <<: *train_defaults
+  ablation_variant: no_spatial
+  finetune: true
+  finetune_last_n_blocks: 1
+  backbone_lr: 0.00001
+
+train_temporal_lstm:
+  <<: *temporal_defaults
+  aggregator_kind: lstm
+
+train_temporal_gru:
+  <<: *temporal_defaults
+  aggregator_kind: gru
+
+train_temporal_mlp:
+  <<: *temporal_defaults
+  aggregator_kind: mlp
+
+train_temporal_conv1d:
+  <<: *temporal_defaults
+  aggregator_kind: conv1d
+
+train_temporal_linear_wavg:
+  <<: *temporal_defaults
+  aggregator_kind: linear_wavg
+
+# ---------------------------------------------------------------------------
+# Spatial-module comparison — vary ONLY the per-tube encoder, in the local-only
+# (no_temporal) setting so the spatial module is isolated. The tubelet-
+# transformer baseline is `train_ablation_no_temporal` above. See
+# SPATIAL_COMPARISON.md.
+# ---------------------------------------------------------------------------
+_spatial_defaults: &spatial_defaults
+  <<: *train_defaults
+  ablation_variant: no_temporal
+  local_branch_section: local_branch
+  query_dim: 384
+
+train_spatial_resnet3d:
+  <<: *spatial_defaults
+  encoder_kind: resnet3d
+  batch_size: 8          # r3d_18 over 28 tubes is memory-heavy
+
+train_spatial_vivit:
+  <<: *spatial_defaults
+  encoder_kind: vivit
+
+train_spatial_convlstm:
+  <<: *spatial_defaults
+  encoder_kind: convlstm
+
+train_spatial_tsm:
+  <<: *spatial_defaults
+  encoder_kind: tsm
+
+# ---------------------------------------------------------------------------
+# Augmentation (RGB only)
+# ---------------------------------------------------------------------------
+augment:
+  enabled: true
+  spatial:
+    flip_prob: 0.5
+    rotation_deg: 5.0
+    scale_range: [0.9, 1.1]
+    translate_frac: 0.05
+  photometric:
+    brightness_range: [0.8, 1.2]
+    contrast_range: [0.8, 1.2]
+    saturation_range: [0.8, 1.2]
+  temporal:
+    subseq_prob: 0.5
+    subseq_min_len: 4
+    stride_prob: 0.25
+    frame_drop_prob: 0.15
+    min_valid_after_drop: 4

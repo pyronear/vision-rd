@@ -1,0 +1,41 @@
+{
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "cpu_threads": 24
+  },
+  "recall_at_fpr": {
+    "recall@fpr=0.01": 0.8740740740740741,
+    "recall@fpr=0.05": 1.0,
+    "recall@fpr=0.1": 1.0
+  },
+  "model_size": {
+    "total_params": 36435201,
+    "total_params_millions": 36.44,
+    "trainable_params": 16581633,
+    "trainable_params_millions": 16.58,
+    "frozen_params_millions": 19.85,
+    "flops_per_sequence": 226548674048,
+    "gflops_per_sequence": 226.5,
+    "gflops_per_frame": 14.16
+  },
+  "time_to_detection": {
+    "n_positive": 135,
+    "n_detected": 135,
+    "n_never_fired": 0,
+    "median_frames_to_detect": 2.0,
+    "mean_frames_to_detect": 2.074074074074074,
+    "median_seconds_to_detect": 30.0,
+    "mean_seconds_to_detect": 32.22222222222222,
+    "frame_dt_seconds": 30.0
+  },
+  "latency_gpu": {
+    "ms_per_sequence_mean": 10.671932203695178,
+    "ms_per_sequence_std": 0.0240137440704318,
+    "ms_per_frame_mean": 0.6669957627309486
+  },
+  "latency_cpu": {
+    "ms_per_sequence_mean": 286.6578564203034,
+    "ms_per_sequence_std": 0.829664835793929,
+    "ms_per_frame_mean": 17.916116026268963
+  }
+}
