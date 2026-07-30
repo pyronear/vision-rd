@@ -40,6 +40,7 @@ def main() -> None:
     parser.add_argument("--num-workers", type=int, default=8)
     # D-FINE paper recipe (opt-in): discriminative backbone LR + EMA.
     parser.add_argument("--backbone-lr", type=float, default=None)
+    parser.add_argument("--max-grad-norm", type=float, default=1.0)
     parser.add_argument("--no-wd-on-norm-bias", action="store_true")
     parser.add_argument("--ema-decay", type=float, default=None)
     parser.add_argument("--ema-warmup-steps", type=int, default=2000)
@@ -59,6 +60,7 @@ def main() -> None:
         early_stop_patience=args.early_stop_patience,
         seed=args.seed,
         num_workers=args.num_workers,
+        max_grad_norm=args.max_grad_norm,
         backbone_lr=args.backbone_lr,
         no_wd_on_norm_bias=args.no_wd_on_norm_bias,
         ema_decay=args.ema_decay,
