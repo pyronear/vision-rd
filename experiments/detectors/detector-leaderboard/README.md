@@ -115,23 +115,30 @@ forward only; GPU-clock sensitive, treat as indicative — params/GFLOPs are the
 | 1 | lwdetr-small-paper (paper recipe) — **top F1** | 0.38 | 0.906 | 0.863 | **0.884** | 0.087 | 14.2 | 110.2 | 13.7 | 160 | 1024 |
 | 2 | rfdetr-nano (finetuned) | 0.40 | 0.923 | 0.846 | **0.883** | **0.039** | 31.5 | 328.7 | 15.1 | 300 | 1024 |
 | 3 | lwdetr-tiny-paper-full (paper recipe, 132ep) | 0.46 | 0.931 | 0.833 | **0.880** | 0.091 | 11.7 | 78.0 | 11.9 | 138 | 1024 |
-| 4 | yolo11s-nimble-narwhal-v6.0.0 (prod baseline) | 0.21 | 0.853 | 0.891 | **0.872** | 0.125 | 9.4 | 55.3 | 3.0 | 219 | 1024 |
-| 5 | deimv2-s (fair-param, native 640) | 0.40 | 0.863 | 0.864 | **0.864** | 0.065 | 9.7 | 49.3 | 8.4 | **100** | 640 |
-| 6 | dfine-nano-paper (paper recipe) | 0.12 | 0.878 | 0.825 | 0.851 | 0.112 | **3.7** | 17.9 | 5.8 | 142 | 1024 |
-| 7 | dfine-small-paper (paper recipe) | 0.40 | 0.893 | 0.803 | 0.846 | 0.080 | 10.2 | 66.4 | 6.8 | 297 | 1024 |
-| 8 | rtdetrv2-r18-paper (paper recipe; ⚠ FPR 0.47) | 0.01 | 0.785 | 0.893 | 0.835 | 0.470 | 20.1 | 153.4 | 7.1 | 342 | 1024 |
-| 9 | yolo26s-smoke (fair-param) | 0.25 | 0.832 | 0.835 | 0.834 | 0.061 | 9.9 | 58.4 | 3.9 | 221 | 1024 |
-| 10 | yolo26n-smoke | 0.22 | 0.801 | 0.847 | 0.823 | 0.106 | 2.5 | 15.2 | 3.6 | 124 | 1024 |
+| 4 | yolo11s-nimble-narwhal-v6.0.0 (prod baseline v6) | 0.21 | 0.853 | 0.891 | **0.872** | 0.125 | 9.4 | 55.3 | 3.0 | 219 | 1024 |
+| 5 | yolo11s-sensitive-detector-v1.1.0 (updated prod; high-recall) | 0.23 | 0.878 | 0.857 | **0.868** | 0.258 | 9.4 | 55.3 | 3.0 | 219 | 1024 |
+| 6 | deimv2-s (fair-param, native 640) | 0.40 | 0.863 | 0.864 | 0.864 | 0.065 | 9.7 | 49.3 | 8.4 | **100** | 640 |
+| 7 | yolo11s-rapid-raccoon-v8.1.0 (updated prod v8) | 0.24 | 0.881 | 0.841 | 0.861 | 0.108 | 9.4 | 55.3 | 3.0 | 219 | 1024 |
+| 8 | dfine-nano-paper (paper recipe) | 0.12 | 0.878 | 0.825 | 0.851 | 0.112 | **3.7** | 17.9 | 5.8 | 142 | 1024 |
+| 9 | dfine-small-paper (paper recipe) | 0.40 | 0.893 | 0.803 | 0.846 | 0.080 | 10.2 | 66.4 | 6.8 | 297 | 1024 |
+| 10 | rtdetrv2-r18-paper (paper recipe; ⚠ FPR 0.47) | 0.01 | 0.785 | 0.893 | 0.835 | 0.470 | 20.1 | 153.4 | 7.1 | 342 | 1024 |
+| 11 | yolo26s-smoke (fair-param) | 0.25 | 0.832 | 0.835 | 0.834 | 0.061 | 9.9 | 58.4 | 3.9 | 221 | 1024 |
+| 12 | yolo26n-smoke | 0.22 | 0.801 | 0.847 | 0.823 | 0.106 | 2.5 | 15.2 | 3.6 | 124 | 1024 |
 
-**One row per model — each is the best-performing version of that architecture** (FPR-aware: the
+**One row per detector — each is the best-performing version of that architecture** (FPR-aware: the
 single best trained variant, SAHI/tiled-inference and superseded flat-recipe runs removed). Rows 1,
-3, 6, 7, 8 are the DETRs finetuned with their paper optimizer recipe (discriminative backbone LR +
+3, 8, 9, 10 are the DETRs finetuned with their paper optimizer recipe (discriminative backbone LR +
 EMA + no-WD-on-norm/bias + grad-clip 0.1 — see the paper-recipe Finding); their earlier flat-recipe
-runs have been cleaned up. **LW-DETR-small (row 1) is the top F1 on the board — at less than half
-rfdetr-nano's params.** ⚠ **`rtdetrv2-r18-paper` (row 8) is a trap:** the paper recipe lifted its
-F1 to 0.835 (best recall on the board, 0.893) but its FPR is **0.47** — it fires on ~half of all
-background frames, operationally the worst row here, so read it by FPR, not F1. **`deimv2-s` (row 5)
-is the canonical fair-param model** — 9.7M params, native 640px, lowest compute/GPU on the board.
+runs have been cleaned up. **Rows 4, 5, 7 are the Pyronear production YOLO11s baselines** — v6
+`nimble-narwhal` (the reference baseline all deltas are measured against), plus the two *updated*
+releases: `rapid-raccoon-v8.1.0` and the `sensitive-detector-v1.1.0`. Notably **both updated
+production models score slightly *below* the v6 baseline on F1** (0.861 and 0.868 vs 0.872), and the
+"sensitive" detector — tuned for recall — carries a much higher **FPR 0.258** (2× the baseline).
+**LW-DETR-small (row 1) is the top F1 on the board — at less than half rfdetr-nano's params.** ⚠
+**`rtdetrv2-r18-paper` (row 10) is a trap:** the paper recipe lifted its F1 to 0.835 (best recall on
+the board, 0.893) but its FPR is **0.47** — it fires on ~half of all background frames, operationally
+the worst row here, so read it by FPR, not F1. **`deimv2-s` (row 6) is the canonical fair-param
+model** — 9.7M params, native 640px, lowest compute/GPU on the board.
 
 The full R&D journey behind these numbers — the DETR checkpoint-selection fix, the flat-vs-paper
 recipe story, SAHI/tiled-inference experiments, DEIMv2 resolution/epoch/augmentation ablations — is

@@ -100,6 +100,31 @@
     }
   },
   {
+    "model_name": "yolo11s-sensitive-detector-v1.1.0",
+    "conf_threshold": 0.23,
+    "iou_threshold": 0.1,
+    "num_frames_with_gt": 1320,
+    "num_background_frames": 1320,
+    "box_tp": 1341,
+    "box_fp": 186,
+    "box_fn": 223,
+    "precision": 0.8781925343811395,
+    "recall": 0.8574168797953964,
+    "f1": 0.8676803623422841,
+    "background_frames_fired": 341,
+    "image_fpr": 0.25833333333333336,
+    "mean_fp_per_background_frame": 0.28863636363636364,
+    "profile": {
+      "backend": "ultralytics",
+      "image_size": 1024,
+      "num_params_m": 9.428179,
+      "gflops": 55.325622272,
+      "latency_ms": 3.0271450805664064,
+      "peak_gpu_mem_mb": 218.516992,
+      "device": "cuda"
+    }
+  },
+  {
     "model_name": "deimv2-s",
     "conf_threshold": 0.4,
     "iou_threshold": 0.1,
@@ -121,6 +146,31 @@
       "gflops": 49.286338048,
       "latency_ms": 8.44822998046875,
       "peak_gpu_mem_mb": 100.369408,
+      "device": "cuda"
+    }
+  },
+  {
+    "model_name": "yolo11s-rapid-raccoon-v8.1.0",
+    "conf_threshold": 0.24,
+    "iou_threshold": 0.1,
+    "num_frames_with_gt": 1320,
+    "num_background_frames": 1320,
+    "box_tp": 1316,
+    "box_fp": 177,
+    "box_fn": 248,
+    "precision": 0.8814467515070328,
+    "recall": 0.8414322250639387,
+    "f1": 0.8609748119070986,
+    "background_frames_fired": 143,
+    "image_fpr": 0.10833333333333334,
+    "mean_fp_per_background_frame": 0.1143939393939394,
+    "profile": {
+      "backend": "ultralytics",
+      "image_size": 1024,
+      "num_params_m": 9.428179,
+      "gflops": 55.325622272,
+      "latency_ms": 2.97955322265625,
+      "peak_gpu_mem_mb": 218.516992,
       "device": "cuda"
     }
   },
