@@ -50,6 +50,10 @@ class TrainConfig:
     batch_size: int = 8
     learning_rate: float = 1e-4
     weight_decay: float = 1e-4
+    # Gradient-norm clipping (HF default 1.0). D-FINE's recipe clips tightly at
+    # 0.1; without it a higher backbone/base LR can diverge to NaN on the smaller
+    # backbones (observed on dfine-nano at lr 2e-4).
+    max_grad_norm: float = 1.0
     early_stop_patience: int = 8
     seed: int = 42
     num_workers: int = 8
@@ -394,6 +398,7 @@ def finetune(
         per_device_train_batch_size=config.batch_size,
         learning_rate=config.learning_rate,
         weight_decay=config.weight_decay,
+        max_grad_norm=config.max_grad_norm,
         lr_scheduler_type="cosine",
         warmup_ratio=0.05,
         # Checkpoint selection is handled by BestF1Callback on val box-F1, not
