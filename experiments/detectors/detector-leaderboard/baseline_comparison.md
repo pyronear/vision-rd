@@ -20,14 +20,16 @@ Box-level F1 on the test split. Δ is the model's F1 minus the baseline's.
 | 2 | rfdetr-nano | 0.8826 | +0.0111 | +1.3% | ▲ better |
 | 3 | lwdetr-tiny-paper-full | 0.8795 | +0.0080 | +0.9% | ▲ better |
 | 4 | **yolo11s-nimble-narwhal-v6.0.0** | 0.8715 | 0 | 0% | — baseline |
-| 5 | deimv2-s | 0.8636 | -0.0079 | -0.9% | ▼ worse |
-| 6 | dfine-nano-paper | 0.8506 | -0.0209 | -2.4% | ▼ worse |
-| 7 | dfine-small-paper | 0.8458 | -0.0257 | -3.0% | ▼ worse |
-| 8 | rtdetrv2-r18-paper | 0.8352 | -0.0363 | -4.2% | ▼ worse |
-| 9 | yolo26s-smoke | 0.8337 | -0.0378 | -4.3% | ▼ worse |
-| 10 | yolo26n-smoke | 0.8234 | -0.0481 | -5.5% | ▼ worse |
+| 5 | yolo11s-sensitive-detector-v1.1.0 | 0.8677 | -0.0038 | -0.4% | ▼ worse |
+| 6 | deimv2-s | 0.8636 | -0.0079 | -0.9% | ▼ worse |
+| 7 | yolo11s-rapid-raccoon-v8.1.0 | 0.8610 | -0.0105 | -1.2% | ▼ worse |
+| 8 | dfine-nano-paper | 0.8506 | -0.0209 | -2.4% | ▼ worse |
+| 9 | dfine-small-paper | 0.8458 | -0.0257 | -3.0% | ▼ worse |
+| 10 | rtdetrv2-r18-paper | 0.8352 | -0.0363 | -4.2% | ▼ worse |
+| 11 | yolo26s-smoke | 0.8337 | -0.0378 | -4.3% | ▼ worse |
+| 12 | yolo26n-smoke | 0.8234 | -0.0481 | -5.5% | ▼ worse |
 
-*3 of 9 models beat the baseline's F1 (0.8715).*
+*3 of 11 models beat the baseline's F1 (0.8715).*
 
 ## 2. Recall vs baseline (higher is better)
 
@@ -40,14 +42,16 @@ detected. Δ is the model's recall minus the baseline's.
 | 2 | **yolo11s-nimble-narwhal-v6.0.0** | 0.8913 | 0 | 0% | — baseline |
 | 3 | deimv2-s | 0.8645 | -0.0269 | -3.0% | ▼ worse |
 | 4 | lwdetr-small-paper | 0.8625 | -0.0288 | -3.2% | ▼ worse |
-| 5 | yolo26n-smoke | 0.8465 | -0.0448 | -5.0% | ▼ worse |
-| 6 | rfdetr-nano | 0.8459 | -0.0454 | -5.1% | ▼ worse |
-| 7 | yolo26s-smoke | 0.8350 | -0.0563 | -6.3% | ▼ worse |
-| 8 | lwdetr-tiny-paper-full | 0.8331 | -0.0582 | -6.5% | ▼ worse |
-| 9 | dfine-nano-paper | 0.8248 | -0.0665 | -7.5% | ▼ worse |
-| 10 | dfine-small-paper | 0.8031 | -0.0882 | -9.9% | ▼ worse |
+| 5 | yolo11s-sensitive-detector-v1.1.0 | 0.8574 | -0.0339 | -3.8% | ▼ worse |
+| 6 | yolo26n-smoke | 0.8465 | -0.0448 | -5.0% | ▼ worse |
+| 7 | rfdetr-nano | 0.8459 | -0.0454 | -5.1% | ▼ worse |
+| 8 | yolo11s-rapid-raccoon-v8.1.0 | 0.8414 | -0.0499 | -5.6% | ▼ worse |
+| 9 | yolo26s-smoke | 0.8350 | -0.0563 | -6.3% | ▼ worse |
+| 10 | lwdetr-tiny-paper-full | 0.8331 | -0.0582 | -6.5% | ▼ worse |
+| 11 | dfine-nano-paper | 0.8248 | -0.0665 | -7.5% | ▼ worse |
+| 12 | dfine-small-paper | 0.8031 | -0.0882 | -9.9% | ▼ worse |
 
-*1 of 9 models beat the baseline's Recall (0.8913).*
+*1 of 11 models beat the baseline's Recall (0.8913).*
 
 ## 3. False-positive rate vs baseline (lower is better)
 
@@ -64,11 +68,13 @@ alarms. A negative Δ / % change means fewer false alarms than the baseline.
 | 5 | lwdetr-small-paper | 0.0871 | -0.0379 | -30.3% | ▲ better |
 | 6 | lwdetr-tiny-paper-full | 0.0909 | -0.0341 | -27.3% | ▲ better |
 | 7 | yolo26n-smoke | 0.1061 | -0.0189 | -15.2% | ▲ better |
-| 8 | dfine-nano-paper | 0.1121 | -0.0129 | -10.3% | ▲ better |
-| 9 | **yolo11s-nimble-narwhal-v6.0.0** | 0.1250 | 0 | 0% | — baseline |
-| 10 | rtdetrv2-r18-paper | 0.4705 | +0.3455 | +276.4% | ▼ worse |
+| 8 | yolo11s-rapid-raccoon-v8.1.0 | 0.1083 | -0.0167 | -13.3% | ▲ better |
+| 9 | dfine-nano-paper | 0.1121 | -0.0129 | -10.3% | ▲ better |
+| 10 | **yolo11s-nimble-narwhal-v6.0.0** | 0.1250 | 0 | 0% | — baseline |
+| 11 | yolo11s-sensitive-detector-v1.1.0 | 0.2583 | +0.1333 | +106.7% | ▼ worse |
+| 12 | rtdetrv2-r18-paper | 0.4705 | +0.3455 | +276.4% | ▼ worse |
 
-*8 of 9 models have a lower false-positive rate than the baseline (0.1250).*
+*9 of 11 models have a lower false-positive rate than the baseline (0.1250).*
 
 ## 4. Time to detection vs baseline (lower is better)
 
@@ -79,15 +85,17 @@ so latency is not input-size-normalized.
 
 | Rank | Model | Latency (ms) | Δ ms | Relative | vs baseline | Input |
 | ---: | :--- | ---: | ---: | ---: | :--- | ---: |
-| 1 | **yolo11s-nimble-narwhal-v6.0.0** | 3.04 | 0 | 1.00× (baseline) | — baseline | 1024 |
-| 2 | yolo26n-smoke | 3.63 | +0.59 | 1.19× baseline | ▼ worse | 1024 |
-| 3 | yolo26s-smoke | 3.90 | +0.86 | 1.28× baseline | ▼ worse | 1024 |
-| 4 | dfine-nano-paper | 5.84 | +2.80 | 1.92× baseline | ▼ worse | 1024 |
-| 5 | dfine-small-paper | 6.78 | +3.74 | 2.23× baseline | ▼ worse | 1024 |
-| 6 | rtdetrv2-r18-paper | 7.09 | +4.04 | 2.33× baseline | ▼ worse | 1024 |
-| 7 | deimv2-s | 8.45 | +5.41 | 2.78× baseline | ▼ worse | 640 |
-| 8 | lwdetr-tiny-paper-full | 11.86 | +8.82 | 3.90× baseline | ▼ worse | 1024 |
-| 9 | lwdetr-small-paper | 13.69 | +10.65 | 4.50× baseline | ▼ worse | 1024 |
-| 10 | rfdetr-nano | 15.05 | +12.01 | 4.95× baseline | ▼ worse | 1024 |
+| 1 | yolo11s-rapid-raccoon-v8.1.0 | 2.98 | -0.06 | 0.98× baseline | ▲ better | 1024 |
+| 2 | yolo11s-sensitive-detector-v1.1.0 | 3.03 | -0.01 | 1.00× baseline | ▲ better | 1024 |
+| 3 | **yolo11s-nimble-narwhal-v6.0.0** | 3.04 | 0 | 1.00× (baseline) | — baseline | 1024 |
+| 4 | yolo26n-smoke | 3.63 | +0.59 | 1.19× baseline | ▼ worse | 1024 |
+| 5 | yolo26s-smoke | 3.90 | +0.86 | 1.28× baseline | ▼ worse | 1024 |
+| 6 | dfine-nano-paper | 5.84 | +2.80 | 1.92× baseline | ▼ worse | 1024 |
+| 7 | dfine-small-paper | 6.78 | +3.74 | 2.23× baseline | ▼ worse | 1024 |
+| 8 | rtdetrv2-r18-paper | 7.09 | +4.04 | 2.33× baseline | ▼ worse | 1024 |
+| 9 | deimv2-s | 8.45 | +5.41 | 2.78× baseline | ▼ worse | 640 |
+| 10 | lwdetr-tiny-paper-full | 11.86 | +8.82 | 3.90× baseline | ▼ worse | 1024 |
+| 11 | lwdetr-small-paper | 13.69 | +10.65 | 4.50× baseline | ▼ worse | 1024 |
+| 12 | rfdetr-nano | 15.05 | +12.01 | 4.95× baseline | ▼ worse | 1024 |
 
-*0 of 9 profiled models are faster than the baseline (3.04 ms @ input 1024).*
+*2 of 11 profiled models are faster than the baseline (3.04 ms @ input 1024).*
