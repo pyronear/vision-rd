@@ -1,0 +1,362 @@
+[
+  {
+    "model_name": "lwdetr-small-paper",
+    "conf_threshold": 0.38,
+    "iou_threshold": 0.1,
+    "num_frames_with_gt": 1320,
+    "num_background_frames": 1320,
+    "box_tp": 1349,
+    "box_fp": 140,
+    "box_fn": 215,
+    "precision": 0.905977165883143,
+    "recall": 0.862531969309463,
+    "f1": 0.8837209302325583,
+    "background_frames_fired": 115,
+    "image_fpr": 0.08712121212121213,
+    "mean_fp_per_background_frame": 0.0893939393939394,
+    "precision_at_recall": {
+      "0.95": 0.48435462842242505,
+      "0.98": 0.15226460071513706,
+      "0.99": 0.07980833633881189
+    },
+    "profile": {
+      "backend": "dfine",
+      "image_size": 1024,
+      "num_params_m": 14.233558,
+      "gflops": 110.245957632,
+      "latency_ms": 13.694771728515626,
+      "peak_gpu_mem_mb": 159.751168,
+      "device": "cuda"
+    }
+  },
+  {
+    "model_name": "rfdetr-nano",
+    "conf_threshold": 0.4,
+    "iou_threshold": 0.1,
+    "num_frames_with_gt": 1320,
+    "num_background_frames": 1320,
+    "box_tp": 1323,
+    "box_fp": 111,
+    "box_fn": 241,
+    "precision": 0.9225941422594143,
+    "recall": 0.8459079283887468,
+    "f1": 0.8825883922615078,
+    "background_frames_fired": 52,
+    "image_fpr": 0.03939393939393939,
+    "mean_fp_per_background_frame": 0.04015151515151515,
+    "precision_at_recall": {
+      "0.95": 0.5699501724798773,
+      "0.98": 0.3533072136436967,
+      "0.99": 0.20980631179737233
+    },
+    "profile": {
+      "backend": "rfdetr",
+      "image_size": 1024,
+      "num_params_m": 31.498756,
+      "gflops": 328.73862144,
+      "latency_ms": 15.0549853515625,
+      "peak_gpu_mem_mb": 299.828224,
+      "device": "cuda"
+    }
+  },
+  {
+    "model_name": "lwdetr-tiny-paper-full",
+    "conf_threshold": 0.46,
+    "iou_threshold": 0.1,
+    "num_frames_with_gt": 1320,
+    "num_background_frames": 1320,
+    "box_tp": 1303,
+    "box_fp": 96,
+    "box_fn": 261,
+    "precision": 0.9313795568263045,
+    "recall": 0.8331202046035806,
+    "f1": 0.879514006074924,
+    "background_frames_fired": 120,
+    "image_fpr": 0.09090909090909091,
+    "mean_fp_per_background_frame": 0.09166666666666666,
+    "precision_at_recall": {
+      "0.95": 0.3394243947007766,
+      "0.98": 0.14312389132667352,
+      "0.99": 0.07356922346236049
+    },
+    "profile": {
+      "backend": "dfine",
+      "image_size": 1024,
+      "num_params_m": 11.728182,
+      "gflops": 77.988524032,
+      "latency_ms": 11.86019287109375,
+      "peak_gpu_mem_mb": 137.902592,
+      "device": "cuda"
+    }
+  },
+  {
+    "model_name": "yolo11s-nimble-narwhal-v6.0.0",
+    "conf_threshold": 0.21,
+    "iou_threshold": 0.1,
+    "num_frames_with_gt": 1320,
+    "num_background_frames": 1320,
+    "box_tp": 1394,
+    "box_fp": 241,
+    "box_fn": 170,
+    "precision": 0.8525993883792049,
+    "recall": 0.8913043478260869,
+    "f1": 0.8715223507346046,
+    "background_frames_fired": 165,
+    "image_fpr": 0.125,
+    "mean_fp_per_background_frame": 0.13636363636363635,
+    "precision_at_recall": {
+      "0.95": 0.5391872278664731,
+      "0.98": null,
+      "0.99": null
+    },
+    "profile": {
+      "backend": "ultralytics",
+      "image_size": 1024,
+      "num_params_m": 9.428179,
+      "gflops": 55.325622272,
+      "latency_ms": 3.040691223144531,
+      "peak_gpu_mem_mb": 218.516992,
+      "device": "cuda"
+    }
+  },
+  {
+    "model_name": "yolo11s-sensitive-detector-v1.1.0",
+    "conf_threshold": 0.23,
+    "iou_threshold": 0.1,
+    "num_frames_with_gt": 1320,
+    "num_background_frames": 1320,
+    "box_tp": 1341,
+    "box_fp": 186,
+    "box_fn": 223,
+    "precision": 0.8781925343811395,
+    "recall": 0.8574168797953964,
+    "f1": 0.8676803623422841,
+    "background_frames_fired": 341,
+    "image_fpr": 0.25833333333333336,
+    "mean_fp_per_background_frame": 0.28863636363636364,
+    "precision_at_recall": {
+      "0.95": 0.5650190114068441,
+      "0.98": null,
+      "0.99": null
+    },
+    "profile": {
+      "backend": "ultralytics",
+      "image_size": 1024,
+      "num_params_m": 9.428179,
+      "gflops": 55.325622272,
+      "latency_ms": 3.0271450805664064,
+      "peak_gpu_mem_mb": 218.516992,
+      "device": "cuda"
+    }
+  },
+  {
+    "model_name": "deimv2-s",
+    "conf_threshold": 0.4,
+    "iou_threshold": 0.1,
+    "num_frames_with_gt": 1320,
+    "num_background_frames": 1320,
+    "box_tp": 1352,
+    "box_fp": 215,
+    "box_fn": 212,
+    "precision": 0.8627951499680919,
+    "recall": 0.8644501278772379,
+    "f1": 0.8636218460555734,
+    "background_frames_fired": 86,
+    "image_fpr": 0.06515151515151515,
+    "mean_fp_per_background_frame": 0.06818181818181818,
+    "precision_at_recall": {
+      "0.95": 0.4675896790434235,
+      "0.98": 0.14723396081444487,
+      "0.99": 0.052989874110563766
+    },
+    "profile": {
+      "backend": "deimv2",
+      "image_size": 640,
+      "num_params_m": 9.662319,
+      "gflops": 49.286338048,
+      "latency_ms": 8.44822998046875,
+      "peak_gpu_mem_mb": 100.369408,
+      "device": "cuda"
+    }
+  },
+  {
+    "model_name": "yolo11s-rapid-raccoon-v8.1.0",
+    "conf_threshold": 0.24,
+    "iou_threshold": 0.1,
+    "num_frames_with_gt": 1320,
+    "num_background_frames": 1320,
+    "box_tp": 1316,
+    "box_fp": 177,
+    "box_fn": 248,
+    "precision": 0.8814467515070328,
+    "recall": 0.8414322250639387,
+    "f1": 0.8609748119070986,
+    "background_frames_fired": 143,
+    "image_fpr": 0.10833333333333334,
+    "mean_fp_per_background_frame": 0.1143939393939394,
+    "precision_at_recall": {
+      "0.95": 0.5078605604921395,
+      "0.98": null,
+      "0.99": null
+    },
+    "profile": {
+      "backend": "ultralytics",
+      "image_size": 1024,
+      "num_params_m": 9.428179,
+      "gflops": 55.325622272,
+      "latency_ms": 2.97955322265625,
+      "peak_gpu_mem_mb": 218.516992,
+      "device": "cuda"
+    }
+  },
+  {
+    "model_name": "dfine-nano-paper",
+    "conf_threshold": 0.12,
+    "iou_threshold": 0.1,
+    "num_frames_with_gt": 1320,
+    "num_background_frames": 1320,
+    "box_tp": 1290,
+    "box_fp": 179,
+    "box_fn": 274,
+    "precision": 0.8781484002722941,
+    "recall": 0.8248081841432225,
+    "f1": 0.8506429277942631,
+    "background_frames_fired": 148,
+    "image_fpr": 0.11212121212121212,
+    "mean_fp_per_background_frame": 0.11818181818181818,
+    "precision_at_recall": {
+      "0.95": null,
+      "0.98": null,
+      "0.99": null
+    },
+    "profile": {
+      "backend": "dfine",
+      "image_size": 1024,
+      "num_params_m": 3.719545,
+      "gflops": 17.916926464,
+      "latency_ms": 5.843930053710937,
+      "peak_gpu_mem_mb": 141.983232,
+      "device": "cuda"
+    }
+  },
+  {
+    "model_name": "dfine-small-paper",
+    "conf_threshold": 0.4,
+    "iou_threshold": 0.1,
+    "num_frames_with_gt": 1320,
+    "num_background_frames": 1320,
+    "box_tp": 1256,
+    "box_fp": 150,
+    "box_fn": 308,
+    "precision": 0.8933143669985776,
+    "recall": 0.80306905370844,
+    "f1": 0.8457912457912458,
+    "background_frames_fired": 106,
+    "image_fpr": 0.0803030303030303,
+    "mean_fp_per_background_frame": 0.08257575757575758,
+    "precision_at_recall": {
+      "0.95": null,
+      "0.98": null,
+      "0.99": null
+    },
+    "profile": {
+      "backend": "dfine",
+      "image_size": 1024,
+      "num_params_m": 10.208169,
+      "gflops": 66.379064832,
+      "latency_ms": 6.777692260742188,
+      "peak_gpu_mem_mb": 296.727552,
+      "device": "cuda"
+    }
+  },
+  {
+    "model_name": "rtdetrv2-r18-paper",
+    "conf_threshold": 0.01,
+    "iou_threshold": 0.1,
+    "num_frames_with_gt": 1320,
+    "num_background_frames": 1320,
+    "box_tp": 1396,
+    "box_fp": 383,
+    "box_fn": 168,
+    "precision": 0.7847105115233277,
+    "recall": 0.8925831202046036,
+    "f1": 0.835177983846844,
+    "background_frames_fired": 621,
+    "image_fpr": 0.47045454545454546,
+    "mean_fp_per_background_frame": 0.7712121212121212,
+    "precision_at_recall": {
+      "0.95": null,
+      "0.98": null,
+      "0.99": null
+    },
+    "profile": {
+      "backend": "dfine",
+      "image_size": 1024,
+      "num_params_m": 20.073172,
+      "gflops": 153.38669056,
+      "latency_ms": 7.085409545898438,
+      "peak_gpu_mem_mb": 342.065664,
+      "device": "cuda"
+    }
+  },
+  {
+    "model_name": "yolo26s-smoke",
+    "conf_threshold": 0.25,
+    "iou_threshold": 0.1,
+    "num_frames_with_gt": 1320,
+    "num_background_frames": 1320,
+    "box_tp": 1306,
+    "box_fp": 263,
+    "box_fn": 258,
+    "precision": 0.8323773103887827,
+    "recall": 0.8350383631713555,
+    "f1": 0.8337057133737632,
+    "background_frames_fired": 80,
+    "image_fpr": 0.06060606060606061,
+    "mean_fp_per_background_frame": 0.06439393939393939,
+    "precision_at_recall": {
+      "0.95": null,
+      "0.98": null,
+      "0.99": null
+    },
+    "profile": {
+      "backend": "ultralytics",
+      "image_size": 1024,
+      "num_params_m": 9.948638,
+      "gflops": 58.416693248,
+      "latency_ms": 3.8983474731445313,
+      "peak_gpu_mem_mb": 220.681216,
+      "device": "cuda"
+    }
+  },
+  {
+    "model_name": "yolo26n-smoke",
+    "conf_threshold": 0.22,
+    "iou_threshold": 0.1,
+    "num_frames_with_gt": 1320,
+    "num_background_frames": 1320,
+    "box_tp": 1324,
+    "box_fp": 328,
+    "box_fn": 240,
+    "precision": 0.801452784503632,
+    "recall": 0.8465473145780051,
+    "f1": 0.8233830845771144,
+    "background_frames_fired": 140,
+    "image_fpr": 0.10606060606060606,
+    "mean_fp_per_background_frame": 0.11212121212121212,
+    "precision_at_recall": {
+      "0.95": null,
+      "0.98": null,
+      "0.99": null
+    },
+    "profile": {
+      "backend": "ultralytics",
+      "image_size": 1024,
+      "num_params_m": 2.50419,
+      "gflops": 15.185739776,
+      "latency_ms": 3.6267047119140625,
+      "peak_gpu_mem_mb": 123.777536,
+      "device": "cuda"
+    }
+  }
+]
