@@ -143,7 +143,41 @@ model** — 9.7M params, native 640px, lowest compute/GPU on the board.
 The full R&D journey behind these numbers — the DETR checkpoint-selection fix, the flat-vs-paper
 recipe story, SAHI/tiled-inference experiments, DEIMv2 resolution/epoch/augmentation ablations — is
 in the Findings below and in git history; only the winning version of each model is kept here and in
-`data/`. The auto-generated full table is `data/08_reporting/leaderboard.txt`.
+`data/`. The auto-generated full table (now including the precision-at-recall columns below) is
+`data/08_reporting/leaderboard.txt`.
+
+### Precision at fixed recall (recall managed server-side)
+
+Because recall is enforced downstream, the operationally interesting question is **how much precision
+each model keeps when forced up to a high recall floor.** These are read off each model's **test**
+PR curve (box-matching identical to the main table): for each recall floor, the best box-precision
+attainable while keeping recall ≥ that floor (or **—** if the model never reaches that recall on the
+test set, even at the lowest cached confidence). Box-precision on GT frames, same as the Precision
+column; background false alarms are the separate Image-FPR metric. Sorted by precision @ 0.95 recall.
+
+| Model | P @ R≥0.95 | P @ R≥0.98 | P @ R≥0.99 | max recall |
+| :--- | ---: | ---: | ---: | ---: |
+| rfdetr-nano | **0.570** | **0.353** | **0.210** | 1.000 |
+| yolo11s-sensitive-detector-v1.1.0 | 0.565 | — | — | 0.966 |
+| yolo11s-nimble-narwhal-v6.0.0 (baseline) | 0.539 | — | — | 0.956 |
+| yolo11s-rapid-raccoon-v8.1.0 | 0.508 | — | — | 0.960 |
+| lwdetr-small-paper | 0.484 | 0.152 | 0.080 | 0.990 |
+| deimv2-s | 0.468 | 0.147 | 0.053 | 0.993 |
+| lwdetr-tiny-paper-full | 0.339 | 0.143 | 0.074 | 0.994 |
+| yolo26n-smoke | — | — | — | 0.944 |
+| yolo26s-smoke | — | — | — | 0.940 |
+| dfine-nano-paper | — | — | — | 0.898 |
+| rtdetrv2-r18-paper | — | — | — | 0.893 |
+| dfine-small-paper | — | — | — | 0.855 |
+
+**Takeaways:** **`rfdetr-nano` is the clear high-recall winner** — it's the only model that stays
+usable at extreme recall (0.35 precision at 0.98, 0.21 at 0.99), roughly 2× every other model in that
+regime. At the 0.95 floor the field is closer, with rfdetr-nano and the two production YOLO11s models
+(sensitive-detector, nimble-narwhal) leading at ~0.54–0.57. **Five of the twelve — dfine-nano/small,
+rtdetrv2-r18, yolo26 s/n — never reach 0.95 recall at all** (their PR curve tops out below it), so
+they're unsuitable when a high recall floor is required regardless of their headline F1. Note this
+is the opposite ranking from F1: lwdetr-small tops F1 but rfdetr-nano is far better where recall is
+pinned high.
 
 ### Findings
 

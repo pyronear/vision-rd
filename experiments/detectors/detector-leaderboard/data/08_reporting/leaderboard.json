@@ -14,6 +14,11 @@
     "background_frames_fired": 115,
     "image_fpr": 0.08712121212121213,
     "mean_fp_per_background_frame": 0.0893939393939394,
+    "precision_at_recall": {
+      "0.95": 0.48435462842242505,
+      "0.98": 0.15226460071513706,
+      "0.99": 0.07980833633881189
+    },
     "profile": {
       "backend": "dfine",
       "image_size": 1024,
@@ -39,6 +44,11 @@
     "background_frames_fired": 52,
     "image_fpr": 0.03939393939393939,
     "mean_fp_per_background_frame": 0.04015151515151515,
+    "precision_at_recall": {
+      "0.95": 0.5699501724798773,
+      "0.98": 0.3533072136436967,
+      "0.99": 0.20980631179737233
+    },
     "profile": {
       "backend": "rfdetr",
       "image_size": 1024,
@@ -64,6 +74,11 @@
     "background_frames_fired": 120,
     "image_fpr": 0.09090909090909091,
     "mean_fp_per_background_frame": 0.09166666666666666,
+    "precision_at_recall": {
+      "0.95": 0.3394243947007766,
+      "0.98": 0.14312389132667352,
+      "0.99": 0.07356922346236049
+    },
     "profile": {
       "backend": "dfine",
       "image_size": 1024,
@@ -89,6 +104,11 @@
     "background_frames_fired": 165,
     "image_fpr": 0.125,
     "mean_fp_per_background_frame": 0.13636363636363635,
+    "precision_at_recall": {
+      "0.95": 0.5391872278664731,
+      "0.98": null,
+      "0.99": null
+    },
     "profile": {
       "backend": "ultralytics",
       "image_size": 1024,
@@ -114,6 +134,11 @@
     "background_frames_fired": 341,
     "image_fpr": 0.25833333333333336,
     "mean_fp_per_background_frame": 0.28863636363636364,
+    "precision_at_recall": {
+      "0.95": 0.5650190114068441,
+      "0.98": null,
+      "0.99": null
+    },
     "profile": {
       "backend": "ultralytics",
       "image_size": 1024,
@@ -139,6 +164,11 @@
     "background_frames_fired": 86,
     "image_fpr": 0.06515151515151515,
     "mean_fp_per_background_frame": 0.06818181818181818,
+    "precision_at_recall": {
+      "0.95": 0.4675896790434235,
+      "0.98": 0.14723396081444487,
+      "0.99": 0.052989874110563766
+    },
     "profile": {
       "backend": "deimv2",
       "image_size": 640,
@@ -164,6 +194,11 @@
     "background_frames_fired": 143,
     "image_fpr": 0.10833333333333334,
     "mean_fp_per_background_frame": 0.1143939393939394,
+    "precision_at_recall": {
+      "0.95": 0.5078605604921395,
+      "0.98": null,
+      "0.99": null
+    },
     "profile": {
       "backend": "ultralytics",
       "image_size": 1024,
@@ -189,6 +224,11 @@
     "background_frames_fired": 148,
     "image_fpr": 0.11212121212121212,
     "mean_fp_per_background_frame": 0.11818181818181818,
+    "precision_at_recall": {
+      "0.95": null,
+      "0.98": null,
+      "0.99": null
+    },
     "profile": {
       "backend": "dfine",
       "image_size": 1024,
@@ -214,6 +254,11 @@
     "background_frames_fired": 106,
     "image_fpr": 0.0803030303030303,
     "mean_fp_per_background_frame": 0.08257575757575758,
+    "precision_at_recall": {
+      "0.95": null,
+      "0.98": null,
+      "0.99": null
+    },
     "profile": {
       "backend": "dfine",
       "image_size": 1024,
@@ -239,6 +284,11 @@
     "background_frames_fired": 621,
     "image_fpr": 0.47045454545454546,
     "mean_fp_per_background_frame": 0.7712121212121212,
+    "precision_at_recall": {
+      "0.95": null,
+      "0.98": null,
+      "0.99": null
+    },
     "profile": {
       "backend": "dfine",
       "image_size": 1024,
@@ -264,6 +314,11 @@
     "background_frames_fired": 80,
     "image_fpr": 0.06060606060606061,
     "mean_fp_per_background_frame": 0.06439393939393939,
+    "precision_at_recall": {
+      "0.95": null,
+      "0.98": null,
+      "0.99": null
+    },
     "profile": {
       "backend": "ultralytics",
       "image_size": 1024,
@@ -289,6 +344,11 @@
     "background_frames_fired": 140,
     "image_fpr": 0.10606060606060606,
     "mean_fp_per_background_frame": 0.11212121212121212,
+    "precision_at_recall": {
+      "0.95": null,
+      "0.98": null,
+      "0.99": null
+    },
     "profile": {
       "backend": "ultralytics",
       "image_size": 1024,

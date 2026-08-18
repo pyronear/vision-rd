@@ -25,8 +25,14 @@ from pathlib import Path
 
 from detector_leaderboard.metrics import (
     compute_detection_metrics,
+    precision_at_recall,
     select_best_threshold,
 )
+
+# Recall floors at which to report the best attainable precision. Recall is
+# enforced downstream (server-side), so precision at these floors is the metric
+# we actually care about.
+RECALL_TARGETS = (0.95, 0.98, 0.99)
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -79,6 +85,22 @@ def main() -> None:
         predictions_path=args.test_predictions,
         conf_threshold=best_conf,
         iou_threshold=args.iou_threshold,
+    )
+
+    # Precision at fixed recall floors, read off the test PR curve (threshold-
+    # independent of the val-selected operating point above).
+    par = precision_at_recall(
+        args.model_name,
+        args.test_dir,
+        args.test_predictions,
+        args.iou_threshold,
+        RECALL_TARGETS,
+    )
+    metrics = dataclasses.replace(metrics, precision_at_recall=par)
+    logger.info(
+        "%s: precision@recall %s",
+        args.model_name,
+        {k: (f"{v:.3f}" if v is not None else "n/a") for k, v in par.items()},
     )
 
     metrics_path = args.output_dir / "metrics.json"
