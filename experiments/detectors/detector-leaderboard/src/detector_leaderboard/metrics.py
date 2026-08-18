@@ -77,6 +77,96 @@ def match_frame(
     return tp, fp, fn
 
 
+def _match_labels(
+    preds: Sequence[Detection], gts: Sequence[Detection], iou_threshold: float
+) -> list[tuple[float, bool]]:
+    """Per-prediction ``(confidence, is_true_positive)`` under greedy IoU matching.
+
+    Same matching as :func:`match_frame` (highest-confidence-first, each GT
+    claimed once, class-agnostic) but keeps the per-box outcome so a full
+    precision-recall curve can be swept from it.
+    """
+    matched_gt: set[int] = set()
+    out: list[tuple[float, bool]] = []
+    for pred in sorted(preds, key=lambda d: d.confidence, reverse=True):
+        best_iou = iou_threshold
+        best_gt = -1
+        for gi, gt in enumerate(gts):
+            if gi in matched_gt:
+                continue
+            iou = iou_xywhn(pred, gt)
+            if iou >= best_iou:
+                best_iou = iou
+                best_gt = gi
+        if best_gt >= 0:
+            matched_gt.add(best_gt)
+            out.append((pred.confidence, True))
+        else:
+            out.append((pred.confidence, False))
+    return out
+
+
+def precision_at_recall(
+    model_name: str,
+    data_dir: Path,
+    predictions_path: Path,
+    iou_threshold: float,
+    recall_targets: Sequence[float],
+) -> dict[str, float | None]:
+    """Best box-precision attainable at each target recall, from the PR curve.
+
+    Builds the precision-recall curve over the split's GT-bearing frames (box
+    matching identical to :func:`compute_detection_metrics`) by sorting every
+    predicted box by confidence and sweeping the threshold from high to low. For
+    each target recall ``R`` returns the highest precision reached while recall
+    ``>= R`` — i.e. the best precision achievable at that recall floor — or
+    ``None`` if the model never reaches recall ``R`` on this split.
+
+    Precision here is box-precision on GT frames (matching the ``precision``
+    field); background-frame false alarms are captured separately by ``image_fpr``.
+
+    Returns a dict keyed by the target formatted as ``"%.2f"`` (e.g. ``"0.95"``).
+    """
+    preds_by_frame = {
+        fr.frame_id: fr.detections for fr in load_predictions(predictions_path)
+    }
+    labeled: list[tuple[float, bool]] = []
+    total_gt = 0
+    for frame in iter_frames(data_dir):
+        if not frame.gt_boxes:
+            continue
+        total_gt += len(frame.gt_boxes)
+        labeled.extend(
+            _match_labels(
+                preds_by_frame.get(frame.stem, []), frame.gt_boxes, iou_threshold
+            )
+        )
+
+    keys = [f"{r:.2f}" for r in recall_targets]
+    if total_gt == 0 or not labeled:
+        return dict.fromkeys(keys)
+
+    labeled.sort(key=lambda x: x[0], reverse=True)
+    best = {r: 0.0 for r in recall_targets}
+    tp = fp = 0
+    max_recall = 0.0
+    for _conf, is_tp in labeled:
+        if is_tp:
+            tp += 1
+        else:
+            fp += 1
+        recall = tp / total_gt
+        precision = tp / (tp + fp)
+        max_recall = recall
+        for r in recall_targets:
+            if recall >= r and precision > best[r]:
+                best[r] = precision
+    return {
+        f"{r:.2f}": (best[r] if max_recall >= r - 1e-9 else None)
+        for r in recall_targets
+    }
+
+
 def _filter_by_conf(detections: Sequence[Detection], conf: float) -> list[Detection]:
     return [d for d in detections if d.confidence >= conf]
 
@@ -200,4 +290,5 @@ __all__ = [
     "match_frame",
     "compute_detection_metrics",
     "select_best_threshold",
+    "precision_at_recall",
 ]

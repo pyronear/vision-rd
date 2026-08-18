@@ -8,7 +8,7 @@ JSON merge both so detectors can be compared on quality and cost at once.
 import dataclasses
 import json
 
-from .types import LeaderboardEntry
+from .types import DetectionMetrics, LeaderboardEntry
 
 # Accuracy metrics where lower is better (sorted ascending).
 _LOWER_IS_BETTER = {"image_fpr", "mean_fp_per_background_frame"}
@@ -49,11 +49,18 @@ def format_table(entries: list[LeaderboardEntry]) -> str:
         "Precision",
         "Recall",
         "F1",
+        "P@R.95",
+        "P@R.98",
+        "P@R.99",
         "Image FPR",
         "Mean FP/frame",
     ]
     if show_profile:
         headers += ["Params(M)", "GFLOPs", "Latency(ms)", "GPU(MB)", "Input"]
+
+    def _par(m: DetectionMetrics, key: str) -> str:
+        v = (m.precision_at_recall or {}).get(key)
+        return f"{v:.4f}" if v is not None else "-"
 
     rows: list[list[str]] = []
     for i, entry in enumerate(entries, start=1):
@@ -64,6 +71,9 @@ def format_table(entries: list[LeaderboardEntry]) -> str:
             f"{m.precision:.4f}",
             f"{m.recall:.4f}",
             f"{m.f1:.4f}",
+            _par(m, "0.95"),
+            _par(m, "0.98"),
+            _par(m, "0.99"),
             f"{m.image_fpr:.4f}",
             f"{m.mean_fp_per_background_frame:.2f}",
         ]

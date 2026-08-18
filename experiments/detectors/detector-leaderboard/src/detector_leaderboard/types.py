@@ -5,7 +5,7 @@ split independently. All bounding-box coordinates use a normalized center-based
 format (``cx, cy, w, h`` in [0, 1]).
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -66,6 +66,11 @@ class DetectionMetrics:
         image_fpr: ``background_frames_fired / num_background_frames`` (lower is
             better).
         mean_fp_per_background_frame: Mean detections per background frame.
+        precision_at_recall: Box-precision attainable at fixed recall floors,
+            read off the test PR curve — ``{"0.95": p, "0.98": p, "0.99": p}``
+            (value is the best precision while keeping recall >= the key, or
+            ``None`` if that recall is unreachable). Useful when recall is
+            enforced downstream and precision is what we optimize for.
     """
 
     model_name: str
@@ -82,6 +87,7 @@ class DetectionMetrics:
     background_frames_fired: int
     image_fpr: float
     mean_fp_per_background_frame: float
+    precision_at_recall: dict[str, float | None] = field(default_factory=dict)
 
 
 @dataclass
