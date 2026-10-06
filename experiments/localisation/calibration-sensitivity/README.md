@@ -1,10 +1,9 @@
 # Calibration sensitivity
 
-Reproducible sensitivity study for [vision-rd#103](https://github.com/pyronear/vision-rd/issues/103).
-It measures how each calibration error moves a known ground point, and derives
-conditional calibration tolerances for a chosen horizontal position-error budget.
+Study for [#103](https://github.com/pyronear/vision-rd/issues/103): position errors
+and conditional calibration targets for a single camera. Standard library only.
 
-## Reproduce
+## Run
 
 ```bash
 cd experiments/localisation/calibration-sensitivity
@@ -14,61 +13,36 @@ ruff check --select E,F,I,W,UP,B,SIM --target-version py311 study.py
 ruff format --check study.py
 ```
 
-This is a standard-library-only script with inline uv metadata. No package,
-environment, notebook, model, or data download is needed. Generated CSVs are
-ignored by Git. `config.json` records the arguments, Python version and input
-hashes. There are no random samples.
+Generated files stay outside Git: `errors.csv` records signed perturbations and
+no-hit cases; `precision.csv` records two-sided limits; `config.json` records
+arguments, Python version and source hash. `capped=True` means a lower bound.
 
-Outputs:
-- `errors.csv`: signed parameter errors, along/across displacement, total
-  horizontal error, and separate `no_hit` results.
-- `precision.csv`: two-sided tolerances for each case and parameter. `capped=True`
-  means the tolerance is **at least** the configured cap, not an exact limit.
-- `config.json`: run configuration and SHA-256 hashes.
+## Method
 
-## Geometry and data
+A perspective camera uses azimuth (direction), tilt (up/down angle), roll
+(image rotation) and horizontal field of view. Azimuth and roll are clockwise;
+positive tilt points down. Sensor aspect ratio is 16:9. Each known target is
+placed at nine image locations (`u,v = 0.1,0.5,0.9`). Hold that pixel fixed and
+change one parameter. Intersect the resulting ray with each linear terrain
+segment; select the first forward hit. Horizontal position errors leave camera
+altitude unchanged, separating them from height errors.
 
-Use a perspective pinhole camera with 16:9 aspect ratio and full azimuth, tilt
-and roll rotations. Coordinates are right, forward and up in local metres.
-Azimuth and roll are clockwise; positive tilt points down. Height is above the
-terrain at the true camera location. Horizontal position errors leave its
-vertical coordinate unchanged, so height and position errors remain separate.
-
-The same known point is placed at nine image locations (`u,v = 0.1,0.5,0.9`).
-For each case, derive the nominal pose, hold the image pixel fixed, and change
-one parameter. All parameters use both error signs. The terrain intersection
-is exact for each linear profile segment and selects the first forward hit.
-This avoids hiding roll/FOV sensitivity by testing only the centre pixel.
-
-Defaults: 0.5/1/2/5/10 km; 15/35/100 m camera heights; 54.2/87 degree horizontal
-FOVs; angular errors of 0.01/0.1/1 degree; position/height errors of 0.1/1/5 m.
-Terrain is flat, or rises at a 2% or 10% grade after half the target distance.
-The heights and FOVs include those in the prototype's
+Defaults: 0.5/1/2/5/10 km; camera heights 15/35/100 m; FOVs 54.2/87 degrees;
+angular errors ±0.01/0.1/1 degree; height/position errors ±0.1/1/5 m. Terrain is
+flat, or rises at 2% or 10% after half the target distance. All values are
+synthetic; height and FOV include the prototype's
 [camera registry](https://github.com/pyronear/smoke-localization/blob/be051f802809b8186cf65a058a174e5d23f4b486/data/cameras.csv).
-
-Optional terrain input is a continuous CSV profile with columns
-`distance_m,elevation_m`, in metres. Distances must increase and cover zero
-and every requested target. The profile is extruded sideways; it is not a
-complete 2D terrain map. The camera is at distance zero. Occluded targets are
-excluded from calibration recommendations and recorded in `precision.csv`.
-
-```bash
-uv run --python 3.11 study.py --budget 50 --heights 35 --distances 1000 5000
-uv run --python 3.11 study.py --profile terrain.csv --max-range 15000
-```
+Use `--help` for options, for example `--budget 50 --heights 35 --distances 1000 5000`.
 
 ## Results
 
-The default run produces **34,020 perturbations**, including **356 no-hit
-results**, and 5,670 precision rows. All nominal synthetic targets are visible.
-The checks cover analytical flat/sloped intersections, all sampled image
-positions, off-axis perspective, roll, height, horizon/range failures, a nearer
-ridge, and analytical calibration tolerances.
+Default run: **34,020 perturbations**, **356 no-hit cases**, **5,670 precision
+rows**. All nominal targets are visible. Analytical checks cover perspective,
+rotations, flat/sloped intersections, height, a nearer ridge and precision limits.
 
-The table below reports **horizontal position error in metres on flat terrain**.
-Each cell is the largest error across both signs, both fields of view (FOVs)
-and all nine image positions. Each parameter changes separately. The position
-column covers either horizontal axis; it does not combine both errors.
+**Position error in metres on flat terrain.** Each cell is the maximum across
+both error signs, both fields of view (FOVs), and nine image positions. Change
+one parameter at a time; the position column covers either horizontal axis.
 
 | Distance | Camera height | Azimuth ±0.1° | Tilt ±0.01° | Roll ±0.01° | FOV ±0.01° | Height ±1 m | Position ±1 m per axis |
 |---|---|---:|---:|---:|---:|---:|---:|
@@ -88,8 +62,7 @@ column covers either horizontal axis; it does not combine both errors.
 | 10 km | 35 m | 17.45 | 524.84 | 310.90 | 183.68 | 285.71 | 1.00 |
 | 10 km | 100 m | 17.45 | 177.65 | 106.67 | 63.53 | 100.00 | 1.00 |
 
-The full parameter sweep, including rising terrain and larger errors, is in
-the generated `errors.csv`. The selected perturbations above all give valid hits.
+All selected perturbations give valid hits. `errors.csv` contains the full sweep.
 
 At **5 km**, **35 m height**, with a **100 m example error budget**, the smallest
 tolerances across both FOVs and all nine image positions are:
@@ -104,31 +77,20 @@ tolerances across both FOVs and all nine image positions are:
 | Position across view | 100 m | 100 m | 100 m |
 | Position along view | 100 m | >=200 m (cap) | 133 m |
 
-These are **one-parameter-at-a-time limits**, not a combined error budget or
-measured camera accuracy. Tilt, roll, FOV and height merit particular attention
-at long range on flat ground. Actual priority also depends on how uncertain
-each parameter is. Choose the operational range and acceptable position error
-before adopting targets in the epic.
+Tilt, roll, FOV and height need particular care at long range on flat terrain.
+Actual calibration priority also depends on each parameter's uncertainty.
 
-Additional checks used GLO-30 profiles through Brison (311 degrees) and
-Croix-Augas (212 degrees), from the prototype's sample views. Thirty centre-ray
-comparisons against its pinned ray/terrain implementation differed by at most
-**0.541 m**. Five of ten nominal terrain targets were behind nearer terrain;
-the study flags them instead of recommending precision for an invisible point.
-This validates the profile calculation on real terrain, not localisation on
-real fires. Those downloaded inputs and reports are outside Git.
+## Interpretation
 
-## Limits
+Targets apply to **one parameter at a time**. They do not guarantee the same
+combined error budget or measured camera accuracy. Agree the operating range
+and acceptable position error before adopting them in the epic.
 
-The baseline intentionally matches the prototype's straight vertical ray:
-no Earth curvature, refraction, lens distortion, smoke-origin error or terrain
-height uncertainty. A 10 km result is a conditional sensitivity calculation,
-not a claim of absolute geographic accuracy. GLO-30 includes canopy/buildings.
-Do not treat a visible plume above a ridge as a visible ground origin.
-
-Tolerance search follows the first sampled local budget crossing, then bisects
-it; arbitrary terrain can have discontinuous or non-monotonic errors. No-hit
-includes a ray outside terrain coverage/range or a camera below the modelled
-surface. Production geometry and combined uncertainty remain
-[#109](https://github.com/pyronear/vision-rd/issues/109) and
-[#113](https://github.com/pyronear/vision-rd/issues/113).
+The geometry excludes curvature, refraction, lens distortion, smoke-origin
+error and terrain uncertainty. Profiles are extruded sideways; they are not
+2D terrain maps. Long-range results are conditional sensitivity calculations.
+Tolerance search follows the first sampled local budget crossing and bisects
+it. Non-monotonic errors can occur on arbitrary terrain. No-hit includes range
+or terrain limits and a camera below the modelled surface. Production geometry
+and combined uncertainty remain in [#109](https://github.com/pyronear/vision-rd/issues/109)
+and [#113](https://github.com/pyronear/vision-rd/issues/113).

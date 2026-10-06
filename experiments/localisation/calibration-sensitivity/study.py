@@ -74,7 +74,7 @@ def intersect(direction, camera, profile, max_range):
     return x, y
 
 
-def displacement(delta, parameter, camera, angles, pixel, profile, distance, max_range):
+def displacement(parameter, camera, angles, pixel, profile, distance, max_range, delta):
     perturbed_camera, perturbed_angles = list(camera), list(angles)
     if parameter < 4:
         perturbed_angles[parameter] += delta
@@ -122,12 +122,12 @@ def check():
     tilt = math.degrees(math.atan2(35, 5000))
     angles, camera, pixel = (0, tilt, 0, 87), (0, 0, 35), (0.5, 0.5)
     for sign in (-1, 1):
-        shift = displacement(sign * 0.01, 1, camera, angles, pixel, flat, 5000, 30_000)
+        shift = displacement(1, camera, angles, pixel, flat, 5000, 30_000, sign * 0.01)
         expected = 35 / math.tan(math.radians(tilt + sign * 0.01)) - 5000
         assert shift is not None and math.isclose(shift[1], expected, abs_tol=1e-8)
-    shift = displacement(1, 4, camera, angles, pixel, flat, 5000, 30_000)
+    shift = displacement(4, camera, angles, pixel, flat, 5000, 30_000, 1)
     assert shift is not None and math.isclose(shift[1], 5000 / 35, abs_tol=1e-8)
-    shift = displacement(0.1, 0, camera, angles, pixel, flat, 5000, 30_000)
+    shift = displacement(0, camera, angles, pixel, flat, 5000, 30_000, 0.1)
     assert shift is not None and math.isclose(
         shift[0], 5000 * math.sin(math.radians(0.1))
     )
@@ -158,14 +158,7 @@ def check():
         (4, 0.7),
     ):
         error = partial(
-            displacement,
-            parameter=parameter,
-            camera=camera,
-            angles=angles,
-            pixel=pixel,
-            profile=flat,
-            distance=5000,
-            max_range=30_000,
+            displacement, parameter, camera, angles, pixel, flat, 5000, 30_000
         )
         limit, capped = tolerance(error, 100, 5)
         assert math.isclose(limit, expected, rel_tol=1e-8) and not capped
@@ -201,11 +194,6 @@ def main():
         help="Example horizontal error budget in metres",
     )
     parser.add_argument("--max-range", type=float, default=30_000)
-    parser.add_argument(
-        "--profile",
-        type=Path,
-        help="Optional CSV: distance_m,elevation_m; camera at distance 0",
-    )
     args = parser.parse_args()
     if args.check:
         check()
@@ -232,30 +220,7 @@ def main():
         parser.error(
             "Range must exceed distances; perturbed FOV must stay within (0, 180)"
         )
-    profile = None
-    if args.profile:
-        try:
-            with args.profile.open() as stream:
-                profile = [
-                    (float(row["distance_m"]), float(row["elevation_m"]))
-                    for row in csv.DictReader(stream)
-                ]
-        except (OSError, KeyError, TypeError, ValueError) as exc:
-            parser.error(f"Cannot read terrain profile: {exc}")
-        if (
-            len(profile) < 2
-            or not all(math.isfinite(value) for point in profile for value in point)
-            or not all(a[0] < b[0] for a, b in itertools.pairwise(profile))
-        ):
-            parser.error(
-                "Profile needs two finite samples with strictly increasing distances"
-            )
-        try:
-            for distance in (0, *args.distances):
-                elevation_at(profile, distance)
-        except ValueError as exc:
-            parser.error(str(exc))
-    names = (
+    names = [
         "azimuth",
         "tilt",
         "roll",
@@ -263,7 +228,7 @@ def main():
         "height",
         "position_right",
         "position_forward",
-    )
+    ]
     args.output.mkdir(parents=True, exist_ok=True)
     with (
         (args.output / "errors.csv").open("w", newline="") as errors_file,
@@ -288,74 +253,53 @@ def main():
             args.fovs,
             (0.1, 0.5, 0.9),
             (0.1, 0.5, 0.9),
-            (0,) if profile else (0, 0.02, 0.1),
+            (0, 0.02, 0.1),
         )
         count, missed, occluded = 0, 0, 0
         for distance, height, hfov, u, v, slope in cases:
-            terrain = (
-                profile
-                if profile
-                else [
-                    (-args.max_range, 0),
-                    (distance / 2, 0),
-                    (args.max_range, slope * (args.max_range - distance / 2)),
-                ]
-            )
-            label = str(args.profile) if profile else f"rising_{slope:g}"
-            camera = (0, 0, elevation_at(terrain, 0) + height)
+            terrain = [
+                (-args.max_range, 0),
+                (distance / 2, 0),
+                (args.max_range, slope * (args.max_range - distance / 2)),
+            ]
+            label = f"rising_{slope:g}"
+            camera = (0, 0, height)
             target_z = elevation_at(terrain, distance)
+            status = "visible"
             try:
                 azimuth, tilt = pose(
                     u, v, hfov, math.atan2(target_z - camera[2], distance)
                 )
+                angles, pixel = (azimuth, tilt, 0, hfov), (u, v)
+                baseline = intersect(
+                    ray(*pixel, *angles), camera, terrain, args.max_range
+                )
+                if (
+                    baseline is None
+                    or math.hypot(baseline[0], baseline[1] - distance) >= 0.01
+                ):
+                    status = "invalid_baseline"
             except ValueError:
-                occluded += 1
-                for name in names:
-                    precision.writerow(
-                        [
-                            label,
-                            distance,
-                            height,
-                            hfov,
-                            u,
-                            v,
-                            name,
-                            "deg" if name in names[:4] else "m",
-                            args.budget,
-                            "",
-                            "",
-                            "unreachable_pixel",
-                        ]
-                    )
-                continue
-            angles, pixel = (azimuth, tilt, 0, hfov), (u, v)
-            baseline = intersect(ray(*pixel, *angles), camera, terrain, args.max_range)
-            visible = (
-                baseline is not None
-                and math.hypot(baseline[0], baseline[1] - distance) < 0.01
-            )
-            if not visible:
+                status = "unreachable_pixel"
+            if status != "visible":
                 occluded += 1
             for parameter, name in enumerate(names):
                 unit = "deg" if parameter < 4 else "m"
                 prefix = [label, distance, height, hfov, u, v, name, unit]
 
+                if status != "visible":
+                    precision.writerow(prefix + [args.budget, "", "", status])
+                    continue
                 error = partial(
                     displacement,
-                    parameter=parameter,
-                    camera=camera,
-                    angles=angles,
-                    pixel=pixel,
-                    profile=terrain,
-                    distance=distance,
-                    max_range=args.max_range,
+                    parameter,
+                    camera,
+                    angles,
+                    pixel,
+                    terrain,
+                    distance,
+                    args.max_range,
                 )
-
-                if not visible:
-                    precision.writerow(
-                        prefix + [args.budget, "", "", "occluded_or_no_baseline_hit"]
-                    )
-                    continue
                 deltas = args.angular_errors if parameter < 4 else args.position_errors
                 for delta, sign in itertools.product(deltas, (-1, 1)):
                     shift = error(delta * sign)
@@ -378,9 +322,6 @@ def main():
         vars(args),
         python=sys.version,
         script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-        profile_sha256=hashlib.sha256(args.profile.read_bytes()).hexdigest()
-        if args.profile
-        else None,
     )
     with (args.output / "config.json").open("w") as stream:
         json.dump(config, stream, indent=2, default=str)
