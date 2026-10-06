@@ -21,7 +21,8 @@ arguments, Python version and source hash. `capped=True` means a lower bound.
 
 A perspective camera uses azimuth (direction), tilt (up/down angle), roll
 (image rotation) and horizontal field of view. Azimuth and roll are clockwise;
-positive tilt points down. Sensor aspect ratio is 16:9. Each known target is
+positive tilt points down. Sensor aspect ratio is 16:9. FOV errors change the
+assumed focal length for both image axes. Each known target is
 placed at nine image locations (`u,v = 0.1,0.5,0.9`). Hold that pixel fixed and
 change one parameter. Intersect the resulting ray with each linear terrain
 segment; select the first forward hit. Horizontal position errors leave camera
@@ -29,8 +30,8 @@ altitude unchanged, separating them from height errors.
 
 Defaults: 0.5/1/2/5/10 km; camera heights 15/35/100 m; FOVs 54.2/87 degrees;
 angular errors ±0.01/0.1/1 degree; height/position errors ±0.1/1/5 m. Terrain is
-flat, or rises at 2% or 10% after half the target distance. All values are
-synthetic; height and FOV include the prototype's
+flat, or rises at 2% or 10% after half the target distance. Targets and terrain are
+synthetic; heights and FOVs include the prototype's
 [camera registry](https://github.com/pyronear/smoke-localization/blob/be051f802809b8186cf65a058a174e5d23f4b486/data/cameras.csv).
 Use `--help` for options, for example `--budget 50 --heights 35 --distances 1000 5000`.
 

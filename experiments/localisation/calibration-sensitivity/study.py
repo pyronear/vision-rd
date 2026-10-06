@@ -131,6 +131,22 @@ def check():
     assert shift is not None and math.isclose(
         shift[0], 5000 * math.sin(math.radians(0.1))
     )
+    for parameter, expected in ((5, (1, 0)), (6, (0, 1))):
+        shift = displacement(parameter, camera, angles, pixel, flat, 5000, 30_000, 1)
+        assert shift is not None and math.dist(shift, expected) < 1e-8
+    for parameter, off_axis_pixel, sign in ((2, (0.75, 0.5), -1), (3, (0.5, 0.25), 1)):
+        azimuth, off_axis_tilt = pose(*off_axis_pixel, 87, -math.atan2(35, 5000))
+        shift = displacement(
+            parameter,
+            camera,
+            (azimuth, off_axis_tilt, 0, 87),
+            off_axis_pixel,
+            flat,
+            5000,
+            30_000,
+            0.01,
+        )
+        assert shift is not None and sign * shift[1] > 0
     assert intersect(ray(0.5, 0.5, 0, -1, 0, 87), camera, flat, 30_000) is None
     assert intersect(ray(0.5, 0.5, 0, tilt, 0, 87), camera, flat, 4000) is None
     assert all(
@@ -170,7 +186,9 @@ def main():
     parser.add_argument(
         "--check", action="store_true", help="Run the analytical checks only"
     )
-    parser.add_argument("--output", type=Path, default=Path("data/08_reporting"))
+    parser.add_argument(
+        "--output", type=Path, default=Path(__file__).parent / "data/08_reporting"
+    )
     parser.add_argument(
         "--distances", type=float, nargs="+", default=[500, 1000, 2000, 5000, 10_000]
     )
@@ -193,7 +211,9 @@ def main():
         default=100,
         help="Example horizontal error budget in metres",
     )
-    parser.add_argument("--max-range", type=float, default=30_000)
+    parser.add_argument(
+        "--max-range", type=float, default=30_000, help="Horizontal range (m)"
+    )
     args = parser.parse_args()
     if args.check:
         check()
