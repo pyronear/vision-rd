@@ -1,25 +1,66 @@
-# Calibration sensitivity
+# Camera view planner
 
-Study for [#103](https://github.com/pyronear/vision-rd/issues/103): position errors
-and conditional calibration targets for a single camera. Standard library only.
+Use a camera/view profile to choose the next measurement or calibration task.
+The sensitivity results support [#103](https://github.com/pyronear/vision-rd/issues/103).
+Both tools use the standard library.
 
-## Run
+## Decide what to do next
 
 ```bash
 cd experiments/localisation/calibration-sensitivity
+uv run --python 3.11 plan.py
+uv run --python 3.11 plan.py my-view.json --range-m 2000 5000 10000
+uv run --python 3.11 plan.py my-view.json --json
+uv run --python 3.11 plan.py --check
+```
+
+Copy [view.example.json](view.example.json). Name it for the camera, preset and
+zoom; enter image dimensions, both fields of view, target range, terrain slope
+and error amplitudes from that capture profile. `height_above_target_m` is
+**camera elevation minus target terrain
+elevation**, including mast height. It is not mast height alone. Set `evidence`
+to `measured` only when the profile and error inputs have supporting measurements.
+Use a consistent vertical reference; relative-height error includes terrain data.
+`ground_origin_visible` requires an identified ground origin and clear line of sight.
+`bearing_offset_deg` is target direction minus camera-centre direction.
+The planner uses explicit horizontal and vertical FOVs; the study keeps its
+16:9 assumption so its published results remain reproducible.
+
+The tool prioritises missing ground evidence, unstable projections, required
+geometry work and the largest separately tested uncertainty. A fitting assumed
+profile asks for measurements; a fitting measured profile asks for known-point
+and real-fire validation. Neither result approves a deployment.
+Individual blockers remain visible even when the first action is geometry work;
+removing the largest source alone need not meet the combined budget.
+
+The example is assumed: a 35 m mast on a site 500 m above a clear valley, with a
+250 m budget. At 5 km its sampled joint shift is 118.6 m, with an estimated
+18.5 m omitted-curvature bias. The first measurement is point-selection error.
+At 10 km the screening total is 626.9 m, so that budget needs better inputs or
+another view/range. These are model calculations, not measured site accuracy.
+
+The planner tests lower, nominal and upper inputs in combination. Its score adds
+the largest valid tested shift to a nominal parabolic-Earth bias estimate.
+Missing projections produce an unstable result, not a zero-error result.
+This is a finite stress test on an extruded local plane: no continuous bound,
+probability, refraction, lens distortion or intervening-ridge model. Slope is
+rise/run (2% = 0.02); `max_range_m` limits horizontal analysis distance. Angular
+bounds above 5° require coarse calibration before this local screen.
+
+## Reproduce the supporting study
+
+```bash
 uv run --python 3.11 study.py --check
 uv run --python 3.11 study.py
-ruff check --select E,F,I,W,UP,B,SIM --target-version py311 study.py
-ruff format --check study.py
 ```
 
 Full sweep files stay outside Git: `errors.csv` records signed perturbations and
 no-hit cases; `precision.csv` records two-sided limits; `config.json` records
 arguments, Python version and source hash. `capped=True` means a lower bound.
 
-## Method
+## Study method
 
-A perspective camera uses azimuth (direction), tilt (up/down angle), roll
+The study uses azimuth (direction), tilt (up/down angle), roll
 (image rotation) and horizontal field of view. Azimuth and roll are clockwise;
 positive tilt points down. Sensor aspect ratio is 16:9. FOV errors change the
 assumed focal length for both image axes. Each known target is
@@ -35,7 +76,7 @@ synthetic; heights and FOVs include the prototype's
 [camera registry](https://github.com/pyronear/smoke-localization/blob/be051f802809b8186cf65a058a174e5d23f4b486/data/cameras.csv).
 Use `--help` for options, for example `--budget 50 --heights 35 --distances 1000 5000`.
 
-## Results
+## Study results
 
 Default run: **34,020 perturbations**, **356 no-hit cases**, **5,670 precision
 rows**. All nominal targets are visible. Analytical checks cover perspective,

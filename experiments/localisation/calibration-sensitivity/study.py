@@ -15,16 +15,32 @@ from functools import partial
 from pathlib import Path
 
 
-def ray(u, v, azimuth, tilt, roll, hfov):
-    """Right/forward/up ray; clockwise azimuth/roll, downward tilt, 16:9 sensor."""
+def ray(u, v, azimuth, tilt, roll, hfov, vfov=None):
+    """Right/forward/up ray; explicit vertical FOV or the study's 16:9 model."""
     a, t, r = map(math.radians, (azimuth, tilt, roll))
     scale = math.tan(math.radians(hfov) / 2)
     x, z = (2 * u - 1) * scale, (1 - 2 * v) * scale * 9 / 16
+    if vfov is not None:
+        z = (1 - 2 * v) * math.tan(math.radians(vfov) / 2)
     x, z = x * math.cos(r) + z * math.sin(r), z * math.cos(r) - x * math.sin(r)
     y, z = math.cos(t) + z * math.sin(t), z * math.cos(t) - math.sin(t)
     x, y = x * math.cos(a) + y * math.sin(a), y * math.cos(a) - x * math.sin(a)
     length = math.hypot(x, y, z)
     return x / length, y / length, z / length
+
+
+def project(direction, azimuth, tilt, roll, hfov, vfov):
+    """Inverse of ray(): place a known direction in the actual camera image."""
+    x, y, z = direction
+    a, t, r = map(math.radians, (azimuth, tilt, roll))
+    x, y = x * math.cos(a) - y * math.sin(a), x * math.sin(a) + y * math.cos(a)
+    y, z = y * math.cos(t) - z * math.sin(t), y * math.sin(t) + z * math.cos(t)
+    x, z = x * math.cos(r) - z * math.sin(r), x * math.sin(r) + z * math.cos(r)
+    if y <= 0:
+        return None
+    u = 0.5 + x / (2 * y * math.tan(math.radians(hfov) / 2))
+    v = 0.5 - z / (2 * y * math.tan(math.radians(vfov) / 2))
+    return (u, v) if 0 <= u <= 1 and 0 <= v <= 1 else None
 
 
 def pose(u, v, hfov, elevation):

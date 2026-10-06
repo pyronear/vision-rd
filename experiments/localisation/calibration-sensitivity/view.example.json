@@ -1,0 +1,28 @@
+{
+  "name": "Clear valley example",
+  "evidence": "assumed",
+  "ground_origin_visible": true,
+  "range_m": 5000,
+  "height_above_target_m": 535,
+  "terrain_slope": 0,
+  "tilt_deg": 6,
+  "roll_deg": 0,
+  "bearing_offset_deg": 0,
+  "hfov_deg": 54.2,
+  "vfov_deg": 41.7,
+  "width_px": 1280,
+  "height_px": 720,
+  "budget_m": 250,
+  "max_range_m": 30000,
+  "bounds": {
+    "azimuth_deg": 0.1,
+    "tilt_deg": 0.05,
+    "roll_deg": 0.1,
+    "hfov_deg": 0.2,
+    "vfov_deg": 0.2,
+    "relative_height_m": 2,
+    "position_m": 5,
+    "point_px": 1,
+    "terrain_slope": 0
+  }
+}
