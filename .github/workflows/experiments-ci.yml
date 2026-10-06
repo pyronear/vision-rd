@@ -10,6 +10,19 @@ on:
       - "experiments/**"
 
 jobs:
+  calibration-sensitivity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Check standalone study
+        working-directory: experiments/localisation/calibration-sensitivity
+        run: |
+          uv run --python 3.11 study.py --check
+          uv run --python 3.11 plan.py --check
+          uvx ruff@0.16.10 check --select E,F,I,W,UP,B,SIM --target-version py311 study.py plan.py
+          uvx ruff@0.16.10 format --check study.py plan.py
+
   discover:
     runs-on: ubuntu-latest
     outputs:
