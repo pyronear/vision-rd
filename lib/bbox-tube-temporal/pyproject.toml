@@ -25,6 +25,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.9"]
 
+[tool.uv]
+required-version = ">=0.13.4,<1.0.0"
+
 [tool.uv.sources]
 pyrocore = { path = "../pyrocore" }
 

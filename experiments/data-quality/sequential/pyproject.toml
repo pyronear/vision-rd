@@ -9,6 +9,9 @@ dependencies = [
     "tqdm>=4.67.3",
 ]
 
+[tool.uv]
+required-version = ">=0.13.4,<1.0.0"
+
 [tool.uv.sources]
 pyrocore = { path = "../../../lib/pyrocore" }
 bbox-tube-temporal = { path = "../../temporal-models/bbox-tube-temporal" }

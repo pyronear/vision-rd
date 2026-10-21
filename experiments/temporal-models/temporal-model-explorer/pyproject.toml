@@ -21,6 +21,9 @@ dependencies = [
     "streamlit>=1.40",
 ]
 
+[tool.uv]
+required-version = ">=0.13.4,<1.0.0"
+
 [tool.uv.sources]
 bbox-tube-temporal-core = { path = "../../../lib/bbox-tube-temporal", editable = true }
 pyrocore = { path = "../../../lib/pyrocore", editable = true }

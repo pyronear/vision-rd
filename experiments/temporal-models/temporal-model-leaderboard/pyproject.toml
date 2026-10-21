@@ -12,6 +12,9 @@ dependencies = [
     "tqdm>=4.67.3",
 ]
 
+[tool.uv]
+required-version = ">=0.13.4,<1.0.0"
+
 [tool.uv.sources]
 pyrocore = { path = "../../../lib/pyrocore" }
 tracking-fsm-baseline = { path = "../tracking-fsm-baseline" }

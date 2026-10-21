@@ -11,6 +11,9 @@ dependencies = [
 [project.scripts]
 playground = "playground.cli:main"
 
+[tool.uv]
+required-version = ">=0.13.4,<1.0.0"
+
 [tool.uv.sources]
 pyrocore = { path = "../../../lib/pyrocore", editable = true }
 bbox-tube-temporal-core = { path = "../../../lib/bbox-tube-temporal", editable = true }
