@@ -36,6 +36,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.13.4"
       - name: Install
         working-directory: ${{ matrix.experiment }}
         run: uv sync
@@ -58,6 +60,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.13.4"
       - name: Install
         working-directory: ${{ matrix.experiment }}
         run: uv sync
