@@ -35,9 +35,9 @@ jobs:
     name: lint (${{ matrix.experiment }})
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: ./.github/actions/setup-uv
         with:
-          version: "0.13.4"
+          project-file: ${{ matrix.experiment }}/pyproject.toml
       - name: Install
         working-directory: ${{ matrix.experiment }}
         run: uv sync
@@ -59,9 +59,9 @@ jobs:
     name: test (${{ matrix.experiment }})
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: ./.github/actions/setup-uv
         with:
-          version: "0.13.4"
+          project-file: ${{ matrix.experiment }}/pyproject.toml
       - name: Install
         working-directory: ${{ matrix.experiment }}
         run: uv sync
