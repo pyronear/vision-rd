@@ -1,113 +1,101 @@
-# Camera view planner
+# Calibration sensitivity on mast terrain
 
-Use a camera/view profile to choose the next measurement or calibration task.
-The sensitivity results support [#103](https://github.com/pyronear/vision-rd/issues/103).
-Both tools use the standard library.
+## Objective
 
-## Decide what to do next
+For [#103](https://github.com/pyronear/vision-rd/issues/103), identify which
+camera views need tighter calibration. Compare a difficult flat case with real
+relief. Results describe sampled views, not site-wide deployment acceptance.
+
+## Approach
+
+`study.py` provides the controlled, one-parameter-at-a-time baseline. It covers
+azimuth, tilt, roll, field of view, height and both horizontal position axes,
+at several ranges, heights and image positions. Its original summary CSVs
+remain in [position-errors.csv](position-errors.csv) and
+[precision-targets.csv](precision-targets.csv).
+
+`terrain.py` reuses the Copernicus ray-caster from
+[smoke-localization](https://github.com/pyronear/smoke-localization/tree/cf2bfdecbfbefafb6dfdc7ec8f505d9b6bffab5d).
+It includes Earth curvature and fixed standard refraction (`k = 0.13`).
+For each mast it aims at surface targets on eight compass bearings at 2, 5 and
+10 km. It repeats the test on a flat surface at the same mast elevation.
+Both surfaces use the same ray-caster, 10 m steps and a 15 km ray limit.
+Targets missed by more than one DSM cell (30 m) are retained as
+`occluded_or_unresolved`; they are not assigned an accuracy score.
+
+For visible targets, change each calibration parameter separately in both
+directions. The pinhole model is shared with `study.py`: assumed 54.2° horizontal
+field of view, 16:9 sensor and pixels `(0.5,0.5)`, `(0.1,0.1)`, `(0.9,0.9)`.
+Angular test amplitudes are 0.001/0.003/0.01/0.03/0.1°; height and position
+amplitudes are 0.1/0.3/1/3/10 m. Horizontal position changes keep absolute camera
+altitude fixed, so they do not add height error.
+
+Precision uses a **100 m example budget**. `tested_limit` is the last amplitude
+in the initial passing sequence, with both signs and all three pixels passing.
+`below_grid` means even the smallest test failed; `all_tested_pass` means the
+largest test also passed. These sampled limits do not guarantee intermediate
+inputs or combined errors. A missing projection is a failure, not zero error.
+
+## Data
+
+[sites.csv](sites.csv) contains three self-supporting pylons from the
+[ANFR September 2026 snapshot](https://static.data.gouv.fr/resources/donnees-sur-les-installations-radioelectriques-de-plus-de-5-watts-1/20261006-082445/20260930-export-etalab-data.zip),
+table `SUP_SUPPORT.txt` (Open Licence 2.0). IDs, positions and support heights
+are recorded inputs. The foothill and mountain sites are near the reviewer's
+Alsace/Vosges map area; the flat comparison uses a 40 m Landes mast.
+
+Copernicus GLO-30 is a **digital surface model (DSM)**: it includes canopy and
+buildings. Camera elevation is assumed to be local DSM elevation plus the ANFR
+mast height. This is not a surveyed camera mounting position or bare-ground
+elevation. Camera optics and calibration errors are also assumed.
+
+## Results
+
+For ±0.1° tilt, the 40 m flat control shifts up to **1,502 m at 5 km**;
+the Landes DSM case reaches **1,949 m**, with 6/8 nominal targets visible.
+At 2 km, the Vosges case shifts up to **30 m** against **158 m** on its flat
+control, but only 4/8 targets are visible. No sampled Vosges target is reached
+at 5 or 10 km. Relief can reduce sensitivity while limiting coverage.
+
+[terrain-results.csv](terrain-results.csv) records visibility, tilt sensitivity
+and sampled tilt limits for both surfaces. All attempted target directions stay
+in the visibility denominator; errors and precision limits cover visible targets
+only. `tilt_all_tested_within_budget` counts targets whose tilt grid passes at
+all three image positions. Maximum valid errors must be read with missing-hit
+counts. Blank results mean no visible target, not zero error.
+
+The full run writes per-view status, signed errors, per-parameter precision and
+a summary. `config.json` records source/data hashes, the prototype revision and
+installed library versions. DSM tiles and full outputs stay outside Git.
+
+## How to reproduce
 
 ```bash
 cd experiments/localisation/calibration-sensitivity
-uv run --python 3.11 plan.py
-uv run --python 3.11 plan.py my-view.json --range-m 2000 5000 10000
-uv run --python 3.11 plan.py my-view.json --json
-uv run --python 3.11 plan.py --check
+uv sync --python 3.11
+uv run pytest tests/ -v
+uv run ruff check .
+uv run ruff format --check .
+uv run terrain.py
+# Compare data/08_reporting/terrain/summary.csv with terrain-results.csv.
+uv run study.py
+# Explicit difficult flat case, without curvature or refraction:
+uv run study.py --heights 40 --distances 5000 --angular-errors 0.1
 ```
 
-Copy [view.example.json](view.example.json). Name it for the camera, preset and
-zoom; enter image dimensions, both fields of view, target range, terrain slope
-and error amplitudes from that capture profile. `height_above_target_m` is
-**camera elevation minus target terrain
-elevation**, including mast height. It is not mast height alone. Set `evidence`
-to `measured` only when the profile and error inputs have supporting measurements.
-Use a consistent vertical reference; relative-height error includes terrain data.
-`ground_origin_visible` requires an identified ground origin and clear line of sight.
-`bearing_offset_deg` is target direction minus camera-centre direction.
-The planner uses explicit horizontal and vertical FOVs; the study keeps its
-16:9 assumption so its published results remain reproducible.
+`terrain.py --sites other-sites.csv --budget 250` accepts the same input columns.
+`--cache` and `--output` can point outside the checkout. Tests use synthetic
+surfaces and require no DSM download. The experiment follows the template's
+`pyproject.toml`, pytest and Ruff checks and is found by the existing CI matrix.
+The prototype and geometry libraries are pinned; resolved versions are recorded.
 
-The tool prioritises missing ground evidence, unstable projections, required
-geometry work and the largest separately tested uncertainty. A fitting assumed
-profile asks for measurements; a fitting measured profile asks for known-point
-and real-fire validation. Neither result approves a deployment.
-Individual blockers remain visible even when the first action is geometry work;
-removing the largest source alone need not meet the combined budget.
+## Limits
 
-The example is assumed: a 35 m mast on a site 500 m above a clear valley, with a
-250 m budget. At 5 km its sampled joint shift is 118.6 m, with an estimated
-18.5 m omitted-curvature bias. The first measurement is point-selection error.
-At 10 km the screening total is 626.9 m, so that budget needs better inputs or
-another view/range. These are model calculations, not measured site accuracy.
-
-The planner tests lower, nominal and upper inputs in combination. Its score adds
-the largest valid tested shift to a nominal parabolic-Earth bias estimate.
-Missing projections produce an unstable result, not a zero-error result.
-This is a finite stress test on an extruded local plane: no continuous bound,
-probability, refraction, lens distortion or intervening-ridge model. Slope is
-rise/run (2% = 0.02); `max_range_m` limits horizontal analysis distance. Angular
-bounds above 5° require coarse calibration before this local screen.
-
-## Reproduce the supporting study
-
-```bash
-uv run --python 3.11 study.py --check
-uv run --python 3.11 study.py
-```
-
-Full sweep files stay outside Git: `errors.csv` records signed perturbations and
-no-hit cases; `precision.csv` records two-sided limits; `config.json` records
-arguments, Python version and source hash. `capped=True` means a lower bound.
-
-## Study method
-
-The study uses azimuth (direction), tilt (up/down angle), roll
-(image rotation) and horizontal field of view. Azimuth and roll are clockwise;
-positive tilt points down. Sensor aspect ratio is 16:9. FOV errors change the
-assumed focal length for both image axes. Each known target is
-placed at nine image locations (`u,v = 0.1,0.5,0.9`). Hold that pixel fixed and
-change one parameter. Intersect the resulting ray with each linear terrain
-segment; select the first forward hit. Horizontal position errors leave camera
-altitude unchanged, separating them from height errors.
-
-Defaults: 0.5/1/2/5/10 km; camera heights 15/35/100 m; FOVs 54.2/87 degrees;
-angular errors ±0.01/0.1/1 degree; height/position errors ±0.1/1/5 m. Terrain is
-flat, or rises at 2% or 10% after half the target distance. Targets and terrain are
-synthetic; heights and FOVs include the prototype's
-[camera registry](https://github.com/pyronear/smoke-localization/blob/be051f802809b8186cf65a058a174e5d23f4b486/data/cameras.csv).
-Use `--help` for options, for example `--budget 50 --heights 35 --distances 1000 5000`.
-
-## Study results
-
-Default run: **34,020 perturbations**, **356 no-hit cases**, **5,670 precision
-rows**. All nominal targets are visible. Analytical checks cover perspective,
-rotations, flat/sloped intersections, height, a nearer ridge and precision limits.
-
-![Maximum position error across distances and camera heights for specified calibration errors on flat terrain](https://github.com/user-attachments/assets/6b5f48c3-feb2-4ed0-998b-3b9b795b0c9c)
-
-[Exact plot values](position-errors.csv): maximum error across both signs,
-both FOVs and nine image positions. CSV deltas apply in both directions.
-Position changes one horizontal axis at a time. Azimuth and position curves
-overlap across camera heights. Both plot axes use logarithmic scales.
-
-[Precision targets](precision-targets.csv): minimum tolerances across the same
-FOVs and image positions, for a **100 m example error budget**, **5 km target**
-and **35 m camera height**. Columns cover flat, 2% rising and 10% rising terrain.
-`*_capped=True` marks a lower bound.
-
-Tilt, roll, FOV and height need particular care at long range on flat terrain.
-Actual calibration priority also depends on each parameter's uncertainty.
-
-## Interpretation
-
-Targets apply to **one parameter at a time**. They do not guarantee the same
-combined error budget or measured camera accuracy. Agree the operating range
-and acceptable position error before adopting them in the epic.
-
-The geometry excludes curvature, refraction, lens distortion, smoke-origin
-error and terrain uncertainty. Profiles are extruded sideways; they are not
-2D terrain maps. Long-range results are conditional sensitivity calculations.
-Tolerance search follows the first sampled local budget crossing and bisects
-it. Non-monotonic errors can occur on arbitrary terrain. No-hit includes range
-or terrain limits and a camera below the modelled surface. Production geometry
-and combined uncertainty remain in [#109](https://github.com/pyronear/vision-rd/issues/109)
-and [#113](https://github.com/pyronear/vision-rd/issues/113).
+Real relief can shorten the ray intersection and reduce sensitivity, or hide
+the target entirely. Neither a flat-plane score nor a sampled terrain result
+establishes whole-site feasibility. Check camera mounting height, terrain and
+known ground points before using these as calibration requirements.
+No smoke image, ground-origin detection, combined uncertainty, lens distortion
+or weather-dependent refraction is evaluated. Full geometry and uncertainty
+remain in [#109](https://github.com/pyronear/vision-rd/issues/109) and
+[#113](https://github.com/pyronear/vision-rd/issues/113).
