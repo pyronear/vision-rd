@@ -1,4 +1,7 @@
-data/
+data/*
+!data/01_raw/
+data/01_raw/*
+!data/01_raw/*.dvc
 __pycache__/
 .ruff_cache/
 .venv/

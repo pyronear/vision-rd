@@ -1,0 +1,5 @@
+[core]
+    analytics = false
+    remote = archive
+['remote "archive"']
+    url = s3://pyro-vision-rd/dvc/experiments/skyline-tilt/

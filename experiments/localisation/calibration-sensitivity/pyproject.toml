@@ -5,17 +5,21 @@ description = "Calibration sensitivity on synthetic profiles and real mast terra
 requires-python = ">=3.11"
 dependencies = [
     "smoke-localisation",
-    "numpy==2.4.6",
+    "numpy==2.4.4",
     "pyproj==3.7.2",
     "rasterio==1.4.4",
     "scipy==1.17.1",
+    "ncnn==1.0.20260114",
+    "opencv-python-headless==4.13.0.92",
+    "opencv-python==4.13.0.92",
+    "pyyaml>=6,<7",
 ]
 
 [tool.uv]
 required-version = ">=0.13.4,<1.0.0"
 
 [tool.uv.sources]
-smoke-localisation = { git = "https://github.com/pyronear/smoke-localization", rev = "cf2bfdecbfbefafb6dfdc7ec8f505d9b6bffab5d" }
+smoke-localisation = { git = "https://github.com/pyronear/smoke-localization", rev = "16b984711dd4a3a6bfb4b2bfdf7e708b89c4da60" }
 
 [dependency-groups]
 dev = ["pytest>=8.0", "ruff>=0.9"]
