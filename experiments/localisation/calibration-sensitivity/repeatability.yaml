@@ -1,0 +1,19 @@
+azimuth_search_deg: 20
+azimuth_retry_deg: 45
+max_residual_deg: 0.5
+fov_offsets_deg: [-15, -10, -5, 0, 5, 10, 15]
+assumed_height_m: 20
+unknown_height_scenarios_m: [5, 35]
+known_height_delta_m: 2
+mask_threshold_scenarios: [0.35, 0.65]
+refraction_scenarios: [0, 0.2]
+dem_margin_deg: 0.35
+wide_dem_margin_deg: 0.7
+wide_skyline_distance_m: 50000
+epoch_min_frames: 5
+change_min_frames: 2
+epoch_min_shift_deg: 0.3
+epoch_noise_multiple: 4
+range_targets_m: [2000, 5000]
+position_budget_m: 100
+tilt_grid_deg: [0.001, 0.003, 0.01, 0.03, 0.1]

@@ -1,4 +1,4 @@
-# Calibration sensitivity on mast terrain
+# Calibration requirements and repeatability
 
 ## Objective
 
@@ -8,6 +8,11 @@ relief. Results describe sampled views, not site-wide deployment acceptance.
 
 ## Approach
 
+For achieved tilt precision, run `uv run repeatability.py --input /path/to/bundle`.
+It retains rejected frames and candidate camera changes for
+[#105](https://github.com/pyronear/vision-rd/issues/105).
+[Method and reproduction](repeatability.md) · [Pose results](repeatability.csv).
+
 `study.py` provides the controlled, one-parameter-at-a-time baseline. It covers
 azimuth, tilt, roll, field of view, height and both horizontal position axes,
 at several ranges, heights and image positions. Its original summary CSVs
@@ -15,7 +20,8 @@ remain in [position-errors.csv](position-errors.csv) and
 [precision-targets.csv](precision-targets.csv).
 
 `terrain.py` reuses the Copernicus ray-caster from
-[smoke-localization](https://github.com/pyronear/smoke-localization/tree/cf2bfdecbfbefafb6dfdc7ec8f505d9b6bffab5d).
+[smoke-localization](https://github.com/pyronear/smoke-localization), pinned in
+`pyproject.toml`.
 It includes Earth curvature and fixed standard refraction (`k = 0.13`).
 For each mast it aims at surface targets on eight compass bearings at 2, 5 and
 10 km. It repeats the test on a flat surface at the same mast elevation.
