@@ -8,7 +8,15 @@ import pytest
 import yaml
 
 import repeatability
-from repeatability import epochs, run, sigma, summarize, tilt_requirement
+from repeatability import (
+    epochs,
+    fit,
+    run,
+    sigma,
+    summarize,
+    tilt_range,
+    tilt_requirement,
+)
 
 CFG = yaml.safe_load((Path(__file__).parents[1] / "repeatability.yaml").read_text())
 
@@ -50,6 +58,82 @@ def test_flat_range_requires_tight_tilt():
     assert target == 0.003
 
 
+def test_tilt_range_reports_samples_and_grid_limits():
+    cases = (
+        ({}, ("no_reference_fit", None, None)),
+        ({"required_tilt_2000m_deg": None}, ("target_not_reached", None, None)),
+        ({"required_tilt_2000m_deg": 0}, ("below_grid", None, 0.001)),
+        ({"required_tilt_2000m_deg": 0.003}, ("bracketed", 0.003, 0.01)),
+        ({"required_tilt_2000m_deg": 0.1}, ("cap_reached", 0.1, None)),
+    )
+    for profile, expected in cases:
+        assert tilt_range(profile, 2000, CFG) == expected
+
+
+def test_pose_diagnostics_handle_azimuth_wrap_and_summarize_grid(tmp_path):
+    values = ((0, 359), (0, 0), (0, 1), (2, 350))
+    rows = [
+        dict(
+            pose="P01",
+            pose_id="raw",
+            camera="C01",
+            height_known=False,
+            status="accepted",
+            datetime_utc=f"2024-01-0{i + 1}T00:00:00Z",
+            tilt_deg=tilt,
+            azimuth_deg=azimuth,
+            tilt_uncertainty_deg=0.1,
+        )
+        for i, (tilt, azimuth) in enumerate(values)
+    ]
+    (tmp_path / "frames.jsonl").write_text("\n".join(json.dumps(r) for r in rows))
+    (tmp_path / "profiles.json").write_text(
+        json.dumps(
+            dict(
+                raw=dict(
+                    hfov=87,
+                    fov_profile_complete=True,
+                    required_tilt_2000m_deg=0.003,
+                    required_tilt_5000m_deg=0.1,
+                )
+            )
+        )
+    )
+
+    summarize(SimpleNamespace(output=tmp_path), CFG)
+    result = next(csv.DictReader((tmp_path / "summary.csv").open()))
+    assert result["tilt_gt1deg_frames"] == "1"
+    assert result["tilt_gt1deg_azimuth_gt05deg_frames"] == "1"
+    assert result["tilt_uncertainty_within_pose_median_fraction"] == "0.75"
+    assert result["requirement_2000m_status"] == "bracketed"
+    assert result["tilt_2000m_last_pass_deg"] == "0.003"
+    assert result["tilt_2000m_first_fail_deg"] == "0.01"
+    assert result["requirement_5000m_status"] == "cap_reached"
+    assert result["tilt_5000m_last_pass_deg"] == "0.1"
+    assert result["tilt_5000m_first_fail_deg"] == ""
+    assert "required_tilt_2000m_deg" not in result
+
+
+def test_fit_keeps_25km_default_and_allows_sensitivity_override(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        repeatability,
+        "calibrate",
+        lambda *args, **kwargs: calls.append(kwargs) or kwargs,
+    )
+    args = (
+        np.zeros((2, 2)),
+        dict(lat=0, lon=0, pose_azimuth_deg=0),
+        20,
+        87,
+        (0, 0, 0),
+        CFG,
+    )
+    fit(*args)
+    fit(*args, max_skyline_distance_m=50000)
+    assert [call["max_skyline_distance_m"] for call in calls] == [25000, 50000]
+
+
 def test_all_rejected_is_not_zero_uncertainty(tmp_path):
     rows = [
         dict(
@@ -70,6 +154,9 @@ def test_all_rejected_is_not_zero_uncertainty(tmp_path):
     result = next(csv.DictReader((tmp_path / "summary.csv").open()))
     assert result["accepted"] == "0"
     assert result["repeatability_sigma_deg"] == result["absolute_bias_deg"] == ""
+    assert result["tilt_gt1deg_frames"] == ""
+    assert result["tilt_gt1deg_azimuth_gt05deg_frames"] == ""
+    assert result["tilt_uncertainty_within_pose_median_fraction"] == ""
     assert result["requirement_2000m_status"] == "no_reference_fit"
 
 

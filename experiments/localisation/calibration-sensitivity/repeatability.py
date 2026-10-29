@@ -27,6 +27,30 @@ def sigma(values):
     return float(1.4826 * np.median(np.abs(a - np.median(a)))) if len(a) else None
 
 
+def angular_distance(a, b):
+    return abs((a - b + 180) % 360 - 180)
+
+
+def circular_median(values):
+    return min(values, key=lambda x: sum(angular_distance(x, y) for y in values))
+
+
+def tilt_range(profile, distance, cfg):
+    key = f"required_tilt_{distance}m_deg"
+    if key not in profile:
+        return "no_reference_fit", None, None
+    last_pass = profile[key]
+    if last_pass is None:
+        return "target_not_reached", None, None
+    grid = cfg["tilt_grid_deg"]
+    if last_pass == 0:
+        return "below_grid", None, grid[0]
+    first_fail = next((x for x in grid if x > last_pass), None)
+    if first_fail is None:
+        return "cap_reached", last_pass, None
+    return "bracketed", last_pass, first_fail
+
+
 def epochs(frames, cfg):
     """Flag persistent level changes as candidate camera moves."""
     n = cfg["change_min_frames"]
@@ -84,6 +108,8 @@ def fit(mask, cam, height, hfov, dsm, cfg, **overrides):
     kwargs = dict(
         max_azimuth_offset_deg=cfg["azimuth_search_deg"],
         max_residual_deg=cfg["max_residual_deg"],
+        # Keep this study's baseline comparable with the original 25 km run.
+        max_skyline_distance_m=25000,
     )
     kwargs.update(overrides)
     try:
@@ -365,6 +391,30 @@ def summarize(args, cfg):
         )
         groups = epochs(accepted, cfg) if accepted else []
         profile = profiles[all_rows[0]["pose_id"]]
+        pose_tilt = (
+            float(np.median([r["tilt_deg"] for r in accepted])) if accepted else None
+        )
+        tilt_outliers = [r for r in accepted if abs(r["tilt_deg"] - pose_tilt) > 1]
+        pose_azimuth = (
+            circular_median([r["azimuth_deg"] for r in accepted]) if accepted else None
+        )
+        azimuth_outliers = sum(
+            angular_distance(r["azimuth_deg"], pose_azimuth) > 0.5
+            for r in tilt_outliers
+        )
+        uncertainty_coverage = (
+            sum(
+                abs(r["tilt_deg"] - pose_tilt) <= r["tilt_uncertainty_deg"]
+                for r in accepted
+            )
+            / len(accepted)
+            if accepted
+            else None
+        )
+        requirements = {
+            distance: tilt_range(profile, distance, cfg)
+            for distance in cfg["range_targets_m"]
+        }
         sigmas, tails = [], []
         for k, group in enumerate(groups):
             spread = sigma([r["tilt_deg"] for r in group])
@@ -403,6 +453,11 @@ def summarize(args, cfg):
                 fov_profile_complete=profile["fov_profile_complete"],
                 repeatability_sigma_deg=max(sigmas) if sigmas else None,
                 repeatability_p95_deg=max(tails) if tails else None,
+                tilt_gt1deg_frames=len(tilt_outliers) if accepted else None,
+                tilt_gt1deg_azimuth_gt05deg_frames=azimuth_outliers
+                if accepted
+                else None,
+                tilt_uncertainty_within_pose_median_fraction=uncertainty_coverage,
                 median_conditional_radius_deg=float(
                     np.median([r["tilt_uncertainty_deg"] for r in accepted])
                 )
@@ -410,20 +465,17 @@ def summarize(args, cfg):
                 else None,
                 absolute_bias_deg=None,
                 **{
-                    f"requirement_{distance}m_status": "no_reference_fit"
-                    if f"required_tilt_{distance}m_deg" not in profile
-                    else "target_not_reached"
-                    if profile[f"required_tilt_{distance}m_deg"] is None
-                    else "below_grid"
-                    if profile[f"required_tilt_{distance}m_deg"] == 0
-                    else "sampled"
-                    for distance in cfg["range_targets_m"]
+                    f"requirement_{distance}m_status": result[0]
+                    for distance, result in requirements.items()
+                },
+                **{
+                    f"tilt_{distance}m_{bound}_deg": value
+                    for distance, (_, last, first) in requirements.items()
+                    for bound, value in (("last_pass", last), ("first_fail", first))
                 },
                 **{
                     key: profile.get(key)
                     for key in (
-                        "required_tilt_2000m_deg",
-                        "required_tilt_5000m_deg",
                         "fov_sensitivity_deg",
                         "height_sensitivity_deg",
                         "mask_sensitivity_deg",
