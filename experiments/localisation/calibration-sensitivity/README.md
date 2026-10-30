@@ -13,6 +13,9 @@ It retains rejected frames and candidate camera changes for
 [#105](https://github.com/pyronear/vision-rd/issues/105).
 [Method and reproduction](repeatability.md) · [Pose results](repeatability.csv).
 
+For the controlled skyline error study in [#160](https://github.com/pyronear/vision-rd/issues/160),
+see [method and findings](skyline-floor.md) and [results](skyline-floor.csv).
+
 `study.py` provides the controlled, one-parameter-at-a-time baseline. It covers
 azimuth, tilt, roll, field of view, height and both horizontal position axes,
 at several ranges, heights and image positions. Its original summary CSVs
