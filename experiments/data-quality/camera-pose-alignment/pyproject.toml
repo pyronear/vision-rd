@@ -16,7 +16,7 @@ dependencies = [
 required-version = ">=0.13.4,<1.0.0"
 
 [dependency-groups]
-dev = ["ruff>=0.9"]
+dev = ["pytest>=8.0", "ruff>=0.9"]
 
 [tool.ruff]
 target-version = "py311"

@@ -42,15 +42,3 @@ def register(ref_g: np.ndarray, img_g: np.ndarray, coarse: bool = True):
     except cv2.error:
         return None
     return float(warp[0, 2]), float(warp[1, 2]), float(cc)
-
-
-if __name__ == "__main__":
-    # Self-check: a known sub-pixel shift on a textured image is recovered.
-    rng = np.random.default_rng(0)
-    base = cv2.GaussianBlur((rng.random((400, 1280)) * 255).astype(np.uint8), (0, 0), 2)
-    for tx, ty in [(0.4, -0.3), (7.6, 2.2)]:
-        m = np.float32([[1, 0, tx], [0, 1, ty]])
-        shifted = cv2.warpAffine(base, m, base.shape[::-1], flags=cv2.INTER_CUBIC)
-        dx, dy, cc = register(prepare(base, 0), prepare(shifted, 0))
-        assert abs(dx - tx) < 0.05 and abs(dy - ty) < 0.05, (tx, ty, dx, dy)
-    print("ok")
