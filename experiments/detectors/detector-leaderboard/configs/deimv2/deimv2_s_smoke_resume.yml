@@ -1,0 +1,8 @@
+__include__: ['./deimv2_s_smoke.yml']
+
+# Continue training the best 640 checkpoint for +100 epochs (via --tuning from
+# best_stg2.pth). epoches=100 < stop_epoch(120), so DEIM's stage-2 reload never
+# fires — a single clean aug run. An external watcher stops it on overfitting
+# (val mAP stalling). Separate output dir keeps the original 640 model intact.
+output_dir: ./outputs/deimv2_s_smoke_resume
+epoches: 100
