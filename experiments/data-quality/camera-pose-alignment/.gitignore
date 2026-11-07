@@ -1,0 +1,4 @@
+data/01_raw
+data/07_model_output/
+.venv/
+__pycache__/

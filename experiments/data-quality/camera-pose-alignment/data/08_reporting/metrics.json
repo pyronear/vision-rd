@@ -1,0 +1,28 @@
+{
+  "n_images": 9914,
+  "n_poses": 30,
+  "valid_pct": 74.56122654831552,
+  "valid_day_pct": 75.14245014245014,
+  "valid_ir_pct": 8.13953488372093,
+  "ir_pct": 0.8674601573532379,
+  "median_vs_ref_px": 4.257364172176794,
+  "median_vs_median_px": 2.6085568150602327,
+  "p95_vs_median_px": 10.850805154109917,
+  "p99_vs_median_px": 42.31612494170677,
+  "gt1px_pct": 82.71103896103897,
+  "gt5px_pct": 24.71590909090909,
+  "consecutive_median_px": 0.8512166896453646,
+  "consecutive_p95_px": 7.135158749422515,
+  "seeded_vs_identity_gt1px": 159,
+  "valid_identity_init_pct": 73.02804115392374,
+  "deg_per_px": 0.04234375,
+  "calibration": {
+    "synthetic_max_abs_bias_px": 0.019888142496347433,
+    "synthetic_rmse_x_px": 0.013655378908023874,
+    "neighbours_n": 3626,
+    "neighbours_valid": 3625,
+    "neighbours_median_px": 0.18215939611221887,
+    "neighbours_p95_px": 7.725069073419215,
+    "neighbours_max_px": 16.532252154207455
+  }
+}
