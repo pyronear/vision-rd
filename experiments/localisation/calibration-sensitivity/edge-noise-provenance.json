@@ -1,0 +1,65 @@
+{
+  "config": {
+    "shape": [
+      720,
+      1280
+    ],
+    "hfov_deg": 60.0,
+    "tilt_deg": 2.0,
+    "rolls_deg": [
+      0.0,
+      1.0
+    ],
+    "profiles": [
+      "flat",
+      "ridges"
+    ],
+    "azimuth_search_deg": {
+      "fixed": 0.0,
+      "joint": 2.0
+    },
+    "noise_stddev_px": [
+      1,
+      2
+    ],
+    "block_widths_px": [
+      1,
+      16,
+      128
+    ],
+    "common_bias_px": [
+      -1,
+      1
+    ],
+    "seed_count": 30,
+    "ridge_profile": {
+      "sine_amplitude": 0.6,
+      "sine_frequency": 0.16,
+      "cosine_amplitude": 0.3,
+      "cosine_frequency": 0.43,
+      "peak_amplitude": 0.8,
+      "peak_center": -8.0,
+      "peak_width": 3.0
+    }
+  },
+  "sources": {
+    "edge_noise.py": "45befd27ded2e2a53df92e3a1df6e4a7549d62ace0db44db6d9f693ac8809ff1",
+    "skyline_floor.py": "143f367af9cdcb180010d94909d213cb86a5e7424607b16237586808685f0ec0",
+    "edge_noise.yaml": "6538fd2015ff76718aeb47ae579fc9871d32b7348d2c2bc528acef835a9e95d0"
+  },
+  "runtime": {
+    "url": "https://github.com/pyronear/smoke-localization",
+    "vcs_info": {
+      "vcs": "git",
+      "commit_id": "5f578f126f8c8f5933a78c8a85a3cb9c1260915d",
+      "requested_revision": "5f578f126f8c8f5933a78c8a85a3cb9c1260915d"
+    }
+  },
+  "runtime_calibration_sha256": "b86fa669aaeb61d5b11dc3bc71b60fd8a071326ebd455c24fbba68e383dd9709",
+  "versions": {
+    "numpy": "2.4.6",
+    "scipy": "1.17.1",
+    "opencv-python-headless": "4.13.0.92"
+  },
+  "method": "analytic skyline sampler; unchanged calibration fitter and gates"
+}

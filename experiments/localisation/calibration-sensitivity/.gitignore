@@ -1,7 +1,5 @@
-data/*
-!data/01_raw/
-data/01_raw/*
-!data/01_raw/*.dvc
+data/02_intermediate/
+data/08_reporting/
 __pycache__/
 .ruff_cache/
 .venv/

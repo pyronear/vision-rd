@@ -14,6 +14,7 @@ from smoke_localisation import calibrate, load_dsm
 from smoke_localisation.calibration import dem_skyline
 from smoke_localisation.camera import pixel_angles
 from smoke_localisation.dem import dsm_interpolator
+from smoke_localisation.sky import find_horizon_line
 
 POSES = (2, 13, 15)
 TILT, ROLL, EXTENT = 2.0, 1.0, 50_000
@@ -35,11 +36,23 @@ def render(skyline, azimuths, shape, hfov, tilt, roll):
 
 
 def shifted(mask, pixels):
-    rows = np.clip(np.arange(mask.shape[0]) - pixels, 0, mask.shape[0] - 1)
-    return mask[rows]
+    """Shift all columns or each column separately without wrapping the image."""
+    rows = np.clip(
+        np.arange(mask.shape[0])[:, None] - np.asarray(pixels),
+        0,
+        mask.shape[0] - 1,
+    )
+    return mask[rows, np.arange(mask.shape[1])]
 
 
-def cases():
+def column_noise(width, stddev, block, seed):
+    """Sample integer row errors, independent between contiguous column blocks."""
+    count = (width + block - 1) // block
+    offsets = np.rint(np.random.default_rng(seed).normal(0, stddev, count))
+    return np.repeat(offsets.astype(int), block)[:width]
+
+
+def cases(include_edge_noise=False):
     yield "perfect", {}
     yield "azimuth_on_grid_control", dict(on_grid=True)
     yield "zero_roll_control", {"roll": 0}
@@ -58,22 +71,28 @@ def cases():
     for sign, edge, k, seed in itertools.product(
         (-1, 1), (-1, 1), (0.10, 0.16), range(3)
     ):
-        yield (
-            "combined",
-            dict(
-                small=True,
-                edge=edge,
-                fov=sign,
-                k=k,
-                seed=seed,
-                noise=4,
-                canopy=5,
-                extent=25_000,
-            ),
+        defects = dict(
+            small=True,
+            edge=edge,
+            fov=sign,
+            k=k,
+            seed=seed,
+            noise=4,
+            canopy=5,
         )
+        # Pair the same defects/seeds so only the skyline cutoff changes.
+        yield "combined", dict(defects, extent=25_000)
+        yield "combined_no_cutoff", dict(defects, extent=EXTENT)
+
+    if include_edge_noise:
+        for amplitude, block, seed in itertools.product((1, 2), (1, 16, 128), range(3)):
+            yield (
+                f"edge_noise_{amplitude}px_block_{block}px",
+                dict(edge_stddev=amplitude, edge_block=block, seed=seed),
+            )
 
 
-def evaluate(cam, dsm, shape):
+def evaluate(cam, dsm, shape, *, include_edge_noise=False):
     lat, lon = float(cam["lat"]), float(cam["lon"])
     height = float(cam["mast_height_m"] or 20)
     hfov = float(cam["angle_of_view_deg_platform"])
@@ -92,7 +111,7 @@ def evaluate(cam, dsm, shape):
     }
     # A square network input preserves the original camera's vertical angular FOV.
     small = cv2.resize(masks[ROLL], (384, 384), interpolation=cv2.INTER_AREA)
-    for name, defects in cases():
+    for name, defects in cases(include_edge_noise):
         surface = dsm[0]
         if defects.get("noise"):
             noise = (
@@ -107,12 +126,39 @@ def evaluate(cam, dsm, shape):
         # DSM defects must not also move the camera's absolute altitude.
         model_height = camera_z - float(dsm_interpolator(*model)((lat, lon)))
         mask = small if defects.get("small") else masks[defects.get("roll", ROLL)]
-        mask = shifted(mask, defects.get("edge", 0))
+        offsets = defects.get("edge", 0)
+        if "edge_stddev" in defects:
+            offsets = column_noise(
+                shape[1],
+                defects["edge_stddev"],
+                defects["edge_block"],
+                defects["seed"],
+            )
+            reference_edge = find_horizon_line(mask)
+        mask = shifted(mask, offsets)
         if defects.get("small"):
             mask = np.clip(
                 cv2.resize(mask, shape[::-1], interpolation=cv2.INTER_LINEAR), 0, 1
             )
         row = dict(scenario=name, **defects)
+        if "edge_stddev" in defects:
+            moved_edge = find_horizon_line(mask)
+            valid = (
+                (reference_edge >= 0)
+                & (reference_edge < shape[0] - 1)
+                & (moved_edge >= 0)
+                & (moved_edge < shape[0] - 1)
+            )
+            applied_edge = (moved_edge - reference_edge)[valid]
+            row.update(
+                edge_columns=int(valid.sum()),
+                mean_edge_shift_px=float(np.mean(applied_edge))
+                if applied_edge.size
+                else None,
+                std_edge_shift_px=float(np.std(applied_edge))
+                if applied_edge.size
+                else None,
+            )
         try:
             result = calibrate(
                 mask,
@@ -141,6 +187,11 @@ def evaluate(cam, dsm, shape):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True)
+    parser.add_argument(
+        "--edge-noise",
+        action="store_true",
+        help="Also test independent and block-correlated column errors (#163).",
+    )
     parser.add_argument("--cache", type=Path, default=Path("data/02_intermediate/dem"))
     parser.add_argument(
         "--output", type=Path, default=Path("data/08_reporting/skyline-floor")
@@ -173,6 +224,13 @@ def main():
                 for p in ("cameras.csv", "images.csv")
             },
             truth=dict(tilt_deg=TILT, roll_deg=ROLL, refraction=0.13, extent_m=EXTENT),
+            edge_noise=dict(
+                enabled=args.edge_noise,
+                stddev_px=[1, 2],
+                block_width_px=[1, 16, 128],
+                seeds=[0, 1, 2],
+                units="full-resolution image pixels",
+            ),
             poses={},
         ),
     )
@@ -193,7 +251,7 @@ def main():
                 shape=shape,
                 dsm_sha256=[hashlib.sha256(a.tobytes()).hexdigest() for a in dsm],
             )
-            for row in evaluate(cam, dsm, shape):
+            for row in evaluate(cam, dsm, shape, include_edge_noise=args.edge_noise):
                 row = dict(pose=pose, **row)
                 records.append(row)
                 stream.write(json.dumps(row, allow_nan=False) + "\n")
