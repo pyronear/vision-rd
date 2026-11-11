@@ -20,6 +20,10 @@ are needed; images supply only their dimensions. The committed
 source/runtime hashes, manifest hashes and DSM array hashes stay in the output.
 Camera coordinates and image files stay outside Git.
 
+The separate [analytic edge-noise control](edge-noise.md) can be reproduced
+without this bundle or terrain downloads. Its results are kept separate
+from the original DSM-based cases below.
+
 ## Method
 
 - P02 has a distant-horizon sensitivity; P13 is the forest/plain site; P15 has

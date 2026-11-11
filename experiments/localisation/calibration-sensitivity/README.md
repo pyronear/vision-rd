@@ -19,6 +19,11 @@ The runner includes paired combined defects with and without the old 25 km
 cutoff; `--edge-noise` also tests independent and block-correlated edge errors
 for [#163](https://github.com/pyronear/vision-rd/issues/163).
 
+For a fully offline control of edge bias and spatial correlation, run
+`uv run edge_noise.py --params edge_noise.yaml`. It generates its inputs in
+memory and requires no private bundle, terrain download or camera.
+[Method and measured results](edge-noise.md) · [Aggregate CSV](edge-noise.csv).
+
 `study.py` provides the controlled, one-parameter-at-a-time baseline. It covers
 azimuth, tilt, roll, field of view, height and both horizontal position axes,
 at several ranges, heights and image positions. Its original summary CSVs

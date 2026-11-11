@@ -1,0 +1,22 @@
+shape: [720, 1280]
+hfov_deg: 60.0
+tilt_deg: 2.0
+rolls_deg: [0.0, 1.0]
+profiles: [flat, ridges]
+# A fixed bearing isolates edge noise; the joint fit also estimates azimuth.
+azimuth_search_deg:
+  fixed: 0.0
+  joint: 2.0
+noise_stddev_px: [1, 2]
+block_widths_px: [1, 16, 128]
+common_bias_px: [-1, 1]
+seed_count: 30
+# Amplitudes are degrees; widths/frequencies operate on relative azimuth degrees.
+ridge_profile:
+  sine_amplitude: 0.6
+  sine_frequency: 0.16
+  cosine_amplitude: 0.3
+  cosine_frequency: 0.43
+  peak_amplitude: 0.8
+  peak_center: -8.0
+  peak_width: 3.0
