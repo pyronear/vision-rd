@@ -88,15 +88,14 @@ All **135/135 fits pass the gates**, yet each pose's worst combined error is
 tilt accuracy. These are tested maxima, not a confidence interval.
 
 At 720 image rows, one native 384 px mask row is **1.875 image pixels**.
-As a local planning approximation, 1 image pixel costs about 0.05° of tilt
-and 1° of FOV error costs about 0.04°. Spending the entire 0.009° plains
-budget on one term would allow about **0.18 image pixel** of common edge bias
-or **0.225° of FOV error**. These are separate, indicative ceilings, not
-simultaneously allowable errors. P02's larger pixel sensitivity implies a
-tighter edge ceiling, about 0.11 pixel. Model floor, roll, terrain, refraction
-and other inputs consume part of the same budget. Independent column noise
-must be measured separately from common edge bias; increasing the number of
-columns cannot remove a shared offset.
+
+| Input bias | Approximate tilt cost | Ceiling using the entire 0.009° budget |
+|---|---:|---:|
+| Common skyline shift | 0.05° / image px | 0.18 px (P02: 0.11 px) |
+| FOV error | 0.04° / degree | 0.225° |
+
+These single-term ceilings leave no room for model, terrain or other errors.
+More columns cannot remove a shared edge offset.
 
 **Decision:** remove the 25 km cutoff first (a runtime setting, addressed in
 [smoke-localization#8](https://github.com/pyronear/smoke-localization/pull/8)),
