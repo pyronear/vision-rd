@@ -13,7 +13,7 @@ from ultralytics import YOLO
 
 torch.set_num_threads(4)
 N = 1024
-src = cv2.imread("frame.jpg")
+src = cv2.imread(sys.argv[2])  # any frame, upscaled to 4K below
 cv2.imwrite(
     "frame_4k.jpg", cv2.resize(src, (3840, 2160), interpolation=cv2.INTER_CUBIC)
 )
