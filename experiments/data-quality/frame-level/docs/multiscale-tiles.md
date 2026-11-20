@@ -117,11 +117,28 @@ Offline (from `experiments/data-quality/frame-level`):
 PYTHONPATH=src uv run python scripts/multiscale_tiles_test.py --model <best.pt> --split-dir data/01_raw/datasets/test --net 352 --ref 1024 --band-cy 0.54
 ```
 
-On the Pi (`scripts/pi_bench/`, NCNN export of the model next to the scripts;
-the temporal scripts need Python 3.11 and `temporal-model-core`):
+On the Pi, from `scripts/pi_bench/`. Inputs:
+
+- `<ncnn_model>`: the model exported with `yolo export model=best.pt format=ncnn imgsz=1024`.
+- `<frame.jpg>`: any camera frame (upscaled to 4K in memory).
+- `<frames4k>`: real 3840×2160 camera frames, other sizes rejected
+  (this run used 58 frames from one site).
+- `<seq>`: a camera sequence of at least 10 frames.
+
+The YOLO scripts need `ultralytics`, the temporal ones Python 3.11 with
+`temporal-model-core` (as pinned in pyro-engine's `pyro_temporal_api`). The
+temporal model is downloaded from the Hugging Face Hub.
 
 ```bash
-python bench_tiles.py nimble_narwhal_ncnn_model
-python bench_temporal.py <dir with 10 frames>
-python endurance.py 60 30 > endurance.log & python temporal_load.py 60 30 <dir with 4 frames> > temporal.log
+python bench_tiles.py <ncnn_model> <frame.jpg>
 ```
+
+```bash
+python bench_temporal.py <seq>
+```
+
+```bash
+python endurance.py 60 30 <ncnn_model> <frames4k> > endurance.log & python temporal_load.py 60 30 <seq> > temporal.log
+```
+
+`temporal_load.py` expects `tm_v061/model_onnx.zip`, which `bench_temporal.py` downloads.

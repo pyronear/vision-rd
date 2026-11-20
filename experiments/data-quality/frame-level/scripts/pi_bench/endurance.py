@@ -12,9 +12,9 @@ from torchvision.ops import nms
 from ultralytics import YOLO
 
 torch.set_num_threads(4)
-cycles, period, N = int(sys.argv[1]), float(sys.argv[2]), 1024
-paths = sorted(glob.glob("frames4k/*.jpg"))
-m = YOLO("nimble_narwhal_ncnn_model", task="detect")
+cycles, period, N = int(sys.argv[1]), float(sys.argv[2]), 1024  # + model, frames dir
+paths = sorted(glob.glob(f"{sys.argv[4]}/*.jpg"))
+m = YOLO(sys.argv[3], task="detect")
 xs, y0 = [0, 704, 1408, 2112, 2816], 568
 
 
@@ -40,6 +40,7 @@ for c in range(cycles):
     for k in range(8):
         a = time.perf_counter()
         im = cv2.imread(paths[(8 * c + k) % len(paths)])
+        assert im.shape[:2] == (2160, 3840), "tile grid is hard-coded for 3840x2160"
         small = cv2.resize(
             im, (1280, 720), interpolation=cv2.INTER_LINEAR
         )  # engine: frame_size
