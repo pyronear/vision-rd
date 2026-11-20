@@ -14,9 +14,9 @@ from ultralytics import YOLO
 torch.set_num_threads(4)
 N = 1024
 src = cv2.imread(sys.argv[2])  # any frame, upscaled to 4K below
-cv2.imwrite(
-    "frame_4k.jpg", cv2.resize(src, (3840, 2160), interpolation=cv2.INTER_CUBIC)
-)
+jpg = cv2.imencode(
+    ".jpg", cv2.resize(src, (3840, 2160), interpolation=cv2.INTER_CUBIC)
+)[1]
 m = YOLO(sys.argv[1], task="detect")
 xs = [0, 704, 1408, 2112, 2816]
 y0 = 568
@@ -30,7 +30,7 @@ def det(img):
 def once():
     t = {}
     a = time.perf_counter()
-    im = cv2.imread("frame_4k.jpg")
+    im = cv2.imdecode(jpg, cv2.IMREAD_COLOR)
     t["decode_jpeg"] = time.perf_counter() - a
     a = time.perf_counter()
     g = det(im)

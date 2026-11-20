@@ -1,0 +1,11 @@
+Loading nimble_narwhal_ncnn_model for NCNN inference...
+{"cycle": 0, "t": 1795170060.0, "t_min": 0.0, "busy_s": 26.56, "max_img_s": 5.57, "dets": 40, "temp": "62.6'C", "throttled": "0x0", "arm_mhz": 2400}
+{"cycle": 1, "t": 1795170090.0, "t_min": 0.5, "busy_s": 26.5, "max_img_s": 5.7, "dets": 47, "temp": "65.9'C", "throttled": "0x0", "arm_mhz": 2400}
+{"cycle": 2, "t": 1795170120.0, "t_min": 1.0, "busy_s": 26.53, "max_img_s": 5.76, "dets": 45, "temp": "67.0'C", "throttled": "0x0", "arm_mhz": 2400}
+{"cycle": 3, "t": 1795170150.0, "t_min": 1.5, "busy_s": 26.56, "max_img_s": 5.56, "dets": 47, "temp": "67.5'C", "throttled": "0x0", "arm_mhz": 2400}
+{"cycle": 4, "t": 1795170180.0, "t_min": 2.0, "busy_s": 26.61, "max_img_s": 5.62, "dets": 22, "temp": "67.5'C", "throttled": "0x0", "arm_mhz": 2400}
+{"cycle": 5, "t": 1795170210.0, "t_min": 2.5, "busy_s": 26.63, "max_img_s": 5.8, "dets": 36, "temp": "67.5'C", "throttled": "0x0", "arm_mhz": 2400}
+{"cycle": 6, "t": 1795170240.0, "t_min": 3.0, "busy_s": 26.48, "max_img_s": 5.75, "dets": 44, "temp": "68.6'C", "throttled": "0x0", "arm_mhz": 2400}
+{"cycle": 7, "t": 1795170270.0, "t_min": 3.5, "busy_s": 26.52, "max_img_s": 5.69, "dets": 33, "temp": "69.7'C", "throttled": "0x0", "arm_mhz": 2400}
+{"cycle": 8, "t": 1795170300.0, "t_min": 4.0, "busy_s": 26.52, "max_img_s": 5.68, "dets": 57, "temp": "68.6'C", "throttled": "0x0", "arm_mhz": 2400}
+{"cycle": 9, "t": 1795170330.0, "t_min": 4.5, "busy_s": 26.55, "max_img_s": 5.73, "dets": 48, "temp": "69.7'C", "throttled": "0x0", "arm_mhz": 2400}

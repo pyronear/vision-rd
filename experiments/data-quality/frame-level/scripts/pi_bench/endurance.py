@@ -32,8 +32,10 @@ def vc(*a):
 
 
 det(cv2.imread(paths[0]))  # warm-up
-t0 = time.time()
+# shared clock: temporal_load.py aligns on the same period boundary
+t0 = (time.time() // period + 2) * period
 for c in range(cycles):
+    time.sleep(max(t0 + c * period - time.time(), 0))
     start = time.time()
     per_img = []
     n_det = 0
@@ -60,6 +62,7 @@ for c in range(cycles):
         json.dumps(
             {
                 "cycle": c,
+                "t": round(start, 2),
                 "t_min": round((start - t0) / 60, 1),
                 "busy_s": round(busy, 2),
                 "max_img_s": round(max(per_img), 2),
@@ -71,4 +74,3 @@ for c in range(cycles):
         ),
         flush=True,
     )
-    time.sleep(max(period - (time.time() - start), 0))

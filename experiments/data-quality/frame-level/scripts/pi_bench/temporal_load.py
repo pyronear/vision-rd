@@ -9,11 +9,15 @@ from temporal_model.core import Detection, FrameDetections
 from temporal_model.core.onnx_model import OnnxTemporalModel
 
 cycles, period = int(sys.argv[1]), float(sys.argv[2])
+offset = float(sys.argv[4]) if len(sys.argv) > 4 else 5.0  # s into the YOLO cycle
 m = OnnxTemporalModel.from_package(
     Path("tm_v061/model_onnx.zip"), embedding_cache_size=4096
 )
 paths = sorted(Path(sys.argv[3]).glob("*.jpg"))[:4]
+# same period boundary as endurance.py, shifted to land inside its busy window
+t0 = (time.time() // period + 2) * period + offset
 for c in range(cycles):
+    time.sleep(max(t0 + c * period - time.time(), 0))
     start = time.time()
     frames = m.load_sequence(paths)
     boxes = [
@@ -38,10 +42,10 @@ for c in range(cycles):
         json.dumps(
             {
                 "cycle": c,
+                "t": round(start, 2),
                 "job_s": round(time.time() - start, 2),
                 "tubes": len(out.details["tubes"]["kept"]),
             }
         ),
         flush=True,
     )
-    time.sleep(max(period - (time.time() - start), 0))

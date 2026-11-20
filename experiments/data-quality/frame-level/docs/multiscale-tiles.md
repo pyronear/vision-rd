@@ -8,7 +8,8 @@ can a Raspberry Pi 5 afford it at 8 frames every 30 s?
 **Answer.** Offline, tiles raise recall on the smallest smokes from 55% to 90%
 at the cost of about +70% false positives. On the Pi, the
 pipeline uses 22.5 s of every 30 s cycle and holds for 30 min with no
-throttling. Both results are proxies: there is no annotated 4K set yet.
+throttling. When a temporal job runs at the same time, the cycle grows to
+26.5 s, leaving 3.5 s for capture and upload. Both results are proxies: there is no annotated 4K set yet.
 
 ## Method
 
@@ -77,22 +78,45 @@ the way `pyro_temporal_api` runs it):
 
 ## 3. Endurance, 30 min
 
-60 cycles of 30 s on real 4K frames (58 images from one site): each frame is
+60 cycles of 30 s on real 4K frames (58 images from one site). Each frame is
 decoded, resized to 1280×720 and JPEG-encoded as pyro-engine does, then run
-through the global pass + 5 tiles + NMS. A temporal job opening 3 tubes on
-4 frames runs in parallel every cycle (pessimistic: a new event every 30 s).
+through the global pass, the 5 tiles and NMS. A separate process runs a
+temporal job every cycle, opening 3 tubes on 4 frames. This is pessimistic: it
+assumes a new event every 30 s.
 
 | metric | result |
 |---|---|
 | YOLO busy time per cycle | 22.42 / 22.51 / 22.77 s (min / median / max) |
 | temperature | 67.5 °C at start, 70.3 °C max, plateau 69–70 °C after 5 min |
 | throttling | none (`0x0`), ARM clock 2400 MHz throughout |
-| temporal job | 3.51–3.54 s for 58 jobs; 5.91 s on the first (cold); 0.01 s once (cache hit) |
+| temporal job | 3.51–3.54 s for 58 jobs, 5.91 s for the first (cold start), 0.01 s once (cache hit) |
 
-The two loads did not slow each other. About 7.5 s per cycle remains for camera
-capture and upload, which were not measured. Raw logs:
-[`endurance.log`](multiscale-tiles/endurance.log),
-[`temporal.log`](multiscale-tiles/temporal.log).
+The two processes started their 30 s schedules independently, and the logs have
+no shared timestamps. Both timings match the standalone ones, so the temporal
+job most likely ran in YOLO's idle window. This run measures thermals, not
+contention.
+
+**Forced overlap, 5 min.** Both processes now align on the same clock, and the
+temporal job starts 5 s into each YOLO cycle. Over 10 cycles:
+
+| metric | alone | overlapping |
+|---|---|---|
+| YOLO busy time per cycle | 22.5 s | **26.5–26.6 s** |
+| slowest frame | 2.8–3.0 s | 5.6–5.8 s |
+| temporal job, 3 tubes | 3.5 s | **6.3–6.4 s** |
+| temperature, throttling | — | 69.7 °C max, none |
+
+The two loads share the 4 cores. When they overlap, the margin left for camera
+capture and upload falls from 7.5 s to 3.5 s per cycle. Capture and upload were
+not measured. On a real event, the temporal job grows past 4 frames
+(up to 6 s cold, or 0.6 s with a warm cache), which shrinks the margin further.
+
+Raw logs:
+
+- [`endurance.log`](multiscale-tiles/endurance.log)
+- [`temporal.log`](multiscale-tiles/temporal.log)
+- [`overlap_yolo.log`](multiscale-tiles/overlap_yolo.log)
+- [`overlap_temporal.log`](multiscale-tiles/overlap_temporal.log)
 
 ## Limits and open points
 
@@ -138,7 +162,10 @@ python bench_temporal.py <seq>
 ```
 
 ```bash
-python endurance.py 60 30 <ncnn_model> <frames4k> > endurance.log & python temporal_load.py 60 30 <seq> > temporal.log
+python endurance.py 60 30 <ncnn_model> <frames4k> > endurance.log & python temporal_load.py 60 30 <seq> 5 > temporal.log
 ```
+
+Both scripts wait for the same 30 s clock boundary. The last argument of
+`temporal_load.py` is how many seconds into each YOLO cycle its job starts.
 
 `temporal_load.py` expects `tm_v061/model_onnx.zip`, which `bench_temporal.py` downloads.
